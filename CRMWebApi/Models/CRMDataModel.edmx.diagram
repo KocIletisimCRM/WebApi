@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="86">
+        <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="10.25" PointY="0.5" />
+        <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="0.5" PointY="4" />
+        <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="3" PointY="8" />
+        <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="6.875" PointY="0.625" />
+        <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
+        <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
+        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="13.25" PointY="4.625" />
+        <EntityTypeShape EntityType="CRMModel.customer_status" Width="1.5" PointX="0.5" PointY="0.5" />
+        <AssociationConnector Association="CRMModel.customer_statuscustomer1" />
+        <AssociationConnector Association="CRMModel.customertaskqueue1" />
+        <AssociationConnector Association="CRMModel.blockcustomer1" />
+        <AssociationConnector Association="CRMModel.blocktaskqueue1" />
+        <AssociationConnector Association="CRMModel.taskstatepooltaskqueue1" />
+        <AssociationConnector Association="CRMModel.personeltaskqueue1" />
+        <AssociationConnector Association="CRMModel.siteblock" />
+        <AssociationConnector Association="CRMModel.tasktaskqueue" />
+        <AssociationConnector Association="CRMModel.asistantPersonel" />
+        <AssociationConnector Association="CRMModel.personeltaskqueue2" />
+        <AssociationConnector Association="CRMModel.personelblock" />
+        <AssociationConnector Association="CRMModel.personelcustomer" />
+        <AssociationConnector Association="CRMModel.personelsite" />
+        <AssociationConnector Association="CRMModel.personeltask" />
+        <AssociationConnector Association="CRMModel.personeltaskstatepool" />
+        <AssociationConnector Association="CRMModel.personelblock1" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

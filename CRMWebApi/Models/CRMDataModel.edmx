@@ -1,0 +1,995 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CRMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="block">
+          <Key>
+            <PropertyRef Name="blockid" />
+          </Key>
+          <Property Name="blockid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="blockname" Type="nvarchar" MaxLength="45" />
+          <Property Name="siteid" Type="int" Nullable="false" />
+          <Property Name="groupid" Type="nvarchar" MaxLength="45" />
+          <Property Name="hp" Type="int" />
+          <Property Name="telocadia" Type="nvarchar" MaxLength="45" />
+          <Property Name="projectno" Type="nvarchar" MaxLength="45" />
+          <Property Name="readytosaledate" Type="date" />
+          <Property Name="sosaledate" Type="date" />
+          <Property Name="kocsaledate" Type="date" />
+          <Property Name="salesrepresentative" Type="int" />
+          <Property Name="superintendent" Type="nvarchar" MaxLength="45" />
+          <Property Name="superintendentcontact" Type="nvarchar" MaxLength="10" />
+          <Property Name="cocierge" Type="nvarchar" MaxLength="45" />
+          <Property Name="cociergecontact" Type="nvarchar" MaxLength="10" />
+          <Property Name="verticalproductionline" Type="nvarchar" MaxLength="45" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" Nullable="false" />
+          <Property Name="deleted" Type="bit" />
+          <Property Name="binakodu" Type="nvarchar" MaxLength="45" />
+          <Property Name="locationid" Type="nvarchar" MaxLength="45" />
+          <Property Name="objid" Type="nvarchar" MaxLength="45" />
+        </EntityType>
+        <EntityType Name="customer">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="blockid" Type="int" />
+          <Property Name="tckimlikno" Type="nvarchar" MaxLength="255" />
+          <Property Name="customername" Type="nvarchar" MaxLength="45" />
+          <Property Name="customersurname" Type="nvarchar" MaxLength="45" />
+          <Property Name="flat" Type="nvarchar" MaxLength="45" />
+          <Property Name="gsm" Type="nvarchar" MaxLength="15" />
+          <Property Name="phone" Type="nvarchar" MaxLength="15" />
+          <Property Name="birthdate" Type="date" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+          <Property Name="customerstatus" Type="int" />
+          <Property Name="telstatu" Type="int" />
+          <Property Name="turkcellTv" Type="nvarchar" MaxLength="50" />
+          <Property Name="netstatu" Type="int" />
+          <Property Name="description" Type="nvarchar" MaxLength="255" />
+          <Property Name="tvstatu" Type="int" />
+          <Property Name="gsmstatu" Type="int" />
+        </EntityType>
+        <EntityType Name="customer_status">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="Text" Type="nvarchar" MaxLength="50" />
+          <Property Name="deleted" Type="int" />
+        </EntityType>
+        <EntityType Name="personel">
+          <Key>
+            <PropertyRef Name="personelid" />
+          </Key>
+          <Property Name="personelid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="personelname" Type="nvarchar" MaxLength="255" />
+          <Property Name="category" Type="bigint" />
+          <Property Name="mobile" Type="nvarchar" MaxLength="255" />
+          <Property Name="email" Type="nvarchar" MaxLength="255" />
+          <Property Name="password" Type="nvarchar" MaxLength="50" />
+          <Property Name="notes" Type="nvarchar(max)" />
+          <Property Name="roles" Type="bigint" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="bigint" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="site">
+          <Key>
+            <PropertyRef Name="siteid" />
+          </Key>
+          <Property Name="siteid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="sitename" Type="nvarchar" MaxLength="150" />
+          <Property Name="siteaddress" Type="nvarchar" MaxLength="300" />
+          <Property Name="region" Type="nvarchar" MaxLength="255" />
+          <Property Name="sitedistrict" Type="nvarchar" MaxLength="150" />
+          <Property Name="siteregioncode" Type="nvarchar" MaxLength="50" />
+          <Property Name="description" Type="nvarchar(max)" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="task">
+          <Key>
+            <PropertyRef Name="taskid" />
+          </Key>
+          <Property Name="taskid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="taskname" Type="nvarchar" MaxLength="255" />
+          <Property Name="tasktype" Type="tinyint" Nullable="false" />
+          <Property Name="attachablepersoneltype" Type="int" />
+          <Property Name="attachableobjecttype" Type="int" />
+          <Property Name="performancescore" Type="float" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="taskqueue">
+          <Key>
+            <PropertyRef Name="taskorderno" />
+          </Key>
+          <Property Name="taskorderno" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="taskid" Type="int" Nullable="false" />
+          <Property Name="previoustaskorderid" Type="int" />
+          <Property Name="relatedtaskorderid" Type="int" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="attachedobjectid" Type="int" />
+          <Property Name="attachmentdate" Type="datetime2" Precision="7" />
+          <Property Name="attachedpersonelid" Type="int" />
+          <Property Name="appointmentdate" Type="datetime2" Precision="7" />
+          <Property Name="status" Type="int" />
+          <Property Name="consummationdate" Type="datetime2" Precision="7" />
+          <Property Name="description" Type="nvarchar" MaxLength="511" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+          <Property Name="assistant_personel" Type="int" />
+          <Property Name="fault" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="taskstatepool">
+          <Key>
+            <PropertyRef Name="taskstateid" />
+          </Key>
+          <Property Name="taskstateid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="taskstate" Type="nvarchar" MaxLength="255" />
+          <Property Name="statetype" Type="int" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <Association Name="FK_block_site">
+          <End Role="site" Type="Self.site" Multiplicity="1" />
+          <End Role="block" Type="Self.block" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="site">
+              <PropertyRef Name="siteid" />
+            </Principal>
+            <Dependent Role="block">
+              <PropertyRef Name="siteid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_customer_block">
+          <End Role="block" Type="Self.block" Multiplicity="0..1" />
+          <End Role="customer" Type="Self.customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="block">
+              <PropertyRef Name="blockid" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="blockid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_taskqueue_task">
+          <End Role="task" Type="Self.task" Multiplicity="1" />
+          <End Role="taskqueue" Type="Self.taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="sf_taskqueue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="pageNo" Type="int" Mode="In" />
+          <Parameter Name="rowsPerPage" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="taskorderno" Type="int" Nullable="false" />
+                <Property Name="taskid" Type="int" Nullable="false" />
+                <Property Name="previoustaskorderid" Type="int" />
+                <Property Name="relatedtaskorderid" Type="int" />
+                <Property Name="creationdate" Type="datetime2" Precision="7" />
+                <Property Name="attachedobjectid" Type="int" />
+                <Property Name="attachmentdate" Type="datetime2" Precision="7" />
+                <Property Name="attachedpersonelid" Type="int" />
+                <Property Name="appointmentdate" Type="datetime2" Precision="7" />
+                <Property Name="status" Type="int" />
+                <Property Name="consummationdate" Type="datetime2" Precision="7" />
+                <Property Name="description" Type="nvarchar" MaxLength="511" />
+                <Property Name="lastupdated" Type="datetime2" Precision="7" />
+                <Property Name="updatedby" Type="int" />
+                <Property Name="deleted" Type="bit" />
+                <Property Name="assistant_personel" Type="int" />
+                <Property Name="fault" Type="nvarchar" MaxLength="255" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
+        <EntityContainer Name="CRMModelStoreContainer">
+          <EntitySet Name="block" EntityType="Self.block" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="customer" EntityType="Self.customer" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="customer_status" EntityType="Self.customer_status" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="personel" EntityType="Self.personel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="site" EntityType="Self.site" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="task" EntityType="Self.task" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="taskqueue" EntityType="Self.taskqueue" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="taskstatepool" EntityType="Self.taskstatepool" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_block_site" Association="Self.FK_block_site">
+            <End Role="site" EntitySet="site" />
+            <End Role="block" EntitySet="block" />
+          </AssociationSet>
+          <AssociationSet Name="FK_customer_block" Association="Self.FK_customer_block">
+            <End Role="block" EntitySet="block" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_taskqueue_task" Association="Self.FK_taskqueue_task">
+            <End Role="task" EntitySet="task" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CRMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="CRMEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="task" EntityType="CRMModel.task" />
+          <EntitySet Name="block" EntityType="CRMModel.block" />
+          <EntitySet Name="site" EntityType="CRMModel.site" />
+          <AssociationSet Name="FK_block_site" Association="CRMModel.FK_block_site">
+            <End Role="site" EntitySet="site" />
+            <End Role="block" EntitySet="block" />
+          </AssociationSet>
+          <EntitySet Name="taskqueue" EntityType="CRMModel.taskqueue" />
+          <AssociationSet Name="FK_taskqueue_task" Association="CRMModel.FK_taskqueue_task">
+            <End Role="task" EntitySet="task" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <EntitySet Name="taskstatepool" EntityType="CRMModel.taskstatepool" />
+          <EntitySet Name="customer" EntityType="CRMModel.customer" />
+          <EntitySet Name="personel" EntityType="CRMModel.personel" />
+          <AssociationSet Name="customertaskqueue" Association="CRMModel.customertaskqueue">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="personeltaskqueue" Association="CRMModel.personeltaskqueue">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <EntitySet Name="customer_status" EntityType="CRMModel.customer_status" />
+          <AssociationSet Name="customer_statuscustomer" Association="CRMModel.customer_statuscustomer">
+            <End Role="customer_status" EntitySet="customer_status" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="blocktaskqueue" Association="CRMModel.blocktaskqueue">
+            <End Role="block" EntitySet="block" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="blockcustomer" Association="CRMModel.blockcustomer">
+            <End Role="block" EntitySet="block" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="taskstatepooltaskqueue" Association="CRMModel.taskstatepooltaskqueue">
+            <End Role="taskstatepool" EntitySet="taskstatepool" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="customer_statuscustomer1" Association="CRMModel.customer_statuscustomer1">
+            <End Role="customer_status" EntitySet="customer_status" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="customertaskqueue1" Association="CRMModel.customertaskqueue1">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="blockcustomer1" Association="CRMModel.blockcustomer1">
+            <End Role="block" EntitySet="block" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="blocktaskqueue1" Association="CRMModel.blocktaskqueue1">
+            <End Role="block" EntitySet="block" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="taskstatepooltaskqueue1" Association="CRMModel.taskstatepooltaskqueue1">
+            <End Role="taskstatepool" EntitySet="taskstatepool" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="personeltaskqueue1" Association="CRMModel.personeltaskqueue1">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="siteblock" Association="CRMModel.siteblock">
+            <End Role="site" EntitySet="site" />
+            <End Role="block" EntitySet="block" />
+          </AssociationSet>
+          <AssociationSet Name="tasktaskqueue" Association="CRMModel.tasktaskqueue">
+            <End Role="task" EntitySet="task" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="asistantPersonel" Association="CRMModel.asistantPersonel">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="personeltaskqueue2" Association="CRMModel.personeltaskqueue2">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="personelblock" Association="CRMModel.personelblock">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="block" EntitySet="block" />
+          </AssociationSet>
+          <AssociationSet Name="personelcustomer" Association="CRMModel.personelcustomer">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="personelsite" Association="CRMModel.personelsite">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="site" EntitySet="site" />
+          </AssociationSet>
+          <AssociationSet Name="personeltask" Association="CRMModel.personeltask">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="personeltaskstatepool" Association="CRMModel.personeltaskstatepool">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="taskstatepool" EntitySet="taskstatepool" />
+          </AssociationSet>
+          <AssociationSet Name="personelblock1" Association="CRMModel.personelblock1">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="block" EntitySet="block" />
+          </AssociationSet>
+          <FunctionImport Name="sf_taskqueue" IsComposable="true" EntitySet="taskqueue" ReturnType="Collection(CRMModel.taskqueue)">
+            <Parameter Name="pageNo" Mode="In" Type="Int32" />
+            <Parameter Name="rowsPerPage" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <EntityType Name="task">
+          <Key>
+            <PropertyRef Name="taskid" />
+          </Key>
+          <Property Name="taskid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="taskname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="tasktype" Type="Byte" Nullable="false" />
+          <Property Name="attachablepersoneltype" Type="Int32" />
+          <Property Name="attachableobjecttype" Type="Int32" />
+          <Property Name="performancescore" Type="Double" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="taskqueues" Relationship="CRMModel.tasktaskqueue" FromRole="task" ToRole="taskqueue" />
+          <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltask" FromRole="task" ToRole="personel" />
+        </EntityType>
+        <EntityType Name="block">
+          <Key>
+            <PropertyRef Name="blockid" />
+          </Key>
+          <Property Name="blockid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="blockname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="siteid" Type="Int32" Nullable="false" />
+          <Property Name="groupid" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="hp" Type="Int32" />
+          <Property Name="telocadia" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="projectno" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="readytosaledate" Type="DateTime" Precision="0" />
+          <Property Name="sosaledate" Type="DateTime" Precision="0" />
+          <Property Name="kocsaledate" Type="DateTime" Precision="0" />
+          <Property Name="salesrepresentative" Type="Int32" />
+          <Property Name="superintendent" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="superintendentcontact" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="cocierge" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="cociergecontact" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="verticalproductionline" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" Nullable="false" />
+          <Property Name="deleted" Type="Boolean" />
+          <Property Name="binakodu" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="locationid" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="objid" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="customers" Relationship="CRMModel.blockcustomer1" FromRole="block" ToRole="customer" />
+          <NavigationProperty Name="taskqueues" Relationship="CRMModel.blocktaskqueue1" FromRole="block" ToRole="taskqueue" />
+          <NavigationProperty Name="site" Relationship="CRMModel.siteblock" FromRole="block" ToRole="site" />
+          <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personelblock" FromRole="block" ToRole="personel" />
+          <NavigationProperty Name="salespersonel" Relationship="CRMModel.personelblock1" FromRole="block" ToRole="personel" />
+        </EntityType>
+        <EntityType Name="site">
+          <Key>
+            <PropertyRef Name="siteid" />
+          </Key>
+          <Property Name="siteid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="sitename" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="siteaddress" Type="String" MaxLength="300" FixedLength="false" Unicode="true" />
+          <Property Name="region" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="sitedistrict" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="siteregioncode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="blocks" Relationship="CRMModel.siteblock" FromRole="site" ToRole="block" />
+          <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personelsite" FromRole="site" ToRole="personel" />
+        </EntityType>
+        <Association Name="FK_block_site">
+          <End Type="CRMModel.site" Role="site" Multiplicity="1" />
+          <End Type="CRMModel.block" Role="block" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="site">
+              <PropertyRef Name="siteid" />
+            </Principal>
+            <Dependent Role="block">
+              <PropertyRef Name="siteid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="taskqueue">
+          <Key>
+            <PropertyRef Name="taskorderno" />
+          </Key>
+          <Property Name="taskorderno" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="taskid" Type="Int32" Nullable="false" />
+          <Property Name="previoustaskorderid" Type="Int32" />
+          <Property Name="relatedtaskorderid" Type="Int32" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="attachedobjectid" Type="Int32" />
+          <Property Name="attachmentdate" Type="DateTime" Precision="7" />
+          <Property Name="attachedpersonelid" Type="Int32" />
+          <Property Name="appointmentdate" Type="DateTime" Precision="7" />
+          <Property Name="status" Type="Int32" />
+          <Property Name="consummationdate" Type="DateTime" Precision="7" />
+          <Property Name="description" Type="String" MaxLength="511" FixedLength="false" Unicode="true" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <Property Name="assistant_personel" Type="Int32" />
+          <Property Name="fault" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="attachedcustomer" Relationship="CRMModel.customertaskqueue1" FromRole="taskqueue" ToRole="customer" />
+          <NavigationProperty Name="attachedblock" Relationship="CRMModel.blocktaskqueue1" FromRole="taskqueue" ToRole="block" />
+          <NavigationProperty Name="taskstatepool" Relationship="CRMModel.taskstatepooltaskqueue1" FromRole="taskqueue" ToRole="taskstatepool" />
+          <NavigationProperty Name="attachedpersonel" Relationship="CRMModel.personeltaskqueue1" FromRole="taskqueue" ToRole="personel" />
+          <NavigationProperty Name="task" Relationship="CRMModel.tasktaskqueue" FromRole="taskqueue" ToRole="task" />
+          <NavigationProperty Name="asistanPersonel" Relationship="CRMModel.asistantPersonel" FromRole="taskqueue" ToRole="personel" />
+          <NavigationProperty Name="Updatedpersonel" Relationship="CRMModel.personeltaskqueue2" FromRole="taskqueue" ToRole="personel" />
+        </EntityType>
+        <Association Name="FK_taskqueue_task">
+          <End Type="CRMModel.task" Role="task" Multiplicity="1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="taskstatepool">
+          <Key>
+            <PropertyRef Name="taskstateid" />
+          </Key>
+          <Property Name="taskstateid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="taskstate" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="statetype" Type="Int32" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="taskqueues" Relationship="CRMModel.taskstatepooltaskqueue1" FromRole="taskstatepool" ToRole="taskqueue" />
+          <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltaskstatepool" FromRole="taskstatepool" ToRole="personel" />
+        </EntityType>
+        <EntityType Name="customer">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="blockid" Type="Int32" />
+          <Property Name="tckimlikno" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="customername" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="customersurname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="phone" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="birthdate" Type="DateTime" Precision="0" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <Property Name="customerstatus" Type="Int32" />
+          <Property Name="telstatu" Type="Int32" />
+          <Property Name="turkcellTv" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="netstatu" Type="Int32" />
+          <Property Name="description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="tvstatu" Type="Int32" />
+          <Property Name="gsmstatu" Type="Int32" />
+          <NavigationProperty Name="customer_status" Relationship="CRMModel.customer_statuscustomer1" FromRole="customer" ToRole="customer_status" />
+          <NavigationProperty Name="taskqueues" Relationship="CRMModel.customertaskqueue1" FromRole="customer" ToRole="taskqueue" />
+          <NavigationProperty Name="block" Relationship="CRMModel.blockcustomer1" FromRole="customer" ToRole="block" />
+          <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personelcustomer" FromRole="customer" ToRole="personel" />
+        </EntityType>
+        <EntityType Name="personel">
+          <Key>
+            <PropertyRef Name="personelid" />
+          </Key>
+          <Property Name="personelid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="personelname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="category" Type="Int64" />
+          <Property Name="mobile" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="email" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="roles" Type="Int64" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int64" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="attachedtaskqueues" Relationship="CRMModel.personeltaskqueue1" FromRole="personel" ToRole="taskqueue" />
+          <NavigationProperty Name="attachedTaskqueuesAsistant" Relationship="CRMModel.asistantPersonel" FromRole="personel" ToRole="taskqueue" />
+          <NavigationProperty Name="updateTaskqueues" Relationship="CRMModel.personeltaskqueue2" FromRole="personel" ToRole="taskqueue" />
+          <NavigationProperty Name="updateblocks" Relationship="CRMModel.personelblock" FromRole="personel" ToRole="block" />
+          <NavigationProperty Name="updatecustomers" Relationship="CRMModel.personelcustomer" FromRole="personel" ToRole="customer" />
+          <NavigationProperty Name="updatesites" Relationship="CRMModel.personelsite" FromRole="personel" ToRole="site" />
+          <NavigationProperty Name="updatetasks" Relationship="CRMModel.personeltask" FromRole="personel" ToRole="task" />
+          <NavigationProperty Name="updatetaskstatepools" Relationship="CRMModel.personeltaskstatepool" FromRole="personel" ToRole="taskstatepool" />
+          <NavigationProperty Name="blocks" Relationship="CRMModel.personelblock1" FromRole="personel" ToRole="block" />
+          </EntityType>
+        <Association Name="customertaskqueue">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedobjectid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personeltaskqueue">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedpersonelid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="customer_status">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="Text" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customers" Relationship="CRMModel.customer_statuscustomer1" FromRole="customer_status" ToRole="customer" />
+        </EntityType>
+        <Association Name="customer_statuscustomer">
+          <End Type="CRMModel.customer_status" Role="customer_status" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer_status">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="customerstatus" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="blocktaskqueue">
+          <End Type="CRMModel.block" Role="block" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="block">
+              <PropertyRef Name="blockid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedobjectid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="blockcustomer">
+          <End Type="CRMModel.block" Role="block" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="block">
+              <PropertyRef Name="blockid" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="blockid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskstatepooltaskqueue">
+          <End Type="CRMModel.taskstatepool" Role="taskstatepool" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskstatepool">
+              <PropertyRef Name="taskstateid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="status" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customer_statuscustomer1">
+          <End Type="CRMModel.customer_status" Role="customer_status" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer_status">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="customerstatus" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customertaskqueue1">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedobjectid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="blockcustomer1">
+          <End Type="CRMModel.block" Role="block" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="block">
+              <PropertyRef Name="blockid" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="blockid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="blocktaskqueue1">
+          <End Type="CRMModel.block" Role="block" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="block">
+              <PropertyRef Name="blockid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedobjectid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskstatepooltaskqueue1">
+          <End Type="CRMModel.taskstatepool" Role="taskstatepool" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskstatepool">
+              <PropertyRef Name="taskstateid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="status" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personeltaskqueue1">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="attachedpersonelid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="siteblock">
+          <End Type="CRMModel.site" Role="site" Multiplicity="1" />
+          <End Type="CRMModel.block" Role="block" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="site">
+              <PropertyRef Name="siteid" />
+            </Principal>
+            <Dependent Role="block">
+              <PropertyRef Name="siteid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="tasktaskqueue">
+          <End Type="CRMModel.task" Role="task" Multiplicity="1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="asistantPersonel">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="assistant_personel" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personeltaskqueue2">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="taskqueue">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelblock">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="1" />
+          <End Type="CRMModel.block" Role="block" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="block">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelcustomer">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelsite">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.site" Role="site" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="site">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personeltask">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="task">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personeltaskstatepool">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.taskstatepool" Role="taskstatepool" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="taskstatepool">
+              <PropertyRef Name="updatedby" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelblock1">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.block" Role="block" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="block">
+              <PropertyRef Name="salesrepresentative" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CRMModelStoreContainer" CdmEntityContainer="CRMEntities">
+          <EntitySetMapping Name="task">
+            <EntityTypeMapping TypeName="CRMModel.task">
+              <MappingFragment StoreEntitySet="task">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="performancescore" ColumnName="performancescore" />
+                <ScalarProperty Name="attachableobjecttype" ColumnName="attachableobjecttype" />
+                <ScalarProperty Name="attachablepersoneltype" ColumnName="attachablepersoneltype" />
+                <ScalarProperty Name="tasktype" ColumnName="tasktype" />
+                <ScalarProperty Name="taskname" ColumnName="taskname" />
+                <ScalarProperty Name="taskid" ColumnName="taskid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="block">
+            <EntityTypeMapping TypeName="CRMModel.block">
+              <MappingFragment StoreEntitySet="block">
+                <ScalarProperty Name="objid" ColumnName="objid" />
+                <ScalarProperty Name="locationid" ColumnName="locationid" />
+                <ScalarProperty Name="binakodu" ColumnName="binakodu" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="verticalproductionline" ColumnName="verticalproductionline" />
+                <ScalarProperty Name="cociergecontact" ColumnName="cociergecontact" />
+                <ScalarProperty Name="cocierge" ColumnName="cocierge" />
+                <ScalarProperty Name="superintendentcontact" ColumnName="superintendentcontact" />
+                <ScalarProperty Name="superintendent" ColumnName="superintendent" />
+                <ScalarProperty Name="salesrepresentative" ColumnName="salesrepresentative" />
+                <ScalarProperty Name="kocsaledate" ColumnName="kocsaledate" />
+                <ScalarProperty Name="sosaledate" ColumnName="sosaledate" />
+                <ScalarProperty Name="readytosaledate" ColumnName="readytosaledate" />
+                <ScalarProperty Name="projectno" ColumnName="projectno" />
+                <ScalarProperty Name="telocadia" ColumnName="telocadia" />
+                <ScalarProperty Name="hp" ColumnName="hp" />
+                <ScalarProperty Name="groupid" ColumnName="groupid" />
+                <ScalarProperty Name="siteid" ColumnName="siteid" />
+                <ScalarProperty Name="blockname" ColumnName="blockname" />
+                <ScalarProperty Name="blockid" ColumnName="blockid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="site">
+            <EntityTypeMapping TypeName="CRMModel.site">
+              <MappingFragment StoreEntitySet="site">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="siteregioncode" ColumnName="siteregioncode" />
+                <ScalarProperty Name="sitedistrict" ColumnName="sitedistrict" />
+                <ScalarProperty Name="region" ColumnName="region" />
+                <ScalarProperty Name="siteaddress" ColumnName="siteaddress" />
+                <ScalarProperty Name="sitename" ColumnName="sitename" />
+                <ScalarProperty Name="siteid" ColumnName="siteid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="taskqueue">
+            <EntityTypeMapping TypeName="CRMModel.taskqueue">
+              <MappingFragment StoreEntitySet="taskqueue">
+                <ScalarProperty Name="fault" ColumnName="fault" />
+                <ScalarProperty Name="assistant_personel" ColumnName="assistant_personel" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="consummationdate" ColumnName="consummationdate" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="appointmentdate" ColumnName="appointmentdate" />
+                <ScalarProperty Name="attachedpersonelid" ColumnName="attachedpersonelid" />
+                <ScalarProperty Name="attachmentdate" ColumnName="attachmentdate" />
+                <ScalarProperty Name="attachedobjectid" ColumnName="attachedobjectid" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="relatedtaskorderid" ColumnName="relatedtaskorderid" />
+                <ScalarProperty Name="previoustaskorderid" ColumnName="previoustaskorderid" />
+                <ScalarProperty Name="taskid" ColumnName="taskid" />
+                <ScalarProperty Name="taskorderno" ColumnName="taskorderno" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="taskstatepool">
+            <EntityTypeMapping TypeName="CRMModel.taskstatepool">
+              <MappingFragment StoreEntitySet="taskstatepool">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="statetype" ColumnName="statetype" />
+                <ScalarProperty Name="taskstate" ColumnName="taskstate" />
+                <ScalarProperty Name="taskstateid" ColumnName="taskstateid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customer">
+            <EntityTypeMapping TypeName="CRMModel.customer">
+              <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="gsmstatu" ColumnName="gsmstatu" />
+                <ScalarProperty Name="tvstatu" ColumnName="tvstatu" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="netstatu" ColumnName="netstatu" />
+                <ScalarProperty Name="turkcellTv" ColumnName="turkcellTv" />
+                <ScalarProperty Name="telstatu" ColumnName="telstatu" />
+                <ScalarProperty Name="customerstatus" ColumnName="customerstatus" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="birthdate" ColumnName="birthdate" />
+                <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="gsm" ColumnName="gsm" />
+                <ScalarProperty Name="flat" ColumnName="flat" />
+                <ScalarProperty Name="customersurname" ColumnName="customersurname" />
+                <ScalarProperty Name="customername" ColumnName="customername" />
+                <ScalarProperty Name="tckimlikno" ColumnName="tckimlikno" />
+                <ScalarProperty Name="blockid" ColumnName="blockid" />
+                <ScalarProperty Name="customerid" ColumnName="customerid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="personel">
+            <EntityTypeMapping TypeName="CRMModel.personel">
+              <MappingFragment StoreEntitySet="personel">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="roles" ColumnName="roles" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="mobile" ColumnName="mobile" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="personelname" ColumnName="personelname" />
+                <ScalarProperty Name="personelid" ColumnName="personelid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customer_status">
+            <EntityTypeMapping TypeName="CRMModel.customer_status">
+              <MappingFragment StoreEntitySet="customer_status">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="Text" ColumnName="Text" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sf_taskqueue" FunctionName="CRMModel.Store.sf_taskqueue">
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
