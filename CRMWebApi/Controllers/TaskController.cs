@@ -14,7 +14,7 @@ namespace CRMWebApi.Controllers
     {
         [Route("getTasks")]
         [HttpPost]
-        public HttpResponseMessage getTaks(int pageNo, int rowsPerPage, bool isOpen)
+        public HttpResponseMessage getTasks(int pageNo, int rowsPerPage)
         {
             using (var db = new CRMEntities())
             {
@@ -22,7 +22,8 @@ namespace CRMWebApi.Controllers
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 
-                var res = db.sf_taskqueue(pageNo, rowsPerPage).Include(tq => tq.task)
+                var res = db.sf_taskqueue(pageNo, rowsPerPage)
+                    .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
                     .Include(tq => tq.attachedblock)
                     .Include(tq => tq.attachedcustomer)
@@ -40,12 +41,12 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("getTasks")]
-        [HttpGet]
-        public HttpResponseMessage _getTaks([FromUri]int pageNo, [FromUri]int rowsPerPage, [FromUri]bool isOpen)
-        {
-            return getTaks(pageNo, rowsPerPage, isOpen);
-        }
+        //[Route("getTasks")]
+        //[HttpGet]
+        //public HttpResponseMessage _getTaks([FromUri]int pageNo, [FromUri]int rowsPerPage, [FromUri]bool isOpen )
+        //{
+        //    return getTaks(pageNo, rowsPerPage,new Dictionary<string,string>());
+        //}
 
 
     }
