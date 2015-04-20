@@ -14,15 +14,18 @@ namespace CRMWebApi.Controllers
     {
         [Route("getTasks")]
         [HttpPost]
-        public HttpResponseMessage getTasks(int pageNo, int rowsPerPage)
+        public HttpResponseMessage getTaskQueues(DTOs.DTOGetTaskQueueRequest request)
         {
             using (var db = new CRMEntities())
             {
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
-                
-                var res = db.sf_taskqueue(pageNo, rowsPerPage)
+                DTOs.TaskFilter taskFilter = new DTOs.TaskFilter(request.filter.TaskIds);
+                string filter = taskFilter.ApplyFilterByTaskName(request.filter.TaskName)
+                    .ApplyFilterByTaskTypeName(request.filter.TaskTypeName)
+                    .ApplyFilterByTaskTypes(request.filter.TaskTypeIds).getFilterXML();
+                var res = db.sf_taskqueue(request.pageNo, request.rowsPerPage, filter)
                     .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
                     .Include(tq => tq.attachedblock)

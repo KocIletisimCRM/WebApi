@@ -5,7 +5,7 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="86">
-        <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="10.25" PointY="0.5" />
+        <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
         <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="0.5" PointY="4" />
         <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="3" PointY="8" />
         <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="6.875" PointY="0.625" />
@@ -29,6 +29,8 @@
         <AssociationConnector Association="CRMModel.personeltask" />
         <AssociationConnector Association="CRMModel.personeltaskstatepool" />
         <AssociationConnector Association="CRMModel.personelblock1" />
+        <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
+        <AssociationConnector Association="CRMModel.tasktypestask" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

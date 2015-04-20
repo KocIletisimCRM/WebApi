@@ -39,11 +39,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -88,14 +88,18 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\FilterClasses.cs" />
     <Compile Include="DTOs\DTOblock.cs" />
     <Compile Include="DTOs\DTOcustomer.cs" />
     <Compile Include="DTOs\DTOcustomer_status.cs" />
+    <Compile Include="DTOs\DTOGetTaskQueueRequest.cs" />
     <Compile Include="DTOs\DTOpersonel.cs" />
     <Compile Include="DTOs\DTOsite.cs" />
     <Compile Include="DTOs\DTOtask.cs" />
     <Compile Include="DTOs\DTOtaskqueue.cs" />
+    <Compile Include="DTOs\DTOTaskQueueFilter.cs" />
     <Compile Include="DTOs\DTOtaskstatepool.cs" />
+    <Compile Include="DTOs\DTOTaskTypes.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -137,6 +141,9 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\taskstatepool.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tasktypes.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

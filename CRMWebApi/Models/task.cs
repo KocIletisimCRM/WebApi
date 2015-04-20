@@ -21,7 +21,7 @@ namespace CRMWebApi.Models
     
         public int taskid { get; set; }
         public string taskname { get; set; }
-        public byte tasktype { get; set; }
+        public int tasktype { get; set; }
         public Nullable<int> attachablepersoneltype { get; set; }
         public Nullable<int> attachableobjecttype { get; set; }
         public Nullable<double> performancescore { get; set; }
@@ -32,5 +32,6 @@ namespace CRMWebApi.Models
     
         public virtual ICollection<taskqueue> taskqueues { get; set; }
         public virtual personel updatedpersonel { get; set; }
+        public virtual tasktypes tasktypes { get; set; }
     }
 }

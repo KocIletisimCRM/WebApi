@@ -105,7 +105,7 @@
           </Key>
           <Property Name="taskid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="taskname" Type="nvarchar" MaxLength="255" />
-          <Property Name="tasktype" Type="tinyint" Nullable="false" />
+          <Property Name="tasktype" Type="int" Nullable="false" />
           <Property Name="attachablepersoneltype" Type="int" />
           <Property Name="attachableobjecttype" Type="int" />
           <Property Name="performancescore" Type="float" />
@@ -148,6 +148,13 @@
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
         </EntityType>
+        <EntityType Name="tasktypes">
+          <Key>
+            <PropertyRef Name="TaskTypeId" />
+          </Key>
+          <Property Name="TaskTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TaskTypeName" Type="nvarchar" MaxLength="50" />
+        </EntityType>
         <Association Name="FK_block_site">
           <End Role="site" Type="Self.site" Multiplicity="1" />
           <End Role="block" Type="Self.block" Multiplicity="*" />
@@ -184,9 +191,31 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="sf_task" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="pageNo" Type="int" Mode="In" />
+          <Parameter Name="rowsPerPage" Type="int" Mode="In" />
+          <Parameter Name="taskFilter" Type="varchar(max)" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="taskid" Type="int" Nullable="false" />
+                <Property Name="taskname" Type="nvarchar" MaxLength="255" />
+                <Property Name="tasktype" Type="tinyint" Nullable="false" />
+                <Property Name="attachablepersoneltype" Type="int" />
+                <Property Name="attachableobjecttype" Type="int" />
+                <Property Name="performancescore" Type="float" />
+                <Property Name="creationdate" Type="datetime2" Precision="7" />
+                <Property Name="lastupdated" Type="datetime2" Precision="7" />
+                <Property Name="updatedby" Type="int" />
+                <Property Name="deleted" Type="bit" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
         <Function Name="sf_taskqueue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="pageNo" Type="int" Mode="In" />
           <Parameter Name="rowsPerPage" Type="int" Mode="In" />
+          <Parameter Name="taskFilter" Type="varchar(max)" Mode="In" />
           <ReturnType>
             <CollectionType>
               <RowType>
@@ -220,6 +249,7 @@
           <EntitySet Name="task" EntityType="Self.task" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="taskqueue" EntityType="Self.taskqueue" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="taskstatepool" EntityType="Self.taskstatepool" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tasktypes" EntityType="Self.tasktypes" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_block_site" Association="Self.FK_block_site">
             <End Role="site" EntitySet="site" />
             <End Role="block" EntitySet="block" />
@@ -237,7 +267,7 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="CRMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityContainer Name="CRMEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="CRMEntities" annotation:LazyLoadingEnabled="false">
           <EntitySet Name="task" EntityType="CRMModel.task" />
           <EntitySet Name="block" EntityType="CRMModel.block" />
           <EntitySet Name="site" EntityType="CRMModel.site" />
@@ -345,7 +375,18 @@
           <FunctionImport Name="sf_taskqueue" IsComposable="true" EntitySet="taskqueue" ReturnType="Collection(CRMModel.taskqueue)">
             <Parameter Name="pageNo" Mode="In" Type="Int32" />
             <Parameter Name="rowsPerPage" Mode="In" Type="Int32" />
+            <Parameter Name="taskFilter" Mode="In" Type="String" />
           </FunctionImport>
+          <FunctionImport Name="sf_task" IsComposable="true" EntitySet="task" ReturnType="Collection(CRMModel.task)">
+            <Parameter Name="pageNo" Mode="In" Type="Int32" />
+            <Parameter Name="rowsPerPage" Mode="In" Type="Int32" />
+            <Parameter Name="taskFilter" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="tasktypes" EntityType="CRMModel.tasktypes" />
+          <AssociationSet Name="tasktypestask" Association="CRMModel.tasktypestask">
+            <End Role="tasktypes" EntitySet="tasktypes" />
+            <End Role="task" EntitySet="task" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="task">
           <Key>
@@ -353,7 +394,7 @@
           </Key>
           <Property Name="taskid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="taskname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="tasktype" Type="Byte" Nullable="false" />
+          <Property Name="tasktype" Type="Int32" Nullable="false" />
           <Property Name="attachablepersoneltype" Type="Int32" />
           <Property Name="attachableobjecttype" Type="Int32" />
           <Property Name="performancescore" Type="Double" />
@@ -363,6 +404,7 @@
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueues" Relationship="CRMModel.tasktaskqueue" FromRole="task" ToRole="taskqueue" />
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltask" FromRole="task" ToRole="personel" />
+          <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktypestask" FromRole="task" ToRole="tasktypes" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -810,6 +852,26 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="tasktypes">
+          <Key>
+            <PropertyRef Name="TaskTypeId" />
+          </Key>
+          <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="task" Relationship="CRMModel.tasktypestask" FromRole="tasktypes" ToRole="task" />
+        </EntityType>
+        <Association Name="tasktypestask">
+          <End Type="CRMModel.tasktypes" Role="tasktypes" Multiplicity="1" />
+          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="task">
+              <PropertyRef Name="tasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -969,6 +1031,16 @@
           </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="sf_taskqueue" FunctionName="CRMModel.Store.sf_taskqueue">
           </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sf_task" FunctionName="CRMModel.Store.sf_task">
+          </FunctionImportMapping>
+          <EntitySetMapping Name="tasktypes">
+            <EntityTypeMapping TypeName="CRMModel.tasktypes">
+              <MappingFragment StoreEntitySet="tasktypes">
+                <ScalarProperty Name="TaskTypeName" ColumnName="TaskTypeName" />
+                <ScalarProperty Name="TaskTypeId" ColumnName="TaskTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -982,7 +1054,7 @@
     </Connection>
     <Options>
       <DesignerInfoPropertySet>
-        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="ValidateOnBuild" Value="True" />
         <DesignerProperty Name="EnablePluralization" Value="false" />
         <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />

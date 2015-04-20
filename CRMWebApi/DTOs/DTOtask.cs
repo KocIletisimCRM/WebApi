@@ -9,7 +9,7 @@ namespace CRMWebApi.DTOs
     {
         public int taskid { get; set; }
         public string taskname { get; set; }
-        public byte tasktype { get; set; }
+        public int tasktype { get; set; }
         public Nullable<int> attachablepersoneltype { get; set; }
         public Nullable<int> attachableobjecttype { get; set; }
         public Nullable<double> performancescore { get; set; }

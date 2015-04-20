@@ -20,6 +20,7 @@ namespace CRMWebApi.Models
         public CRMEntities()
             : base("name=CRMEntities")
         {
+            this.Configuration.LazyLoadingEnabled = false;
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -35,9 +36,10 @@ namespace CRMWebApi.Models
         public virtual DbSet<customer> customer { get; set; }
         public virtual DbSet<personel> personel { get; set; }
         public virtual DbSet<customer_status> customer_status { get; set; }
+        public virtual DbSet<tasktypes> tasktypes { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
-        public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage)
+        public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter)
         {
             var pageNoParameter = pageNo.HasValue ?
                 new ObjectParameter("pageNo", pageNo) :
@@ -47,7 +49,29 @@ namespace CRMWebApi.Models
                 new ObjectParameter("rowsPerPage", rowsPerPage) :
                 new ObjectParameter("rowsPerPage", typeof(int));
     
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<taskqueue>("[CRMEntities].[sf_taskqueue](@pageNo, @rowsPerPage)", pageNoParameter, rowsPerPageParameter);
+            var taskFilterParameter = taskFilter != null ?
+                new ObjectParameter("taskFilter", taskFilter) :
+                new ObjectParameter("taskFilter", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<taskqueue>("[CRMEntities].[sf_taskqueue](@pageNo, @rowsPerPage, @taskFilter)", pageNoParameter, rowsPerPageParameter, taskFilterParameter);
+        }
+    
+        [DbFunction("CRMEntities", "sf_task")]
+        public virtual IQueryable<task> sf_task(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter)
+        {
+            var pageNoParameter = pageNo.HasValue ?
+                new ObjectParameter("pageNo", pageNo) :
+                new ObjectParameter("pageNo", typeof(int));
+    
+            var rowsPerPageParameter = rowsPerPage.HasValue ?
+                new ObjectParameter("rowsPerPage", rowsPerPage) :
+                new ObjectParameter("rowsPerPage", typeof(int));
+    
+            var taskFilterParameter = taskFilter != null ?
+                new ObjectParameter("taskFilter", taskFilter) :
+                new ObjectParameter("taskFilter", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<task>("[CRMEntities].[sf_task](@pageNo, @rowsPerPage, @taskFilter)", pageNoParameter, rowsPerPageParameter, taskFilterParameter);
         }
     }
 }

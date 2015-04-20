@@ -100,7 +100,13 @@ namespace CRMWebApi.Models
         }
     }
 
-
+    public partial class tasktypes : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOTaskTypes>();
+        }
+    }
 
 
 }
