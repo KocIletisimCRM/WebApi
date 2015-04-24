@@ -22,16 +22,17 @@ namespace CRMWebApi.Controllers
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 string sql = @"
-                    with
+                  with
                     {0}
-	                tq as (
-		                select row_number() over(order by taskid) rn, * from taskqueue
-		                Where {1}
-	                )
-	                SELECT taskid, taskname, tasktype, attachablepersoneltype, attachableobjecttype, performancescore, creationdate, 
-                           lastupdated, updatedby, deleted
-	                FROM tq
-	                where (Cast(rn/IIF(@rowsPerPage=0, 1, @rowsPerPage) as int)=@pageNo-1 or @rowsPerPage = 0) ";
+        	         tq as (
+		                select row_number() over(order by taskorderno) rn, * from taskqueue tq
+		                where {1}
+	                       )
+	                select [taskorderno],[taskid], [previoustaskorderid], [relatedtaskorderid], [creationdate], [attachedobjectid],
+		                   [attachmentdate], [attachedpersonelid], [appointmentdate], [status], [consummationdate], [description],
+		                   [lastupdated], [updatedby], [deleted], [assistant_personel], [fault]
+	                from tq 
+	                where (Cast(rn/@rowsPerPage as int)=@pageNo-1 or @rowsPerPage = 0) ";
                 
                 string filter = null;
                 if (request.filter!=null)
