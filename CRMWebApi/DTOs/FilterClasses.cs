@@ -57,7 +57,7 @@ namespace CRMWebApi.DTOs
             return this;
         }
 
-        public IEnumerable<int> getFilterIds(string withClauses, string idFieldName, string tableName, string whereClauses, object[] sqlParams)
+        protected IEnumerable<int> getFilterIds(string withClauses, string idFieldName, string tableName, string whereClauses, object[] sqlParams)
         {
             using (var db = new CRMEntities())
             {

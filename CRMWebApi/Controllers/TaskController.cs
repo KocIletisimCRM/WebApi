@@ -6,6 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
+using CRMWebApi.DTOs;
+using System.Data.SqlClient;
 
 namespace CRMWebApi.Controllers
 {
@@ -21,6 +23,11 @@ namespace CRMWebApi.Controllers
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
+                string xmlToTable = @"
+                    Select x.t.value('data(.)', 'int') id 
+                    From (Select Cast(@{0} as XML) as ids) t
+                    Cross Apply t.ids.nodes('/id') x(t)
+                "; 
                 string sql = @"
                   with
                     {0}
@@ -33,17 +40,29 @@ namespace CRMWebApi.Controllers
 		                   [lastupdated], [updatedby], [deleted], [assistant_personel], [fault]
 	                from tq 
 	                where (Cast(rn/@rowsPerPage as int)=@pageNo-1 or @rowsPerPage = 0) ";
-                
+                List<string> withClauses = new List<string>();
+                List<string> whereClauses = new List<string>();
+                List<SqlParameter> sqlParams = new List<SqlParameter>();
                 string filter = null;
                 if (request.filter!=null)
                 {
-                    DTOs.TaskFilter taskFilter = new DTOs.TaskFilter(request.filter.taskIds);
-                     filter = taskFilter.ApplyFilterByTaskName(request.filter.taskName)
+                    TaskFilter taskFilter = new TaskFilter(request.filter.taskIds);
+                    taskFilter.ApplyFilterByTaskName(request.filter.taskName)
                         .ApplyFilterByTaskTypeName(request.filter.taskTypeName)
-                        .ApplyFilterByTaskTypes(request.filter.taskTypeIds).getFilterXML();
+                        .ApplyFilterByTaskTypes(request.filter.taskTypeIds);
+                    string taskIdsXML = taskFilter.getFilterXML();
+                    if (taskIdsXML != null) sqlParams.Add(new SqlParameter("taskid_Filter", taskIdsXML));
+                    foreach (var param in sqlParams)
+                    {
+                        withClauses.Add(string.Format(" {0} as ({1})", param.ParameterName, string.Format(xmlToTable, param.ParameterName)));
+                        whereClauses.Add(string.Format(" Exists (Select * from {0} ids Where ids.id = tq.{1}) ", param.ParameterName, param.ParameterName.Split('_')[0]));
+                    }
+                    //Date filtereleri eklenecek
                 }
-                
-                var res = db.sf_taskqueue(request.pageNo, request.rowsPerPage, filter)
+                sqlParams.Add(new SqlParameter("pageNo", request.pageNo));
+                sqlParams.Add(new SqlParameter("rowsPerPage", request.rowsPerPage));
+                string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses));
+                var res = db.Database.SqlQuery<taskqueue>(querySQL, sqlParams)
                     .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
                     .Include(tq => tq.attachedblock)
