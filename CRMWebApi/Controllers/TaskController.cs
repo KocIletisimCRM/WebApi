@@ -21,10 +21,29 @@ namespace CRMWebApi.Controllers
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
-                DTOs.TaskFilter taskFilter = new DTOs.TaskFilter(request.filter.TaskIds);
-                string filter = taskFilter.ApplyFilterByTaskName(request.filter.TaskName)
-                    .ApplyFilterByTaskTypeName(request.filter.TaskTypeName)
-                    .ApplyFilterByTaskTypes(request.filter.TaskTypeIds).getFilterXML();
+                string sql = @"with
+	taskTypeIds as (
+		select x.t.value('data(.)', 'int') id 
+		from( Select CAST(@taskFilter as XML) as ids ) t
+		cross apply t.ids.nodes('/id') x(t)	
+	),
+	tsk as (
+		select row_number() over(order by taskid) rn, * from task
+		Where (@taskFilter is null or Exists(select * from taskTypeIds t where t.id = tasktype))
+	)
+	SELECT taskid, taskname, tasktype, attachablepersoneltype, attachableobjecttype, performancescore, creationdate, lastupdated, updatedby, deleted
+	FROM tsk
+	where (Cast(rn/IIF(@rowsPerPage=0, 1, @rowsPerPage) as int)=@pageNo-1 or @rowsPerPage = 0) ";
+
+                string filter = null;
+                if (request.filter!=null)
+                {
+                    DTOs.TaskFilter taskFilter = new DTOs.TaskFilter(request.filter.TaskIds);
+                     filter = taskFilter.ApplyFilterByTaskName(request.filter.TaskName)
+                        .ApplyFilterByTaskTypeName(request.filter.TaskTypeName)
+                        .ApplyFilterByTaskTypes(request.filter.TaskTypeIds).getFilterXML();
+                }
+                
                 var res = db.sf_taskqueue(request.pageNo, request.rowsPerPage, filter)
                     .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
@@ -46,9 +65,9 @@ namespace CRMWebApi.Controllers
 
         //[Route("getTasks")]
         //[HttpGet]
-        //public HttpResponseMessage _getTaks([FromUri]int pageNo, [FromUri]int rowsPerPage, [FromUri]bool isOpen )
+        //public HttpResponseMessage _getTaks([FromUri]int pageNo)
         //{
-        //    return getTaks(pageNo, rowsPerPage,new Dictionary<string,string>());
+        //    return getTaskQueues(pageNo, rowsPerPage);
         //}
 
 
