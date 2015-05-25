@@ -31,6 +31,7 @@
         <AssociationConnector Association="CRMModel.personelblock1" />
         <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
         <AssociationConnector Association="CRMModel.tasktypestask" />
+        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="5.375" PointY="7.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

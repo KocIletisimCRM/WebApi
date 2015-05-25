@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
@@ -130,6 +131,9 @@
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
     </Compile>
     <Compile Include="Models\customer.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\customerinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\customer_status.cs">
