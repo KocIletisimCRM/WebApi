@@ -62,7 +62,8 @@ namespace CRMWebApi.Controllers
                 sqlParams.Add(new SqlParameter("pageNo", request.pageNo));
                 sqlParams.Add(new SqlParameter("rowsPerPage", request.rowsPerPage));
                 string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses));
-                var res = db.Database.SqlQuery<taskqueue>(querySQL, sqlParams).AsQueryable()
+                var res = db.Database.SqlQuery<taskqueue>(querySQL, sqlParams)
+                    //bu noktada kaldık hata veriyor include edemiyoruz
                     .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
                     .Include(tq => tq.attachedblock)

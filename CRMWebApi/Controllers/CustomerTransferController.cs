@@ -12,8 +12,8 @@ namespace CRMWebApi.Controllers
     public class CustomerTransferController : ApiController
     {
          [Route("findCustomer")]
-         [HttpPost]
-        public HttpResponseMessage findCustomer(string cname)
+         [HttpGet]
+         public HttpResponseMessage findCustomer([FromUri]string cname)
         {
             if (cname == null) cname = ""; 
 
@@ -50,11 +50,11 @@ namespace CRMWebApi.Controllers
 
 
 
-         [Route("findCustomer")]
-         [HttpGet]
-         public HttpResponseMessage _findCustomer([FromUri]string cname)
-         {
-             return findCustomer(cname);
-         }
+         //[Route("findCustomer")]
+         //[HttpGet]
+         //public HttpResponseMessage _findCustomer([FromUri]string cname)
+         //{
+         //    return findCustomer(cname);
+         //}
     }
 }
