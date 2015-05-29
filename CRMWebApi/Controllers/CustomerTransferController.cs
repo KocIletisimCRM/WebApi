@@ -26,7 +26,7 @@ namespace CRMWebApi.Controllers
 
          [Route("findSite")]
          [HttpGet]
-         public HttpResponseMessage findSite(string sitename)         
+         public HttpResponseMessage findSite([FromUri]string sitename)         
          {
              if (sitename == null) sitename = "";
              using (var db=new CRMEntities())
@@ -38,12 +38,12 @@ namespace CRMWebApi.Controllers
 
          [Route("findBlock")]
          [HttpGet]
-         public HttpResponseMessage findBlock(int siteid, string blockname) 
+         public HttpResponseMessage findBlock(int siteid) 
          {
-             if (blockname == null) blockname = "";
+             if (siteid == null) siteid = 100;
              using (var db=new CRMEntities())
              {
-                 var x = db.block.Where(b => b.blockname.Contains(blockname) && b.siteid==siteid ).ToList();
+                 var x = db.block.Where(b=> b.siteid==siteid ).ToList();
                  return Request.CreateResponse(HttpStatusCode.OK, x, "application/json");
              }
          }
