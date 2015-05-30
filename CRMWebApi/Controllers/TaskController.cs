@@ -33,15 +33,16 @@ namespace CRMWebApi.Controllers
                     {0}
         	         tq as (
 		                select row_number() over(order by taskorderno) rn, * from taskqueue tq
-		                where {1}
+		                where 1=1 and {1}
 	                       )
 	                select [taskorderno],[taskid], [previoustaskorderid], [relatedtaskorderid], [creationdate], [attachedobjectid],
 		                   [attachmentdate], [attachedpersonelid], [appointmentdate], [status], [consummationdate], [description],
 		                   [lastupdated], [updatedby], [deleted], [assistant_personel], [fault]
 	                from tq 
-	                where (Cast(rn/@rowsPerPage as int)=@pageNo-1 or @rowsPerPage = 0) ";
+	                where (Cast(rn/{2} as int)={3}-1 or {2} = 0) ";
                 List<string> withClauses = new List<string>();
                 List<string> whereClauses = new List<string>();
+                whereClauses.Add("1=1");
                 List<SqlParameter> sqlParams = new List<SqlParameter>();
                 string filter = null;
                 if (request.filter!=null)
@@ -61,9 +62,9 @@ namespace CRMWebApi.Controllers
                 }
                 sqlParams.Add(new SqlParameter("pageNo", request.pageNo));
                 sqlParams.Add(new SqlParameter("rowsPerPage", request.rowsPerPage));
-                string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses));
-                var res = db.Database.SqlQuery<taskqueue>(querySQL, sqlParams).AsQueryable()
-                    //bu noktada kaldık hata veriyor include edemiyoruz
+                string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses), request.rowsPerPage, request.pageNo);
+                var res = db.taskqueue
+                    .SqlQuery(querySQL).AsQueryable()
                     .Include(tq => tq.task)
                     .Include(tq => tq.taskstatepool)
                     .Include(tq => tq.attachedblock)
@@ -75,6 +76,7 @@ namespace CRMWebApi.Controllers
                     .Include(tq => tq.attachedcustomer.block.site)
                     .Include(tq => tq.asistanPersonel)
                     .Include(tq => tq.attachedpersonel);
+
                 return Request.CreateResponse(HttpStatusCode.OK,
                     res.ToList().Select(tq => tq.toDTO()).ToList(),
                     "application/json"
