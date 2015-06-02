@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="86">
+      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="77">
         <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
         <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="0.5" PointY="4" />
         <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="3" PointY="8" />
@@ -31,7 +31,8 @@
         <AssociationConnector Association="CRMModel.personelblock1" />
         <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
         <AssociationConnector Association="CRMModel.tasktypestask" />
-        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="5.375" PointY="7.75" />
+        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="7" PointY="7.75" />
+        <EntityTypeShape EntityType="CRMModel.flatinfo" Width="1.5" PointX="9.375" PointY="5.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

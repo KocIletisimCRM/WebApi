@@ -97,6 +97,7 @@
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\CustomerTransferObject.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
     <Compile Include="DTOs\DTOblock.cs" />
     <Compile Include="DTOs\DTOcustomer.cs" />
@@ -137,6 +138,9 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\customer_status.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\flatinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\ModelExtensions.cs" />
@@ -187,10 +191,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
     <None Include="Properties\PublishProfiles\CrmApi.pubxml" />
+    <Content Include="Web.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

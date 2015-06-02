@@ -38,6 +38,7 @@ namespace CRMWebApi.Models
         public virtual DbSet<customer_status> customer_status { get; set; }
         public virtual DbSet<tasktypes> tasktypes { get; set; }
         public virtual DbSet<customerinfo> customerinfo { get; set; }
+        public virtual DbSet<flatinfo> flatinfo { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)

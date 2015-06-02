@@ -172,6 +172,17 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
           <Property Name="sosaledate" Type="date" />
           <Property Name="contratfinish" Type="date" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="flatinfo">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="flat" Type="nvarchar" MaxLength="45" />
+          <Property Name="flatinfo" Type="nvarchar" MaxLength="138" />
+          <Property Name="blockid" Type="int" />
+        </EntityType>
         <Association Name="FK_block_site">
           <End Role="site" Type="Self.site" Multiplicity="1" />
           <End Role="block" Type="Self.block" Multiplicity="*" />
@@ -285,6 +296,14 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
     [customerinfo].[sosaledate] AS [sosaledate], 
     [customerinfo].[contratfinish] AS [contratfinish]
     FROM [dbo].[customerinfo] AS [customerinfo]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="flatinfo" EntityType="Self.flatinfo" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [flatinfo].[customerid] AS [customerid], 
+    [flatinfo].[flat] AS [flat], 
+    [flatinfo].[flatinfo] AS [flatinfo], 
+    [flatinfo].[blockid] AS [blockid]
+    FROM [dbo].[flatinfo] AS [flatinfo]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="FK_block_site" Association="Self.FK_block_site">
             <End Role="site" EntitySet="site" />
@@ -430,6 +449,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
             <End Role="task" EntitySet="task" />
           </AssociationSet>
           <EntitySet Name="customerinfo" EntityType="CRMModel.customerinfo" />
+          <EntitySet Name="flatinfo" EntityType="CRMModel.flatinfo" />
         </EntityContainer>
         <EntityType Name="task">
           <Key>
@@ -930,6 +950,15 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
           <Property Name="sosaledate" Type="DateTime" Precision="0" />
           <Property Name="contratfinish" Type="DateTime" Precision="0" />
         </EntityType>
+        <EntityType Name="flatinfo">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="flatinfo1" Type="String" MaxLength="138" FixedLength="false" Unicode="true" />
+          <Property Name="blockid" Type="Int32" />
+          <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1111,6 +1140,16 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
                 <ScalarProperty Name="flat" ColumnName="flat" />
                 <ScalarProperty Name="blockname" ColumnName="blockname" />
                 <ScalarProperty Name="sitename" ColumnName="sitename" />
+                <ScalarProperty Name="customerid" ColumnName="customerid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="flatinfo">
+            <EntityTypeMapping TypeName="CRMModel.flatinfo">
+              <MappingFragment StoreEntitySet="flatinfo">
+                <ScalarProperty Name="flat" ColumnName="flat" />
+                <ScalarProperty Name="blockid" ColumnName="blockid" />
+                <ScalarProperty Name="flatinfo1" ColumnName="flatinfo" />
                 <ScalarProperty Name="customerid" ColumnName="customerid" />
               </MappingFragment>
             </EntityTypeMapping>
