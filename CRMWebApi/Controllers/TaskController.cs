@@ -63,6 +63,7 @@ namespace CRMWebApi.Controllers
                 sqlParams.Add(new SqlParameter("pageNo", request.pageNo));
                 sqlParams.Add(new SqlParameter("rowsPerPage", request.rowsPerPage));
                 string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses), request.rowsPerPage, request.pageNo);
+                
                 var res = db.taskqueue
                     .SqlQuery(querySQL).AsQueryable()
                     .Include(tq => tq.task)
