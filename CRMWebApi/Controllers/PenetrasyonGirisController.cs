@@ -12,7 +12,7 @@ namespace CRMWebApi.Controllers
     public class PenetrasyonGirisController : ApiController
     {
          [Route("getCustomer")]
-         [HttpGet]
+         [HttpPost]
          public HttpResponseMessage getCustomer(int siteid,int blockid,string name)
          {
             
