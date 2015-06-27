@@ -6,17 +6,23 @@ using System.Threading.Tasks;
 
 namespace CRMWebApi.DTOs
 {
+    public class Filter
+    {
+        public int[] Ids { get; set; }
+        public string Name { get; set; }
+        public int[] TypeIds { get; set; }
+        public string TypeName { get; set; }
+ 
+    }
+
+
     public class DTOTaskQueueFilter
     {
-        public int[] taskIds { get; set; }
-        public string taskName { get; set; }
-        public int[] taskTypeIds { get; set; }
-        public string taskTypeName { get; set; }
-        public int[] attachedObjectIds { get; set; }
-        public int[] personelIds { get; set; }
-        public string personelName { get; set; }
-        public int[] statusIds { get; set; }
-        public string status { get; set; }
+        public Filter taskFilter { get; set; }
+        public Filter attachedObjectFilter { get; set; }
+        //public int[] attachedObjectIds { get; set; }
+        public Filter personelFilter { get; set; }
+        public Filter statusFilter { get; set; }
         public DateTime attachmentDate { get; set; }
         public DateTime creationDate { get; set; }
         public DateTime consummationDate { get; set; }

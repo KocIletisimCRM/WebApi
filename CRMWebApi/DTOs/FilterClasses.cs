@@ -68,6 +68,30 @@ namespace CRMWebApi.DTOs
                 return db.Database.SqlQuery<int>(preperedSQL, sqlParams);
             }
         }
+
+        //public T ApplyFilterByName<T>(string filterText) where T:BaseFilterList
+        //{
+        //    if (string.IsNullOrWhiteSpace(filterText)) return this;
+        //    var TypeFilter = new TaskTypeFilter(null);
+        //    string whereClause = string.Format("Where taskname like '%{0}%'", filterText);
+        //    var filteredIds = getFilterIds(null, "taskid", "task", whereClause, new object[] { });
+        //    applyFilter(filteredIds);
+        //    return this;
+        //}
+
+        //public T ApplyFilterByTypeName<T>(string filterText)
+        //{
+        //    if (string.IsNullOrWhiteSpace(filterText)) return this;
+        //    var taskTypeFilter = new TaskTypeFilter(null);
+        //    string preparedWithSQL = string.Format("taskTypeIds as ({0}),\r\n", xmlToTable);
+        //    string whereClause = "Where Exists (Select * from taskTypeIds tti Where tti.id=task.tasktype)";
+        //    SqlParameter param = new SqlParameter("filterXML", taskTypeFilter.getFilterXML(filterText));
+        //    var filteredIds = getFilterIds(preparedWithSQL, "taskid", "task", whereClause, new object[] { param });
+        //    applyFilter(filteredIds);
+        //    return this;
+        //}
+        
+
     }
 
     public class TaskTypeFilter : BaseFilterList
@@ -128,4 +152,6 @@ namespace CRMWebApi.DTOs
             return this;
         }
     }
+
+
 }

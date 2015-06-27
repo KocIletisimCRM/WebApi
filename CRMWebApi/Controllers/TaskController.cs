@@ -47,10 +47,10 @@ namespace CRMWebApi.Controllers
                 string filter = null;
                 if (request.filter!=null)
                 {
-                    TaskFilter taskFilter = new TaskFilter(request.filter.taskIds);
-                    taskFilter.ApplyFilterByTaskName(request.filter.taskName)
-                        .ApplyFilterByTaskTypeName(request.filter.taskTypeName)
-                        .ApplyFilterByTaskTypes(request.filter.taskTypeIds);
+                    TaskFilter taskFilter = new TaskFilter(request.filter.taskFilter.Ids);
+                    taskFilter.ApplyFilterByTaskName(request.filter.taskFilter.Name)
+                        .ApplyFilterByTaskTypeName(request.filter.taskFilter.TypeName)
+                        .ApplyFilterByTaskTypes(request.filter.taskFilter.Ids);
                     string taskIdsXML = taskFilter.getFilterXML();
                     if (taskIdsXML != null) sqlParams.Add(new SqlParameter("taskid_Filter", taskIdsXML));
                     foreach (var param in sqlParams)
@@ -63,20 +63,53 @@ namespace CRMWebApi.Controllers
                 sqlParams.Add(new SqlParameter("pageNo", request.pageNo));
                 sqlParams.Add(new SqlParameter("rowsPerPage", request.rowsPerPage));
                 string querySQL = string.Format(sql, string.Join(",", withClauses), string.Join(" and ", whereClauses), request.rowsPerPage, request.pageNo);
+
+                var res = db.taskqueue.SqlQuery(querySQL).ToList();
+                var taskIds = res.Select(r => r.taskid).Distinct().ToList();
+                var tasks = db.task.Where(t => taskIds.Contains(t.taskid)).ToList();
+
+                var personelIds = res.Select(r => r.attachedpersonelid)
+                    .Union(res.Select(r=>r.assistant_personel))
+                    .Union(res.Select(r=>r.updatedby)).Distinct().ToList();
+
+                var personels = db.personel.Where(p=>personelIds.Contains(p.personelid)).ToList();
+
+                var customerIds = res.Select(c => c.attachedobjectid).Distinct().ToList();
+                var customers=db.customer.Include(c=>c.block.site).Where(c=>customerIds.Contains(c.customerid)).ToList();
                 
-                var res = db.taskqueue
-                    .SqlQuery(querySQL).AsQueryable()
-                    .Include(tq => tq.task)
-                    .Include(tq => tq.taskstatepool)
-                    .Include(tq => tq.attachedblock)
-                    .Include(tq => tq.attachedcustomer)
-                    .Include(tq => tq.Updatedpersonel)
-                    .Include(tq => tq.attachedblock.site)
-                    .Include(tq => tq.attachedblock)
-                    .Include(tq => tq.attachedcustomer.block)
-                    .Include(tq => tq.attachedcustomer.block.site)
-                    .Include(tq => tq.asistanPersonel)
-                    .Include(tq => tq.attachedpersonel);
+                var blockIds=res.Select(b=>b.attachedobjectid).Distinct().ToList();
+                var blocks = db.block.Include(b=>b.site).Where(b => blockIds.Contains(b.blockid)).ToList();
+               
+                var taskstateIds = res.Select(tsp=>tsp.status).Distinct().ToList();
+                var taskstates = db.taskstatepool.Where(tsp => taskstateIds.Contains(tsp.taskstateid)).ToList();
+
+                res.ForEach(r =>
+                {
+                    r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
+                    r.attachedpersonel = personels.Where(p => p.personelid == r.attachedpersonelid).FirstOrDefault();
+                    r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
+                    if (r.attachedcustomer==null)
+                    {
+                        r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
+                    }
+                    r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
+                    r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
+                    r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
+                });
+
+               
+                
+                    //.Include(tq => tq.task)
+                    //.Include(tq => tq.taskstatepool)
+                    //.Include(tq => tq.attachedblock)
+                    //.Include(tq => tq.attachedcustomer)
+                    //.Include(tq => tq.Updatedpersonel)
+                    //.Include(tq => tq.attachedblock.site)
+                    //.Include(tq => tq.attachedblock)
+                    //.Include(tq => tq.attachedcustomer.block)
+                    //.Include(tq => tq.attachedcustomer.block.site)
+                    //.Include(tq => tq.asistanPersonel)
+                    //.Include(tq => tq.attachedpersonel);
 
                 return Request.CreateResponse(HttpStatusCode.OK,
                     res.ToList().Select(tq => tq.toDTO()).ToList(),

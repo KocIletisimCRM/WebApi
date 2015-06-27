@@ -116,7 +116,7 @@ namespace CRMWebApi.Controllers
           
             
               db.SaveChanges();
-              return null; 
+              return Request.CreateResponse(HttpStatusCode.OK, "Tasima İslemi Gerçekleştirildi", "application/json");
              }
             
          }
@@ -133,23 +133,30 @@ namespace CRMWebApi.Controllers
                  oldblock = oldcustomer.blockid;
                  oldflat = oldcustomer.flat;
                  oldcustomer.deleted = true;
+
                  string sql = @"INSERT INTO customer (blockid,flat,deleted,creationdate,lastupdated,updatedby)
                                 VALUES ({0},{1},0,GETDATE(),GETDATE(),'9')";
                  var newcustomerid = db.customer.Where(c => c.blockid == oldblock).Max(m => m.customerid);
+
 
                  var oldpersonelinfo = db.taskqueue.Where(t => t.attachedobjectid == custid && t.taskid == 86).OrderByDescending(o => o.taskorderno).FirstOrDefault();
                  if (oldpersonelinfo != null)//eğer kat ziyaret taskı daha önce o kişiye oluşturulmuşsa sildiğimiz için yeniden ekliyoruz.
                  {
                      oldpersonelid = oldpersonelinfo.attachedpersonelid;
                      string tqsql = @"INSERT INTO taskqueue(taskid,creationdate,attachedobjectid,attachedpersonelid,attachmentdate,lastupdated,description,updatedby,deleted)
-                           VALUES (86,GETDATE(),{0},{1},GETDATE(),GETDATE(),'nakil işlemi sonucu oluşturulan kat ziyareti taskı',9,0)";
+                           VALUES (86,GETDATE(),{0},{1},GETDATE(),GETDATE(),'Müşteri pasife çekildikten sonra oluşan kat ziyareti',9,0)";
                      string tqquerysql = string.Format(tqsql, newcustomerid, oldpersonelid);
                      var res2 = db.Database.ExecuteSqlCommand(tqquerysql);
                  }
                  string querysql = string.Format(sql,oldblock,oldflat);
                  var res = db.Database.ExecuteSqlCommand(querysql);
+
+                 string updatesql = @"update taskqueue set deleted=1 where attachedobjectid={0} and status is null";
+                 updatesql = string.Format(updatesql,custid);
+                 var result = db.Database.ExecuteSqlCommand(updatesql);
+
                  db.SaveChanges();
-                 return Request.CreateResponse(HttpStatusCode.OK,"OK","application/json");
+                 return Request.CreateResponse(HttpStatusCode.OK,"Müşteriyi Pasife Çektiniz.","application/json");
              }
              
              
