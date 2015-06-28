@@ -107,6 +107,7 @@
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\DTOKatZiyareti.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
     <Compile Include="DTOs\DTOblock.cs" />
     <Compile Include="DTOs\DTOcustomer.cs" />
@@ -152,7 +153,16 @@
     <Compile Include="Models\flatinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\gsmKullanımıStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\issStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\ModelExtensions.cs" />
+    <Compile Include="Models\netStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\personel.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
@@ -169,6 +179,15 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\tasktypes.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\telStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TurkcellTVStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\TvKullanımıStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

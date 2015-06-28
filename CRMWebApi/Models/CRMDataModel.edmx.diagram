@@ -33,6 +33,12 @@
         <AssociationConnector Association="CRMModel.tasktypestask" />
         <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="7" PointY="7.75" />
         <EntityTypeShape EntityType="CRMModel.flatinfo" Width="1.5" PointX="9.375" PointY="5.75" />
+        <EntityTypeShape EntityType="CRMModel.gsmKullanımıStatus" Width="1.5" PointX="9.5" PointY="11.75" />
+        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="5.375" PointY="11.75" />
+        <EntityTypeShape EntityType="CRMModel.TvKullanımıStatus" Width="1.5" PointX="7.375" PointY="11.75" />
+        <EntityTypeShape EntityType="CRMModel.issStatus" Width="1.5" PointX="9.75" PointY="8.75" />
+        <EntityTypeShape EntityType="CRMModel.netStatus" Width="1.5" PointX="0.75" PointY="12.75" />
+        <EntityTypeShape EntityType="CRMModel.telStatus" Width="1.5" PointX="2.75" PointY="12.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

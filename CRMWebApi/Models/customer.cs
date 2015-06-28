@@ -40,6 +40,7 @@ namespace CRMWebApi.Models
         public Nullable<int> tvstatu { get; set; }
         public Nullable<int> gsmstatu { get; set; }
         public Nullable<int> iss { get; set; }
+        public Nullable<int> emptorcustomernum { get; set; }
     
         public virtual customer_status customer_status { get; set; }
         public virtual ICollection<taskqueue> taskqueues { get; set; }

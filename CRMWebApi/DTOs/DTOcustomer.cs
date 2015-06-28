@@ -26,6 +26,8 @@ namespace CRMWebApi.DTOs
         public string turkcellTv { get; set; }
         public Nullable<int> netstatu { get; set; }
         public string description { get; set; }
+        public Nullable<int> iss { get; set; }
+        public Nullable<int> emptorcustomernum { get; set; }
         public Nullable<int> tvstatu { get; set; }
         public Nullable<int> gsmstatu { get; set; }
     }
