@@ -17,9 +17,10 @@ namespace CRMWebApi.Controllers
     {
          public class getCustomerParams
          {
-             public int? siteid { get; set; }
+             public string sitename { get; set; }
              public int? blockid { get; set; }
              public string name { get; set; }
+             public string region { get; set; }
              public Boolean closedtasks { get; set; }
          }
          [Route("getCustomer")]
@@ -27,7 +28,7 @@ namespace CRMWebApi.Controllers
          public HttpResponseMessage getCustomer(getCustomerParams param)
          {
              SqlParameter siteid = new SqlParameter("@siteid", System.Data.SqlDbType.Int);
-             siteid.Value = (object)param.siteid ?? DBNull.Value;
+             siteid.Value = (object)param.sitename ?? DBNull.Value;
              SqlParameter blockid = new SqlParameter("@blockid", System.Data.SqlDbType.Int);
              blockid.Value = (object)param.blockid ?? DBNull.Value;
              SqlParameter name = new SqlParameter("@name", System.Data.SqlDbType.VarChar);
@@ -44,13 +45,24 @@ namespace CRMWebApi.Controllers
                  var penetarations = db.taskqueue.Where(tq => tq.taskid == 86  && (tq.status ==null || param.closedtasks) && tq.creationdate.Value.Year == 2015 && tq.deleted == false);
 
 
-                 var res = db.customer.Include(c=>c.block.site)
+                 var res = db.customer
+                     .Include(c=>c.netStatus)
+                     .Include(c=>c.gsmKullanımıStatus)
+                     .Include(c=>c.telStatus)
+                     .Include(c=>c.TvKullanımıStatus)
+                     .Include(c=>c.issStatus)
+                     .Include(c=>c.customer_status)
+                     .Include(c=>c.block.site)
+                   
                      .Where(c=>
                          penetarations.Any(p=>p.attachedobjectid==c.customerid) && 
                          (param.name == null || c.customername.Contains(param.name)) &&
-                         (param.blockid == null || c.blockid==param.blockid)&&
-                         (param.siteid==null || c.block.siteid==param.siteid)
+                         (param.blockid == null || c.blockid==param.blockid) &&
+                         (param.region==null || c.block.site.region.Contains(param.region)) &&
+                         (param.sitename==null || c.block.site.sitename.Contains(param.sitename)
+                           )
                      ).ToList();
+                
 //                 string sqlcommand = @"select s.sitename,b.blockname, c.* from taskqueue tq left join customer c on tq.attachedobjectid=c.customerid
 //							left join block b on c.blockid=b.blockid
 //							left join site s on b.siteid=s.siteid
@@ -77,7 +89,7 @@ namespace CRMWebApi.Controllers
                  db.Configuration.AutoDetectChangesEnabled = false;
                  db.Configuration.LazyLoadingEnabled = false;
                  db.Configuration.ProxyCreationEnabled = false;
-                 var res = db.site.Where(s => s.deleted == false).OrderBy(o => o.sitename).ToList();
+                 var res = db.site.Where(s => s.deleted == false).OrderBy(m => m.sitename).ToList();
                   return Request.CreateResponse(HttpStatusCode.OK,res,"application/json");
              }
          }
@@ -138,6 +150,18 @@ namespace CRMWebApi.Controllers
              }
 
          }
+         [Route("getRegion")]
+         [HttpPost]
+         public HttpResponseMessage getRegion(string regionname)
+         {
+             using (var db=new CRMEntities())
+             {
+                 var res = db.site.Where(s => s.deleted == false&&s.region.Contains(regionname)).OrderBy(o => o.region).ToList();
+                 return Request.CreateResponse(HttpStatusCode.OK,res,"application/json");
+                 
+             }
+         }
+     
          [Route("getTvStatus")]
          [HttpGet]
          public HttpResponseMessage getTvStatus()
@@ -185,11 +209,11 @@ namespace CRMWebApi.Controllers
                      item.customername = ct.customername;
                      item.customersurname = ct.customersurname;
                      item.gsm = ct.gsm;
-                     item.netstatu = ct.netstatu;
-                     item.telstatu = ct.telstatu;
-                     item.iss = ct.iss;
+                     item.netstatu = ct.netStatus.id;
+                     item.telstatu = ct.telStatus.id;
+                     item.iss = ct.issStatus.id;
                      item.turkcellTv = ct.turkcellTv;
-                     item.tvstatu = ct.tvstatu;
+                     item.tvstatu = ct.TvKullanımıStatus.id;
                      item.description = ct.description;
                      item.lastupdated = DateTime.Now;
                      item.updatedby = 9;

@@ -107,7 +107,12 @@
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\DTOgsmStatus.cs" />
+    <Compile Include="DTOs\DTOissStatus.cs" />
     <Compile Include="DTOs\DTOKatZiyareti.cs" />
+    <Compile Include="DTOs\DTOnetStatus.cs" />
+    <Compile Include="DTOs\DTOtelStatus.cs" />
+    <Compile Include="DTOs\DTOtvStatus.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
     <Compile Include="DTOs\DTOblock.cs" />
     <Compile Include="DTOs\DTOcustomer.cs" />
@@ -137,6 +142,11 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\CRMDataModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMDataModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\CRMDataModel1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
@@ -196,7 +206,7 @@
     <Content Include="packages.config" />
     <EntityDeploy Include="Models\CRMDataModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>CRMDataModel.Designer.cs</LastGenOutput>
+      <LastGenOutput>CRMDataModel1.Designer.cs</LastGenOutput>
     </EntityDeploy>
     <Content Include="Models\CRMDataModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

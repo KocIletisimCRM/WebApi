@@ -14,8 +14,15 @@ namespace CRMWebApi.Models
     
     public partial class telStatus
     {
+        public telStatus()
+        {
+            this.customer = new HashSet<customer>();
+        }
+    
         public int id { get; set; }
         public string telText { get; set; }
         public Nullable<int> deleted { get; set; }
+    
+        public virtual ICollection<customer> customer { get; set; }
     }
 }

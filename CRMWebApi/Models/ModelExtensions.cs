@@ -107,6 +107,47 @@ namespace CRMWebApi.Models
             return toDTO<DTOs.DTOTaskTypes>();
         }
     }
+    public partial class issStatus : EntityBase 
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOissStatus>();
+        }
+    }
+
+    public partial class netStatus : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOnetStatus>();
+        }
+    }
+    public partial class gsmKullanımıStatus : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOgsmStatus>();
+        }
+    }
+    public partial class telStatus : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOtelStatus>();
+        }
+    }
+    public partial class TvKullanımıStatus : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOs.DTOtvStatus>();
+        }
+    }
+
+
+
+
+
 
 
 }

@@ -510,9 +510,29 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <EntitySet Name="gsmKullanımıStatus" EntityType="CRMModel.gsmKullanımıStatus" />
           <EntitySet Name="TurkcellTVStatus" EntityType="CRMModel.TurkcellTVStatus" />
           <EntitySet Name="TvKullanımıStatus" EntityType="CRMModel.TvKullanımıStatus" />
-          <EntitySet Name="issStatus" EntityType="CRMModel.issStatus" />
           <EntitySet Name="netStatus" EntityType="CRMModel.netStatus" />
           <EntitySet Name="telStatus" EntityType="CRMModel.telStatus" />
+          <EntitySet Name="issStatus" EntityType="CRMModel.issStatus" />
+          <AssociationSet Name="issStatuscustomer" Association="CRMModel.issStatuscustomer">
+            <End Role="issStatus" EntitySet="issStatus" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="netStatuscustomer" Association="CRMModel.netStatuscustomer">
+            <End Role="netStatus" EntitySet="netStatus" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="TvKullanımıStatuscustomer" Association="CRMModel.TvKullanımıStatuscustomer">
+            <End Role="TvKullanımıStatus" EntitySet="TvKullanımıStatus" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="telStatuscustomer" Association="CRMModel.telStatuscustomer">
+            <End Role="telStatus" EntitySet="telStatus" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="gsmKullanımıStatuscustomer" Association="CRMModel.gsmKullanımıStatuscustomer">
+            <End Role="gsmKullanımıStatus" EntitySet="gsmKullanımıStatus" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="task">
           <Key>
@@ -680,6 +700,11 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personelcustomer" FromRole="customer" ToRole="personel" />
           <Property Name="iss" Type="Int32" />
           <Property Name="emptorcustomernum" Type="Int32" />
+          <NavigationProperty Name="issStatus" Relationship="CRMModel.issStatuscustomer" FromRole="customer" ToRole="issStatus" />
+          <NavigationProperty Name="netStatus" Relationship="CRMModel.netStatuscustomer" FromRole="customer" ToRole="netStatus" />
+          <NavigationProperty Name="TvKullanımıStatus" Relationship="CRMModel.TvKullanımıStatuscustomer" FromRole="customer" ToRole="TvKullanımıStatus" />
+          <NavigationProperty Name="telStatus" Relationship="CRMModel.telStatuscustomer" FromRole="customer" ToRole="telStatus" />
+          <NavigationProperty Name="gsmKullanımıStatus" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="customer" ToRole="gsmKullanımıStatus" />
         </EntityType>
         <EntityType Name="personel">
           <Key>
@@ -1031,6 +1056,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="gsmText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="gsmKullanımıStatus" ToRole="customer" />
         </EntityType>
         <EntityType Name="TurkcellTVStatus">
           <Key>
@@ -1047,14 +1073,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="tvKullanımıText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="deleted" Type="Int32" />
-        </EntityType>
-        <EntityType Name="issStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="issText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.TvKullanımıStatuscustomer" FromRole="TvKullanımıStatus" ToRole="customer" />
         </EntityType>
         <EntityType Name="netStatus">
           <Key>
@@ -1063,6 +1082,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="netText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.netStatuscustomer" FromRole="netStatus" ToRole="customer" />
         </EntityType>
         <EntityType Name="telStatus">
           <Key>
@@ -1071,7 +1091,77 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="id" Type="Int32" Nullable="false" />
           <Property Name="telText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.telStatuscustomer" FromRole="telStatus" ToRole="customer" />
         </EntityType>
+        <EntityType Name="issStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="issText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.issStatuscustomer" FromRole="issStatus" ToRole="customer" />
+        </EntityType>
+        <Association Name="issStatuscustomer">
+          <End Type="CRMModel.issStatus" Role="issStatus" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="issStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="iss" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="netStatuscustomer">
+          <End Type="CRMModel.netStatus" Role="netStatus" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="netStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="netstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="TvKullanımıStatuscustomer">
+          <End Type="CRMModel.TvKullanımıStatus" Role="TvKullanımıStatus" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TvKullanımıStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="tvstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="telStatuscustomer">
+          <End Type="CRMModel.telStatus" Role="telStatus" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="telStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="telstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="gsmKullanımıStatuscustomer">
+          <End Type="CRMModel.gsmKullanımıStatus" Role="gsmKullanımıStatus" Multiplicity="0..1" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="gsmKullanımıStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="gsmstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1296,15 +1386,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="issStatus">
-            <EntityTypeMapping TypeName="CRMModel.issStatus">
-              <MappingFragment StoreEntitySet="issStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="issText" ColumnName="issText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="netStatus">
             <EntityTypeMapping TypeName="CRMModel.netStatus">
               <MappingFragment StoreEntitySet="netStatus">
@@ -1319,6 +1400,15 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
               <MappingFragment StoreEntitySet="telStatus">
                 <ScalarProperty Name="deleted" ColumnName="deleted" />
                 <ScalarProperty Name="telText" ColumnName="telText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="issStatus">
+            <EntityTypeMapping TypeName="CRMModel.issStatus">
+              <MappingFragment StoreEntitySet="issStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="issText" ColumnName="issText" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -1338,7 +1428,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="True" />
         <DesignerProperty Name="EnablePluralization" Value="false" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
       </DesignerInfoPropertySet>

@@ -14,8 +14,15 @@ namespace CRMWebApi.Models
     
     public partial class gsmKullanımıStatus
     {
+        public gsmKullanımıStatus()
+        {
+            this.customer = new HashSet<customer>();
+        }
+    
         public int id { get; set; }
         public string gsmText { get; set; }
         public Nullable<int> deleted { get; set; }
+    
+        public virtual ICollection<customer> customer { get; set; }
     }
 }

@@ -6,8 +6,8 @@
     <edmx:Diagrams>
       <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="77">
         <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
-        <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="0.5" PointY="4" />
-        <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="3" PointY="8" />
+        <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="6.625" PointY="8.625" />
+        <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="4" PointY="8.625" />
         <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="6.875" PointY="0.625" />
         <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
         <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
@@ -31,14 +31,19 @@
         <AssociationConnector Association="CRMModel.personelblock1" />
         <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
         <AssociationConnector Association="CRMModel.tasktypestask" />
-        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="7" PointY="7.75" />
+        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="11.25" PointY="12" />
         <EntityTypeShape EntityType="CRMModel.flatinfo" Width="1.5" PointX="9.375" PointY="5.75" />
-        <EntityTypeShape EntityType="CRMModel.gsmKullanımıStatus" Width="1.5" PointX="9.5" PointY="11.75" />
-        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="5.375" PointY="11.75" />
-        <EntityTypeShape EntityType="CRMModel.TvKullanımıStatus" Width="1.5" PointX="7.375" PointY="11.75" />
-        <EntityTypeShape EntityType="CRMModel.issStatus" Width="1.5" PointX="9.75" PointY="8.75" />
-        <EntityTypeShape EntityType="CRMModel.netStatus" Width="1.5" PointX="0.75" PointY="12.75" />
-        <EntityTypeShape EntityType="CRMModel.telStatus" Width="1.5" PointX="2.75" PointY="12.75" />
+        <EntityTypeShape EntityType="CRMModel.gsmKullanımıStatus" Width="1.5" PointX="0.5" PointY="8.375" />
+        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="0.5" PointY="6.625" />
+        <EntityTypeShape EntityType="CRMModel.TvKullanımıStatus" Width="1.5" PointX="0.5" PointY="12.125" />
+        <EntityTypeShape EntityType="CRMModel.netStatus" Width="1.5" PointX="0.5" PointY="4.625" />
+        <EntityTypeShape EntityType="CRMModel.telStatus" Width="1.5" PointX="0.5" PointY="10.25" />
+        <EntityTypeShape EntityType="CRMModel.issStatus" Width="1.5" PointX="0.5" PointY="2.625" />
+        <AssociationConnector Association="CRMModel.issStatuscustomer" />
+        <AssociationConnector Association="CRMModel.netStatuscustomer" />
+        <AssociationConnector Association="CRMModel.TvKullanımıStatuscustomer" />
+        <AssociationConnector Association="CRMModel.telStatuscustomer" />
+        <AssociationConnector Association="CRMModel.gsmKullanımıStatuscustomer" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
