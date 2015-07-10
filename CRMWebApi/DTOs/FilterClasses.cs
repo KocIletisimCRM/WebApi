@@ -69,15 +69,15 @@ namespace CRMWebApi.DTOs
             }
         }
 
-        //public T ApplyFilterByName<T>(string filterText) where T:BaseFilterList
-        //{
-        //    if (string.IsNullOrWhiteSpace(filterText)) return this;
-        //    var TypeFilter = new TaskTypeFilter(null);
-        //    string whereClause = string.Format("Where taskname like '%{0}%'", filterText);
-        //    var filteredIds = getFilterIds(null, "taskid", "task", whereClause, new object[] { });
-        //    applyFilter(filteredIds);
-        //    return this;
-        //}
+        protected T applyFilterByName<T>(string filterText,string idField,string tableName,string nameField) where T : BaseFilterList
+        {
+            if (string.IsNullOrWhiteSpace(filterText)) return (T)this;
+            var TypeFilter = new TaskTypeFilter(null);
+            string whereClause = string.Format("Where {1} like '%{0}%'", filterText,nameField);
+            var filteredIds = getFilterIds(null, idField, tableName, whereClause, new object[] { });
+            applyFilter(filteredIds);
+            return (T)this;
+        }
 
         //public T ApplyFilterByTypeName<T>(string filterText)
         //{
@@ -102,12 +102,14 @@ namespace CRMWebApi.DTOs
 
         }
 
+        public TaskTypeFilter ApplyFilterByTypeName(string nameFilter)
+        {
+            return base.applyFilterByName<TaskTypeFilter>(nameFilter, "TaskTypeId", "tasktypes", "TaskTypeName");
+        }
+
         public string getFilterXML(string filterText)
         {
-            if (string.IsNullOrWhiteSpace(filterText)) return getFilterXML();
-            string whereClauses = string.Format("Where TaskTypeName like '%{0}%'", filterText);
-            var filteredIds = getFilterIds(null, "TaskTypeId", "tasktypes", whereClauses, new object[] { });
-            return applyFilter(filteredIds).getFilterXML();
+            return ApplyFilterByTypeName(filterText).getFilterXML();
         }
     }
 
