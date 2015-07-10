@@ -23,11 +23,11 @@ namespace CRMWebApi.Models
             return dto;
         }
 
-        public abstract object toDTO();
+        public abstract EntityBase toDTO();
     }
     public partial class taskqueue:EntityBase
     {
-        public override object toDTO()
+        public override taskqueue toDTO()
         {
             var Dto= toDTO<DTOs.DTOtaskqueue>();
             if (attachedblock == null && attachedcustomer == null) return Dto;

@@ -96,21 +96,6 @@ namespace CRMWebApi.Controllers
                     r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
                 });
-
-               
-                
-                    //.Include(tq => tq.task)
-                    //.Include(tq => tq.taskstatepool)
-                    //.Include(tq => tq.attachedblock)
-                    //.Include(tq => tq.attachedcustomer)
-                    //.Include(tq => tq.Updatedpersonel)
-                    //.Include(tq => tq.attachedblock.site)
-                    //.Include(tq => tq.attachedblock)
-                    //.Include(tq => tq.attachedcustomer.block)
-                    //.Include(tq => tq.attachedcustomer.block.site)
-                    //.Include(tq => tq.asistanPersonel)
-                    //.Include(tq => tq.attachedpersonel);
-
                 return Request.CreateResponse(HttpStatusCode.OK,
                     res.ToList().Select(tq => tq.toDTO()).ToList(),
                     "application/json"
