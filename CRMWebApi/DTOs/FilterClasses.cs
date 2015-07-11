@@ -8,126 +8,163 @@ using System.Threading.Tasks;
 
 namespace CRMWebApi.DTOs
 {
-    public class BaseFilterList
+    public enum filterOperators
     {
-        protected string xmlToTable = @"
-            Select x.t.value('data(.)', 'int') id 
-            From (Select Cast(@filterXML as XML) as ids) t
-            Cross Apply t.ids.nodes('/id') x(t)
-        "; 
-        protected string baseSQL = @"
-            with
-                {0}
-	            w0 as (
-		            select {1} from {2}
-		            {3}
-	            )
-	        SELECT {1}
-	        FROM w0 ";
-        protected List<int> ids = new List<int>();
+        foLess = 0,
+        foLessOrEqual = 1,
+        foEqual = 2,
+        foGreater = 3,
+        foGreaterOrEqual = 4,
+        foBetween = 5,
+        foLike = 6
+    }
 
-        public BaseFilterList() { }
+    public class fieldFilter
+    {
+        private string filedName { get; set; }
+        private object filterValue { get; set; }
+        private object filterValue2 { get; set; }
+        private filterOperators filterOperator { get; set; }
 
-        public BaseFilterList(IEnumerable<int> idArray)
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'" };
+
+        private string getValueCompairer(object val)
         {
-            applyFilter(idArray);
+            var s = (val is string) || (val is DateTime) ? "'" : string.Empty;
+            return string.Format("{0}{1}{0}", s, val.ToString());
         }
 
-        ~BaseFilterList()
+        public fieldFilter(string name, object value, filterOperators op)
         {
-            ids.Clear();
-            ids = null;
+            filedName = name;
+            filterValue = value;
+            filterOperator = op;
         }
 
-        public string getFilterXML()
+        public string combineWith(filterOperators op)
         {
-            return (ids.Count == 0) ? null : string.Join(string.Empty, ids.Select(i => string.Format("<id>{0}</id>", i)));
+            filterOperator = op;
+            return combine();
         }
 
-        protected void setIds(IEnumerable<int> idArray)
+        public string combine()
         {
-            ids.Clear();
-            ids.AddRange(idArray);
-        }
-
-        public BaseFilterList applyFilter(IEnumerable<int> idArray)
-        {
-            if (idArray == null || idArray.Count() == 0) return this;
-            setIds((ids.Count > 0) ? ids.Intersect(idArray) : idArray);
-            return this;
-        }
-
-        protected IEnumerable<int> getFilterIds(string withClauses, string idFieldName, string tableName, string whereClauses, object[] sqlParams)
-        {
-            using (var db = new CRMEntities())
+            switch (filterOperator)
             {
-                db.Configuration.AutoDetectChangesEnabled = false;
-                db.Configuration.LazyLoadingEnabled = false;
-                db.Configuration.ProxyCreationEnabled = false;
-                string preperedSQL = string.Format(baseSQL, withClauses, idFieldName, tableName, whereClauses);
-                return db.Database.SqlQuery<int>(preperedSQL, sqlParams);
+                case filterOperators.foLess:
+                case filterOperators.foLessOrEqual:
+                case filterOperators.foEqual:
+                case filterOperators.foGreater:
+                case filterOperators.foGreaterOrEqual:
+                    return string.Format(operatorStrings[(int)filterOperator], filedName, getValueCompairer(filterValue));
+                case filterOperators.foBetween:
+                    return string.Format(operatorStrings[(int)filterOperator], filedName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
+                case filterOperators.foLike:
+                    return string.Format(operatorStrings[(int)filterOperator], filedName, filterValue);
+                default:
+                    throw new Exception("Bilinmeyen operatör tipi!");
             }
         }
-    }
 
-    public class TaskTypeFilter : BaseFilterList
+        public static string operator &(fieldFilter f1, fieldFilter f2)
+        {
+            return string.Format("({0} and {1})", f1.combine(), f2.combine());
+        }
+
+        public static string operator |(fieldFilter f1, fieldFilter f2)
+        {
+            return string.Format("({0} or {1})", f1.combine(), f2.combine());
+        }
+
+    }
+    public class filterSQL
     {
-        public TaskTypeFilter(IEnumerable<int> idArray)
-            : base(idArray)
-        {
+        static string sql = "SELECT * FROM {0}";
+        private string tableName { get; set; }
+        public string TableName { get { return tableName; } }
 
+        private string keyFieldName { get; set; }
+        public string KeyFieldName { get { return keyFieldName; } }
+
+        public filterSQL(string tablename, string keyfieldname)
+        {
+            tableName = tablename;
+            keyFieldName = keyfieldname;
         }
 
-        public string getFilterXML(string filterText)
+        private List<fieldFilter> _fieldFilters = new List<fieldFilter>();
+        public bool hasFilterField { get { return _fieldFilters.Count > 0; } }
+        public void addFieldFilter(fieldFilter f)
         {
-            if (string.IsNullOrWhiteSpace(filterText)) return getFilterXML();
-            string whereClauses = string.Format("Where TaskTypeName like '%{0}%'", filterText);
-            var filteredIds = getFilterIds(null, "TaskTypeId", "tasktypes", whereClauses, new object[] { });
-            return applyFilter(filteredIds).getFilterXML();
+            _fieldFilters.Add(f);
+        }
+        public void clearFilters()
+        {
+            _fieldFilters.Clear();
+        }
+        public virtual string get()
+        {
+            return _fieldFilters.Count > 0 ?
+                string.Format("{0} WHERE ({1})", string.Format(sql, tableName), string.Join(" AND ", _fieldFilters.Select(f => f.combine()))) :
+                string.Format(sql, tableName);
         }
     }
 
-    public class TaskFilter : BaseFilterList
+    public class lookupFilterSQL : filterSQL
     {
-        public TaskFilter(int[] idArray)
-            : base(idArray)
+        private Dictionary<string, filterSQL> details = new Dictionary<string, filterSQL>();
+        public Dictionary<string, filterSQL> Details { get { return details; } }
+
+        protected List<string> getSubWithClaueses()
         {
+            List<string> wc = new List<string>();
+            foreach (var detail in details)
+            {
+                if (detail.Value is lookupFilterSQL)
+                {
+                    var ldetail = detail.Value as lookupFilterSQL;
+                    foreach (var item in ldetail.getSubWithClaueses())
+                        wc.Add(item);
+                }
+                wc.Add(string.Format("_{0} as ({1})", detail.Key, detail.Value.get()));
+            }
+            return wc;
         }
 
-        public TaskFilter ApplyFilterByTaskTypes(IEnumerable<int> idArray)
+        public lookupFilterSQL(string tablename, string keyfieldname) : base(tablename, keyfieldname) { }
+
+        private string getSelectStatement()
         {
-            if (idArray == null || idArray.Count() == 0) return this;
-            var taskTypeFilter = new TaskTypeFilter(idArray);
-            string preparedWithSQL = string.Format("taskTypeIds as ({0}),\r\n", xmlToTable);
-            string whereClause = "Where Exists (Select * from taskTypeIds tti Where tti.id=task.tasktype)";
-            SqlParameter param = new SqlParameter("filterXML", taskTypeFilter.getFilterXML());
-            var filteredIds = getFilterIds(preparedWithSQL, "taskid", "task", whereClause, new object[] { param });
-            applyFilter(filteredIds);
-            return this;
+            return base.get();
         }
 
-        public TaskFilter ApplyFilterByTaskTypeName(string filterText)
+        public override string get()
         {
-            if (string.IsNullOrWhiteSpace(filterText)) return this;
-            var taskTypeFilter = new TaskTypeFilter(null);
-            string preparedWithSQL = string.Format("taskTypeIds as ({0}),\r\n", xmlToTable);
-            string whereClause = "Where Exists (Select * from taskTypeIds tti Where tti.id=task.tasktype)";
-            SqlParameter param = new SqlParameter("filterXML", taskTypeFilter.getFilterXML(filterText));
-            var filteredIds = getFilterIds(preparedWithSQL, "taskid", "task", whereClause, new object[] { param });
-            applyFilter(filteredIds);
-            return this;
+            List<string> whereClauses = new List<string>();
+            foreach (var detail in Details)
+            {
+                whereClauses.Add(string.Format(" (EXISTS (SELECT * from _{0} WHERE _{0}.{1} = {2}.{3}))", detail.Key, detail.Value.KeyFieldName, TableName, detail.Key));
+            }
+            if (whereClauses.Count > 0)
+                return string.Format("{0} {1} {2}", base.get(), hasFilterField ? "AND" : "WHERE", string.Join(" AND ", whereClauses));
+            else return base.get();
         }
 
-        public TaskFilter ApplyFilterByTaskName(string filterText)
+        public string getSQL()
         {
-            if (string.IsNullOrWhiteSpace(filterText)) return this;
-            var taskTypeFilter = new TaskTypeFilter(null);
-            string whereClause = string.Format("Where taskname like '%{0}%'", filterText);
-            var filteredIds = getFilterIds(null, "taskid", "task", whereClause, new object[] { });
-            applyFilter(filteredIds);
-            return this;
+            return string.Format("{0} {1}", Details.Count > 0 ? string.Format("WITH {0}", string.Join(",", getSubWithClaueses())) : "", get());
+        }
+
+        public string getPagingSQL(int pageNo, int rowsPerPage)
+        {
+            var selectstatement = get();
+            var pos = selectstatement.IndexOf("*");
+            var sqlwithpagingcolumn = selectstatement.Insert(pos, String.Format("ROW_NUMBER() OVER(ORDER BY {0}) ORDERNO, ", KeyFieldName));
+            var withClauses = getSubWithClaueses();
+            withClauses.Add(string.Format("_paging as ({0})", sqlwithpagingcolumn));
+            return string.Format("{0} {1}", 
+                string.Format("WITH {0}", string.Join(",", withClauses)), 
+                string.Format("SELECT * FROM _paging WHERE (CAST(ORDERNO/{0} as INT) = {1} - 1 OR {1} = 0)", rowsPerPage, pageNo));
         }
     }
-
-
 }

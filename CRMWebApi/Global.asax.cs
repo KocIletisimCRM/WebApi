@@ -13,5 +13,10 @@ namespace CRMWebApi
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
         }
+
+        protected void Application_PostAuthorizeRequest()
+        {
+            System.Web.HttpContext.Current.SetSessionStateBehavior(System.Web.SessionState.SessionStateBehavior.Required);
+        }
     }
 }

@@ -23,5 +23,6 @@ namespace CRMWebApi.Models
         public string phone { get; set; }
         public Nullable<System.DateTime> sosaledate { get; set; }
         public Nullable<System.DateTime> contratfinish { get; set; }
+        public Nullable<int> emptorcustomernum { get; set; }
     }
 }

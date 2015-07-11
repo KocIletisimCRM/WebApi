@@ -22,11 +22,13 @@ namespace CRMWebApi.DTOs
         public DTOpersonel updatedpersonel { get; set; }
         public Nullable<bool> deleted { get; set; }
         public DTOcustomer_status customer_status { get; set; }
-        public Nullable<int> telstatu { get; set; }
+        public DTOtelStatus telStatus { get; set; }
         public string turkcellTv { get; set; }
-        public Nullable<int> netstatu { get; set; }
+        public DTOnetStatus netStatus { get; set; }
         public string description { get; set; }
-        public Nullable<int> tvstatu { get; set; }
-        public Nullable<int> gsmstatu { get; set; }
+        public DTOissStatus issStatus { get; set; }
+        public Nullable<int> emptorcustomernum { get; set; }
+        public DTOtvStatus TvKullanımıStatus { get; set; }
+        public DTOgsmStatus gsmKullanımıStatus { get; set; }
     }
 }
