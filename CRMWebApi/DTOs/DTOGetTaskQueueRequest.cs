@@ -10,6 +10,6 @@ namespace CRMWebApi.DTOs
     {
         public int pageNo { get; set; }
         public int rowsPerPage { get; set; }
-        public DTOTaskQueueFilter filter { get; set; }
+        public DTOFilter filter { get; set; }
     }
 }

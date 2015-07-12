@@ -105,12 +105,14 @@
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
+    <Compile Include="Controllers\TaskQueueFilterController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
     <Compile Include="DTOs\DTOgsmStatus.cs" />
     <Compile Include="DTOs\DTOissStatus.cs" />
     <Compile Include="DTOs\DTOKatZiyareti.cs" />
     <Compile Include="DTOs\DTOnetStatus.cs" />
+    <Compile Include="DTOs\DTOResponseClasses.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />
     <Compile Include="DTOs\DTOtvStatus.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
@@ -122,7 +124,7 @@
     <Compile Include="DTOs\DTOsite.cs" />
     <Compile Include="DTOs\DTOtask.cs" />
     <Compile Include="DTOs\DTOtaskqueue.cs" />
-    <Compile Include="DTOs\DTOTaskQueueFilter.cs" />
+    <Compile Include="DTOs\DTOFilter.cs" />
     <Compile Include="DTOs\DTOtaskstatepool.cs" />
     <Compile Include="DTOs\DTOTaskTypes.cs" />
     <Compile Include="Global.asax.cs">

@@ -16,17 +16,18 @@ namespace CRMWebApi.DTOs
         foGreater = 3,
         foGreaterOrEqual = 4,
         foBetween = 5,
-        foLike = 6
+        foLike = 6,
+        foIn=7
     }
 
     public class fieldFilter
     {
-        private string filedName { get; set; }
+        private string fieldName { get; set; }
         private object filterValue { get; set; }
         private object filterValue2 { get; set; }
         private filterOperators filterOperator { get; set; }
 
-        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'" };
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})" };
 
         private string getValueCompairer(object val)
         {
@@ -36,7 +37,7 @@ namespace CRMWebApi.DTOs
 
         public fieldFilter(string name, object value, filterOperators op)
         {
-            filedName = name;
+            fieldName = name;
             filterValue = value;
             filterOperator = op;
         }
@@ -56,11 +57,17 @@ namespace CRMWebApi.DTOs
                 case filterOperators.foEqual:
                 case filterOperators.foGreater:
                 case filterOperators.foGreaterOrEqual:
-                    return string.Format(operatorStrings[(int)filterOperator], filedName, getValueCompairer(filterValue));
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue));
                 case filterOperators.foBetween:
-                    return string.Format(operatorStrings[(int)filterOperator], filedName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
                 case filterOperators.foLike:
-                    return string.Format(operatorStrings[(int)filterOperator], filedName, filterValue);
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, filterValue);
+                case filterOperators.foIn:
+                    if (filterValue is Array)
+                        return string.Format(operatorStrings[(int)filterOperator], fieldName,
+                           string.Join(", ", (filterValue as Array)));
+                    else
+                        throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
                 default:
                     throw new Exception("Bilinmeyen operatör tipi!");
             }
