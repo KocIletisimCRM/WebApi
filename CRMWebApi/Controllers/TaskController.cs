@@ -48,26 +48,27 @@ namespace CRMWebApi.Controllers
                 var taskstates = db.taskstatepool.Where(tsp => taskstateIds.Contains(tsp.taskstateid)).ToList();
 
                 res.ForEach(r =>
+                                 {
+                                     r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
+                                     r.attachedpersonel = personels.Where(p => p.personelid == r.attachedpersonelid).FirstOrDefault();
+                                     r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
+                                     if (r.attachedcustomer == null)
+                                     {
+                                         r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
+                                     }
+                                     r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
+                                     r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
+                                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
+                                 });
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
-                    r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
-                    r.attachedpersonel = personels.Where(p => p.personelid == r.attachedpersonelid).FirstOrDefault();
-                    r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
-                    if (r.attachedcustomer == null)
-                    {
-                        r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
-                    }
-                    r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
-                    r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
-                    r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
-                });
-                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo { 
-                pageCount=(int)Math.Ceiling(rowCount*1.0/request.rowsPerPage),
-                pageNo=request.pageNo,
-                rowsPerPage=request.rowsPerPage,
-                totalRowCount=rowCount
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
                 };
                 return Request.CreateResponse(HttpStatusCode.OK,
-                    new DTOPagedResponse (DTOResponseError.NoError(),res.Select(r=>r.toDTO()).ToList(),paginginfo),
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Select(r => r.toDTO()).ToList(), paginginfo),
                     "application/json"
                 );
             }
