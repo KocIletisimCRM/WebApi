@@ -10,6 +10,7 @@ using CRMWebApi.DTOs;
 using System.Data.SqlClient;
 namespace CRMWebApi.Controllers
 {
+
      [RoutePrefix("api/TaskQueueFilter")]
     public class TaskQueueFilterController :ApiController
     {
