@@ -112,6 +112,14 @@
     <Compile Include="DTOs\DTOissStatus.cs" />
     <Compile Include="DTOs\DTOKatZiyareti.cs" />
     <Compile Include="DTOs\DTOnetStatus.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetBlockRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetCustomerStatusRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetIssStatusRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetSitesRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTaskStatusRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterRequestBase.cs" />
     <Compile Include="DTOs\DTOResponseClasses.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />
     <Compile Include="DTOs\DTOtvStatus.cs" />
