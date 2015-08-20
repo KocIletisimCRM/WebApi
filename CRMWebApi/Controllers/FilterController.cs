@@ -19,7 +19,7 @@ namespace CRMWebApi.Controllers
           */
         [Route("getTasks")]
         [HttpPost]
-        public HttpResponseMessage getTasks()
+        public HttpResponseMessage getTasks(DTOFilterGetSitesRequest request)
         {
             using (var db = new CRMEntities())
             {
