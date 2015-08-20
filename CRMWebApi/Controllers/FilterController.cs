@@ -10,11 +10,11 @@ using CRMWebApi.DTOs;
 using System.Data.SqlClient;
 namespace CRMWebApi.Controllers
 {
-     [RoutePrefix("api/TaskQueueFilter")]
-    public class TaskQueueFilterController :ApiController
+     [RoutePrefix("api/Filter")]
+    public class FilterController :ApiController
     {
         [Route("getTasks")]
-        [HttpPost]
+        [HttpGet,  HttpPost]
         public HttpResponseMessage getTasks()
         {
             using (var db = new CRMEntities())

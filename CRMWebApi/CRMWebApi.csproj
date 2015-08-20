@@ -105,7 +105,7 @@
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
-    <Compile Include="Controllers\TaskQueueFilterController.cs" />
+    <Compile Include="Controllers\FilterController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
     <Compile Include="DTOs\DTOgsmStatus.cs" />
