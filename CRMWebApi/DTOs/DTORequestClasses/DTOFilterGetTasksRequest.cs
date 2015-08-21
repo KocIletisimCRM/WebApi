@@ -5,7 +5,10 @@ using System.Web;
 
 namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOFilterGetTasksRequest:DTOFilterRequestBase
+    /// <summary> 
+    /// Web Uygulamasındaki filtreleme bileşenlerinin verilerini çekmek için kullanılır 
+    /// </summary>
+    public class DTOFilterGetTasksRequest : DTOFilterRequestBase
     {
     }
 }
