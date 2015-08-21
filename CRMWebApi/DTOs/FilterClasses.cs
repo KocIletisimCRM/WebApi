@@ -116,7 +116,6 @@ namespace CRMWebApi.DTOs
                 string.Format(sql, tableName);
         }
     }
-
     public class lookupFilterSQL : filterSQL
     {
         private Dictionary<string, filterSQL> details = new Dictionary<string, filterSQL>();

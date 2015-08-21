@@ -14,7 +14,6 @@ namespace CRMWebApi.DTOs
  
     }
 
-
     public class DTOFilter
     {
         public string tableName { get; set; }
@@ -52,6 +51,13 @@ namespace CRMWebApi.DTOs
                 lookupSql.Details.Add(subTable.Key,subTable.Value.getLookupFilter());
             }
             return lookupSql;
+        }
+
+        public DTOFilter() { }
+        public DTOFilter(string tn, string kf)
+        {
+            tableName = tn;
+            keyField = kf;
         }
 
         public string getFilterSQL()
