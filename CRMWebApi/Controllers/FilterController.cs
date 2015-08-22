@@ -46,9 +46,28 @@ namespace CRMWebApi.Controllers
                 }), "application/json");
             }
         }
-         /*site adı
-          * öbek
-          */
+
+        /// <summary> 
+        /// Web Uygulamasındaki TaskType filtresi bileşeninin verilerini çekmek için kullanılır. <c>getTaskTypes</c> 
+        /// </summary>
+        /// <param name="request">TaskType tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getTaskTypes")]
+        [HttpPost]
+        public HttpResponseMessage getTaskTypes(DTOFilterGetTaskTypesRequest request) {
+            using (var db=new CRMEntities())
+            {
+              var sql = request.Filter.getFilterSQL();
+              var res = db.tasktypes.SqlQuery(sql)
+                  .OrderBy(t => t.TaskTypeName).ToList();
+              return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()),"application/json");
+            }
+        }
+
+
+        /// <summary> 
+        /// Web Uygulamasındaki Site filtresi bileşeninin verilerini çekmek için kullanılır. <c>getSite</c> 
+        /// </summary>
+        /// <param name="request">Site tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getSite")] 
         [HttpPost]
         public HttpResponseMessage getSite(DTOFilterGetSitesRequest request) 
@@ -71,9 +90,10 @@ namespace CRMWebApi.Controllers
             }
             }
 
-        /*block adı
-         *siteid 
-         */
+        /// <summary> 
+        /// Web Uygulamasındaki block filtresi bileşeninin verilerini çekmek için kullanılır. <c>getBlock</c> 
+        /// </summary>
+        /// <param name="request">Block tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getBlock")]
         [HttpPost]
         public HttpResponseMessage getBlock(DTOFilterGetBlockRequest request)
@@ -82,10 +102,15 @@ namespace CRMWebApi.Controllers
             {
                 var sql = request.Filter.getFilterSQL();
                 var res = db.block.SqlQuery(sql).Where(b => b.deleted == false).ToList();
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=> new {r.blockid,r.blockname}).ToList()., "application/json");
             }
         }
-         /*abone durumu adı*/
+
+
+        /// <summary> 
+        /// Web Uygulamasındaki Müşteri durumu filtresi bileşeninin verilerini çekmek için kullanılır. <c>getCustomerStatus</c> 
+        /// </summary>
+        /// <param name="request">Customer_status tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getCustomerStatus")]
         [HttpPost]
         public HttpResponseMessage getCustomerStatus(DTOFilterGetCustomerStatusRequest request)
@@ -97,8 +122,13 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
         }
-        /*iss durumu adı*/
-         [Route("getIssStatus")]
+
+
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getIssStatus")]
         [HttpPost]
         public HttpResponseMessage getIssStatus(DTOFilterGetIssStatusRequest request)
         {
@@ -109,9 +139,11 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
         }
-         /*task durumu adı
-          * task durum tipi
-          */
+
+        /// <summary> 
+        /// Web Uygulamasındaki Task durumu filtresi bileşeninin verilerini çekmek için kullanılır. <c>getTaskStatus</c> 
+        /// </summary>
+        /// <param name="request">taskstatepool tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getTaskStatus")]
         [HttpPost]
         public HttpResponseMessage getTaskStatus(DTOFilterGetTaskStatusRequest request)
@@ -123,7 +155,11 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
             }
         }
-         /*personel adı*/
+
+        /// <summary> 
+        /// Web Uygulamasındaki personel  filtresi bileşeninin verilerini çekmek için kullanılır. <c>getPersonel</c> 
+        /// </summary>
+        /// <param name="request">personel tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getPersonel")]
         [HttpPost]
         public HttpResponseMessage getPersonel(DTOFilterGetPersonelRequest request)
