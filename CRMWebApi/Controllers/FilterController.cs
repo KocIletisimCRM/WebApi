@@ -22,90 +22,71 @@ namespace CRMWebApi.Controllers
         /// Web Uygulamasındaki Task filtresi bileşeninin verilerini çekmek için kullanılır. <c>getTasks</c> 
         /// </summary>
         /// <param name="request">Task tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
-        [Route("getTasks")]
-        [HttpPost]
-        public HttpResponseMessage getTasks(DTOFilterGetTasksRequest request)
-        {
-            using (var db = new CRMEntities())
-            {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.task.SqlQuery(sql)
-                    .Where(t => t.deleted == false)
-                    .OrderBy(t => t.taskname).ToList();
-                var taskTypeIds = res.Select(t => t.tasktype).Distinct().ToList();
-                var tasktypes = db.tasktypes.Where(tt => taskTypeIds.Contains(tt.TaskTypeId)).ToList();
-                res.ForEach(r =>
-                {
-                    r.tasktypes = tasktypes.Where(tt => tt.TaskTypeId == r.tasktype).FirstOrDefault();
-
-                    });
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(t => new
-                {
-                    t.taskid,
-                    t.taskname
-                }), "application/json");
-            }
-        }
-
-        /// <summary> 
-        /// Web Uygulamasındaki TaskType filtresi bileşeninin verilerini çekmek için kullanılır. <c>getTaskTypes</c> 
-        /// </summary>
-        /// <param name="request">TaskType tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
-        [Route("getTaskTypes")]
-        [HttpPost]
-        public HttpResponseMessage getTaskTypes(DTOFilterGetTaskTypesRequest request) {
-            using (var db=new CRMEntities())
-            {
-              var sql = request.Filter.getFilterSQL();
-              var res = db.tasktypes.SqlQuery(sql)
-                  .OrderBy(t => t.TaskTypeName).ToList();
-              return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()),"application/json");
-            }
-        }
-
+         [Route("getTasks")]
+         [HttpPost]
+         public HttpResponseMessage getTasks(DTOFilterGetTasksRequest request)
+         {
+             using (var db = new CRMEntities())
+             {
+                 var filter = request.getFilter();
+                 if (request.isTaskFilter())
+                     return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(filter.getFilterSQL())
+                             .OrderBy(t => t.taskname)
+                             .Select(t => new
+                                     {
+                                         t.taskid,
+                                         t.taskname
+                                     }).ToList(), "application/json");
+                 return Request.CreateResponse(HttpStatusCode.OK,
+                     db.tasktypes.SqlQuery(filter.subTables["tasktype"].getFilterSQL())
+                         .Select(tt => new { tt.TaskTypeId, tt.TaskTypeName })
+                         .OrderBy(tt => tt.TaskTypeName).ToList(),
+                     "application/json"
+                 );
+             }
+         }
 
         /// <summary> 
         /// Web Uygulamasındaki Site filtresi bileşeninin verilerini çekmek için kullanılır. <c>getSite</c> 
         /// </summary>
         /// <param name="request">Site tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
-        [Route("getSite")] 
+        [Route("getCSB")]
         [HttpPost]
-        public HttpResponseMessage getSite(DTOFilterGetSitesRequest request) 
+        public HttpResponseMessage getCSB(DTOFilterGetCSBRequest request)
         {
             using (var db = new CRMEntities())
             {
-                var filter = new DTOFilter("site", "siteid");
-                if (request.region != null) filter.fieldFilters.Add(request.region);
-                if (request.siteName != null) filter.fieldFilters.Add(request.siteName);
-                var sql = filter.getFilterSQL();
-                var res = db.site.SqlQuery(sql).Where(r => r.deleted == false);
-                if (request.siteName == null)
+                var filter = request.getFilter();
+                if (request.isCustomerFilter())
                     return Request.CreateResponse(HttpStatusCode.OK,
-                        res.Select(r => r.region).Distinct().ToList()
-                        , "application/json");
-                else
-                    return Request.CreateResponse(HttpStatusCode.OK,
-                        res.Select(r => new { r.siteid, r.sitename }).ToList()
-                        , "application/json");
-            }
-            }
+                                db.customer.SqlQuery(filter.getFilterSQL())
+                                    .Where(r => r.deleted == false)
+                                    .Select(r => new { r.customername, r.customersurname })
+                                    .ToList(),
+                                "application/json");
 
-        /// <summary> 
-        /// Web Uygulamasındaki block filtresi bileşeninin verilerini çekmek için kullanılır. <c>getBlock</c> 
-        /// </summary>
-        /// <param name="request">Block tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
-        [Route("getBlock")]
-        [HttpPost]
-        public HttpResponseMessage getBlock(DTOFilterGetBlockRequest request)
-        {
-            using (var db = new CRMEntities())
-            {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.block.SqlQuery(sql).Where(b => b.deleted == false).ToList();
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=> new {r.blockid,r.blockname}).ToList()., "application/json");
+                else if (request.isBlockFilter())
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                               db.block.SqlQuery(filter.subTables["blockid"].getFilterSQL())
+                                   .Where(r => r.deleted == false)
+                                   .Select(r => new { r.blockid, r.blockname })
+                                   .OrderBy(r => r.blockname).ToList(),
+                               "application/json");
+                else if (request.isSiteFilter())
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                               db.site.SqlQuery(filter.subTables["blockid"].subTables["siteid"].getFilterSQL())
+                                    .Where(r => r.deleted == false)
+                                    .Select(r => new { r.siteid, r.sitename }).OrderBy(r => r.sitename).ToList()
+                                      , "application/json");
+
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                                 db.site.SqlQuery(filter.subTables["blockid"].subTables["siteid"].getFilterSQL())
+                                         .Where(r => r.deleted == false)
+                                         .Select(r => new { r.region }).Distinct().OrderBy(r => r.region).ToList()
+                                  , "application/json");
             }
         }
-
+         
 
         /// <summary> 
         /// Web Uygulamasındaki Müşteri durumu filtresi bileşeninin verilerini çekmek için kullanılır. <c>getCustomerStatus</c> 
@@ -113,12 +94,12 @@ namespace CRMWebApi.Controllers
         /// <param name="request">Customer_status tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getCustomerStatus")]
         [HttpPost]
-        public HttpResponseMessage getCustomerStatus(DTOFilterGetCustomerStatusRequest request)
+        public HttpResponseMessage getCustomerStatus()
         {
             using (var db = new CRMEntities())
             {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.customer_status.SqlQuery(sql).Where(c => c.deleted == 0).OrderBy(c => c.Text).ToList();
+             
+                var res = db.customer_status.Where(c => c.deleted == 0).OrderBy(c => c.Text).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
         }
@@ -130,12 +111,11 @@ namespace CRMWebApi.Controllers
         /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getIssStatus")]
         [HttpPost]
-        public HttpResponseMessage getIssStatus(DTOFilterGetIssStatusRequest request)
+        public HttpResponseMessage getIssStatus()
         {
             using (var db = new CRMEntities())
             {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.issStatus.SqlQuery(sql).Where(i => i.deleted == 0).OrderBy(i => i.issText).ToList();
+                var res = db.issStatus.Where(i => i.deleted == 0).OrderBy(i => i.issText).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
         }
@@ -146,12 +126,11 @@ namespace CRMWebApi.Controllers
         /// <param name="request">taskstatepool tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getTaskStatus")]
         [HttpPost]
-        public HttpResponseMessage getTaskStatus(DTOFilterGetTaskStatusRequest request)
+        public HttpResponseMessage getTaskStatus()
         {
             using (var db = new CRMEntities())
             {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.taskstatepool.SqlQuery(sql).Where(tsp => tsp.deleted == false).OrderBy(tsp => tsp.taskstate).ToList();
+                var res = db.taskstatepool.Where(tsp => tsp.deleted == false).OrderBy(tsp => tsp.taskstate).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
             }
         }
@@ -162,12 +141,11 @@ namespace CRMWebApi.Controllers
         /// <param name="request">personel tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getPersonel")]
         [HttpPost]
-        public HttpResponseMessage getPersonel(DTOFilterGetPersonelRequest request)
+        public HttpResponseMessage getPersonel()
         {
             using (var db = new CRMEntities())
             {
-                var sql = request.Filter.getFilterSQL();
-                var res = db.personel.SqlQuery(sql).Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
+                var res = db.personel.Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }

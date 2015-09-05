@@ -28,7 +28,7 @@ namespace CRMWebApi.Controllers
 
                 string querySQL = request.filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
-                var rowCount = db.taskqueue.SqlQuery(request.filter.getFilterSQL()).Count();
+                var rowCount = db.Database.SqlQuery<int>(request.filter.getCountSQL()).First();
                 var taskIds = res.Select(r => r.taskid).Distinct().ToList();
                 var tasks = db.task.Where(t => taskIds.Contains(t.taskid)).ToList();
 

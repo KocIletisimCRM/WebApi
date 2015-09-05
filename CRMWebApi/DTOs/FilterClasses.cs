@@ -32,7 +32,7 @@ namespace CRMWebApi.DTOs
         private string getValueCompairer(object val)
         {
             var s = (val is string) || (val is DateTime) ? "'" : string.Empty;
-            return string.Format("{0}{1}{0}", s, val.ToString());
+            return string.Format("{0}{1}{0}", s, (val is Array) ? string.Join(",", val) : val.ToString());
         }
 
         public fieldFilter(string name, object value, filterOperators op)
@@ -84,6 +84,52 @@ namespace CRMWebApi.DTOs
         }
 
     }
+
+    public class filterCombiner {
+        protected List<fieldFilter> filters = new List<fieldFilter>();
+        public filterCombiner AddRange(IEnumerable<fieldFilter> filters)
+        {
+            this.filters.AddRange(filters);
+            return this;
+        }
+        public filterCombiner Add(fieldFilter filter)
+        {
+            filters.Add(filter);
+            return this;
+        }
+        public virtual string combine(){
+            throw new Exception();
+        }
+    }
+
+    public class conditionOrCombiner : filterCombiner
+    {
+        private List<filterCombiner> subFilters = new List<filterCombiner>();
+        public filterCombiner AddRange(IEnumerable<filterCombiner> filters)
+        {
+            subFilters.AddRange(filters);
+            return this;
+        }
+        public filterCombiner Add(filterCombiner filter)
+        {
+            subFilters.Add(filter);
+            return this;
+        }
+        public override string combine()
+        {
+
+            return filters.Count > 0 ? string.Format("({0})", string.Join(" OR ", filters)) : string.Empty;
+        }
+    }
+
+    public class conditionAndCombiner : filterCombiner
+    {
+        public override string combine()
+        {
+            return filters.Count > 0 ? string.Format("({0})", string.Join(" AND ", filters)) : string.Empty;
+        }
+    }
+
     public class filterSQL
     {
         static string sql = "SELECT * FROM {0}";
@@ -116,6 +162,7 @@ namespace CRMWebApi.DTOs
                 string.Format(sql, tableName);
         }
     }
+    
     public class lookupFilterSQL : filterSQL
     {
         private Dictionary<string, filterSQL> details = new Dictionary<string, filterSQL>();
@@ -123,18 +170,18 @@ namespace CRMWebApi.DTOs
 
         protected List<string> getSubWithClaueses()
         {
-            List<string> wc = new List<string>();
+            List<string> withClauses = new List<string>();
             foreach (var detail in details)
             {
                 if (detail.Value is lookupFilterSQL)
                 {
                     var ldetail = detail.Value as lookupFilterSQL;
                     foreach (var item in ldetail.getSubWithClaueses())
-                        wc.Add(item);
+                        withClauses.Add(item);
                 }
-                wc.Add(string.Format("_{0} as ({1})", detail.Key, detail.Value.get()));
+                withClauses.Add(string.Format("_{0} as ({1})", detail.Key, detail.Value.get()));
             }
-            return wc;
+            return withClauses;
         }
 
         public lookupFilterSQL(string tablename, string keyfieldname) : base(tablename, keyfieldname) { }

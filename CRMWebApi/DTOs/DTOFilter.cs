@@ -11,7 +11,6 @@ namespace CRMWebApi.DTOs
         public string fieldName { get; set; }
         public int op { get; set; }
         public object value { get; set; }
- 
     }
 
     public class DTOFilter
@@ -70,6 +69,10 @@ namespace CRMWebApi.DTOs
             return getLookupFilter().getPagingSQL(pageNo, rowsPerPage);
         }
 
+        public string getCountSQL()
+        {
+            return string.Format("Select Count(*) From ({0}) t", getFilterSQL());
+        }
 
     }
 
