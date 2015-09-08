@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace CRMWebApi.DTOs
+namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOGetTaskQueueRequest
+    public class DTORequestPagination
     {
         public int pageNo { get; set; }
         public int rowsPerPage { get; set; }
-        public DTOFilter filter { get; set; }
     }
 }

@@ -16,16 +16,42 @@ namespace CRMWebApi.Controllers
     {
         [Route("getTaskQueues")]
         [HttpPost]
-        public HttpResponseMessage getTaskQueues(DTOs.DTOGetTaskQueueRequest request)
+        public HttpResponseMessage getTaskQueues(DTOs.DTORequestClasses.DTOGetTaskQueueRequest request)
         {
             using (var db = new CRMEntities())
             {
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
-                string querySQL = request.filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var filter = request.getFilter();
+                string querySQL = request.getFilter().getPagingSQL(request.pageNo, request.rowsPerPage);
+                if (!request.isCustomerFilter())
+                {
+                    querySQL = querySQL.Replace("_attachedobjectid.customerid = taskqueue.attachedobjectid))",
+                        "_attachedobjectid.customerid = taskqueue.attachedobjectid)) OR (EXISTS (SELECT * from _blockid WHERE _blockid.blockid = taskqueue.attachedobjectid))");
+                }
+                if (!request.isBlockFilter())
+                {
+                    querySQL = querySQL.Replace("_blockid.blockid = taskqueue.attachedobjectid))",
+                        "_blockid.blockid = taskqueue.attachedobjectid)) OR (EXISTS (SELECT * from _siteid WHERE _siteid.siteid = taskqueue.attachedobjectid))");
+
+                }
+
+                var countSQL = filter.getCountSQL();
+                if (!request.isCustomerFilter())
+                {
+                    countSQL = countSQL.Replace("_attachedobjectid.customerid = taskqueue.attachedobjectid))",
+                        "_attachedobjectid.customerid = taskqueue.attachedobjectid)) OR (EXISTS (SELECT * from _blockid WHERE _blockid.blockid = taskqueue.attachedobjectid))");
+                }
+                if (!request.isBlockFilter())
+                {
+                    countSQL = countSQL.Replace("_blockid.blockid = taskqueue.attachedobjectid))",
+                        "_blockid.blockid = taskqueue.attachedobjectid)) OR (EXISTS (SELECT * from _siteid WHERE _siteid.siteid = taskqueue.attachedobjectid))");
+
+                }
+
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
-                var rowCount = db.Database.SqlQuery<int>(request.filter.getCountSQL()).First();
+                var rowCount = db.Database.SqlQuery<int>(countSQL).First();
                 var taskIds = res.Select(r => r.taskid).Distinct().ToList();
                 var tasks = db.task.Where(t => taskIds.Contains(t.taskid)).ToList();
 
@@ -65,7 +91,7 @@ namespace CRMWebApi.Controllers
                     totalRowCount = rowCount
                 };
                 return Request.CreateResponse(HttpStatusCode.OK,
-                    new DTOPagedResponse(DTOResponseError.NoError(), res.Select(r => r.toDTO()).ToList(), paginginfo),
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Select(r => r.toDTO()).ToList(), paginginfo, querySQL),
                     "application/json"
                 );
             }

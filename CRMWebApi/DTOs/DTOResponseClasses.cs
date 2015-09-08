@@ -63,6 +63,7 @@ namespace CRMWebApi.DTOs
     }
     public class DTOPagedResponse : DTOResponse
     {
+        public string SQL { get; set; }
         public new DTOResponsePagedData data { get; set; }
         public DTOPagedResponse(){}
         public DTOPagedResponse(DTOResponseError error, DTOResponsePagedData pageddata)
@@ -73,6 +74,11 @@ namespace CRMWebApi.DTOs
         public DTOPagedResponse(DTOResponseError error, List<object> datarows, DTOResponsePagingInfo paginginfo){
             this.error = error;
             this.data = new DTOResponsePagedData(datarows, paginginfo);
+        }
+        public DTOPagedResponse(DTOResponseError error, List<object> datarows, DTOResponsePagingInfo paginginfo, string sql)
+            : this(error, datarows, paginginfo)
+        {
+            this.SQL = sql;
         }
     }
 

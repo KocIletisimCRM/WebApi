@@ -85,51 +85,6 @@ namespace CRMWebApi.DTOs
 
     }
 
-    public class filterCombiner {
-        protected List<fieldFilter> filters = new List<fieldFilter>();
-        public filterCombiner AddRange(IEnumerable<fieldFilter> filters)
-        {
-            this.filters.AddRange(filters);
-            return this;
-        }
-        public filterCombiner Add(fieldFilter filter)
-        {
-            filters.Add(filter);
-            return this;
-        }
-        public virtual string combine(){
-            throw new Exception();
-        }
-    }
-
-    public class conditionOrCombiner : filterCombiner
-    {
-        private List<filterCombiner> subFilters = new List<filterCombiner>();
-        public filterCombiner AddRange(IEnumerable<filterCombiner> filters)
-        {
-            subFilters.AddRange(filters);
-            return this;
-        }
-        public filterCombiner Add(filterCombiner filter)
-        {
-            subFilters.Add(filter);
-            return this;
-        }
-        public override string combine()
-        {
-
-            return filters.Count > 0 ? string.Format("({0})", string.Join(" OR ", filters)) : string.Empty;
-        }
-    }
-
-    public class conditionAndCombiner : filterCombiner
-    {
-        public override string combine()
-        {
-            return filters.Count > 0 ? string.Format("({0})", string.Join(" AND ", filters)) : string.Empty;
-        }
-    }
-
     public class filterSQL
     {
         static string sql = "SELECT * FROM {0}";
@@ -168,18 +123,18 @@ namespace CRMWebApi.DTOs
         private Dictionary<string, filterSQL> details = new Dictionary<string, filterSQL>();
         public Dictionary<string, filterSQL> Details { get { return details; } }
 
-        protected List<string> getSubWithClaueses()
+        protected Dictionary<string, string> getSubWithClaueses()
         {
-            List<string> withClauses = new List<string>();
+            Dictionary<string, string> withClauses = new Dictionary<string, string>();
             foreach (var detail in details)
             {
                 if (detail.Value is lookupFilterSQL)
                 {
                     var ldetail = detail.Value as lookupFilterSQL;
                     foreach (var item in ldetail.getSubWithClaueses())
-                        withClauses.Add(item);
+                        withClauses[item.Key] = item.Value;
                 }
-                withClauses.Add(string.Format("_{0} as ({1})", detail.Key, detail.Value.get()));
+                withClauses[detail.Key] = string.Format("_{0} as ({1})", detail.Key, detail.Value.get());
             }
             return withClauses;
         }
@@ -205,7 +160,7 @@ namespace CRMWebApi.DTOs
 
         public string getSQL()
         {
-            return string.Format("{0} {1}", Details.Count > 0 ? string.Format("WITH {0}", string.Join(",", getSubWithClaueses())) : "", get());
+            return string.Format("{0} {1}", Details.Count > 0 ? string.Format("WITH {0}", string.Join(",", getSubWithClaueses().Values)) : "", get());
         }
 
         public string getPagingSQL(int pageNo, int rowsPerPage)
@@ -214,10 +169,18 @@ namespace CRMWebApi.DTOs
             var pos = selectstatement.IndexOf("*");
             var sqlwithpagingcolumn = selectstatement.Insert(pos, String.Format("ROW_NUMBER() OVER(ORDER BY {0}) ORDERNO, ", KeyFieldName));
             var withClauses = getSubWithClaueses();
-            withClauses.Add(string.Format("_paging as ({0})", sqlwithpagingcolumn));
+            withClauses.Add("_paging", string.Format("_paging as ({0})", sqlwithpagingcolumn));
             return string.Format("{0} {1}", 
-                string.Format("WITH {0}", string.Join(",", withClauses)), 
+                string.Format("WITH {0}", string.Join(",", withClauses.Values)), 
                 string.Format("SELECT * FROM _paging WHERE (CAST(ORDERNO/{0} as INT) = {1} - 1 OR {1} = 0)", rowsPerPage, pageNo));
+        }
+
+        public string getCountSQL() {
+            var withClauses = getSubWithClaueses();
+            withClauses.Add("_all", string.Format("_all as ({0})", get()));
+            return string.Format("{0} {1}",
+                string.Format("WITH {0}", string.Join(",", withClauses.Values)),
+                "SELECT Count(*) FROM _all");
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Web;
 
 namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOGetTaskQueueRequest1:ITaskRequest, ICSBRequest
+    public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest
     {
         private DTOFilterGetTasksRequest taskRequest = new DTOFilterGetTasksRequest();
         private DTOFilterGetCSBRequest csbRequest = new DTOFilterGetCSBRequest();
@@ -184,16 +184,24 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter();
         }
 
+
         public DTOFilter getFilter()
         {
             var filter = new DTOFilter("taskqueue", "taskorderno");
+            var csbFilter = csbRequest.getFilter();
             if (hasTaskFilter()) filter.subTables.Add("taskid", taskRequest.getFilter());
+            //hasCSBFilter her zaman en sonda olmalı. öncesine filtreler eklenecek
             if (hasCSBFilter())
             {
-                if(csbRequest.isCustomerFilter())
-                filter.subTables.Add("attachedobjectid", csbRequest.getFilter());
-                //else if(csbRequest.isBlockFilter())
-
+                if (csbRequest.hasSiteFilter())
+                {
+                    filter.subTables["attachedobjectid"] = csbFilter.subTables["blockid"].subTables["siteid"];
+                }
+                if (csbRequest.hasBlockFilter() || csbRequest.hasSiteFilter())
+                {
+                    filter.subTables["attachedobjectid"] = csbFilter.subTables["blockid"];
+                }
+                filter.subTables["attachedobjectid"] = csbFilter;
             }
             return filter;
         }

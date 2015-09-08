@@ -71,7 +71,7 @@ namespace CRMWebApi.DTOs
 
         public string getCountSQL()
         {
-            return string.Format("Select Count(*) From ({0}) t", getFilterSQL());
+            return getLookupFilter().getCountSQL();
         }
 
     }

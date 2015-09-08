@@ -115,6 +115,7 @@
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTORequestPagination.cs" />
     <Compile Include="DTOs\DTOResponseClasses.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />
     <Compile Include="DTOs\DTOtvStatus.cs" />
@@ -122,7 +123,6 @@
     <Compile Include="DTOs\DTOblock.cs" />
     <Compile Include="DTOs\DTOcustomer.cs" />
     <Compile Include="DTOs\DTOcustomer_status.cs" />
-    <Compile Include="DTOs\DTOGetTaskQueueRequest.cs" />
     <Compile Include="DTOs\DTOpersonel.cs" />
     <Compile Include="DTOs\DTOsite.cs" />
     <Compile Include="DTOs\DTOtask.cs" />
