@@ -23,9 +23,6 @@ namespace CRMWebApi.Controllers
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
-
-
-
                 string querySQL = request.filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
                 var rowCount = db.Database.SqlQuery<int>(request.filter.getCountSQL()).First();
