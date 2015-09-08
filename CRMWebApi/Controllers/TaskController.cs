@@ -8,6 +8,7 @@ using System.Web.Http;
 using System.Data.Entity;
 using CRMWebApi.DTOs;
 using System.Data.SqlClient;
+using CRMWebApi.DTOs.DTORequestClasses;
 
 namespace CRMWebApi.Controllers
 {
@@ -20,6 +21,7 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new CRMEntities())
             {
+                ((IPersonelRequest)request).getFilter();
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;

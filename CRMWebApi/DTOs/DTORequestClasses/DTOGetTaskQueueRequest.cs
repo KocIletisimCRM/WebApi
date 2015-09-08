@@ -5,10 +5,14 @@ using System.Web;
 
 namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest
+    public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest, IPersonelRequest, IAssistantPersonelRequest, IUpdatedByRequest, ITaskStateRequest
     {
         private DTOFilterGetTasksRequest taskRequest = new DTOFilterGetTasksRequest();
         private DTOFilterGetCSBRequest csbRequest = new DTOFilterGetCSBRequest();
+        private DTOFilterGetTaskStateRequest taskstateRequest = new DTOFilterGetTaskStateRequest();
+        private DTOFilterGetPersonelRequest personelRequest = new DTOFilterGetPersonelRequest();
+        private DTOFilterGetPersonelRequest assistantPersonelRequest = new DTOFilterGetPersonelRequest();
+        private DTOFilterGetPersonelRequest updatedByRequest = new DTOFilterGetPersonelRequest();
 
         #region ITaskRequest Implementation
         public DTOFieldFilter task
@@ -175,6 +179,60 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         }
         #endregion
 
+        #region IPersonelRequest Implementation
+        public DTOFieldFilter personel
+        {
+            get
+            {
+                return personelRequest.personel;
+            }
+            set
+            {
+                personelRequest.personel = value;
+            }
+        }
+
+        DTOFilter IPersonelRequest.getFilter()
+        {
+            return personelRequest.getFilter();
+        }
+        #endregion
+
+        #region IAssistantPersonelRequest Implementation
+        public DTOFieldFilter assistantPersonel { get { return assistantPersonelRequest.personel; } set { assistantPersonelRequest.personel = value; } }
+        DTOFilter IAssistantPersonelRequest.getFilter() {
+            return assistantPersonelRequest.getFilter();
+        }
+        #endregion
+
+        #region IUpdatedByRequest Implementation
+        public DTOFieldFilter updatedBy { get { return updatedByRequest.personel; } set { updatedByRequest.personel = value; } }
+        DTOFilter IUpdatedByRequest.getFilter()
+        {
+            return updatedByRequest.getFilter();
+        }
+        #endregion
+
+
+        #region ITaskStateRequest Implementation
+        public DTOFieldFilter taskstate
+        {
+            get
+            {
+                return taskstateRequest.taskstate;
+            }
+            set
+            {
+                taskstateRequest.taskstate = value;
+            }
+        }
+         DTOFilter ITaskStateRequest.getFilter() 
+        {
+            return taskstateRequest.getFilter();
+        }
+        #endregion
+
+
         public bool hasTaskFilter() {
             return taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter();
         }
@@ -184,12 +242,15 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter();
         }
 
-
         public DTOFilter getFilter()
         {
             var filter = new DTOFilter("taskqueue", "taskorderno");
             var csbFilter = csbRequest.getFilter();
             if (hasTaskFilter()) filter.subTables.Add("taskid", taskRequest.getFilter());
+            if (personelRequest.personel != null ) filter.subTables.Add("attachedpersonelid", personelRequest.getFilter());
+            if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
+            if (taskstateRequest.taskstate!=null) filter.subTables.Add("status",taskstateRequest.getFilter());
+
             //hasCSBFilter her zaman en sonda olmalı. öncesine filtreler eklenecek
             if (hasCSBFilter())
             {
@@ -206,5 +267,9 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return filter;
         }
 
+
+
+
+      
     }
 }
