@@ -38,7 +38,7 @@ namespace CRMWebApi.Controllers
 
          [Route("findBlock")]
          [HttpGet]
-         public HttpResponseMessage findBlock(int siteid) 
+         public HttpResponseMessage findBlock(int ? siteid) 
          {
              if (siteid == null) siteid = 100;
              using (var db=new CRMEntities())

@@ -167,7 +167,7 @@ namespace CRMWebApi.DTOs
         {
             var selectstatement = get();
             var pos = selectstatement.IndexOf("*");
-            var sqlwithpagingcolumn = selectstatement.Insert(pos, String.Format("ROW_NUMBER() OVER(ORDER BY {0}) ORDERNO, ", KeyFieldName));
+            var sqlwithpagingcolumn = selectstatement.Insert(pos, String.Format("ROW_NUMBER() OVER(ORDER BY {0} desc) ORDERNO, ", KeyFieldName));
             var withClauses = getSubWithClaueses();
             withClauses.Add("_paging", string.Format("_paging as ({0})", sqlwithpagingcolumn));
             return string.Format("{0} {1}", 

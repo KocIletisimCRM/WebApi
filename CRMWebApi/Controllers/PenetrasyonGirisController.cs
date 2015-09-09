@@ -96,7 +96,7 @@ namespace CRMWebApi.Controllers
 
          [Route("getBlock")]
          [HttpGet]
-         public HttpResponseMessage getBlock(int siteid)
+         public HttpResponseMessage getBlock(int ? siteid)
          {
              if (siteid == null) siteid = 100;
              using (var db = new CRMEntities())

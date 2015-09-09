@@ -249,6 +249,7 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             if (hasTaskFilter()) filter.subTables.Add("taskid", taskRequest.getFilter());
             if (personelRequest.personel != null ) filter.subTables.Add("attachedpersonelid", personelRequest.getFilter());
             if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
+            if (updatedBy != null) filter.subTables.Add("updatedby",updatedByRequest.getFilter());
             if (taskstateRequest.taskstate!=null) filter.subTables.Add("status",taskstateRequest.getFilter());
 
             //hasCSBFilter her zaman en sonda olmalı. öncesine filtreler eklenecek
