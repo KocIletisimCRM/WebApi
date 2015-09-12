@@ -45,20 +45,39 @@ namespace CRMWebApi.DTOs
             pagingInfo = paginginfo;
         }
     }
+
+    public class DTOQueryPerformance {
+        public TimeSpan QuerSQLyDuration { get; set; }
+        public TimeSpan CountSQLDuration { get; set; }
+        public TimeSpan LookupDuration { get; set; }
+        public TimeSpan TotalResponseDuration { get { return QuerSQLyDuration + CountSQLDuration + LookupDuration; } }
+    }
+
     public class DTOResponse
     {
         public DTOResponseError error { get; set; }
+        public DTOQueryPerformance performance { get; set; }
         public DTOResponseData data { get; set; }
-        public DTOResponse(){}
+        public DTOResponse() { }
         public DTOResponse(DTOResponseError error, DTOResponseData data)
         {
             this.data = data;
             this.error = error;
         }
+        public DTOResponse(DTOResponseError error, DTOResponseData data, DTOQueryPerformance performance)
+            : this(error, data)
+        {
+            this.performance = performance;
+        }
         public DTOResponse(DTOResponseError error, List<object> datarows)
         {
             this.error = error;
             data = new DTOResponseData(datarows);
+        }
+        public DTOResponse(DTOResponseError error, List<object> datarows, DTOQueryPerformance performance)
+            : this(error, datarows)
+        {
+            this.performance = performance;
         }
     }
     public class DTOPagedResponse : DTOResponse
@@ -79,6 +98,11 @@ namespace CRMWebApi.DTOs
             : this(error, datarows, paginginfo)
         {
             this.SQL = sql;
+        }
+        public DTOPagedResponse(DTOResponseError error, List<object> datarows, DTOResponsePagingInfo paginginfo, string sql, DTOQueryPerformance performance)
+            : this(error, datarows, paginginfo, sql)
+        {
+            this.performance = performance;
         }
     }
 

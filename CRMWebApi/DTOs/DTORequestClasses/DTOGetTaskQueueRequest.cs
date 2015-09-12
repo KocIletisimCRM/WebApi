@@ -138,6 +138,30 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             }
         }
 
+        public DTOFieldFilter iss
+        {
+            get
+            {
+                return csbRequest.iss;
+            }
+            set
+            {
+                csbRequest.iss = value;
+            }
+        }
+
+        public DTOFieldFilter customerstatus
+        {
+            get
+            {
+                return csbRequest.customerstatus;
+            }
+            set
+            {
+                csbRequest.customerstatus = value;
+            }
+        }
+
         public bool hasSiteFilter()
         {
             return csbRequest.hasSiteFilter();
@@ -151,6 +175,26 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         public bool hasCustomerFilter()
         {
             return csbRequest.hasCustomerFilter();
+        }
+
+        public bool hasIssFilter() 
+        {
+            return csbRequest.hasIssFilter();
+        }
+
+        public bool hasCustomerstatusFilter() 
+        {
+            return csbRequest.hasCustomerstatusFilter();
+        }
+
+        public bool isCustomerstatusFilter() 
+        {
+            return csbRequest.isCustomerstatusFilter();
+        }
+
+        public bool isIssFilter() 
+        {
+            return csbRequest.isIssFilter();
         }
 
         public bool isCustomerFilter()
@@ -239,9 +283,13 @@ namespace CRMWebApi.DTOs.DTORequestClasses
 
         public bool hasCSBFilter()
         {
-            return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter();
+            return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter() || csbRequest.hasIssFilter() || csbRequest.hasCustomerstatusFilter();
         }
 
+        public DateTime ? attachmentDate { get; set; }
+        public DateTime ? appointmentDate { get; set; }
+        public DateTime ? consummationDate { get; set; }
+        public int? taskOrderNo { get; set; }
         public DTOFilter getFilter()
         {
             var filter = new DTOFilter("taskqueue", "taskorderno");
@@ -251,18 +299,13 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
             if (updatedBy != null) filter.subTables.Add("updatedby",updatedByRequest.getFilter());
             if (taskstateRequest.taskstate!=null) filter.subTables.Add("status",taskstateRequest.getFilter());
-
+            if (attachmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachmentdate", op = 6, value = attachmentDate });
+            if (appointmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "appointmentdate", op = 6, value = appointmentDate });
+            if (consummationDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "consummationdate", op = 6, value = consummationDate });
+            if (taskOrderNo != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "taskorderno", op = 2, value = taskOrderNo });
             //hasCSBFilter her zaman en sonda olmalı. öncesine filtreler eklenecek
             if (hasCSBFilter())
-            {
-                if (csbRequest.hasSiteFilter())
-                {
-                    filter.subTables["attachedobjectid"] = csbFilter.subTables["blockid"].subTables["siteid"];
-                }
-                if (csbRequest.hasBlockFilter() || csbRequest.hasSiteFilter())
-                {
-                    filter.subTables["attachedobjectid"] = csbFilter.subTables["blockid"];
-                }
+            {     
                 filter.subTables["attachedobjectid"] = csbFilter;
             }
             return filter;

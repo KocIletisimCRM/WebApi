@@ -13,6 +13,8 @@ namespace CRMWebApi.DTOs
         public Nullable<System.DateTime> appointmentdate { get; set; }
         public Nullable<System.DateTime> consummationdate { get; set; }
         public string description { get; set; }
+        public int ? previoustaskorderid {get;set;}
+        public int? relatedtaskorderid { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<bool> deleted { get; set; }
         public string fault { get; set; }

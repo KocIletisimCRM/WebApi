@@ -18,14 +18,20 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         DTOFieldFilter telocordiaid { get; set; }
         DTOFieldFilter sofiberbaslangic { get; set; }
         DTOFieldFilter customer { get; set; }
+        DTOFieldFilter iss { get; set; }
+        DTOFieldFilter customerstatus { get; set; }
 
         bool hasSiteFilter();
         bool hasBlockFilter();
         bool hasCustomerFilter();
+        bool hasIssFilter();
+        bool hasCustomerstatusFilter();        
         bool isCustomerFilter();
         bool isBlockFilter();
         bool isSiteFilter();
         bool isRegionFilter();
+        bool isIssFilter();
+        bool isCustomerstatusFilter();
         DTOFilter getFilter();
 
     }
@@ -37,6 +43,8 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         public DTOFieldFilter telocordiaid { get; set; }
         public DTOFieldFilter sofiberbaslangic { get; set; }
         public DTOFieldFilter customer { get; set; }
+        public DTOFieldFilter iss { get; set; }
+        public DTOFieldFilter customerstatus { get; set; }
 
         public bool hasSiteFilter()
         {
@@ -51,6 +59,23 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return customer != null;
         }
 
+        public bool hasIssFilter() 
+        {
+            return iss != null;
+        }
+
+        public bool hasCustomerstatusFilter() 
+        {
+            return customerstatus != null;
+        }
+        public bool isIssFilter() 
+        {
+            return hasIssFilter() && !isCustomerFilter();
+        }
+        public bool isCustomerstatusFilter() 
+        {
+            return hasCustomerstatusFilter() && !isCustomerFilter();
+        }
         public bool isCustomerFilter()
         {
             return hasCustomerFilter() || (!hasBlockFilter() && !hasSiteFilter());
@@ -78,7 +103,18 @@ namespace CRMWebApi.DTOs.DTORequestClasses
                 DTOFilter filter = new DTOFilter("customer", "customerid");
                 // Ad Soyad Ayrımı Yapılacak 
                 if (customer != null) filter.fieldFilters.Add(customer);
-
+                if (hasIssFilter())
+                {
+                    var subFilter = new DTOFilter("issStatus", "id");
+                    subFilter.fieldFilters.Add(iss);
+                    filter.subTables.Add("iss",subFilter);
+                }
+                if (hasCustomerstatusFilter()) 
+                {
+                    var subFilter = new DTOFilter("customer_status","ID");
+                    subFilter.fieldFilters.Add(customerstatus);
+                    filter.subTables.Add("customerstatus",subFilter);
+                }
                 if (hasBlockFilter() || hasSiteFilter())
                 {
                     var subFilter = new DTOFilter("block", "blockid");
