@@ -286,9 +286,9 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter() || csbRequest.hasIssFilter() || csbRequest.hasCustomerstatusFilter();
         }
 
-        public DateTime ? attachmentDate { get; set; }
-        public DateTime ? appointmentDate { get; set; }
-        public DateTime ? consummationDate { get; set; }
+        public string attachmentDate { get; set; }
+        public string appointmentDate { get; set; }
+        public string consummationDate { get; set; }
         public int? taskOrderNo { get; set; }
         public DTOFilter getFilter()
         {
@@ -299,9 +299,9 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
             if (updatedBy != null) filter.subTables.Add("updatedby",updatedByRequest.getFilter());
             if (taskstateRequest.taskstate!=null) filter.subTables.Add("status",taskstateRequest.getFilter());
-            if (attachmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachmentdate", op = 6, value = attachmentDate });
-            if (appointmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "appointmentdate", op = 6, value = appointmentDate });
-            if (consummationDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "consummationdate", op = 6, value = consummationDate });
+            if (attachmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachmentdate", op = 5, value = attachmentDate });
+            if (appointmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "appointmentdate", op = 5, value = appointmentDate });
+            if (consummationDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "consummationdate", op = 5, value = consummationDate });
             if (taskOrderNo != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "taskorderno", op = 2, value = taskOrderNo });
             //hasCSBFilter her zaman en sonda olmalı. öncesine filtreler eklenecek
             if (hasCSBFilter())

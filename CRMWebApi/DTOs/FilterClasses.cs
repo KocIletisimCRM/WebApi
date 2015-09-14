@@ -38,6 +38,12 @@ namespace CRMWebApi.DTOs
         public fieldFilter(string name, object value, filterOperators op)
         {
             fieldName = name;
+            if (name.Contains("date")) 
+            {
+                filterValue = value.ToString().Split('-')[0];
+                filterValue2 = value.ToString().Split('-')[1];
+            }
+            else
             filterValue = value;
             filterOperator = op;
         }
@@ -59,7 +65,7 @@ namespace CRMWebApi.DTOs
                 case filterOperators.foGreaterOrEqual:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue));
                 case filterOperators.foBetween:
-                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
+                        return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
                 case filterOperators.foLike:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName, filterValue);
                 case filterOperators.foIn:
