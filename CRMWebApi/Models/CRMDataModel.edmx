@@ -922,7 +922,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.customerproducttaskqueue" FromRole="taskqueue" ToRole="customerproduct" />
           <NavigationProperty Name="taskqueue1" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue" ToRole="taskqueue1" />
           <NavigationProperty Name="relatedTaskQueue" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue1" ToRole="taskqueue" />
-          <Property Name="taskqueue_taskorderno" Type="Int32" Nullable="false" />
+          
         
         </EntityType>
         <Association Name="FK_taskqueue_task">

@@ -331,7 +331,7 @@ namespace CRMWebApi.Controllers
                 var test = false;
                 var ttqretek = dtq;
                 while (ttqretek != null && ttqretek.task.tasktype != 1 && ttqretek.taskid != 65)
-                  //  ttqretek = ttqretek.relatedTaskQueue;
+                   ttqretek = ttqretek.relatedTaskQueue;
                 if (ttqretek != null)
                 {
                     if (ttqretek.taskid == 6117 || ttqretek.taskid == 6115)
@@ -344,7 +344,7 @@ namespace CRMWebApi.Controllers
                     {
                         var ttq = dtq;
                         while (ttq != null && ttq.task.tasktype != 1 && ttq.taskid != 65 && ttq.taskid != 69) /* Satış ziyareti veya Yönetim Odası Satışı--nakil taskı *///&& ttq.taskid != 53 27.12.2014 18:40 OZAL
-                          //  ttq = ttq.relatedTaskQueue;
+                            ttq = ttq.relatedTaskQueue;
                         if (ttq == null)
                             throw new Exception("Satış Taskı Bulunamadı.");
 

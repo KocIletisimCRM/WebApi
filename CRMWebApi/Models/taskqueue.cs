@@ -37,7 +37,6 @@ namespace CRMWebApi.Models
         public Nullable<bool> deleted { get; set; }
         public Nullable<int> assistant_personel { get; set; }
         public string fault { get; set; }
-        public int taskqueue_taskorderno { get; set; }
     
         public virtual customer attachedcustomer { get; set; }
         public virtual block attachedblock { get; set; }

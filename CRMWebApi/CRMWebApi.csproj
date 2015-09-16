@@ -157,6 +157,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\CRMDataModel1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\CRMDataModel1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -251,7 +256,7 @@
     <Content Include="Models\CRMDataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
-      <LastGenOutput>CRMDataModel.cs</LastGenOutput>
+      <LastGenOutput>CRMDataModel1.cs</LastGenOutput>
     </Content>
   </ItemGroup>
   <ItemGroup>
