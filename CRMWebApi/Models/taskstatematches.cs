@@ -12,24 +12,21 @@ namespace CRMWebApi.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class taskstatepool
+    public partial class taskstatematches
     {
-        public taskstatepool()
-        {
-            this.taskqueues = new HashSet<taskqueue>();
-            this.taskstatematches = new HashSet<taskstatematches>();
-        }
-    
-        public int taskstateid { get; set; }
-        public string taskstate { get; set; }
-        public Nullable<int> statetype { get; set; }
+        public int id { get; set; }
+        public Nullable<int> taskid { get; set; }
+        public Nullable<int> stateid { get; set; }
+        public string automandatorytasks { get; set; }
+        public string autooptionaltasks { get; set; }
+        public string stockcards { get; set; }
+        public string documents { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
     
-        public virtual ICollection<taskqueue> taskqueues { get; set; }
-        public virtual personel updatedpersonel { get; set; }
-        public virtual ICollection<taskstatematches> taskstatematches { get; set; }
+        public virtual task task { get; set; }
+        public virtual taskstatepool taskstatepool { get; set; }
     }
 }

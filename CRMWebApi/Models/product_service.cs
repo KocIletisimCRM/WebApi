@@ -12,28 +12,23 @@ namespace CRMWebApi.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class task
+    public partial class product_service
     {
-        public task()
+        public product_service()
         {
-            this.taskqueues = new HashSet<taskqueue>();
-            this.taskstatematches = new HashSet<taskstatematches>();
+            this.customerproduct = new HashSet<customerproduct>();
         }
     
-        public int taskid { get; set; }
-        public string taskname { get; set; }
-        public int tasktype { get; set; }
-        public Nullable<int> attachablepersoneltype { get; set; }
-        public Nullable<int> attachableobjecttype { get; set; }
-        public Nullable<double> performancescore { get; set; }
+        public int productid { get; set; }
+        public string productname { get; set; }
+        public string category { get; set; }
+        public string automandatorytasks { get; set; }
+        public Nullable<int> maxduration { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
     
-        public virtual ICollection<taskqueue> taskqueues { get; set; }
-        public virtual personel updatedpersonel { get; set; }
-        public virtual tasktypes tasktypes { get; set; }
-        public virtual ICollection<taskstatematches> taskstatematches { get; set; }
+        public virtual ICollection<customerproduct> customerproduct { get; set; }
     }
 }

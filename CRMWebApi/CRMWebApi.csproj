@@ -108,6 +108,7 @@
     <Compile Include="Controllers\FilterController.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\DTOCloseTaskQueue.cs" />
     <Compile Include="DTOs\DTOgsmStatus.cs" />
     <Compile Include="DTOs\DTOissStatus.cs" />
     <Compile Include="DTOs\DTOKatZiyareti.cs" />
@@ -138,6 +139,9 @@
     <Compile Include="Models\block.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\campaigns.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\CRMDataModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -161,10 +165,19 @@
     <Compile Include="Models\customer.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\customerdocument.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\customerinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\customerproduct.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\customer_status.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\document.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\flatinfo.cs">
@@ -183,13 +196,25 @@
     <Compile Include="Models\personel.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\product_service.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\site.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\stockcard.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\stockmovement.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\task.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\taskqueue.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\taskstatematches.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\taskstatepool.cs">

@@ -45,6 +45,14 @@ namespace CRMWebApi.Models
         public virtual DbSet<netStatus> netStatus { get; set; }
         public virtual DbSet<telStatus> telStatus { get; set; }
         public virtual DbSet<issStatus> issStatus { get; set; }
+        public virtual DbSet<campaigns> campaigns { get; set; }
+        public virtual DbSet<customerproduct> customerproduct { get; set; }
+        public virtual DbSet<customerdocument> customerdocument { get; set; }
+        public virtual DbSet<document> document { get; set; }
+        public virtual DbSet<taskstatematches> taskstatematches { get; set; }
+        public virtual DbSet<product_service> product_service { get; set; }
+        public virtual DbSet<stockcard> stockcard { get; set; }
+        public virtual DbSet<stockmovement> stockmovement { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)

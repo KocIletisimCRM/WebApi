@@ -8,7 +8,7 @@
         <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
         <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="6.625" PointY="8.625" />
         <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="4" PointY="8.625" />
-        <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="6.875" PointY="0.625" />
+        <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="15.5" PointY="3.875" />
         <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
         <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
         <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="13.25" PointY="4.625" />
@@ -31,7 +31,7 @@
         <AssociationConnector Association="CRMModel.personelblock1" />
         <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
         <AssociationConnector Association="CRMModel.tasktypestask" />
-        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="11.25" PointY="12" />
+        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="5.375" PointY="0.75" />
         <EntityTypeShape EntityType="CRMModel.flatinfo" Width="1.5" PointX="9.375" PointY="5.75" />
         <EntityTypeShape EntityType="CRMModel.gsmKullanımıStatus" Width="1.5" PointX="0.5" PointY="8.375" />
         <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="0.5" PointY="6.625" />
@@ -44,6 +44,24 @@
         <AssociationConnector Association="CRMModel.TvKullanımıStatuscustomer" />
         <AssociationConnector Association="CRMModel.telStatuscustomer" />
         <AssociationConnector Association="CRMModel.gsmKullanımıStatuscustomer" />
+        <EntityTypeShape EntityType="CRMModel.campaigns" Width="1.5" PointX="5.125" PointY="15.625" />
+        <EntityTypeShape EntityType="CRMModel.customerproduct" Width="1.5" PointX="8.5" PointY="14.625" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_campaigns" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_customer" />
+        <AssociationConnector Association="CRMModel.customerproducttaskqueue" />
+        <EntityTypeShape EntityType="CRMModel.customerdocument" Width="1.5" PointX="11.125" PointY="13.375" />
+        <EntityTypeShape EntityType="CRMModel.document" Width="1.5" PointX="13.25" PointY="13.125" />
+        <AssociationConnector Association="CRMModel.customerdocumentdocument" />
+        <AssociationConnector Association="CRMModel.customerdocumentcustomer" />
+        <EntityTypeShape EntityType="CRMModel.taskstatematches" Width="1.5" PointX="17.75" PointY="1.375" />
+        <AssociationConnector Association="CRMModel.FK_taskstatematches_task" />
+        <AssociationConnector Association="CRMModel.FK_taskstatematches_taskstatepool" />
+        <EntityTypeShape EntityType="CRMModel.product_service" Width="1.5" PointX="9.375" PointY="9" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_product_service" />
+        <EntityTypeShape EntityType="CRMModel.stockcard" Width="1.5" PointX="14.25" PointY="10.75" />
+        <EntityTypeShape EntityType="CRMModel.stockmovement" Width="1.5" PointX="16.5" PointY="10.25" />
+        <AssociationConnector Association="CRMModel.FK_stockmovement_stockcard" />
+        <AssociationConnector Association="CRMModel.taskqueuetaskqueue" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

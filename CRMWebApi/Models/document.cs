@@ -12,28 +12,21 @@ namespace CRMWebApi.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class task
+    public partial class document
     {
-        public task()
+        public document()
         {
-            this.taskqueues = new HashSet<taskqueue>();
-            this.taskstatematches = new HashSet<taskstatematches>();
+            this.customerdocument = new HashSet<customerdocument>();
         }
     
-        public int taskid { get; set; }
-        public string taskname { get; set; }
-        public int tasktype { get; set; }
-        public Nullable<int> attachablepersoneltype { get; set; }
-        public Nullable<int> attachableobjecttype { get; set; }
-        public Nullable<double> performancescore { get; set; }
+        public int documentid { get; set; }
+        public string documentname { get; set; }
+        public string documentdescription { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
     
-        public virtual ICollection<taskqueue> taskqueues { get; set; }
-        public virtual personel updatedpersonel { get; set; }
-        public virtual tasktypes tasktypes { get; set; }
-        public virtual ICollection<taskstatematches> taskstatematches { get; set; }
+        public virtual ICollection<customerdocument> customerdocument { get; set; }
     }
 }

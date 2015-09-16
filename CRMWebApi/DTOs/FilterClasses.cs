@@ -38,7 +38,7 @@ namespace CRMWebApi.DTOs
         public fieldFilter(string name, object value, filterOperators op)
         {
             fieldName = name;
-            if (name.Contains("date")) 
+            if (name.Contains("date"))
             {
                 filterValue = value.ToString().Split('-')[0];
                 filterValue2 = value.ToString().Split('-')[1];

@@ -33,6 +33,21 @@
           <Property Name="locationid" Type="nvarchar" MaxLength="45" />
           <Property Name="objid" Type="nvarchar" MaxLength="45" />
         </EntityType>
+        <EntityType Name="campaigns">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="category" Type="nvarchar" MaxLength="255" />
+          <Property Name="subcategory" Type="nvarchar" MaxLength="255" />
+          <Property Name="name" Type="nvarchar" MaxLength="255" />
+          <Property Name="products" Type="nvarchar" MaxLength="255" />
+          <Property Name="documents" Type="nvarchar" MaxLength="255" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
         <EntityType Name="customer">
           <Key>
             <PropertyRef Name="customerid" />
@@ -67,6 +82,49 @@
           <Property Name="ID" Type="int" Nullable="false" />
           <Property Name="Text" Type="nvarchar" MaxLength="50" />
           <Property Name="deleted" Type="int" />
+        </EntityType>
+        <EntityType Name="customerdocument">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="customerid" Type="int" />
+          <Property Name="attachedobjecttype" Type="int" />
+          <Property Name="taskqueueid" Type="int" />
+          <Property Name="documentid" Type="int" />
+          <Property Name="documenturl" Type="nvarchar" MaxLength="255" />
+          <Property Name="receiptdate" Type="datetime2" Precision="7" />
+          <Property Name="deliverydate" Type="datetime2" Precision="7" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="customerproduct">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="taskid" Type="int" />
+          <Property Name="customerid" Type="int" />
+          <Property Name="productid" Type="int" />
+          <Property Name="campaignid" Type="int" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="document">
+          <Key>
+            <PropertyRef Name="documentid" />
+          </Key>
+          <Property Name="documentid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="documentname" Type="nvarchar" MaxLength="255" />
+          <Property Name="documentdescription" Type="nvarchar" MaxLength="255" />
+          <Property Name="creationdate" Type="date" />
+          <Property Name="lastupdated" Type="date" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
         </EntityType>
         <EntityType Name="gsmKullanımıStatus">
           <Key>
@@ -109,6 +167,20 @@
           <Property Name="updatedby" Type="bigint" />
           <Property Name="deleted" Type="bit" />
         </EntityType>
+        <EntityType Name="product_service">
+          <Key>
+            <PropertyRef Name="productid" />
+          </Key>
+          <Property Name="productid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="productname" Type="nvarchar" MaxLength="255" />
+          <Property Name="category" Type="nvarchar" MaxLength="255" />
+          <Property Name="automandatorytasks" Type="nvarchar" MaxLength="255" />
+          <Property Name="maxduration" Type="int" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
         <EntityType Name="site">
           <Key>
             <PropertyRef Name="siteid" />
@@ -120,6 +192,41 @@
           <Property Name="sitedistrict" Type="nvarchar" MaxLength="150" />
           <Property Name="siteregioncode" Type="nvarchar" MaxLength="50" />
           <Property Name="description" Type="nvarchar(max)" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="stockcard">
+          <Key>
+            <PropertyRef Name="stockid" />
+          </Key>
+          <Property Name="stockid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="productname" Type="nvarchar" MaxLength="255" />
+          <Property Name="category" Type="nvarchar" MaxLength="255" />
+          <Property Name="hasserial" Type="bit" />
+          <Property Name="unit" Type="nvarchar" MaxLength="255" />
+          <Property Name="description" Type="nvarchar(max)" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="stockmovement">
+          <Key>
+            <PropertyRef Name="movementid" />
+          </Key>
+          <Property Name="movementid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="relatedtaskqueue" Type="int" />
+          <Property Name="fromobjecttype" Type="int" />
+          <Property Name="fromobject" Type="int" />
+          <Property Name="toobjecttype" Type="int" />
+          <Property Name="toobject" Type="int" />
+          <Property Name="stockcardid" Type="int" />
+          <Property Name="amount" Type="int" />
+          <Property Name="serialno" Type="nvarchar" MaxLength="255" />
+          <Property Name="movementdate" Type="datetime2" Precision="7" />
+          <Property Name="confirmationdate" Type="datetime2" Precision="7" />
           <Property Name="creationdate" Type="datetime2" Precision="7" />
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
@@ -161,6 +268,22 @@
           <Property Name="deleted" Type="bit" />
           <Property Name="assistant_personel" Type="int" />
           <Property Name="fault" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="taskstatematches">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="taskid" Type="int" />
+          <Property Name="stateid" Type="int" />
+          <Property Name="automandatorytasks" Type="nvarchar" MaxLength="255" />
+          <Property Name="autooptionaltasks" Type="nvarchar" MaxLength="255" />
+          <Property Name="stockcards" Type="nvarchar" MaxLength="255" />
+          <Property Name="documents" Type="nvarchar" MaxLength="255" />
+          <Property Name="creationdate" Type="datetime2" Precision="7" />
+          <Property Name="lastupdated" Type="datetime2" Precision="7" />
+          <Property Name="updatedby" Type="int" />
+          <Property Name="deleted" Type="bit" />
         </EntityType>
         <EntityType Name="taskstatepool">
           <Key>
@@ -257,6 +380,54 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_customerproduct_campaigns">
+          <End Role="campaigns" Type="Self.campaigns" Multiplicity="0..1" />
+          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="campaigns">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="campaignid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_customerproduct_customer">
+          <End Role="customer" Type="Self.customer" Multiplicity="0..1" />
+          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="customerid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_customerproduct_product_service">
+          <End Role="product_service" Type="Self.product_service" Multiplicity="0..1" />
+          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="product_service">
+              <PropertyRef Name="productid" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="productid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_stockmovement_stockcard">
+          <End Role="stockcard" Type="Self.stockcard" Multiplicity="0..1" />
+          <End Role="stockmovement" Type="Self.stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="stockcard">
+              <PropertyRef Name="stockid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="stockcardid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_taskqueue_task">
           <End Role="task" Type="Self.task" Multiplicity="1" />
           <End Role="taskqueue" Type="Self.taskqueue" Multiplicity="*" />
@@ -266,6 +437,30 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Principal>
             <Dependent Role="taskqueue">
               <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_taskstatematches_task">
+          <End Role="task" Type="Self.task" Multiplicity="0..1" />
+          <End Role="taskstatematches" Type="Self.taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="taskstatematches">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_taskstatematches_taskstatepool">
+          <End Role="taskstatepool" Type="Self.taskstatepool" Multiplicity="0..1" />
+          <End Role="taskstatematches" Type="Self.taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskstatepool">
+              <PropertyRef Name="taskstateid" />
+            </Principal>
+            <Dependent Role="taskstatematches">
+              <PropertyRef Name="stateid" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -326,15 +521,23 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
         </Function>
         <EntityContainer Name="CRMModelStoreContainer">
           <EntitySet Name="block" EntityType="Self.block" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="campaigns" EntityType="Self.campaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="customer" EntityType="Self.customer" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="customer_status" EntityType="Self.customer_status" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="customerdocument" EntityType="Self.customerdocument" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="customerproduct" EntityType="Self.customerproduct" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="document" EntityType="Self.document" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="gsmKullanımıStatus" EntityType="Self.gsmKullanımıStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="issStatus" EntityType="Self.issStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="netStatus" EntityType="Self.netStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="personel" EntityType="Self.personel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="product_service" EntityType="Self.product_service" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="site" EntityType="Self.site" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockcard" EntityType="Self.stockcard" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockmovement" EntityType="Self.stockmovement" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="task" EntityType="Self.task" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="taskqueue" EntityType="Self.taskqueue" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="taskstatematches" EntityType="Self.taskstatematches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="taskstatepool" EntityType="Self.taskstatepool" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tasktypes" EntityType="Self.tasktypes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="telStatus" EntityType="Self.telStatus" Schema="dbo" store:Type="Tables" />
@@ -370,9 +573,33 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             <End Role="block" EntitySet="block" />
             <End Role="customer" EntitySet="customer" />
           </AssociationSet>
+          <AssociationSet Name="FK_customerproduct_campaigns" Association="Self.FK_customerproduct_campaigns">
+            <End Role="campaigns" EntitySet="campaigns" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <AssociationSet Name="FK_customerproduct_customer" Association="Self.FK_customerproduct_customer">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <AssociationSet Name="FK_customerproduct_product_service" Association="Self.FK_customerproduct_product_service">
+            <End Role="product_service" EntitySet="product_service" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <AssociationSet Name="FK_stockmovement_stockcard" Association="Self.FK_stockmovement_stockcard">
+            <End Role="stockcard" EntitySet="stockcard" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
           <AssociationSet Name="FK_taskqueue_task" Association="Self.FK_taskqueue_task">
             <End Role="task" EntitySet="task" />
             <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <AssociationSet Name="FK_taskstatematches_task" Association="Self.FK_taskstatematches_task">
+            <End Role="task" EntitySet="task" />
+            <End Role="taskstatematches" EntitySet="taskstatematches" />
+          </AssociationSet>
+          <AssociationSet Name="FK_taskstatematches_taskstatepool" Association="Self.FK_taskstatematches_taskstatepool">
+            <End Role="taskstatepool" EntitySet="taskstatepool" />
+            <End Role="taskstatematches" EntitySet="taskstatematches" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -533,6 +760,54 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             <End Role="gsmKullanımıStatus" EntitySet="gsmKullanımıStatus" />
             <End Role="customer" EntitySet="customer" />
           </AssociationSet>
+          <EntitySet Name="campaigns" EntityType="CRMModel.campaigns" />
+          <EntitySet Name="customerproduct" EntityType="CRMModel.customerproduct" />
+          <AssociationSet Name="FK_customerproduct_campaigns" Association="CRMModel.FK_customerproduct_campaigns">
+            <End Role="campaigns" EntitySet="campaigns" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <AssociationSet Name="FK_customerproduct_customer" Association="CRMModel.FK_customerproduct_customer">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <AssociationSet Name="customerproducttaskqueue" Association="CRMModel.customerproducttaskqueue">
+            <End Role="customerproduct" EntitySet="customerproduct" />
+            <End Role="taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
+          <EntitySet Name="customerdocument" EntityType="CRMModel.customerdocument" />
+          <EntitySet Name="document" EntityType="CRMModel.document" />
+          <AssociationSet Name="customerdocumentdocument" Association="CRMModel.customerdocumentdocument">
+            <End Role="customerdocument" EntitySet="customerdocument" />
+            <End Role="document" EntitySet="document" />
+          </AssociationSet>
+          <AssociationSet Name="customerdocumentcustomer" Association="CRMModel.customerdocumentcustomer">
+            <End Role="customerdocument" EntitySet="customerdocument" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <EntitySet Name="taskstatematches" EntityType="CRMModel.taskstatematches" />
+          <AssociationSet Name="FK_taskstatematches_task" Association="CRMModel.FK_taskstatematches_task">
+            <End Role="task" EntitySet="task" />
+            <End Role="taskstatematches" EntitySet="taskstatematches" />
+          </AssociationSet>
+          <AssociationSet Name="FK_taskstatematches_taskstatepool" Association="CRMModel.FK_taskstatematches_taskstatepool">
+            <End Role="taskstatepool" EntitySet="taskstatepool" />
+            <End Role="taskstatematches" EntitySet="taskstatematches" />
+          </AssociationSet>
+          <EntitySet Name="product_service" EntityType="CRMModel.product_service" />
+          <AssociationSet Name="FK_customerproduct_product_service" Association="CRMModel.FK_customerproduct_product_service">
+            <End Role="product_service" EntitySet="product_service" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <EntitySet Name="stockcard" EntityType="CRMModel.stockcard" />
+          <EntitySet Name="stockmovement" EntityType="CRMModel.stockmovement" />
+          <AssociationSet Name="FK_stockmovement_stockcard" Association="CRMModel.FK_stockmovement_stockcard">
+            <End Role="stockcard" EntitySet="stockcard" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="taskqueuetaskqueue" Association="CRMModel.taskqueuetaskqueue">
+            <End Role="taskqueue" EntitySet="taskqueue" />
+            <End Role="taskqueue1" EntitySet="taskqueue" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="task">
           <Key>
@@ -551,6 +826,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="taskqueues" Relationship="CRMModel.tasktaskqueue" FromRole="task" ToRole="taskqueue" />
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltask" FromRole="task" ToRole="personel" />
           <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktypestask" FromRole="task" ToRole="tasktypes" />
+          <NavigationProperty Name="taskstatematches" Relationship="CRMModel.FK_taskstatematches_task" FromRole="task" ToRole="taskstatematches" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -643,6 +919,11 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="task" Relationship="CRMModel.tasktaskqueue" FromRole="taskqueue" ToRole="task" />
           <NavigationProperty Name="asistanPersonel" Relationship="CRMModel.asistantPersonel" FromRole="taskqueue" ToRole="personel" />
           <NavigationProperty Name="Updatedpersonel" Relationship="CRMModel.personeltaskqueue2" FromRole="taskqueue" ToRole="personel" />
+          <NavigationProperty Name="customerproduct" Relationship="CRMModel.customerproducttaskqueue" FromRole="taskqueue" ToRole="customerproduct" />
+          <NavigationProperty Name="taskqueue1" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue" ToRole="taskqueue1" />
+          <NavigationProperty Name="relatedTaskQueue" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue1" ToRole="taskqueue" />
+          <Property Name="taskqueue_taskorderno" Type="Int32" Nullable="false" />
+        
         </EntityType>
         <Association Name="FK_taskqueue_task">
           <End Type="CRMModel.task" Role="task" Multiplicity="1" />
@@ -669,6 +950,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueues" Relationship="CRMModel.taskstatepooltaskqueue1" FromRole="taskstatepool" ToRole="taskqueue" />
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltaskstatepool" FromRole="taskstatepool" ToRole="personel" />
+          <NavigationProperty Name="taskstatematches" Relationship="CRMModel.FK_taskstatematches_taskstatepool" FromRole="taskstatepool" ToRole="taskstatematches" />
         </EntityType>
         <EntityType Name="customer">
           <Key>
@@ -705,6 +987,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="TvKullanımıStatus" Relationship="CRMModel.TvKullanımıStatuscustomer" FromRole="customer" ToRole="TvKullanımıStatus" />
           <NavigationProperty Name="telStatus" Relationship="CRMModel.telStatuscustomer" FromRole="customer" ToRole="telStatus" />
           <NavigationProperty Name="gsmKullanımıStatus" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="customer" ToRole="gsmKullanımıStatus" />
+          <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_customer" FromRole="customer" ToRole="customerproduct" />
+          <NavigationProperty Name="customerdocument" Relationship="CRMModel.customerdocumentcustomer" FromRole="customer" ToRole="customerdocument" />
         </EntityType>
         <EntityType Name="personel">
           <Key>
@@ -1162,6 +1446,263 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="campaigns">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="subcategory" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="name" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="products" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="documents" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_campaigns" FromRole="campaigns" ToRole="customerproduct" />
+        </EntityType>
+        <EntityType Name="customerproduct">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="taskid" Type="Int32" />
+          <Property Name="customerid" Type="Int32" />
+          <Property Name="productid" Type="Int32" />
+          <Property Name="campaignid" Type="Int32" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="campaigns" Relationship="CRMModel.FK_customerproduct_campaigns" FromRole="customerproduct" ToRole="campaigns" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.FK_customerproduct_customer" FromRole="customerproduct" ToRole="customer" />
+          <NavigationProperty Name="taskqueue" Relationship="CRMModel.customerproducttaskqueue" FromRole="customerproduct" ToRole="taskqueue" />
+          <NavigationProperty Name="product_service" Relationship="CRMModel.FK_customerproduct_product_service" FromRole="customerproduct" ToRole="product_service" />
+        </EntityType>
+        <Association Name="FK_customerproduct_campaigns">
+          <End Type="CRMModel.campaigns" Role="campaigns" Multiplicity="0..1" />
+          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="campaigns">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="campaignid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_customerproduct_customer">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="customerid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerproducttaskqueue">
+          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="taskqueue">
+              <PropertyRef Name="taskorderno" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="customerdocument">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="customerid" Type="Int32" />
+          <Property Name="attachedobjecttype" Type="Int32" />
+          <Property Name="taskqueueid" Type="Int32" />
+          <Property Name="documentid" Type="Int32" />
+          <Property Name="documenturl" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="receiptdate" Type="DateTime" Precision="7" />
+          <Property Name="deliverydate" Type="DateTime" Precision="7" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="document" Relationship="CRMModel.customerdocumentdocument" FromRole="customerdocument" ToRole="document" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customerdocumentcustomer" FromRole="customerdocument" ToRole="customer" />
+        </EntityType>
+        <EntityType Name="document">
+          <Key>
+            <PropertyRef Name="documentid" />
+          </Key>
+          <Property Name="documentid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="documentname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="documentdescription" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="0" />
+          <Property Name="lastupdated" Type="DateTime" Precision="0" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="customerdocument" Relationship="CRMModel.customerdocumentdocument" FromRole="document" ToRole="customerdocument" />
+        </EntityType>
+        <Association Name="customerdocumentdocument">
+          <End Type="CRMModel.customerdocument" Role="customerdocument" Multiplicity="*" />
+          <End Type="CRMModel.document" Role="document" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="document">
+              <PropertyRef Name="documentid" />
+            </Principal>
+            <Dependent Role="customerdocument">
+              <PropertyRef Name="documentid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerdocumentcustomer">
+          <End Type="CRMModel.customerdocument" Role="customerdocument" Multiplicity="*" />
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="customerdocument">
+              <PropertyRef Name="customerid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="taskstatematches">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="taskid" Type="Int32" />
+          <Property Name="stateid" Type="Int32" />
+          <Property Name="automandatorytasks" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="autooptionaltasks" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="stockcards" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="documents" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="task" Relationship="CRMModel.FK_taskstatematches_task" FromRole="taskstatematches" ToRole="task" />
+          <NavigationProperty Name="taskstatepool" Relationship="CRMModel.FK_taskstatematches_taskstatepool" FromRole="taskstatematches" ToRole="taskstatepool" />
+        </EntityType>
+        <Association Name="FK_taskstatematches_task">
+          <End Type="CRMModel.task" Role="task" Multiplicity="0..1" />
+          <End Type="CRMModel.taskstatematches" Role="taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="taskstatematches">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_taskstatematches_taskstatepool">
+          <End Type="CRMModel.taskstatepool" Role="taskstatepool" Multiplicity="0..1" />
+          <End Type="CRMModel.taskstatematches" Role="taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskstatepool">
+              <PropertyRef Name="taskstateid" />
+            </Principal>
+            <Dependent Role="taskstatematches">
+              <PropertyRef Name="stateid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="product_service">
+          <Key>
+            <PropertyRef Name="productid" />
+          </Key>
+          <Property Name="productid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="automandatorytasks" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="maxduration" Type="Int32" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_product_service" FromRole="product_service" ToRole="customerproduct" />
+        </EntityType>
+        <Association Name="FK_customerproduct_product_service">
+          <End Type="CRMModel.product_service" Role="product_service" Multiplicity="0..1" />
+          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="product_service">
+              <PropertyRef Name="productid" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="productid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="stockcard">
+          <Key>
+            <PropertyRef Name="stockid" />
+          </Key>
+          <Property Name="stockid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="hasserial" Type="Boolean" />
+          <Property Name="unit" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="stockmovement" Relationship="CRMModel.FK_stockmovement_stockcard" FromRole="stockcard" ToRole="stockmovement" />
+        </EntityType>
+        <EntityType Name="stockmovement">
+          <Key>
+            <PropertyRef Name="movementid" />
+          </Key>
+          <Property Name="movementid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="relatedtaskqueue" Type="Int32" />
+          <Property Name="fromobjecttype" Type="Int32" />
+          <Property Name="fromobject" Type="Int32" />
+          <Property Name="toobjecttype" Type="Int32" />
+          <Property Name="toobject" Type="Int32" />
+          <Property Name="stockcardid" Type="Int32" />
+          <Property Name="amount" Type="Int32" />
+          <Property Name="serialno" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="movementdate" Type="DateTime" Precision="7" />
+          <Property Name="confirmationdate" Type="DateTime" Precision="7" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="stockcard" Relationship="CRMModel.FK_stockmovement_stockcard" FromRole="stockmovement" ToRole="stockcard" />
+        </EntityType>
+        <Association Name="FK_stockmovement_stockcard">
+          <End Type="CRMModel.stockcard" Role="stockcard" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="stockcard">
+              <PropertyRef Name="stockid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="stockcardid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskqueuetaskqueue">
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue1" Multiplicity="*" >
+          </End>
+          <ReferentialConstraint>
+            <Principal Role="taskqueue">
+              <PropertyRef Name="taskorderno" />
+            </Principal>
+            <Dependent Role="taskqueue1">
+              <PropertyRef Name="relatedtaskorderid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1410,6 +1951,137 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
                 <ScalarProperty Name="deleted" ColumnName="deleted" />
                 <ScalarProperty Name="issText" ColumnName="issText" />
                 <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="campaigns">
+            <EntityTypeMapping TypeName="CRMModel.campaigns">
+              <MappingFragment StoreEntitySet="campaigns">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="documents" ColumnName="documents" />
+                <ScalarProperty Name="products" ColumnName="products" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="subcategory" ColumnName="subcategory" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customerproduct">
+            <EntityTypeMapping TypeName="CRMModel.customerproduct">
+              <MappingFragment StoreEntitySet="customerproduct">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="campaignid" ColumnName="campaignid" />
+                <ScalarProperty Name="productid" ColumnName="productid" />
+                <ScalarProperty Name="customerid" ColumnName="customerid" />
+                <ScalarProperty Name="taskid" ColumnName="taskid" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customerdocument">
+            <EntityTypeMapping TypeName="CRMModel.customerdocument">
+              <MappingFragment StoreEntitySet="customerdocument">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="deliverydate" ColumnName="deliverydate" />
+                <ScalarProperty Name="receiptdate" ColumnName="receiptdate" />
+                <ScalarProperty Name="documenturl" ColumnName="documenturl" />
+                <ScalarProperty Name="documentid" ColumnName="documentid" />
+                <ScalarProperty Name="taskqueueid" ColumnName="taskqueueid" />
+                <ScalarProperty Name="attachedobjecttype" ColumnName="attachedobjecttype" />
+                <ScalarProperty Name="customerid" ColumnName="customerid" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="document">
+            <EntityTypeMapping TypeName="CRMModel.document">
+              <MappingFragment StoreEntitySet="document">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="documentdescription" ColumnName="documentdescription" />
+                <ScalarProperty Name="documentname" ColumnName="documentname" />
+                <ScalarProperty Name="documentid" ColumnName="documentid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="taskstatematches">
+            <EntityTypeMapping TypeName="CRMModel.taskstatematches">
+              <MappingFragment StoreEntitySet="taskstatematches">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="documents" ColumnName="documents" />
+                <ScalarProperty Name="stockcards" ColumnName="stockcards" />
+                <ScalarProperty Name="autooptionaltasks" ColumnName="autooptionaltasks" />
+                <ScalarProperty Name="automandatorytasks" ColumnName="automandatorytasks" />
+                <ScalarProperty Name="stateid" ColumnName="stateid" />
+                <ScalarProperty Name="taskid" ColumnName="taskid" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="product_service">
+            <EntityTypeMapping TypeName="CRMModel.product_service">
+              <MappingFragment StoreEntitySet="product_service">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="maxduration" ColumnName="maxduration" />
+                <ScalarProperty Name="automandatorytasks" ColumnName="automandatorytasks" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="productid" ColumnName="productid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockcard">
+            <EntityTypeMapping TypeName="CRMModel.stockcard">
+              <MappingFragment StoreEntitySet="stockcard">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="unit" ColumnName="unit" />
+                <ScalarProperty Name="hasserial" ColumnName="hasserial" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="stockid" ColumnName="stockid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockmovement">
+            <EntityTypeMapping TypeName="CRMModel.stockmovement">
+              <MappingFragment StoreEntitySet="stockmovement">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="confirmationdate" ColumnName="confirmationdate" />
+                <ScalarProperty Name="movementdate" ColumnName="movementdate" />
+                <ScalarProperty Name="serialno" ColumnName="serialno" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="stockcardid" ColumnName="stockcardid" />
+                <ScalarProperty Name="toobject" ColumnName="toobject" />
+                <ScalarProperty Name="toobjecttype" ColumnName="toobjecttype" />
+                <ScalarProperty Name="fromobject" ColumnName="fromobject" />
+                <ScalarProperty Name="fromobjecttype" ColumnName="fromobjecttype" />
+                <ScalarProperty Name="relatedtaskqueue" ColumnName="relatedtaskqueue" />
+                <ScalarProperty Name="movementid" ColumnName="movementid" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -14,6 +14,12 @@ namespace CRMWebApi.Models
     
     public partial class taskqueue
     {
+        public taskqueue()
+        {
+            this.customerproduct = new HashSet<customerproduct>();
+            this.taskqueue1 = new HashSet<taskqueue>();
+        }
+    
         public int taskorderno { get; set; }
         public int taskid { get; set; }
         public Nullable<int> previoustaskorderid { get; set; }
@@ -31,6 +37,7 @@ namespace CRMWebApi.Models
         public Nullable<bool> deleted { get; set; }
         public Nullable<int> assistant_personel { get; set; }
         public string fault { get; set; }
+        public int taskqueue_taskorderno { get; set; }
     
         public virtual customer attachedcustomer { get; set; }
         public virtual block attachedblock { get; set; }
@@ -39,5 +46,8 @@ namespace CRMWebApi.Models
         public virtual task task { get; set; }
         public virtual personel asistanPersonel { get; set; }
         public virtual personel Updatedpersonel { get; set; }
+        public virtual ICollection<customerproduct> customerproduct { get; set; }
+        public virtual ICollection<taskqueue> taskqueue1 { get; set; }
+        public virtual taskqueue relatedTaskQueue { get; set; }
     }
 }

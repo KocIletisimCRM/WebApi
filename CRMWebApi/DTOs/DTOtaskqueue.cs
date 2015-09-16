@@ -27,5 +27,7 @@ namespace CRMWebApi.DTOs
         public BaseAttachedObject attachedobject { get; set; }
         public DTOtaskstatepool taskstatepool { get; set; }
 
+       
+
     }
 }
