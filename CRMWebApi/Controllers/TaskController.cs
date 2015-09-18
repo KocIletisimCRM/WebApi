@@ -121,8 +121,10 @@ namespace CRMWebApi.Controllers
 
             using (var db = new CRMEntities())
             {
-                var tsm = db.taskstatematches.Where(r => r.taskid == tq.task.taskid && r.stateid == tq.taskstatepool.taskstateid).FirstOrDefault();
-                var dtq = db.taskqueue.Include(t => t.task).Where(r => r.taskorderno == tq.taskorderno).First();
+                var tsm = db.taskstatematches.Include(t=>t.taskstatepool).Where(r => r.taskid == tq.task.taskid && r.stateid == tq.taskstatepool.taskstateid).FirstOrDefault();
+                var dtq = db.taskqueue.Include(t => t.task)
+                                      .Include(t=>t.attachedpersonel)
+                                      .Include(t=>t.taskstatepool).Where(r => r.taskorderno == tq.taskorderno).First();
                 #region Geçici Kod Satış tarihlerini Değiştirmek için
                 //if (tq.consummationdate > DateTime.MinValue && !Request.Params.AllKeys.Contains("tq.status"))
                 //{
@@ -174,6 +176,7 @@ namespace CRMWebApi.Controllers
                             if (db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item).Any())
                                 continue;
                             var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
+
                             var amtq = new taskqueue
                             {
                                 //automandatorytasks
@@ -384,6 +387,34 @@ namespace CRMWebApi.Controllers
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK,"ok","application/json");
             }           
+        }
+
+        [Route("saveSalesTask")]
+        [HttpPost]
+        public HttpResponseMessage saveSalesTask(int? customerid_VI, int? attachedpersonelid_VI, int? assistant_personel_VI, DateTime appointmentdate)
+        {
+            using (var db=new CRMEntities())
+            {
+                var taskqueue = new taskqueue
+                {
+                    appointmentdate = DateTime.Now,
+                    attachedobjectid = customerid_VI ?? 0,
+                    attachedpersonelid = attachedpersonelid_VI,
+                    assistant_personel = assistant_personel_VI,
+                    attachmentdate = DateTime.Now,
+                    consummationdate = DateTime.Now,
+                    creationdate = DateTime.Now,
+                    deleted = false,
+                    description = "Doğrudan Satış",
+                    lastupdated = DateTime.Now,
+                    status = null,
+                    taskid = 3,
+                    updatedby = 7
+                };
+                db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK,taskqueue.taskorderno,"application/json");
+            }
         }
     }
 }
