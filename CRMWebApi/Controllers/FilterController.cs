@@ -126,12 +126,29 @@ namespace CRMWebApi.Controllers
         /// <param name="request">taskstatepool tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getTaskStatus")]
         [HttpPost]
-        public HttpResponseMessage getTaskStatus()
+        public HttpResponseMessage getTaskStatus(DTOs.DTORequestClasses.DTOFilterGetTaskStateToTaskRequest request)
         {
             using (var db = new CRMEntities())
             {
-                var res = db.taskstatepool.Where(tsp => tsp.deleted == false).OrderBy(tsp => tsp.taskstate).ToList();
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
+               var states = new List<int>();
+               var deneme = new taskstatepool { taskstate = "AÇIK", taskstateid = 9999 };
+                if (request.taskorderno != null)
+                {
+                    var taskid = db.taskqueue.Where(t => t.taskorderno == request.taskorderno).Select(s => s.taskid).FirstOrDefault();
+                    foreach (var item in db.taskstatepool.Where(t => t.deleted == false && t.taskstatematches.Where(ya => ya.deleted == false).Select(m => m.taskid).Contains(taskid)))
+                    {
+                        states.Add(item.taskstateid);                       
+                    }
+                    var res = db.taskstatepool.Where(t => t.deleted == false && states.Contains(t.taskstateid)).OrderBy(tsp => tsp.taskstate).ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
+                }
+                else 
+                {
+                    var res = db.taskstatepool.Where(tsp => tsp.deleted == false).OrderBy(t => t.taskstate).ToList();
+                    res.Insert(0,deneme);
+                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
+
+                }
             }
         }
 
@@ -145,7 +162,9 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new CRMEntities())
             {
+                var atanmamis = new personel {personelid=0,personelname="Atanmamış" };
                 var res = db.personel.Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
+                res.Insert(0, atanmamis);
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }

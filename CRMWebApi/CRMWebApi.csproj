@@ -106,6 +106,7 @@
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="Controllers\FilterController.cs" />
+    <Compile Include="DTOs\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
     <Compile Include="DTOs\DTOCloseTaskQueue.cs" />
@@ -117,7 +118,9 @@
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTaskStateRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTaskStateToTaskRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTORequestTopluAtamalar.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTORequestPagination.cs" />
     <Compile Include="DTOs\DTOResponseClasses.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />

@@ -280,12 +280,10 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         public bool hasTaskFilter() {
             return taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter();
         }
-
         public bool hasCSBFilter()
         {
             return csbRequest.hasCustomerFilter() || csbRequest.isBlockFilter() || csbRequest.hasSiteFilter() || csbRequest.hasIssFilter() || csbRequest.hasCustomerstatusFilter();
         }
-
         public string attachmentDate { get; set; }
         public string appointmentDate { get; set; }
         public string consummationDate { get; set; }
@@ -295,10 +293,22 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             var filter = new DTOFilter("taskqueue", "taskorderno");
             var csbFilter = csbRequest.getFilter();
             if (hasTaskFilter()) filter.subTables.Add("taskid", taskRequest.getFilter());
-            if (personelRequest.personel != null ) filter.subTables.Add("attachedpersonelid", personelRequest.getFilter());
+            if (personelRequest.personel != null)
+            {
+                if (personelRequest.personel.op == 8)
+                    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 8 });
+                else
+                    filter.subTables.Add("attachedpersonelid", personelRequest.getFilter());
+            }
             if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
             if (updatedBy != null) filter.subTables.Add("updatedby",updatedByRequest.getFilter());
-            if (taskstateRequest.taskstate!=null) filter.subTables.Add("status",taskstateRequest.getFilter());
+            if (taskstateRequest.taskstate != null)
+            {
+                if (taskstateRequest.taskstate.op == 8)
+                    filter.fieldFilters.Add(new DTOFieldFilter {fieldName="status",op=8 });
+                else
+                filter.subTables.Add("status", taskstateRequest.getFilter());
+            }
             if (attachmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachmentdate", op = 5, value = attachmentDate });
             if (appointmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "appointmentdate", op = 5, value = appointmentDate });
             if (consummationDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "consummationdate", op = 5, value = consummationDate });

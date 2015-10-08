@@ -211,8 +211,8 @@ namespace CRMWebApi.Controllers
                      item.gsm = ct.gsm;
                      item.netstatu = ct.netStatus.id;
                      item.telstatu = ct.telStatus.id;
+                     item.gsmstatu = ct.gsmKullanımıStatus.id;
                      item.iss = ct.issStatus.id;
-                     item.turkcellTv = ct.turkcellTv;
                      item.tvstatu = ct.TvKullanımıStatus.id;
                      item.description = ct.description;
                      item.lastupdated = DateTime.Now;

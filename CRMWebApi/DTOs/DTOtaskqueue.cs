@@ -8,10 +8,10 @@ namespace CRMWebApi.DTOs
     public class DTOtaskqueue
     {
         public int taskorderno { get; set; }
-        public Nullable<System.DateTime> creationdate { get; set; }
-        public Nullable<System.DateTime> attachmentdate { get; set; }
-        public Nullable<System.DateTime> appointmentdate { get; set; }
-        public Nullable<System.DateTime> consummationdate { get; set; }
+        public Nullable<DateTime> creationdate { get; set; }
+        public Nullable<DateTime> attachmentdate { get; set; }
+        public Nullable<DateTime> appointmentdate { get; set; }
+        public Nullable<DateTime> consummationdate { get; set; }
         public string description { get; set; }
         public int ? previoustaskorderid {get;set;}
         public int? relatedtaskorderid { get; set; }
@@ -25,9 +25,7 @@ namespace CRMWebApi.DTOs
        // public DTOsite site { get; set; }
       //  public DTOblock block { get; set; }
         public BaseAttachedObject attachedobject { get; set; }
-        public DTOtaskstatepool taskstatepool { get; set; }
-
-       
+        public  DTOtaskstatepool taskstatepool { get; set; }
 
     }
 }

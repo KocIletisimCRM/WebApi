@@ -17,7 +17,8 @@ namespace CRMWebApi.DTOs
         foGreaterOrEqual = 4,
         foBetween = 5,
         foLike = 6,
-        foIn=7
+        foIn=7,
+        foIsNull = 8
     }
 
     public class fieldFilter
@@ -27,7 +28,7 @@ namespace CRMWebApi.DTOs
         private object filterValue2 { get; set; }
         private filterOperators filterOperator { get; set; }
 
-        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})" };
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null" };
 
         private string getValueCompairer(object val)
         {
@@ -74,6 +75,8 @@ namespace CRMWebApi.DTOs
                            string.Join(", ", (filterValue as Array)));
                     else
                         throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
+                case filterOperators.foIsNull:
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName);
                 default:
                     throw new Exception("Bilinmeyen operatör tipi!");
             }
