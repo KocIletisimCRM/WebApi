@@ -117,11 +117,11 @@
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTaskStateRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTaskStateToTaskRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTORequestTopluAtamalar.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTORequestPagination.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
     <Compile Include="DTOs\DTOResponseClasses.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />
     <Compile Include="DTOs\DTOtvStatus.cs" />

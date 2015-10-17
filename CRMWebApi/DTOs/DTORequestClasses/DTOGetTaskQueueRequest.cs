@@ -5,11 +5,10 @@ using System.Web;
 
 namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest, IPersonelRequest, IAssistantPersonelRequest, IUpdatedByRequest, ITaskStateRequest
+    public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest, IPersonelRequest, IAssistantPersonelRequest, IUpdatedByRequest
     {
         private DTOFilterGetTasksRequest taskRequest = new DTOFilterGetTasksRequest();
         private DTOFilterGetCSBRequest csbRequest = new DTOFilterGetCSBRequest();
-        private DTOFilterGetTaskStateRequest taskstateRequest = new DTOFilterGetTaskStateRequest();
         private DTOFilterGetPersonelRequest personelRequest = new DTOFilterGetPersonelRequest();
         private DTOFilterGetPersonelRequest assistantPersonelRequest = new DTOFilterGetPersonelRequest();
         private DTOFilterGetPersonelRequest updatedByRequest = new DTOFilterGetPersonelRequest();
@@ -38,6 +37,17 @@ namespace CRMWebApi.DTOs.DTORequestClasses
                 taskRequest.taskType = value;
             }
         }
+        public DTOFieldFilter taskstate
+        {
+            get
+            {
+                return taskRequest.taskstate;
+            }
+            set
+            {
+                taskRequest.taskstate = value;
+            }
+        }
 
         bool ITaskRequest.hasTaskFilter()
         {
@@ -47,6 +57,10 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         bool ITaskRequest.hasTypeFilter()
         {
             return taskRequest.hasTypeFilter();
+        }
+        bool ITaskRequest.hasTaskstateFilter()
+        {
+            return taskRequest.hasTaskstateFilter();
         }
 
         bool ITaskRequest.isTaskFilter()
@@ -58,7 +72,10 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         {
             return taskRequest.isTypeFilter();
         }
-
+        bool ITaskRequest.isTaskstateFilter()
+        {
+            return taskRequest.isTaskstateFilter();
+        }
         DTOFilter ITaskRequest.getFilter()
         {
             return taskRequest.getFilter();
@@ -258,27 +275,10 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         #endregion
 
 
-        #region ITaskStateRequest Implementation
-        public DTOFieldFilter taskstate
-        {
-            get
-            {
-                return taskstateRequest.taskstate;
-            }
-            set
-            {
-                taskstateRequest.taskstate = value;
-            }
-        }
-         DTOFilter ITaskStateRequest.getFilter() 
-        {
-            return taskstateRequest.getFilter();
-        }
-        #endregion
 
 
         public bool hasTaskFilter() {
-            return taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter();
+            return taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter() || taskRequest.hasTaskstateFilter();
         }
         public bool hasCSBFilter()
         {
@@ -292,7 +292,17 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         {
             var filter = new DTOFilter("taskqueue", "taskorderno");
             var csbFilter = csbRequest.getFilter();
-            if (hasTaskFilter()) filter.subTables.Add("taskid", taskRequest.getFilter());
+            if (hasTaskFilter())
+            {
+                var taskFilter = taskRequest.getFilter();
+                if (taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter())
+                    filter.subTables.Add("taskid", taskFilter.subTables["taskid"]);
+                if (taskRequest.hasTaskstateFilter())
+                    if (taskRequest.taskstate.op != 8)
+                        filter.subTables.Add("status", taskFilter.subTables["stateid"]);
+                    else
+                        filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "status", op = 8 });
+            }
             if (personelRequest.personel != null)
             {
                 if (personelRequest.personel.op == 8)
@@ -302,13 +312,6 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             }
             if (assistantPersonel != null) filter.subTables.Add("assistant_personel", assistantPersonelRequest.getFilter());
             if (updatedBy != null) filter.subTables.Add("updatedby",updatedByRequest.getFilter());
-            if (taskstateRequest.taskstate != null)
-            {
-                if (taskstateRequest.taskstate.op == 8)
-                    filter.fieldFilters.Add(new DTOFieldFilter {fieldName="status",op=8 });
-                else
-                filter.subTables.Add("status", taskstateRequest.getFilter());
-            }
             if (attachmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachmentdate", op = 5, value = attachmentDate });
             if (appointmentDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "appointmentdate", op = 5, value = appointmentDate });
             if (consummationDate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "consummationdate", op = 5, value = consummationDate });

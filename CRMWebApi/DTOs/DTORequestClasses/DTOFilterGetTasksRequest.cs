@@ -16,10 +16,13 @@ namespace CRMWebApi.DTOs.DTORequestClasses
     {
         DTOFieldFilter task { get; set; }
         DTOFieldFilter taskType { get; set; }
+        DTOFieldFilter taskstate { get; set; }
         bool hasTaskFilter();
         bool hasTypeFilter();
+        bool hasTaskstateFilter();
         bool isTaskFilter();
         bool isTypeFilter();
+        bool isTaskstateFilter();
         DTOFilter getFilter();
     }
     /// <summary> 
@@ -29,6 +32,7 @@ namespace CRMWebApi.DTOs.DTORequestClasses
     {
         public DTOFieldFilter task { get; set; }
         public DTOFieldFilter taskType { get; set; }
+        public DTOFieldFilter taskstate { get; set; }
 
 
         public bool hasTaskFilter()
@@ -41,25 +45,47 @@ namespace CRMWebApi.DTOs.DTORequestClasses
             return taskType != null;
         }
 
+        public bool hasTaskstateFilter()
+        {
+            return taskstate != null;
+        }
+
         public bool isTaskFilter()
         {
-            return !hasTypeFilter()||hasTaskFilter();
+            return (!hasTypeFilter() && !hasTaskstateFilter());
         }
 
         public bool isTypeFilter()
         {
-            return !isTaskFilter() ;
+            return !hasTaskstateFilter() && hasTypeFilter();
         }
 
+        public bool isTaskstateFilter()
+        {
+            return hasTaskstateFilter();
+        }
         public DTOFilter getFilter()
         {
-            DTOFilter filter = new DTOFilter("task", "taskid");
-            if (task != null) filter.fieldFilters.Add(task);
+
+            DTOFilter filter = new DTOFilter("taskstatematches", "id");
+
+            if (hasTaskFilter() || hasTypeFilter())
+            {
+                var subFilter = new DTOFilter("task", "taskid");
+                if (task != null) subFilter.fieldFilters.Add(task);
+                filter.subTables.Add("taskid", subFilter);
+            }
             if (hasTypeFilter())
             {
                 var subFilter = new DTOFilter("tasktypes", "TaskTypeId");
                 if (taskType != null) subFilter.fieldFilters.Add(taskType);
-                filter.subTables.Add("tasktype", subFilter);
+                filter.subTables["taskid"].subTables.Add("tasktype", subFilter);
+            }
+            if (hasTaskstateFilter())
+            {
+                var subFilter = new DTOFilter("taskstatepool", "taskstateid");
+                subFilter.fieldFilters.Add(taskstate);
+                filter.subTables.Add("stateid", subFilter);
             }
             return filter;
         }

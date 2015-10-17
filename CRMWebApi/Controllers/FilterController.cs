@@ -30,13 +30,22 @@ namespace CRMWebApi.Controllers
              {
                  var filter = request.getFilter();
                  if (request.isTaskFilter())
-                     return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(filter.getFilterSQL())
+                     return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(filter.subTables["taskid"].getFilterSQL())
                              .OrderBy(t => t.taskname)
                              .Select(t => new
                                      {
                                          t.taskid,
                                          t.taskname
                                      }).ToList(), "application/json");
+                 if (request.isTaskstateFilter())
+                 {
+                     var acik = new taskstatepool { taskstate = "AÇIK", taskstateid = 0 };
+                     var tspIds =  db.taskstatematches.SqlQuery(filter.getFilterSQL())
+                         .Select(t => t.stateid).ToList();
+                     var res = db.taskstatepool.Where(tsp => tspIds.Contains(tsp.taskstateid)).OrderBy(tsp => tsp.taskstate).ToList();
+                     res.Insert(0, acik);
+                     return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=>r.toDTO()).ToList(), "application/json");
+                 }
                  return Request.CreateResponse(HttpStatusCode.OK,
                      db.tasktypes.SqlQuery(filter.subTables["tasktype"].getFilterSQL())
                          .Select(tt => new { tt.TaskTypeId, tt.TaskTypeName })
@@ -61,7 +70,7 @@ namespace CRMWebApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.OK,
                                 db.customer.SqlQuery(filter.getFilterSQL())
                                     .Where(r => r.deleted == false)
-                                    .Select(r => new { r.customername, r.customersurname })
+                                    .Select(r => new {r.customerid, r.customername, r.customersurname })
                                     .ToList(),
                                 "application/json");
 
@@ -120,37 +129,7 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        /// <summary> 
-        /// Web Uygulamasındaki Task durumu filtresi bileşeninin verilerini çekmek için kullanılır. <c>getTaskStatus</c> 
-        /// </summary>
-        /// <param name="request">taskstatepool tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
-        [Route("getTaskStatus")]
-        [HttpPost]
-        public HttpResponseMessage getTaskStatus(DTOs.DTORequestClasses.DTOFilterGetTaskStateToTaskRequest request)
-        {
-            using (var db = new CRMEntities())
-            {
-               var states = new List<int>();
-               var deneme = new taskstatepool { taskstate = "AÇIK", taskstateid = 9999 };
-                if (request.taskorderno != null)
-                {
-                    var taskid = db.taskqueue.Where(t => t.taskorderno == request.taskorderno).Select(s => s.taskid).FirstOrDefault();
-                    foreach (var item in db.taskstatepool.Where(t => t.deleted == false && t.taskstatematches.Where(ya => ya.deleted == false).Select(m => m.taskid).Contains(taskid)))
-                    {
-                        states.Add(item.taskstateid);                       
-                    }
-                    var res = db.taskstatepool.Where(t => t.deleted == false && states.Contains(t.taskstateid)).OrderBy(tsp => tsp.taskstate).ToList();
-                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
-                }
-                else 
-                {
-                    var res = db.taskstatepool.Where(tsp => tsp.deleted == false).OrderBy(t => t.taskstate).ToList();
-                    res.Insert(0,deneme);
-                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()).ToList(), "application/json");
-
-                }
-            }
-        }
+       
 
         /// <summary> 
         /// Web Uygulamasındaki personel  filtresi bileşeninin verilerini çekmek için kullanılır. <c>getPersonel</c> 
@@ -166,6 +145,41 @@ namespace CRMWebApi.Controllers
                 var res = db.personel.Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
                 res.Insert(0, atanmamis);
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
+            }
+        }
+
+        /// <summary> 
+        /// Web Uygulamasındaki kampanya  seçenekleri bileşeninin verilerini çekmek için kullanılır. 
+        /// </summary>
+        /// <param name="request">kategori alt kategori ve ürün tanımlarını içerir</param>
+        [Route("getCampaignInfo")]
+        [HttpPost]
+        public HttpResponseMessage getCampaignInfo(DTOs.DTORequestClasses.DTOFiterGetCampaignRequst request)
+        {
+            var filter = request.getFilter();
+            filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+           
+            using (var db = new CRMEntities())
+            {
+                //var p = db.campaigns.Where(c => c.id == 6080).FirstOrDefault();
+                //List<int> productids = new List<int>();
+                //foreach (var item in p.products.Split(',').ToList())
+                //{
+                //    productids.Add(Convert.ToInt32(item));
+                //}
+                //var products = db.product_service.Where(pp => productids.Contains(pp.productid)).ToList();
+                //return Request.CreateResponse(HttpStatusCode.OK, products.Select(s => new {s.productname,s.productid }), "application/json");              
+
+                if (request.isCategoryFilter())
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.category }).Distinct().OrderBy(t => t.category).ToList(), "application/json");
+                }
+                else if (request.isSubcategoryFilter())
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.subcategory }).Distinct().OrderBy(t => t.subcategory).ToList(), "application/json");
+                }
+                else
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name,tt.id }).OrderBy(t => t.name).ToList(), "application/json");              
             }
         }
     }

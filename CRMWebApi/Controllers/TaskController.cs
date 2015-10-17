@@ -23,12 +23,12 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new CRMEntities())
             {
-                ((IPersonelRequest)request).getFilter();
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 var filter = request.getFilter();
-                string querySQL = request.getFilter().getPagingSQL(request.pageNo, request.rowsPerPage);
+                filter.fieldFilters.Add(new DTOFieldFilter{fieldName= "deleted",value=0,op=2});
+                string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
 
                 #region scb filter düzeltmesi
@@ -43,7 +43,6 @@ namespace CRMWebApi.Controllers
                         if (!request.isBlockFilter()) sbcExistsClauses.Add("(EXISTS (SELECT * from _siteid WHERE _siteid.siteid = taskqueue.attachedobjectid))");
                     }
                     querySQL = querySQL.Replace("@", string.Format("({0})", string.Join(" OR ", sbcExistsClauses)));
-
                     countSQL = countSQL.Replace(sbcExistsClauses[0], string.Format("({0})", string.Join(" OR ", sbcExistsClauses)));
                 }
                 #endregion
@@ -93,7 +92,7 @@ namespace CRMWebApi.Controllers
                                      r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
                                      r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
                                      r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
-
+                                    
                                  });
                 var ld = perf.Elapsed;
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
@@ -131,10 +130,11 @@ namespace CRMWebApi.Controllers
                 
                 
 
-                #region Taskın durumu değişmişse yapılacaklar
-                if (dtq.status != tq.taskstatepool.taskstateid && tq.taskstatepool.taskstateid!=0)
+                #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
+                if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid!=0|| tq.taskstatepool.taskstate!=null))
                 {
-                    dtq.status = tq.taskstatepool.taskstateid;
+                    if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
+                    else dtq.status = tq.taskstatepool.taskstateid;
 
                     #region Değiştirilen taska bağlı taskların hiyerarşik iptali. Bu kod taskın zorunlu task atamalarından önce çalışmalıdır.
                     foreach (var item in db.taskqueue.Where(r => r.relatedtaskorderid == tq.taskorderno && (r.deleted == false) || r.previoustaskorderid == tq.taskorderno && (r.deleted == false)).ToList())
@@ -180,22 +180,16 @@ namespace CRMWebApi.Controllers
                             var amtq = new taskqueue
                             {                               
                                appointmentdate = ((dtq.task.tasktype == 2 || dtq.taskid == 55 || dtq.taskid == 72 || dtq.taskid == 68 || item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
-                               
-                               // 73 d smart. ömer adında silinen müşteriye atanıyor. sorulup silinecek
-                               attachedpersonelid = (item == 73) ? 65 : ((item == 8147) ? null : (personel_id ? dtq.attachedpersonelid : (null))),
-                               
-                               //73 d smart kurulumu için sorulup silinecek
-                               attachmentdate = (dtq.task.taskid == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (null)),
-                               
-                                attachedobjectid = dtq.attachedobjectid,
-                                taskid = item,
-                                creationdate = DateTime.Now,
-                                deleted = false,
-                                lastupdated = DateTime.Now,
-                                previoustaskorderid = dtq.taskorderno,
-
-                                updatedby = 7, //User.Identity.PersonelID,
-                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                               attachedpersonelid = (item == 8147) ? null : (personel_id ? dtq.attachedpersonelid : (null)),                               
+                               attachmentdate = personel_id ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (null),                              
+                               attachedobjectid = dtq.attachedobjectid,
+                               taskid = item,
+                               creationdate = DateTime.Now,
+                               deleted = false,
+                               lastupdated = DateTime.Now,
+                               previoustaskorderid = dtq.taskorderno,
+                               updatedby = 7, //User.Identity.PersonelID,
+                               relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                             };
                             db.taskqueue.Add(amtq);
                         }
@@ -349,16 +343,15 @@ namespace CRMWebApi.Controllers
 
         [Route("saveSalesTask")]
         [HttpPost]
-        public HttpResponseMessage saveSalesTask(int? customerid_VI, int? attachedpersonelid_VI, int? assistant_personel_VI, DateTime appointmentdate)
+        public HttpResponseMessage saveSalesTask(DTOs.DTORequestClasses.DTOSaveFiberSalesTask request)
         {
             using (var db=new CRMEntities())
             {
                 var taskqueue = new taskqueue
                 {
-                    appointmentdate = DateTime.Now,
-                    attachedobjectid = customerid_VI ?? 0,
-                    attachedpersonelid = attachedpersonelid_VI,
-                    assistant_personel = assistant_personel_VI,
+                    appointmentdate =request.appointmentdate!=null? request.appointmentdate : DateTime.Now,
+                    attachedobjectid = request.customerid ?? 0,
+                    attachedpersonelid = request.attachedpersonelid,
                     attachmentdate = DateTime.Now,
                     consummationdate = DateTime.Now,
                     creationdate = DateTime.Now,
