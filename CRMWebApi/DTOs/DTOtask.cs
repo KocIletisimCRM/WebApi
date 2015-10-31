@@ -9,8 +9,6 @@ namespace CRMWebApi.DTOs
     {
         public int taskid { get; set; }
         public string taskname { get; set; }
-        public Nullable<int> attachablepersoneltype { get; set; }
-        public Nullable<int> attachableobjecttype { get; set; }
         public Nullable<double> performancescore { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
@@ -18,5 +16,7 @@ namespace CRMWebApi.DTOs
         public Nullable<bool> deleted { get; set; }
 
         public DTOTaskTypes tasktypes { get; set; }
+        public DTOobjecttypes objecttypes { get; set; }
+        public DTOobjecttypes personeltypes { get; set; }
     }
 }

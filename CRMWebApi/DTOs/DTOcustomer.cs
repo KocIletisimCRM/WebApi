@@ -7,7 +7,6 @@ namespace CRMWebApi.DTOs
 {
     public class DTOcustomer :BaseAttachedObject
     {
-
         public int customerid { get; set; }
         public DTOblock block { get; set; }
         public string tckimlikno { get; set; }
@@ -30,5 +29,6 @@ namespace CRMWebApi.DTOs
         public Nullable<int> emptorcustomernum { get; set; }
         public DTOtvStatus TvKullanımıStatus { get; set; }
         public DTOgsmStatus gsmKullanımıStatus { get; set; }
+        
     }
 }

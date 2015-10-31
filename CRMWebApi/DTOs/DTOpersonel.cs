@@ -20,5 +20,7 @@ namespace CRMWebApi.DTOs
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<long> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        
+        public List<object> stockstatus { get; set; }
     }
 }

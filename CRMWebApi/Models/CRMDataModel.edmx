@@ -150,6 +150,13 @@
           <Property Name="netText" Type="nvarchar" MaxLength="50" />
           <Property Name="deleted" Type="int" />
         </EntityType>
+        <EntityType Name="objecttypes">
+          <Key>
+            <PropertyRef Name="typeid" />
+          </Key>
+          <Property Name="typeid" Type="int" Nullable="false" />
+          <Property Name="typname" Type="varchar" MaxLength="100" />
+        </EntityType>
         <EntityType Name="personel">
           <Key>
             <PropertyRef Name="personelid" />
@@ -356,6 +363,35 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="flatinfo" Type="nvarchar" MaxLength="448" />
           <Property Name="blockid" Type="int" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMCRM.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="stockstatus">
+          <Key>
+            <PropertyRef Name="toobject" />
+            <PropertyRef Name="toobjecttype" />
+            <PropertyRef Name="stockcardid" />
+            <PropertyRef Name="INPUT" />
+            <PropertyRef Name="OUTPUT" />
+          </Key>
+          <Property Name="toobject" Type="int" Nullable="false" />
+          <Property Name="toobjecttype" Type="int" Nullable="false" />
+          <Property Name="stockcardid" Type="int" Nullable="false" />
+          <Property Name="INPUT" Type="int" Nullable="false" />
+          <Property Name="OUTPUT" Type="int" Nullable="false" />
+          <Property Name="amount" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="int" Nullable="false" />
+          <Property Name="pid" Type="int" Nullable="false" />
+          <Property Name="cname" Type="nvarchar" MaxLength="255" />
+          <Property Name="productname" Type="nvarchar" MaxLength="255" />
+        </EntityType>
         <Association Name="FK_block_site">
           <End Role="site" Type="Self.site" Multiplicity="1" />
           <End Role="block" Type="Self.block" Multiplicity="*" />
@@ -464,6 +500,17 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="getSerialsOnPersonel" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="PERSONELID" Type="int" Mode="In" />
+          <Parameter Name="STOCKCARDID" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="serialno" Type="nvarchar" MaxLength="255" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
         <Function Name="sf_task" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="pageNo" Type="int" Mode="In" />
           <Parameter Name="rowsPerPage" Type="int" Mode="In" />
@@ -530,6 +577,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <EntitySet Name="gsmKullanımıStatus" EntityType="Self.gsmKullanımıStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="issStatus" EntityType="Self.issStatus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="netStatus" EntityType="Self.netStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="objecttypes" EntityType="Self.objecttypes" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="personel" EntityType="Self.personel" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="product_service" EntityType="Self.product_service" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="site" EntityType="Self.site" Schema="dbo" store:Type="Tables" />
@@ -564,6 +612,24 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
     [flatinfo].[flatinfo] AS [flatinfo], 
     [flatinfo].[blockid] AS [blockid]
     FROM [dbo].[flatinfo] AS [flatinfo]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="stockstatus" EntityType="Self.stockstatus" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [stockstatus].[toobject] AS [toobject], 
+    [stockstatus].[toobjecttype] AS [toobjecttype], 
+    [stockstatus].[stockcardid] AS [stockcardid], 
+    [stockstatus].[INPUT] AS [INPUT], 
+    [stockstatus].[OUTPUT] AS [OUTPUT], 
+    [stockstatus].[amount] AS [amount]
+    FROM [dbo].[stockstatus] AS [stockstatus]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vcampaignproducts" EntityType="Self.vcampaignproducts" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vcampaignproducts].[cid] AS [cid], 
+    [vcampaignproducts].[pid] AS [pid], 
+    [vcampaignproducts].[cname] AS [cname], 
+    [vcampaignproducts].[productname] AS [productname]
+    FROM [dbo].[vcampaignproducts] AS [vcampaignproducts]</DefiningQuery>
           </EntitySet>
           <AssociationSet Name="FK_block_site" Association="Self.FK_block_site">
             <End Role="site" EntitySet="site" />
@@ -804,7 +870,66 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             <End Role="stockcard" EntitySet="stockcard" />
             <End Role="stockmovement" EntitySet="stockmovement" />
           </AssociationSet>
-          <AssociationSet Name="taskqueuetaskqueue" Association="CRMModel.taskqueuetaskqueue">
+          <AssociationSet Name="taskrel" Association="CRMModel.taskrel">
+            <End Role="taskqueue" EntitySet="taskqueue" />
+            <End Role="taskqueue1" EntitySet="taskqueue" />
+          </AssociationSet>
+          <EntitySet Name="vcampaignproducts" EntityType="CRMModel.vcampaignproducts" />
+          <AssociationSet Name="campaignsvcampaignproducts" Association="CRMModel.campaignsvcampaignproducts">
+            <End Role="campaigns" EntitySet="campaigns" />
+            <End Role="vcampaignproducts" EntitySet="vcampaignproducts" />
+          </AssociationSet>
+          <AssociationSet Name="product_servicevcampaignproducts" Association="CRMModel.product_servicevcampaignproducts">
+            <End Role="product_service" EntitySet="product_service" />
+            <End Role="vcampaignproducts" EntitySet="vcampaignproducts" />
+          </AssociationSet>
+          <AssociationSet Name="customerstockmovement" Association="CRMModel.customerstockmovement">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="taskqueuestockmovement" Association="CRMModel.taskqueuestockmovement">
+            <End Role="taskqueue" EntitySet="taskqueue" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <EntitySet Name="objecttypes" EntityType="CRMModel.objecttypes" />
+          <AssociationSet Name="objecttypesstockmovement" Association="CRMModel.objecttypesstockmovement">
+            <End Role="objecttypes" EntitySet="objecttypes" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="objecttypesstockmovement1" Association="CRMModel.objecttypesstockmovement1">
+            <End Role="objecttypes" EntitySet="objecttypes" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="customerstockmovement1" Association="CRMModel.customerstockmovement1">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="personelstockmovement" Association="CRMModel.personelstockmovement">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="personelstockmovement1" Association="CRMModel.personelstockmovement1">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <EntitySet Name="stockstatus" EntityType="CRMModel.stockstatus" />
+          <AssociationSet Name="personelstockstatus" Association="CRMModel.personelstockstatus">
+            <End Role="personel" EntitySet="personel" />
+            <End Role="stockstatus" EntitySet="stockstatus" />
+          </AssociationSet>
+          <AssociationSet Name="taskobjecttypes" Association="CRMModel.taskobjecttypes">
+            <End Role="task" EntitySet="task" />
+            <End Role="objecttypes" EntitySet="objecttypes" />
+          </AssociationSet>
+          <AssociationSet Name="taskobjecttypes1" Association="CRMModel.taskobjecttypes1">
+            <End Role="task" EntitySet="task" />
+            <End Role="objecttypes" EntitySet="objecttypes" />
+          </AssociationSet>
+          <FunctionImport Name="getSerialsOnPersonel" IsComposable="true" ReturnType="Collection(String)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <AssociationSet Name="taskprev" Association="CRMModel.taskprev">
             <End Role="taskqueue" EntitySet="taskqueue" />
             <End Role="taskqueue1" EntitySet="taskqueue" />
           </AssociationSet>
@@ -827,6 +952,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltask" FromRole="task" ToRole="personel" />
           <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktypestask" FromRole="task" ToRole="tasktypes" />
           <NavigationProperty Name="taskstatematches" Relationship="CRMModel.FK_taskstatematches_task" FromRole="task" ToRole="taskstatematches" />
+          <NavigationProperty Name="objecttypes" Relationship="CRMModel.taskobjecttypes" FromRole="task" ToRole="objecttypes" />
+          <NavigationProperty Name="personeltypes" Relationship="CRMModel.taskobjecttypes1" FromRole="task" ToRole="objecttypes" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -920,8 +1047,11 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="asistanPersonel" Relationship="CRMModel.asistantPersonel" FromRole="taskqueue" ToRole="personel" />
           <NavigationProperty Name="Updatedpersonel" Relationship="CRMModel.personeltaskqueue2" FromRole="taskqueue" ToRole="personel" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.customerproducttaskqueue" FromRole="taskqueue" ToRole="customerproduct" />
-          <NavigationProperty Name="taskqueue1" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue" ToRole="taskqueue1" />
-          <NavigationProperty Name="relatedTaskQueue" Relationship="CRMModel.taskqueuetaskqueue" FromRole="taskqueue1" ToRole="taskqueue" />
+          <NavigationProperty Name="taskqueue11" Relationship="CRMModel.taskrel" FromRole="taskqueue" ToRole="taskqueue1" />
+          <NavigationProperty Name="relatedTaskQueue" Relationship="CRMModel.taskrel" FromRole="taskqueue1" ToRole="taskqueue" />
+          <NavigationProperty Name="stockmovement" Relationship="CRMModel.taskqueuestockmovement" FromRole="taskqueue" ToRole="stockmovement" />
+          <NavigationProperty Name="taskqueue1" Relationship="CRMModel.taskprev" FromRole="taskqueue" ToRole="taskqueue1" />
+          <NavigationProperty Name="previousTaskQueue" Relationship="CRMModel.taskprev" FromRole="taskqueue1" ToRole="taskqueue" />
           
         
         </EntityType>
@@ -989,6 +1119,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="gsmKullanımıStatus" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="customer" ToRole="gsmKullanımıStatus" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_customer" FromRole="customer" ToRole="customerproduct" />
           <NavigationProperty Name="customerdocument" Relationship="CRMModel.customerdocumentcustomer" FromRole="customer" ToRole="customerdocument" />
+          <NavigationProperty Name="instockmovement" Relationship="CRMModel.customerstockmovement" FromRole="customer" ToRole="stockmovement" />
+          <NavigationProperty Name="outstockmovement1" Relationship="CRMModel.customerstockmovement1" FromRole="customer" ToRole="stockmovement" />
         </EntityType>
         <EntityType Name="personel">
           <Key>
@@ -1015,6 +1147,9 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <NavigationProperty Name="updatetasks" Relationship="CRMModel.personeltask" FromRole="personel" ToRole="task" />
           <NavigationProperty Name="updatetaskstatepools" Relationship="CRMModel.personeltaskstatepool" FromRole="personel" ToRole="taskstatepool" />
           <NavigationProperty Name="blocks" Relationship="CRMModel.personelblock1" FromRole="personel" ToRole="block" />
+          <NavigationProperty Name="stockmovement" Relationship="CRMModel.personelstockmovement" FromRole="personel" ToRole="stockmovement" />
+          <NavigationProperty Name="stockmovement1" Relationship="CRMModel.personelstockmovement1" FromRole="personel" ToRole="stockmovement" />
+          <NavigationProperty Name="stockstatus" Relationship="CRMModel.personelstockstatus" FromRole="personel" ToRole="stockstatus" />
           </EntityType>
         <Association Name="customertaskqueue">
           <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
@@ -1461,6 +1596,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_campaigns" FromRole="campaigns" ToRole="customerproduct" />
+          <NavigationProperty Name="vcampaignproducts" Relationship="CRMModel.campaignsvcampaignproducts" FromRole="campaigns" ToRole="vcampaignproducts" />
         </EntityType>
         <EntityType Name="customerproduct">
           <Key>
@@ -1628,6 +1764,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_product_service" FromRole="product_service" ToRole="customerproduct" />
+          <NavigationProperty Name="vcampaignproducts" Relationship="CRMModel.product_servicevcampaignproducts" FromRole="product_service" ToRole="vcampaignproducts" />
         </EntityType>
         <Association Name="FK_customerproduct_product_service">
           <End Type="CRMModel.product_service" Role="product_service" Multiplicity="0..1" />
@@ -1677,6 +1814,13 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="stockcard" Relationship="CRMModel.FK_stockmovement_stockcard" FromRole="stockmovement" ToRole="stockcard" />
+          <NavigationProperty Name="tocustomer" Relationship="CRMModel.customerstockmovement" FromRole="stockmovement" ToRole="customer" />
+          <NavigationProperty Name="taskqueue" Relationship="CRMModel.taskqueuestockmovement" FromRole="stockmovement" ToRole="taskqueue" />
+          <NavigationProperty Name="fromobjecttypes" Relationship="CRMModel.objecttypesstockmovement" FromRole="stockmovement" ToRole="objecttypes" />
+          <NavigationProperty Name="toobjecttypes" Relationship="CRMModel.objecttypesstockmovement1" FromRole="stockmovement" ToRole="objecttypes" />
+          <NavigationProperty Name="fromcustomer" Relationship="CRMModel.customerstockmovement1" FromRole="stockmovement" ToRole="customer" />
+          <NavigationProperty Name="frompersonel" Relationship="CRMModel.personelstockmovement" FromRole="stockmovement" ToRole="personel" />
+          <NavigationProperty Name="topersonel" Relationship="CRMModel.personelstockmovement1" FromRole="stockmovement" ToRole="personel" />
         </EntityType>
         <Association Name="FK_stockmovement_stockcard">
           <End Type="CRMModel.stockcard" Role="stockcard" Multiplicity="0..1" />
@@ -1690,7 +1834,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="taskqueuetaskqueue">
+        <Association Name="taskrel">
           <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="0..1" />
           <End Type="CRMModel.taskqueue" Role="taskqueue1" Multiplicity="*" >
           </End>
@@ -1700,6 +1844,201 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
             </Principal>
             <Dependent Role="taskqueue1">
               <PropertyRef Name="relatedtaskorderid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="Int32" Nullable="false" />
+          <Property Name="pid" Type="Int32" Nullable="false" />
+          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="campaigns" Relationship="CRMModel.campaignsvcampaignproducts" FromRole="vcampaignproducts" ToRole="campaigns" />
+          <NavigationProperty Name="product_service" Relationship="CRMModel.product_servicevcampaignproducts" FromRole="vcampaignproducts" ToRole="product_service" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="campaignsvcampaignproducts">
+          <End Type="CRMModel.campaigns" Role="campaigns" Multiplicity="1" />
+          <End Type="CRMModel.vcampaignproducts" Role="vcampaignproducts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="campaigns">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="vcampaignproducts">
+              <PropertyRef Name="cid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="product_servicevcampaignproducts">
+          <End Type="CRMModel.product_service" Role="product_service" Multiplicity="1" />
+          <End Type="CRMModel.vcampaignproducts" Role="vcampaignproducts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="product_service">
+              <PropertyRef Name="productid" />
+            </Principal>
+            <Dependent Role="vcampaignproducts">
+              <PropertyRef Name="pid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerstockmovement">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskqueuestockmovement">
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskqueue">
+              <PropertyRef Name="taskorderno" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="relatedtaskqueue" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="objecttypes">
+          <Key>
+            <PropertyRef Name="typeid" />
+          </Key>
+          <Property Name="typeid" Type="Int32" Nullable="false" />
+          <Property Name="typname" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="stockmovement" Relationship="CRMModel.objecttypesstockmovement" FromRole="objecttypes" ToRole="stockmovement" />
+          <NavigationProperty Name="stockmovement1" Relationship="CRMModel.objecttypesstockmovement1" FromRole="objecttypes" ToRole="stockmovement" />
+          <NavigationProperty Name="task" Relationship="CRMModel.taskobjecttypes" FromRole="objecttypes" ToRole="task" />
+          <NavigationProperty Name="task1" Relationship="CRMModel.taskobjecttypes1" FromRole="objecttypes" ToRole="task" />
+        </EntityType>
+        <Association Name="objecttypesstockmovement">
+          <End Type="CRMModel.objecttypes" Role="objecttypes" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="fromobjecttype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="objecttypesstockmovement1">
+          <End Type="CRMModel.objecttypes" Role="objecttypes" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="toobjecttype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerstockmovement1">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="fromobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelstockmovement">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="fromobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="personelstockmovement1">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <End Type="CRMModel.stockmovement" Role="stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="stockmovement">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="stockstatus">
+          <Key>
+            <PropertyRef Name="toobject" />
+            <PropertyRef Name="toobjecttype" />
+            <PropertyRef Name="stockcardid" />
+            <PropertyRef Name="INPUT" />
+            <PropertyRef Name="OUTPUT" />
+          </Key>
+          <Property Name="toobject" Type="Int32" Nullable="false" />
+          <Property Name="toobjecttype" Type="Int32" Nullable="false" />
+          <Property Name="stockcardid" Type="Int32" Nullable="false" />
+          <Property Name="INPUT" Type="Int32" Nullable="false" />
+          <Property Name="OUTPUT" Type="Int32" Nullable="false" />
+          <Property Name="amount" Type="Int32" />
+          <NavigationProperty Name="personel" Relationship="CRMModel.personelstockstatus" FromRole="stockstatus" ToRole="personel" />
+        </EntityType>
+        <Association Name="personelstockstatus">
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="1" />
+          <End Type="CRMModel.stockstatus" Role="stockstatus" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="stockstatus">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskobjecttypes">
+          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
+          <End Type="CRMModel.objecttypes" Role="objecttypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="task">
+              <PropertyRef Name="attachableobjecttype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskobjecttypes1">
+          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
+          <End Type="CRMModel.objecttypes" Role="objecttypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="task">
+              <PropertyRef Name="attachablepersoneltype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="taskprev">
+          <End Type="CRMModel.taskqueue" Role="taskqueue" Multiplicity="0..1" />
+          <End Type="CRMModel.taskqueue" Role="taskqueue1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="taskqueue">
+              <PropertyRef Name="taskorderno" />
+            </Principal>
+            <Dependent Role="taskqueue1">
+              <PropertyRef Name="previoustaskorderid" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2085,6 +2424,37 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary ke
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="vcampaignproducts">
+            <EntityTypeMapping TypeName="CRMModel.vcampaignproducts">
+              <MappingFragment StoreEntitySet="vcampaignproducts">
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="cname" ColumnName="cname" />
+                <ScalarProperty Name="pid" ColumnName="pid" />
+                <ScalarProperty Name="cid" ColumnName="cid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="objecttypes">
+            <EntityTypeMapping TypeName="CRMModel.objecttypes">
+              <MappingFragment StoreEntitySet="objecttypes">
+                <ScalarProperty Name="typname" ColumnName="typname" />
+                <ScalarProperty Name="typeid" ColumnName="typeid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockstatus">
+            <EntityTypeMapping TypeName="CRMModel.stockstatus">
+              <MappingFragment StoreEntitySet="stockstatus">
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="OUTPUT" ColumnName="OUTPUT" />
+                <ScalarProperty Name="INPUT" ColumnName="INPUT" />
+                <ScalarProperty Name="stockcardid" ColumnName="stockcardid" />
+                <ScalarProperty Name="toobjecttype" ColumnName="toobjecttype" />
+                <ScalarProperty Name="toobject" ColumnName="toobject" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="getSerialsOnPersonel" FunctionName="CRMModel.Store.getSerialsOnPersonel" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

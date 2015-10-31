@@ -19,6 +19,8 @@ namespace CRMWebApi.Models
             this.taskqueues = new HashSet<taskqueue>();
             this.customerproduct = new HashSet<customerproduct>();
             this.customerdocument = new HashSet<customerdocument>();
+            this.instockmovement = new HashSet<stockmovement>();
+            this.outstockmovement1 = new HashSet<stockmovement>();
         }
     
         public int customerid { get; set; }
@@ -55,5 +57,7 @@ namespace CRMWebApi.Models
         public virtual gsmKullanımıStatus gsmKullanımıStatus { get; set; }
         public virtual ICollection<customerproduct> customerproduct { get; set; }
         public virtual ICollection<customerdocument> customerdocument { get; set; }
+        public virtual ICollection<stockmovement> instockmovement { get; set; }
+        public virtual ICollection<stockmovement> outstockmovement1 { get; set; }
     }
 }

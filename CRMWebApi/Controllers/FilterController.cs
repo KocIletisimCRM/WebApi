@@ -40,13 +40,33 @@ namespace CRMWebApi.Controllers
                  if (request.isTaskstateFilter())
                  {
                      var acik = new taskstatepool { taskstate = "AÇIK", taskstateid = 0 };
-                     var tspIds =  db.taskstatematches.SqlQuery(filter.getFilterSQL())
+                    var query = filter.getFilterSQL();
+                    var tspIds =  db.taskstatematches.SqlQuery(query)
                          .Select(t => t.stateid).ToList();
+
                      var res = db.taskstatepool.Where(tsp => tspIds.Contains(tsp.taskstateid)).OrderBy(tsp => tsp.taskstate).ToList();
                      res.Insert(0, acik);
                      return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=>r.toDTO()).ToList(), "application/json");
                  }
-                 return Request.CreateResponse(HttpStatusCode.OK,
+                if (request.isObjecttypeFilter())
+                {
+                    var objids = db.task.SqlQuery(filter.subTables["taskid"].getFilterSQL()).Select(s => s.attachableobjecttype).Distinct().ToList();
+                    var res = db.objecttypes.Where(o => objids.Contains(o.typeid))
+                               .OrderBy(t => t.typname)
+                               .ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK,res.Select(s=> new { s.typeid, s.typname }).ToList() , "application/json");
+                }
+                if (request.isPersonelTypeFilter())
+                {
+                    var pids= db.task.SqlQuery(filter.subTables["taskid"].getFilterSQL()).Select(s => s.attachablepersoneltype).Distinct().ToList();
+                    var res = db.objecttypes.Where(p => pids.Contains(p.typeid)).OrderBy(p => p.typname).ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(t => new
+                               {
+                                   t.typeid,
+                                   t.typname
+                               }).ToList(), "application/json");
+                }
+                return Request.CreateResponse(HttpStatusCode.OK,
                      db.tasktypes.SqlQuery(filter.subTables["tasktype"].getFilterSQL())
                          .Select(tt => new { tt.TaskTypeId, tt.TaskTypeName })
                          .OrderBy(tt => tt.TaskTypeName).ToList(),
@@ -70,7 +90,7 @@ namespace CRMWebApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.OK,
                                 db.customer.SqlQuery(filter.getFilterSQL())
                                     .Where(r => r.deleted == false)
-                                    .Select(r => new {r.customerid, r.customername, r.customersurname })
+                                    .Select(r => new {r.customerid, r.customername, r.customersurname,r.flat})
                                     .ToList(),
                                 "application/json");
 
@@ -128,8 +148,76 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
         }
-
-       
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getNetStatus")]
+        [HttpPost]
+        public HttpResponseMessage getNetStatus()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.netStatus.Where(i => i.deleted == 0).OrderBy(i => i.netText).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getTelStatus")]
+        [HttpPost]
+        public HttpResponseMessage getTelStatus()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.telStatus.Where(i => i.deleted == 0).OrderBy(i => i.telText).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getTvKullanımıStatus")]
+        [HttpPost]
+        public HttpResponseMessage getTvKullanımıStatus()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.TvKullanımıStatus.Where(i => i.deleted == 0).OrderBy(i => i.tvKullanımıText).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getTurkcellTvStatus")]
+        [HttpPost]
+        public HttpResponseMessage getTurkcellTvStatus()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.TurkcellTVStatus.Where(i => i.deleted == 0).OrderBy(i => i.TurkcellTvText).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
+        /// <summary> 
+        /// Web Uygulamasındaki iss filtresi bileşeninin verilerini çekmek için kullanılır. <c>getIssStatus</c> 
+        /// </summary>
+        /// <param name="request">issStatus tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
+        [Route("getGsmStatus")]
+        [HttpPost]
+        public HttpResponseMessage getGsmStatus()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.gsmKullanımıStatus.Where(i => i.deleted == 0).OrderBy(i => i.gsmText).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
 
         /// <summary> 
         /// Web Uygulamasındaki personel  filtresi bileşeninin verilerini çekmek için kullanılır. <c>getPersonel</c> 
@@ -169,7 +257,6 @@ namespace CRMWebApi.Controllers
                 //}
                 //var products = db.product_service.Where(pp => productids.Contains(pp.productid)).ToList();
                 //return Request.CreateResponse(HttpStatusCode.OK, products.Select(s => new {s.productname,s.productid }), "application/json");              
-
                 if (request.isCategoryFilter())
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.category }).Distinct().OrderBy(t => t.category).ToList(), "application/json");
@@ -178,8 +265,61 @@ namespace CRMWebApi.Controllers
                 {
                     return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.subcategory }).Distinct().OrderBy(t => t.subcategory).ToList(), "application/json");
                 }
+                else if (request.isCampaignFilter())
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name, tt.id }).OrderBy(t => t.name).ToList(), "application/json");
                 else
-                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name,tt.id }).OrderBy(t => t.name).ToList(), "application/json");              
+                {
+                    var cids = db.campaigns.SqlQuery(filter.getFilterSQL()).Select(s=>s.id).ToList();
+                    var pids = db.vcampaignproducts.Where(v=>cids.Contains(v.cid)).Select(s=>s.pid).ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                        db.product_service.Where(p => pids.Contains(p.productid)).OrderBy(s => s.category).ToList().GroupBy(g => g.category, g => g.toDTO()).Select(g => new { category = g.Key, products = g })
+                        ,"application/json");
+
+                }
+            }
+        }
+
+        [Route("getProducts")]
+        [HttpPost]
+        public HttpResponseMessage getProduct()
+        {
+            using (var db = new CRMEntities())
+            {
+
+                var res = db.product_service.Where(p => p.deleted == false).OrderBy(o => o.productname).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
+            }
+        }
+
+        [Route("getObjectType")]
+        [HttpPost]
+        public HttpResponseMessage getObjectType()
+        {
+            using (var db=new CRMEntities())
+            {
+                var res = db.objecttypes.Select(s => new {s.typeid,s.typname }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK,res,"application/json");
+            }
+        }
+
+        [Route("getObject")]
+        [HttpPost]
+        public HttpResponseMessage getObject(DTOs.DTORequestClasses.DTOGetObjectRequest request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var filter = request.getFilter();
+                var querySql = filter.getFilterSQL();
+                var res = new List<idName>();
+                if (filter.tableName == "block")
+                    res.AddRange(db.block.SqlQuery(querySql).Select(b=> new idName { id = b.blockid, name = b.blockname}));
+                else if (filter.tableName == "site")
+                    res.AddRange(db.site.SqlQuery(querySql).Select(s => new idName { id = s.siteid, name = s.sitename }));
+                else if (filter.tableName == "customer")
+                    res.AddRange(db.customer.SqlQuery(querySql).Select(c => new idName { id = c.customerid, name = $"{c.customername} {c.customersurname}" }).Take(10));
+                else
+                    res.AddRange(db.personel.SqlQuery(querySql).Select(p => new idName { id = p.personelid, name = p.personelname }));
+                return Request.CreateResponse(HttpStatusCode.OK,res.Select(r=>r.toDTO()),"application/json");
             }
         }
     }

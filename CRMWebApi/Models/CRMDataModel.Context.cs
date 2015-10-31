@@ -53,6 +53,9 @@ namespace CRMWebApi.Models
         public virtual DbSet<product_service> product_service { get; set; }
         public virtual DbSet<stockcard> stockcard { get; set; }
         public virtual DbSet<stockmovement> stockmovement { get; set; }
+        public virtual DbSet<vcampaignproducts> vcampaignproducts { get; set; }
+        public virtual DbSet<objecttypes> objecttypes { get; set; }
+        public virtual DbSet<stockstatus> stockstatus { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)
@@ -112,6 +115,20 @@ namespace CRMWebApi.Models
                 new ObjectParameter("taskFilter", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<task>("[CRMEntities].[sf_task](@pageNo, @rowsPerPage, @taskFilter)", pageNoParameter, rowsPerPageParameter, taskFilterParameter);
+        }
+    
+        [DbFunction("CRMEntities", "getSerialsOnPersonel")]
+        public virtual IQueryable<string> getSerialsOnPersonel(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
+        {
+            var pERSONELIDParameter = pERSONELID.HasValue ?
+                new ObjectParameter("PERSONELID", pERSONELID) :
+                new ObjectParameter("PERSONELID", typeof(int));
+    
+            var sTOCKCARDIDParameter = sTOCKCARDID.HasValue ?
+                new ObjectParameter("STOCKCARDID", sTOCKCARDID) :
+                new ObjectParameter("STOCKCARDID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[CRMEntities].[getSerialsOnPersonel](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
         }
     }
 }

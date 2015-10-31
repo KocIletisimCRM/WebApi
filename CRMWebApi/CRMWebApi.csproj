@@ -20,11 +20,12 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -102,28 +103,49 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\SiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
+    <Compile Include="Controllers\StockController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="Controllers\FilterController.cs" />
     <Compile Include="DTOs\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\BaseAttachedObject.cs" />
     <Compile Include="DTOs\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\DTOcampaigns.cs" />
     <Compile Include="DTOs\DTOCloseTaskQueue.cs" />
+    <Compile Include="DTOs\DTOcustomerproduct.cs" />
+    <Compile Include="DTOs\DTOdocument.cs" />
     <Compile Include="DTOs\DTOgsmStatus.cs" />
     <Compile Include="DTOs\DTOissStatus.cs" />
     <Compile Include="DTOs\DTOKatZiyareti.cs" />
     <Compile Include="DTOs\DTOnetStatus.cs" />
+    <Compile Include="DTOs\DTOobjecttypes.cs" />
+    <Compile Include="DTOs\DTOProduct_service.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetBlockFilter.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetDocumentFilter.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetObjectRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetSiteFilter.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetStockMovementRequest.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetTSMFilter.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTOGetTSPFilter.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTORequestCloseTaskqueue.cs" />
+    <Compile Include="DTOs\DTORequestClasses\DTORequestSaveFaultTaks.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTORequestTopluAtamalar.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTORequestPagination.cs" />
     <Compile Include="DTOs\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
     <Compile Include="DTOs\DTOResponseClasses.cs" />
+    <Compile Include="DTOs\DTOstockcard.cs" />
+    <Compile Include="DTOs\DTOstockmovement.cs" />
+    <Compile Include="DTOs\DTOstockstatus.cs" />
+    <Compile Include="DTOs\DTOtaskstatematches.cs" />
     <Compile Include="DTOs\DTOtelStatus.cs" />
+    <Compile Include="DTOs\DTOturkcelltvstatus.cs" />
     <Compile Include="DTOs\DTOtvStatus.cs" />
     <Compile Include="DTOs\FilterClasses.cs" />
     <Compile Include="DTOs\DTOblock.cs" />
@@ -201,6 +223,9 @@
     <Compile Include="Models\netStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\objecttypes.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\personel.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
@@ -214,6 +239,9 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\stockmovement.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\stockstatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\task.cs">
@@ -238,6 +266,9 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\TvKullanımıStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\vcampaignproducts.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

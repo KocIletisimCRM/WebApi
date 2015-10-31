@@ -17,6 +17,8 @@ namespace CRMWebApi.Models
         public taskqueue()
         {
             this.customerproduct = new HashSet<customerproduct>();
+            this.taskqueue11 = new HashSet<taskqueue>();
+            this.stockmovement = new HashSet<stockmovement>();
             this.taskqueue1 = new HashSet<taskqueue>();
         }
     
@@ -46,7 +48,10 @@ namespace CRMWebApi.Models
         public virtual personel asistanPersonel { get; set; }
         public virtual personel Updatedpersonel { get; set; }
         public virtual ICollection<customerproduct> customerproduct { get; set; }
-        public virtual ICollection<taskqueue> taskqueue1 { get; set; }
+        public virtual ICollection<taskqueue> taskqueue11 { get; set; }
         public virtual taskqueue relatedTaskQueue { get; set; }
+        public virtual ICollection<stockmovement> stockmovement { get; set; }
+        public virtual ICollection<taskqueue> taskqueue1 { get; set; }
+        public virtual taskqueue previousTaskQueue { get; set; }
     }
 }

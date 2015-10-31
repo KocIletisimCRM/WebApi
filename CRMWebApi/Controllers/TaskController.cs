@@ -27,7 +27,7 @@ namespace CRMWebApi.Controllers
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 var filter = request.getFilter();
-                filter.fieldFilters.Add(new DTOFieldFilter{fieldName= "deleted",value=0,op=2});
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
 
@@ -46,7 +46,7 @@ namespace CRMWebApi.Controllers
                     countSQL = countSQL.Replace(sbcExistsClauses[0], string.Format("({0})", string.Join(" OR ", sbcExistsClauses)));
                 }
                 #endregion
-                
+
                 var perf = Stopwatch.StartNew();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
                 var qd = perf.Elapsed;
@@ -61,7 +61,9 @@ namespace CRMWebApi.Controllers
                     .Union(res.Select(r => r.assistant_personel))
                     .Union(res.Select(r => r.updatedby)).Distinct().ToList();
 
-                var personels = db.personel.Where(p => personelIds.Contains(p.personelid)).ToList();
+                List<personel> personels;// personelin stok durumuna ihtiyaç yoksa sorgulanmasın
+                if (request.taskOrderNo != null) personels = db.personel.Include(p => p.stockstatus).Where(p => personelIds.Contains(p.personelid)).ToList();
+                else personels = db.personel.Where(p => personelIds.Contains(p.personelid)).ToList();
 
                 var customerIds = res.Select(c => c.attachedobjectid).Distinct().ToList();
                 var customers = db.customer.Include(c => c.block.site).Where(c => customerIds.Contains(c.customerid)).ToList();
@@ -72,7 +74,7 @@ namespace CRMWebApi.Controllers
                 var taskstateIds = res.Select(tsp => tsp.status).Distinct().ToList();
                 var taskstates = db.taskstatepool.Where(tsp => taskstateIds.Contains(tsp.taskstateid)).ToList();
 
-                var issIds = res.Where(i=>i.attachedcustomer!=null && i.attachedcustomer.iss != null).Select(i => i.attachedcustomer.iss).Distinct().ToList();
+                var issIds = res.Where(i => i.attachedcustomer != null && i.attachedcustomer.iss != null).Select(i => i.attachedcustomer.iss).Distinct().ToList();
                 var isss = db.issStatus.Where(i => issIds.Contains(i.id)).ToList();
 
                 var cststatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.customerstatus != null).Select(c => c.attachedcustomer.customerstatus).Distinct().ToList();
@@ -87,12 +89,36 @@ namespace CRMWebApi.Controllers
                                      {
                                          r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
                                      }
-                                     if(r.attachedcustomer!=null)r.attachedcustomer.issStatus =isss.Where(i => i.id == (r.attachedcustomer.iss??0)).FirstOrDefault();
+                                     if (r.attachedcustomer != null) r.attachedcustomer.issStatus = isss.Where(i => i.id == (r.attachedcustomer.iss ?? 0)).FirstOrDefault();
                                      if (r.attachedcustomer != null) r.attachedcustomer.customer_status = cststatus.Where(c => c.ID == (r.attachedcustomer.customerstatus ?? 0)).FirstOrDefault();
                                      r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
                                      r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
                                      r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
-                                    
+                                     if (request.taskOrderNo != null)
+                                     {
+                                         var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
+                                         var salestaskorderno = db.taskqueue.Where(t => t.taskid == 3 && t.attachedobjectid == customerid)
+                                             .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+
+                                         //taska bağlı müşteri kampanyası ve bilgileri
+                                         r.customerproduct = db.customerproduct.Include(c => c.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
+                                         //taska bağlı stock hareketleri
+                                         r.stockmovement = db.stockmovement.Include(s => s.stockcard).Where(s => s.relatedtaskqueue == r.taskorderno).ToList();
+                                         var stockcardids = db.taskstatematches.Where(tsm => tsm.taskid == r.taskid && tsm.stateid == r.status && tsm.stockcards != null).ToList()
+                                         .SelectMany(s => s.stockcards.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(ss => Convert.ToInt32(ss))).ToList();
+                                         r.stockcardlist = db.stockcard.Where(s => stockcardids.Contains(s.stockid)).ToList();
+                                         //sadece task durumuyla ilişkili stockcardid'ler seçiliyor
+                                         if (stockcardids.Count() > 0)
+                                         {
+                                             r.attachedpersonel.stockstatus = r.attachedpersonel.stockstatus.
+                                                Where(ss => stockcardids.Contains(ss.stockcardid)).ToList();
+                                             foreach (var ss in r.attachedpersonel.stockstatus)
+                                             {
+                                                 ss.serials = db.getSerialsOnPersonel(ss.toobject, ss.stockcardid).ToList();
+                                             }
+                                         }
+                                     }
+
                                  });
                 var ld = perf.Elapsed;
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
@@ -104,10 +130,12 @@ namespace CRMWebApi.Controllers
                 };
                 DTOQueryPerformance qp = new DTOQueryPerformance
                 {
-                    QuerSQLyDuration = qd, CountSQLDuration = cd, LookupDuration = ld
+                    QuerSQLyDuration = qd,
+                    CountSQLDuration = cd,
+                    LookupDuration = ld
                 };
                 return Request.CreateResponse(HttpStatusCode.OK,
-                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r=>r.deleted==false).Select(r => r.toDTO()).ToList(), paginginfo, querySQL, qp),
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySQL, qp),
                     "application/json"
                 );
             }
@@ -116,22 +144,24 @@ namespace CRMWebApi.Controllers
         [Route("saveTaskQueues")]
         [HttpPost]
         public HttpResponseMessage saveTaskQueues(DTOs.DTOtaskqueue tq)
-
         {
-              
+
             // 7 User.Identity.PersonelID
             using (var db = new CRMEntities())
             {
-                var tsm = db.taskstatematches.Include(t=>t.taskstatepool).Where(r => r.taskid == tq.task.taskid && r.stateid == tq.taskstatepool.taskstateid).FirstOrDefault();
-                var dtq = db.taskqueue.Include(p=>p.attachedpersonel)
-                                      .Include(tsp=>tsp.taskstatepool)
-                                      .Include(ap=>ap.asistanPersonel)
-                                      .Include(t=>t.task).Where(r => r.taskorderno == tq.taskorderno).First();
-                
-                
+                var tsm = db.taskstatematches.Include(t => t.taskstatepool).Where(r => r.taskid == tq.task.taskid && r.stateid == tq.taskstatepool.taskstateid).FirstOrDefault();
+                var dtq = db.taskqueue.Include(t => t.task)
+                                      .Include(p => p.attachedpersonel)
+                                      .Include(tsp => tsp.taskstatepool)
+                                      .Include(ap => ap.asistanPersonel)
+                                      .Include(rt=>rt.relatedTaskQueue)
+                                      .Include(pt=>pt.previousTaskQueue)
+                                      .Where(r => r.taskorderno == tq.taskorderno).First();
+
+
 
                 #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
-                if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid!=0|| tq.taskstatepool.taskstate!=null))
+                if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != null))
                 {
                     if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
                     else dtq.status = tq.taskstatepool.taskstateid;
@@ -178,18 +208,18 @@ namespace CRMWebApi.Controllers
                                 continue;
                             var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
                             var amtq = new taskqueue
-                            {                               
-                               appointmentdate = ((dtq.task.tasktype == 2 || dtq.taskid == 55 || dtq.taskid == 72 || dtq.taskid == 68 || item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
-                               attachedpersonelid = (item == 8147) ? null : (personel_id ? dtq.attachedpersonelid : (null)),                               
-                               attachmentdate = personel_id ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (null),                              
-                               attachedobjectid = dtq.attachedobjectid,
-                               taskid = item,
-                               creationdate = DateTime.Now,
-                               deleted = false,
-                               lastupdated = DateTime.Now,
-                               previoustaskorderid = dtq.taskorderno,
-                               updatedby = 7, //User.Identity.PersonelID,
-                               relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                            {
+                                appointmentdate = ((dtq.task.tasktype == 2 || dtq.taskid == 55 || dtq.taskid == 72 || dtq.taskid == 68 || item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
+                                attachedpersonelid = (item == 8147) ? null : (personel_id ? dtq.attachedpersonelid : (null)),
+                                attachmentdate = personel_id ? ((dtq.taskstatepool != null ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (DateTime?)DateTime.Now)) : (null),
+                                attachedobjectid = dtq.attachedobjectid,
+                                taskid = item,
+                                creationdate = DateTime.Now,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                previoustaskorderid = dtq.taskorderno,
+                                updatedby = 7, //User.Identity.PersonelID,
+                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                             };
                             db.taskqueue.Add(amtq);
                         }
@@ -227,7 +257,7 @@ namespace CRMWebApi.Controllers
                 if (dtq.taskid == 85 && (dtq.status == 75 || dtq.status == 77 || dtq.status == 78))
                 {
                     var blok = dtq.attachedobjectid;
-                    foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted==false)))
+                    foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted == false)))
                     {
                         db.taskqueue.Add(new taskqueue
                         {
@@ -241,7 +271,7 @@ namespace CRMWebApi.Controllers
                             lastupdated = DateTime.Now,
                             previoustaskorderid = dtq.taskorderno,
                             //Kullanıcı Kontrolü
-                            updatedby =7, // User.Identity.PersonelID,
+                            updatedby = 7, // User.Identity.PersonelID,
                             relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                         });
                     }
@@ -254,7 +284,7 @@ namespace CRMWebApi.Controllers
                 if (dtq.taskid == 8164 && dtq.status == 8110)
                 {
                     var blok = dtq.attachedobjectid;
-                    foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted==false)))
+                    foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted == false)))
                     {
                         db.taskqueue.Add(new taskqueue
                         {
@@ -268,7 +298,7 @@ namespace CRMWebApi.Controllers
                             lastupdated = DateTime.Now,
                             previoustaskorderid = dtq.taskorderno,
                             //Kullanıcı Kontrolü
-                            updatedby =7,// User.Identity.PersonelID,
+                            updatedby = 7,// User.Identity.PersonelID,
                             relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                         });
                     }
@@ -302,7 +332,7 @@ namespace CRMWebApi.Controllers
                         if (ttq == null)
                             throw new Exception("Satış Taskı Bulunamadı.");
 
-                        var cust_pro = db.customerproduct.Where(r => r.taskid == ttq.taskorderno && r.deleted==false).ToList();
+                        var cust_pro = db.customerproduct.Where(r => r.taskid == ttq.taskorderno && r.deleted == false).ToList();
                         foreach (var p in cust_pro.Select(r => r.productid))
                             foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                             {
@@ -321,7 +351,7 @@ namespace CRMWebApi.Controllers
                                     lastupdated = DateTime.Now,
                                     previoustaskorderid = dtq.taskorderno,
                                     //Kullanıcı Kontrolü
-                                    updatedby =7,// User.Identity.PersonelID,
+                                    updatedby = 7,// User.Identity.PersonelID,
                                     relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                                 });
                             }
@@ -330,30 +360,119 @@ namespace CRMWebApi.Controllers
                 }
                 #endregion
 
-                dtq.description = tq.description!=null ?tq.description :dtq.description;
-                dtq.appointmentdate = (tq.appointmentdate!=null) ? tq.appointmentdate :dtq.appointmentdate;
-                dtq.creationdate = (tq.creationdate!=null) ? tq.creationdate : dtq.creationdate;
-                dtq.assistant_personel = (tq.asistanPersonel.personelid !=null && tq.asistanPersonel.personelid!=0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
-                dtq.consummationdate = (tq.consummationdate!=null) ? tq.consummationdate : (dtq.status!=null) ? dtq.consummationdate : DateTime.Now;
+                dtq.description = tq.description != null ? tq.description : dtq.description;
+                dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
+                dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
+                dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
+                dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
                 dtq.lastupdated = DateTime.Now;
                 db.SaveChanges();
-                return Request.CreateResponse(HttpStatusCode.OK,"ok","application/json");          
-                }           
+                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
+            }
+        }
+
+        [Route("closeTaskQueues")]
+        [HttpPost]
+        public HttpResponseMessage closeTaskQueues(DTOs.DTORequestClasses.DTORequestCloseTaskqueue request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var tq = db.taskqueue.Include(t => t.attachedpersonel).Where(r => r.taskorderno == request.taskorderno).First();
+                var cdocs = tq.customerproduct.Where(r => r.deleted == false);
+                var olddocs = (cdocs.Any()) ? (cdocs.First().campaigns.documents ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)).ToList() : new List<int>();
+                var newdocs = (db.campaigns.Where(r => r.id == request.campaignid).First().documents ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r));
+                #region Eski kampanya belgeleri siliniyor
+                foreach (var item in olddocs.Where(r => !newdocs.Contains(r)))
+                {
+                    foreach (var cdc in db.customerdocument.Where(r => r.documentid == item && r.taskqueueid == tq.taskorderno && r.deleted == false))
+                    {
+                        cdc.updatedby = 7;// User.Identity.PersonelID;
+                        cdc.deleted = true;
+                        cdc.lastupdated = DateTime.Now;
+                    }
+                }
+                #endregion
+                #region Yeni kampanya belgeleri ekleniyor
+                foreach (var item in newdocs.Where(r => !olddocs.Contains(r)))
+                {
+                    db.customerdocument.Add(new customerdocument
+                    {
+                        creationdate = DateTime.Now,
+                        customerid = tq.attachedobjectid,
+                        deleted = false,
+                        documentid = item,
+                        lastupdated = DateTime.Now,
+                        taskqueueid = tq.taskorderno,
+                        updatedby = 7,// User.Identity.PersonelID,
+                        attachedobjecttype = tq.task.attachableobjecttype ?? 0
+                    });
+                }
+                #endregion
+                var tsm = db.taskstatematches.Where(r => r.taskid == tq.taskid && r.stateid == tq.status).FirstOrDefault();
+                #region Eski ürünler siliniyor
+                db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where taskid={1}", new object[] { 7, tq.taskorderno });
+                #endregion
+                #region  Yeni ürün ekleniyor
+                foreach (var p in request.selectedProductsIds.Where(s => s != 0))
+                {
+
+                    db.customerproduct.Add(new customerproduct
+                    {
+                        campaignid = request.campaignid,
+                        creationdate = DateTime.Now,
+                        customerid = tq.attachedobjectid,
+                        deleted = false,
+                        lastupdated = DateTime.Now,
+                        productid = p,
+                        taskid = tq.taskorderno,
+                        updatedby = 7,// User.Identity.PersonelID
+                    });
+                    #region Ek ürün için otomatik zorunlu taskların türetilmesi-- OZAL 10.10.2014 17:45 ve Retention
+                    if (tq.taskid == 6115 || tq.taskid == 6117)
+                    {
+                        foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                        {
+                            var personel_id = (db.task.Where(t => t.attachablepersoneltype == tq.attachedpersonel.category && t.taskid == item).Any());
+                            db.taskqueue.Add(new taskqueue
+                            {
+
+                                appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
+
+                                attachmentdate = (item == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((tq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : tq.attachmentdate),
+
+                                attachedobjectid = tq.attachedobjectid,
+                                taskid = item,
+                                creationdate = DateTime.Now,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                previoustaskorderid = tq.taskorderno,
+                                updatedby = 7, //User.Identity.PersonelID,
+                                /*25.10.2014 17:33 OZAL  Önceki kod kısmında alttaki satır kapalıydı ve task oluşurken ilişkilendirme yapılamıyordu*/
+                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                /*25.10.2014 17:33 */
+                            });
+                        }
+                    }
+                    #endregion
+                }
+                #endregion
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
+            }
         }
 
         [Route("saveSalesTask")]
         [HttpPost]
         public HttpResponseMessage saveSalesTask(DTOs.DTORequestClasses.DTOSaveFiberSalesTask request)
         {
-            using (var db=new CRMEntities())
+            using (var db = new CRMEntities())
             {
                 var taskqueue = new taskqueue
                 {
-                    appointmentdate =request.appointmentdate!=null? request.appointmentdate : DateTime.Now,
+                    appointmentdate = request.appointmentdate != null ? request.appointmentdate : DateTime.Now,
                     attachedobjectid = request.customerid ?? 0,
                     attachedpersonelid = request.attachedpersonelid,
                     attachmentdate = DateTime.Now,
-                    consummationdate = DateTime.Now,
                     creationdate = DateTime.Now,
                     deleted = false,
                     description = "Doğrudan Satış",
@@ -364,84 +483,111 @@ namespace CRMWebApi.Controllers
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();
-                return Request.CreateResponse(HttpStatusCode.OK,taskqueue.taskorderno,"application/json");
+                return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
+            }
+        }
+
+        [Route("saveFaultTask")]
+        [HttpPost]
+        public HttpResponseMessage SaveFaultTask(DTOs.DTORequestClasses.DTORequestSaveFaultTaks request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var taskqueue = new taskqueue
+                {
+                    appointmentdate = request.appointmentdate,
+                    attachedobjectid = request.customerid ?? 0,
+                    attachedpersonelid = request.attachedpersonelid,
+                    attachmentdate = DateTime.Now,
+                    creationdate = DateTime.Now,
+                    deleted = false,
+                    description = request.description,
+                    fault = request.fault,
+                    lastupdated = DateTime.Now,
+                    status = null,
+                    taskid = 66,
+                    updatedby = 7,//User.Identity.PersonelID
+                };
+                db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
         }
 
         [Route("deneme")]
         [HttpGet]
-        public HttpResponseMessage deneme(BaseAttachedObject t) 
+        public HttpResponseMessage deneme(BaseAttachedObject t)
         {
-            return Request.CreateResponse(HttpStatusCode.OK,t,"application/json");
+            return Request.CreateResponse(HttpStatusCode.OK, t, "application/json");
         }
 
         [Route("personelattachment")]
         [HttpPost]
-        public HttpResponseMessage personelattachment(DTOs.DTORequestClasses.DTORequestAttachmentPersonel request) 
+        public HttpResponseMessage personelattachment(DTOs.DTORequestClasses.DTORequestAttachmentPersonel request)
         {
-            if (request.ids.Count()>0)
+            if (request.ids.Count() > 0)
             {
-            using (var db=new CRMEntities())
-            {
-                var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno) && t.status != null).Count();
-                if (tqs > 0)
-                 {
-                     DTOResponseError re = new DTOResponseError
-                     {
-                         errorCode=-1,
-                         errorMessage = "Sonlandırılmış Tasklara Personel Atanamaz"
-                     };
-                     return Request.CreateResponse(HttpStatusCode.OK,re,"application/json");
-                 }  
-            }
-            using (var db=new CRMEntities())
-            {
-                 var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno))
-                          .Select(t => t.task.attachablepersoneltype).Distinct().ToList();
-               var cnt = tqs.Count();
-              if (cnt > 1)
+                using (var db = new CRMEntities())
                 {
-                    DTOResponseError re = new DTOResponseError
+                    var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno) && t.status != null).Count();
+                    if (tqs > 0)
                     {
-                        errorCode=-1,
-                        errorMessage = "Çoklu Atama Yapmak için Aynı Tür Taskları Seçmelisiniz..."
-                    };
-                    return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+                        DTOResponseError re = new DTOResponseError
+                        {
+                            errorCode = -1,
+                            errorMessage = "Sonlandırılmış Tasklara Personel Atanamaz"
+                        };
+                        return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+                    }
                 }
-              else 
-              {
-                  if (request.personelname != null)
-                  {
-                      var apid = db.personel.Where(p => p.personelname.Contains(request.personelname)).Select(s => s.personelid).FirstOrDefault();
-                      foreach (var item in request.ids)
-                      {
-                          var tq = db.taskqueue.Where(t => t.taskorderno == item).FirstOrDefault();
-                          tq.attachedpersonelid = apid;
-                          tq.attachmentdate = DateTime.Now;
-                          tq.lastupdated = DateTime.Now;
-                          tq.updatedby = 7;
-                          db.SaveChanges();
-                      }
-                      DTOResponseError re = new DTOResponseError
-                      {
-                          errorCode = 1,
-                          errorMessage = request.ids.Count() + " adet taska atama yapıldı"
-                      };
-                      return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
-                  }
-                  else
-                  {
-                      DTOResponseError re = new DTOResponseError
-                      {
-                          errorCode = 0,
-                          errorMessage = "Personel Seçimi Yapmadınız!"
-                      };
-                      return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
-                  }
-              }  
-           
+                using (var db = new CRMEntities())
+                {
+                    var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno))
+                             .Select(t => t.task.attachablepersoneltype).Distinct().ToList();
+                    var cnt = tqs.Count();
+                    if (cnt > 1)
+                    {
+                        DTOResponseError re = new DTOResponseError
+                        {
+                            errorCode = -1,
+                            errorMessage = "Çoklu Atama Yapmak için Aynı Tür Taskları Seçmelisiniz..."
+                        };
+                        return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+                    }
+                    else
+                    {
+                        if (request.personelname != null)
+                        {
+                            var apid = db.personel.Where(p => p.personelname.Contains(request.personelname)).Select(s => s.personelid).FirstOrDefault();
+                            foreach (var item in request.ids)
+                            {
+                                var tq = db.taskqueue.Where(t => t.taskorderno == item).FirstOrDefault();
+                                tq.attachedpersonelid = apid;
+                                tq.attachmentdate = DateTime.Now;
+                                tq.lastupdated = DateTime.Now;
+                                tq.updatedby = 7;
+                                db.SaveChanges();
+                            }
+                            DTOResponseError re = new DTOResponseError
+                            {
+                                errorCode = 1,
+                                errorMessage = request.ids.Count() + " adet taska atama yapıldı"
+                            };
+                            return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+                        }
+                        else
+                        {
+                            DTOResponseError re = new DTOResponseError
+                            {
+                                errorCode = 0,
+                                errorMessage = "Personel Seçimi Yapmadınız!"
+                            };
+                            return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+                        }
+                    }
+
+                }
             }
-        }
             else
             {
                 DTOResponseError re = new DTOResponseError
@@ -452,5 +598,370 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
             }
         }
+
+        [Route("saveCustomerCard")]
+        [HttpPost]
+        public HttpResponseMessage saveCustomerCard(DTOKatZiyareti ct)
+        {
+            using (var db = new CRMEntities())
+            {
+                if (db.customer.Any(c => c.customerid == ct.customerid))
+                {
+                    var item = db.customer.Where(c => c.customerid == ct.customerid).First();
+
+                    item.customername = ct.customername;
+                    item.customersurname = ct.customersurname;
+                    item.gsm = ct.gsm;
+                    if (ct.netStatus.id != 0)
+                        item.netstatu = ct.netStatus.id;
+                    if (ct.telStatus.id!=0)
+                        item.telstatu = ct.telStatus.id;
+                    if (ct.gsmKullanımıStatus.id!=0)
+                        item.gsmstatu = ct.gsmKullanımıStatus.id;
+                    if (ct.issStatus.id!=0)
+                        item.iss = ct.issStatus.id;
+                    if(ct.TvKullanımıStatus.id!=0)
+                         item.tvstatu = ct.TvKullanımıStatus.id;
+                    if (ct.telStatus.id != 0)
+                        item.telstatu = ct.telStatus.id;
+                    item.description = ct.description;
+                    item.lastupdated = DateTime.Now;
+                    item.updatedby = 9;
+
+                }
+                if (ct.closedKatZiyareti == true)
+                {
+                    var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
+                    res.status = 1079;
+                }
+
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
+            }
+        }
+
+        #region Task Tanımlamaları Sayfası
+        [Route("getTaskList")]
+        [HttpPost]
+        public HttpResponseMessage getTaskList(DTOFilterGetTasksRequest request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var filter = request.getFilter();
+                var querySql = filter.subTables["taskid"].getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.task.SqlQuery(querySql).ToList();
+                var ptypeids = res.Select(r => r.attachablepersoneltype).Distinct().ToList();
+                var personels = db.objecttypes.Where(p => ptypeids.Contains(p.typeid)).ToList();
+
+                var obtpyeids = res.Select(r => r.attachableobjecttype).Distinct().ToList();
+                var objects = db.objecttypes.Where(o => obtpyeids.Contains(o.typeid)).ToList();
+
+                var ttypeids = res.Select(s => s.tasktype).Distinct().ToList();
+                var tasktypess = db.tasktypes.Where(t => ttypeids.Contains(t.TaskTypeId)).ToList();
+                res.ForEach(r =>
+                {
+                    r.objecttypes = objects.Where(t => t.typeid == r.attachableobjecttype).FirstOrDefault();
+                    r.personeltypes = personels.Where(p => p.typeid == r.attachablepersoneltype).FirstOrDefault();
+                    r.tasktypes = tasktypess.Where(t => t.TaskTypeId == r.tasktype).FirstOrDefault();
+                });
+
+
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
+               
+            }
+        }
+
+        [Route("saveTask")]
+        [HttpPost]
+        public HttpResponseMessage saveTask(DTOs.DTOtask request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var dt = db.task.Where(t => t.taskid == request.taskid).FirstOrDefault();
+                var errormessage = new DTOResponseError();
+
+                dt.taskname = request.taskname;
+                dt.performancescore = request.performancescore;
+                dt.tasktype = request.tasktypes.TaskTypeId;
+                dt.attachableobjecttype = request.objecttypes.typeid;
+                dt.attachablepersoneltype = request.personeltypes.typeid;
+                dt.updatedby = 7;
+                dt.lastupdated = DateTime.Now;
+                db.SaveChanges();
+                errormessage.errorCode = 1;
+                errormessage.errorMessage = "İşlem Başarılı";
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+
+            }
+        }
+        [Route("insertTask")]
+        [HttpPost]
+        public HttpResponseMessage insertTask(DTOs.DTOtask request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError();
+                var t = new task {
+                    taskname = request.taskname,
+                    attachableobjecttype=request.objecttypes.typeid,
+                    attachablepersoneltype=request.personeltypes.typeid,
+                    performancescore=request.performancescore,
+                    tasktype=request.tasktypes.TaskTypeId,
+                    deleted=false,
+                    creationdate=DateTime.Now,
+                    lastupdated=DateTime.Now,
+                    updatedby=7
+
+                };
+                db.task.Add(t);
+                db.SaveChanges();
+                errormessage.errorCode = 1;
+                errormessage.errorMessage = "İşlem Başarılı";
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+
+            }
+        }
+        #endregion
+        #region Task Durum Havuzu
+        [Route("getTaskState")]
+        [HttpPost]
+        public HttpResponseMessage getTaskstate(DTOs.DTORequestClasses.DTOGetTSPFilter request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var filter = request.getFilter();
+                var querySql = filter.getPagingSQL(request.pageNo,request.rowsPerPage);
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First() ;
+
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+                var res = db.taskstatepool.SqlQuery(querySql).OrderBy(o=>o.taskstateid).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK,  new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo), "application/json");
+
+            }
+        }
+
+        [Route("saveTaskState")]
+        [HttpPost]
+        public HttpResponseMessage saveTaskstate(DTOs.DTOtaskstatepool request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var dtsp = db.taskstatepool.Where(t => t.taskstateid == request.taskstateid).FirstOrDefault();
+                dtsp.taskstate = request.taskstate;
+                dtsp.statetype = request.statetype;
+                dtsp.lastupdated = DateTime.Now;
+                dtsp.updatedby = 7;
+                db.SaveChanges();
+                var errormessage = new DTOResponseError { errorCode=1,errorMessage="İşlem Başarılı"};
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
+        [Route("insertTaskState")]
+        [HttpPost]
+        public HttpResponseMessage insertTaskState(DTOs.DTOtaskstatepool request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var tsp = new taskstatepool {
+                    taskstate = request.taskstate,
+                    statetype = request.statetype,
+                    creationdate = DateTime.Now,
+                    lastupdated=DateTime.Now,
+                    updatedby=7,
+                    deleted =false
+                };
+                db.taskstatepool.Add(tsp);
+                db.SaveChanges();
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
+        #endregion
+        [Route("getTaskStateMatches")]
+        [HttpPost]
+        public HttpResponseMessage getTaskStateMatches(DTOs.DTORequestClasses.DTOGetTSMFilter request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var filter = request.getFilter();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                var res = db.taskstatematches.SqlQuery(querySql).ToList();
+                var taskids = res.Select(s => s.taskid).Distinct().ToList();
+                var tasks = db.task.Where(t => taskids.Contains(t.taskid)).ToList();
+
+                var stateids = res.Select(s => s.stateid).Distinct().ToList();
+                var states = db.taskstatepool.Where(tsp => stateids.Contains(tsp.taskstateid)).ToList();
+                res.ForEach(r=> {
+                    r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
+                    r.taskstatepool = states.Where(t => t.taskstateid == r.stateid).FirstOrDefault();
+                });
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo)
+                    , "application/json");
+
+            }
+        }
+
+        #region Document sayfası için
+        [Route("getDocuments")]
+        [HttpPost]
+        public HttpResponseMessage getDocuments(DTOs.DTORequestClasses.DTOGetDocumentFilter request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var filter = request.getFilter();
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.document.SqlQuery(querySql).ToList();
+
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo)
+                    , "application/json");
+            }
+        }
+
+        [Route("saveDocument")]
+        [HttpPost]
+        public HttpResponseMessage saveDocument(DTOs.DTOdocument request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var ddoc = db.document.Where(d => d.documentid == request.documentid).FirstOrDefault();
+                ddoc.documentname = request.documentname;
+                ddoc.documentdescription = request.documentdescription;
+                ddoc.lastupdated = DateTime.Now;
+                ddoc.updatedby = 7;
+                db.SaveChanges();
+
+                return Request.CreateResponse(HttpStatusCode.OK,DTOResponseError.NoError(),"application/json");
+            }
+        }
+
+        [Route("insertDocument")]
+        [HttpPost]
+        public HttpResponseMessage insertDocument(DTOs.DTOdocument request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var d = new document {
+                    documentname = request.documentname,
+                    documentdescription = request.documentdescription,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby=7
+                };
+                db.document.Add(d);
+                db.SaveChanges();
+                DTOResponseError errormessage = new DTOResponseError { errorCode=1,errorMessage="İşlem Başarılı" };
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+        #endregion
+
+        #region Kampanya Sayfası 
+        [Route("getCampaigns")]
+        [HttpPost]
+        public HttpResponseMessage getCampaigns(DTOs.DTORequestClasses.DTOFiterGetCampaignRequst request)
+        {
+            using (var db=new CRMEntities())
+            {
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo,request.rowsPerPage);
+                var res = db.campaigns.SqlQuery(querySql).ToList();
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+                    , "application/json");
+            }
+        }
+
+        [Route("saveCampaigns")]
+        [HttpPost]
+        public HttpResponseMessage saveCampaigns(DTOs.DTOcampaigns request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError {errorCode=1,errorMessage="İşlem Başarılı" };
+                var dcamp = db.campaigns.Where(t => t.id == request.id).FirstOrDefault();
+
+                dcamp.name = request.name;
+                dcamp.category = request.category;
+                dcamp.subcategory = request.subcategory;
+                dcamp.products = request.products;
+                dcamp.documents = request.documents;
+                dcamp.lastupdated = DateTime.Now;
+                dcamp.updatedby = 7;
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK,errormessage, "application/json");
+            }
+        }
+
+        [Route("insertCampaigns")]
+        [HttpPost]
+        public HttpResponseMessage insertCampaigns(DTOs.DTOcampaigns request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var c = new campaigns {
+                    name=request.name,
+                    category=request.category,
+                    subcategory=request.subcategory,
+                    products=request.products,
+                    documents=request.documents,
+                    creationdate=DateTime.Now,
+                    lastupdated=DateTime.Now,
+                    deleted=false,
+                    updatedby=7
+                };
+                db.campaigns.Add(c);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+        #endregion
+
+       
     }
 }

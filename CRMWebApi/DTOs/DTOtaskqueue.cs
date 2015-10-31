@@ -22,10 +22,11 @@ namespace CRMWebApi.DTOs
         public DTOpersonel asistanPersonel { get; set; }
         public DTOpersonel Updatedpersonel { get; set; }
         public DTOpersonel attachedpersonel { get; set; }
-       // public DTOsite site { get; set; }
-      //  public DTOblock block { get; set; }
-        public BaseAttachedObject attachedobject { get; set; }
-        public  DTOtaskstatepool taskstatepool { get; set; }
 
+        public BaseAttachedObject attachedobject { get; set; }
+        public DTOtaskstatepool taskstatepool { get; set; }
+        public List<object> customerproduct { get; set; }
+        public List<object> stockmovement { get; set; }
+        public List<object> stockcardlist { get; set; }
     }
 }

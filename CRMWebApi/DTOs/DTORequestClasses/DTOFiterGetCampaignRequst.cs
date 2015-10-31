@@ -12,12 +12,12 @@ using System.Data.SqlClient;
 using CRMWebApi.DTOs.DTORequestClasses;
 namespace CRMWebApi.DTOs.DTORequestClasses
 {
-    public class DTOFiterGetCampaignRequst
+    public class DTOFiterGetCampaignRequst :DTORequestPagination
     {
         public DTOFieldFilter category { get; set; }
         public DTOFieldFilter subcategory { get; set; }
         public DTOFieldFilter campaign { get; set; }
-        public DTOFieldFilter selectedcampaign { get; set; }
+        public DTOFieldFilter products { get; set; }
 
         public bool hasCategoryFilter() 
         {
@@ -31,27 +31,27 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         {
             return campaign != null;
         }
-         public bool hasSelectedCampaignFilter() 
+         public bool hasProductsFilter() 
          {
-             return selectedcampaign != null;
+             return products != null;
          }
 
         public bool isCategoryFilter() 
         {
-            return !hasSubcategoryFilter() && !hasCampaignFilter();
+            return hasCategoryFilter() && !(hasSubcategoryFilter() || hasCampaignFilter() || hasProductsFilter());
         }
         public bool isSubcategoryFilter() 
         {
-            return !hasCampaignFilter();
+            return hasSubcategoryFilter() && !(hasCampaignFilter() || hasProductsFilter());
         }
 
         public bool isCampaignFilter() 
         {
-            return hasCategoryFilter() && hasSubcategoryFilter() && hasCampaignFilter();
+            return hasCampaignFilter() && !isProductsFilter();
         }
-        public bool isSelectedCampaignFilter()
+        public bool isProductsFilter()
         {
-            return hasCategoryFilter() && hasSubcategoryFilter() && hasCampaignFilter() && hasSelectedCampaignFilter();
+            return hasProductsFilter();
         }
 
         public DTOFilter getFilter()
@@ -69,20 +69,16 @@ namespace CRMWebApi.DTOs.DTORequestClasses
                 }
                 if (hasCampaignFilter())
                     filter.fieldFilters.Add(campaign);
-                //if (hasSelectedCampaignFilter())
-                //{
-                //    var p = db.campaigns.Where(c => c.name==selectedcampaign.value).FirstOrDefault();
-                //    List<int> productids = new List<int>();
-                //    foreach (var item in p.products.Split(',').ToList())
-                //    {
 
-                //        productids.Add(Convert.ToInt32(item));
-                //    }
-                //    filter = new DTOFilter("product_service","productid");
-                //    int[] pids= productids.ToArray();
-                //    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "productid", value = pids, op = 7 });
+                if (hasProductsFilter())
+                {
+                    var subFilter = new DTOFilter("vcampaignproducts","cid");
+                    var psubFilter = new DTOFilter("product_service","productid");
+                    psubFilter.fieldFilters.Add(products);
+                    subFilter.subTables.Add("pid",psubFilter);
+                    filter.subTables.Add("id", subFilter);
 
-                //}
+                }
                 return filter;
             }
         }

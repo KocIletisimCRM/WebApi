@@ -33,7 +33,7 @@ namespace CRMWebApi.DTOs
         private string getValueCompairer(object val)
         {
             var s = (val is string) || (val is DateTime) ? "'" : string.Empty;
-            return string.Format("{0}{1}{0}", s, (val is Array) ? string.Join(",", val) : val.ToString());
+            return string.Format("{0}{1}{0}", s, (val is Array) ? string.Join(",", val) : val.ToString().Replace("'","''"));
         }
 
         public fieldFilter(string name, object value, filterOperators op)
@@ -68,7 +68,7 @@ namespace CRMWebApi.DTOs
                 case filterOperators.foBetween:
                         return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
                 case filterOperators.foLike:
-                    return string.Format(operatorStrings[(int)filterOperator], fieldName, filterValue);
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, (filterValue??string.Empty).ToString().Replace("'","''"));
                 case filterOperators.foIn:
                     if (filterValue is Array)
                         return string.Format(operatorStrings[(int)filterOperator], fieldName,

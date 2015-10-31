@@ -25,6 +25,9 @@ namespace CRMWebApi.Models
             this.updatetasks = new HashSet<task>();
             this.updatetaskstatepools = new HashSet<taskstatepool>();
             this.blocks = new HashSet<block>();
+            this.stockmovement = new HashSet<stockmovement>();
+            this.stockmovement1 = new HashSet<stockmovement>();
+            this.stockstatus = new HashSet<stockstatus>();
         }
     
         public int personelid { get; set; }
@@ -49,5 +52,8 @@ namespace CRMWebApi.Models
         public virtual ICollection<task> updatetasks { get; set; }
         public virtual ICollection<taskstatepool> updatetaskstatepools { get; set; }
         public virtual ICollection<block> blocks { get; set; }
+        public virtual ICollection<stockmovement> stockmovement { get; set; }
+        public virtual ICollection<stockmovement> stockmovement1 { get; set; }
+        public virtual ICollection<stockstatus> stockstatus { get; set; }
     }
 }

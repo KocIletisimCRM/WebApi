@@ -48,6 +48,28 @@ namespace CRMWebApi.DTOs.DTORequestClasses
                 taskRequest.taskstate = value;
             }
         }
+        public DTOFieldFilter objecttype
+        {
+            get
+            {
+                return taskRequest.objecttype;
+            }
+            set
+            {
+                taskRequest.objecttype = value;
+            }
+        }
+        public DTOFieldFilter personeltype
+        {
+            get
+            {
+                return taskRequest.personeltype;
+            }
+            set
+            {
+                taskRequest.personeltype = value;
+            }
+        }
 
         bool ITaskRequest.hasTaskFilter()
         {
@@ -62,7 +84,14 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         {
             return taskRequest.hasTaskstateFilter();
         }
-
+        bool ITaskRequest.hasObjecttypeFilter()
+        {
+            return taskRequest.hasObjecttypeFilter();
+        }
+        bool ITaskRequest.hasPersoneltypeFilter()
+        {
+            return taskRequest.hasPersoneltypeFilter();
+        }
         bool ITaskRequest.isTaskFilter()
         {
             return taskRequest.isTaskFilter();
@@ -76,13 +105,21 @@ namespace CRMWebApi.DTOs.DTORequestClasses
         {
             return taskRequest.isTaskstateFilter();
         }
+        bool ITaskRequest.isPersonelTypeFilter()
+        {
+            return taskRequest.isPersonelTypeFilter();
+        }
+        bool ITaskRequest.isObjecttypeFilter()
+        {
+            return taskRequest.isObjecttypeFilter();
+        }
         DTOFilter ITaskRequest.getFilter()
         {
             return taskRequest.getFilter();
         }
         #endregion
 
-        #region ICSCRequest Implementation
+        #region ICSBRequest Implementation
         public DTOFieldFilter region
         {
             get

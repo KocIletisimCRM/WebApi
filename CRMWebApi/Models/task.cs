@@ -35,5 +35,7 @@ namespace CRMWebApi.Models
         public virtual personel updatedpersonel { get; set; }
         public virtual tasktypes tasktypes { get; set; }
         public virtual ICollection<taskstatematches> taskstatematches { get; set; }
+        public virtual objecttypes objecttypes { get; set; }
+        public virtual objecttypes personeltypes { get; set; }
     }
 }

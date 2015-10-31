@@ -17,6 +17,7 @@ namespace CRMWebApi.Models
         public campaigns()
         {
             this.customerproduct = new HashSet<customerproduct>();
+            this.vcampaignproducts = new HashSet<vcampaignproducts>();
         }
     
         public int id { get; set; }
@@ -31,5 +32,6 @@ namespace CRMWebApi.Models
         public Nullable<bool> deleted { get; set; }
     
         public virtual ICollection<customerproduct> customerproduct { get; set; }
+        public virtual ICollection<vcampaignproducts> vcampaignproducts { get; set; }
     }
 }

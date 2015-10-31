@@ -31,5 +31,12 @@ namespace CRMWebApi.Models
         public Nullable<bool> deleted { get; set; }
     
         public virtual stockcard stockcard { get; set; }
+        public virtual customer tocustomer { get; set; }
+        public virtual taskqueue taskqueue { get; set; }
+        public virtual objecttypes fromobjecttypes { get; set; }
+        public virtual objecttypes toobjecttypes { get; set; }
+        public virtual customer fromcustomer { get; set; }
+        public virtual personel frompersonel { get; set; }
+        public virtual personel topersonel { get; set; }
     }
 }
