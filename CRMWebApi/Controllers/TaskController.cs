@@ -6,20 +6,20 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
-using CRMWebApi.DTOs;
-using System.Data.SqlClient;
-using CRMWebApi.DTOs.DTORequestClasses;
+using CRMWebApi.DTOs.Fiber;
+using CRMWebApi.DTOs.Fiber.DTORequestClasses;
 using System.Diagnostics;
+using CRMWebApi.Models.Fiber;
 
 namespace CRMWebApi.Controllers
 {
 
-    [RoutePrefix("api/Task")]
+    [RoutePrefix("api/Fiber/Task")]
     public class TaskController : ApiController
     {
         [Route("getTaskQueues")]
         [HttpPost]
-        public HttpResponseMessage getTaskQueues(DTOs.DTORequestClasses.DTOGetTaskQueueRequest request)
+        public HttpResponseMessage getTaskQueues(DTOGetTaskQueueRequest request)
         {
             using (var db = new CRMEntities())
             {
@@ -143,7 +143,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveTaskQueues")]
         [HttpPost]
-        public HttpResponseMessage saveTaskQueues(DTOs.DTOtaskqueue tq)
+        public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
 
             // 7 User.Identity.PersonelID
@@ -373,7 +373,7 @@ namespace CRMWebApi.Controllers
 
         [Route("closeTaskQueues")]
         [HttpPost]
-        public HttpResponseMessage closeTaskQueues(DTOs.DTORequestClasses.DTORequestCloseTaskqueue request)
+        public HttpResponseMessage closeTaskQueues(DTORequestCloseTaskqueue request)
         {
             using (var db = new CRMEntities())
             {
@@ -463,7 +463,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveSalesTask")]
         [HttpPost]
-        public HttpResponseMessage saveSalesTask(DTOs.DTORequestClasses.DTOSaveFiberSalesTask request)
+        public HttpResponseMessage saveSalesTask(DTOSaveFiberSalesTask request)
         {
             using (var db = new CRMEntities())
             {
@@ -489,7 +489,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveFaultTask")]
         [HttpPost]
-        public HttpResponseMessage SaveFaultTask(DTOs.DTORequestClasses.DTORequestSaveFaultTaks request)
+        public HttpResponseMessage SaveFaultTask(DTORequestSaveFaultTaks request)
         {
             using (var db = new CRMEntities())
             {
@@ -514,16 +514,9 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("deneme")]
-        [HttpGet]
-        public HttpResponseMessage deneme(BaseAttachedObject t)
-        {
-            return Request.CreateResponse(HttpStatusCode.OK, t, "application/json");
-        }
-
         [Route("personelattachment")]
         [HttpPost]
-        public HttpResponseMessage personelattachment(DTOs.DTORequestClasses.DTORequestAttachmentPersonel request)
+        public HttpResponseMessage personelattachment(DTORequestAttachmentPersonel request)
         {
             if (request.ids.Count() > 0)
             {
@@ -673,7 +666,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveTask")]
         [HttpPost]
-        public HttpResponseMessage saveTask(DTOs.DTOtask request)
+        public HttpResponseMessage saveTask(DTOtask request)
         {
             using (var db=new CRMEntities())
             {
@@ -696,7 +689,7 @@ namespace CRMWebApi.Controllers
         }
         [Route("insertTask")]
         [HttpPost]
-        public HttpResponseMessage insertTask(DTOs.DTOtask request)
+        public HttpResponseMessage insertTask(DTOtask request)
         {
             using (var db = new CRMEntities())
             {
@@ -725,7 +718,7 @@ namespace CRMWebApi.Controllers
         #region Task Durum Havuzu
         [Route("getTaskState")]
         [HttpPost]
-        public HttpResponseMessage getTaskstate(DTOs.DTORequestClasses.DTOGetTSPFilter request)
+        public HttpResponseMessage getTaskstate(DTOGetTSPFilter request)
         {
             using (var db=new CRMEntities())
             {
@@ -749,7 +742,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveTaskState")]
         [HttpPost]
-        public HttpResponseMessage saveTaskstate(DTOs.DTOtaskstatepool request)
+        public HttpResponseMessage saveTaskstate(DTOtaskstatepool request)
         {
             using (var db = new CRMEntities())
             {
@@ -766,7 +759,7 @@ namespace CRMWebApi.Controllers
 
         [Route("insertTaskState")]
         [HttpPost]
-        public HttpResponseMessage insertTaskState(DTOs.DTOtaskstatepool request)
+        public HttpResponseMessage insertTaskState(DTOtaskstatepool request)
         {
             using (var db=new CRMEntities())
             {
@@ -788,7 +781,7 @@ namespace CRMWebApi.Controllers
         #endregion
         [Route("getTaskStateMatches")]
         [HttpPost]
-        public HttpResponseMessage getTaskStateMatches(DTOs.DTORequestClasses.DTOGetTSMFilter request)
+        public HttpResponseMessage getTaskStateMatches(DTOGetTSMFilter request)
         {
             using (var db = new CRMEntities())
             {
@@ -826,7 +819,7 @@ namespace CRMWebApi.Controllers
         #region Document sayfası için
         [Route("getDocuments")]
         [HttpPost]
-        public HttpResponseMessage getDocuments(DTOs.DTORequestClasses.DTOGetDocumentFilter request)
+        public HttpResponseMessage getDocuments(DTOGetDocumentFilter request)
         {
             using (var db=new CRMEntities())
             {
@@ -852,7 +845,7 @@ namespace CRMWebApi.Controllers
 
         [Route("saveDocument")]
         [HttpPost]
-        public HttpResponseMessage saveDocument(DTOs.DTOdocument request)
+        public HttpResponseMessage saveDocument(DTOdocument request)
         {
             using (var db = new CRMEntities())
             {
@@ -869,7 +862,7 @@ namespace CRMWebApi.Controllers
 
         [Route("insertDocument")]
         [HttpPost]
-        public HttpResponseMessage insertDocument(DTOs.DTOdocument request)
+        public HttpResponseMessage insertDocument(DTOdocument request)
         {
             using (var db = new CRMEntities())
             {
@@ -889,18 +882,447 @@ namespace CRMWebApi.Controllers
         }
         #endregion
 
-        #region Kampanya Sayfası 
-        [Route("getCampaigns")]
+        //#region Kampanya Sayfası 
+        //[Route("getCampaigns")]
+        //[HttpPost]
+        //public HttpResponseMessage getCampaigns(DTOFiterGetCampaignRequst request)
+        //{
+        //    using (var db=new CRMEntities())
+        //    {
+        //        var filter = request.getFilter();
+        //        filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+        //        var countSql = filter.getCountSQL();
+        //        var rowCount = db.Database.SqlQuery<int>(countSql).First();
+        //        var querySql = filter.getPagingSQL(request.pageNo,request.rowsPerPage);
+        //        var res = db.campaigns.SqlQuery(querySql).ToList();
+        //        DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+        //        {
+        //            pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+        //            pageNo = request.pageNo,
+        //            rowsPerPage = request.rowsPerPage,
+        //            totalRowCount = rowCount
+        //        };
+
+        //        return Request.CreateResponse(HttpStatusCode.OK,
+        //            new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+        //            , "application/json");
+        //    }
+        //}
+
+        //[Route("saveCampaigns")]
+        //[HttpPost]
+        //public HttpResponseMessage saveCampaigns(DTOcampaigns request)
+        //{
+        //    using (var db = new CRMEntities())
+        //    {
+        //        var errormessage = new DTOResponseError {errorCode=1,errorMessage="İşlem Başarılı" };
+        //        var dcamp = db.campaigns.Where(t => t.id == request.id).FirstOrDefault();
+
+        //        dcamp.name = request.name;
+        //        dcamp.category = request.category;
+        //        dcamp.subcategory = request.subcategory;
+        //        dcamp.products = request.products;
+        //        dcamp.documents = request.documents;
+        //        dcamp.lastupdated = DateTime.Now;
+        //        dcamp.updatedby = 7;
+        //        db.SaveChanges();
+        //        return Request.CreateResponse(HttpStatusCode.OK,errormessage, "application/json");
+        //    }
+        //}
+
+        //[Route("insertCampaigns")]
+        //[HttpPost]
+        //public HttpResponseMessage insertCampaigns(DTOcampaigns request)
+        //{
+        //    using (var db = new CRMEntities())
+        //    {
+        //        var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+        //        var c = new campaigns {
+        //            name=request.name,
+        //            category=request.category,
+        //            subcategory=request.subcategory,
+        //            products=request.products,
+        //            documents=request.documents,
+        //            creationdate=DateTime.Now,
+        //            lastupdated=DateTime.Now,
+        //            deleted=false,
+        //            updatedby=7
+        //        };
+        //        db.campaigns.Add(c);
+        //        db.SaveChanges();
+        //        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+        //    }
+        //}
+        //#endregion
+
+        #region Ürün Tanımlamaları Sayfası
+
+        [Route("getProducts")]
         [HttpPost]
-        public HttpResponseMessage getCampaigns(DTOs.DTORequestClasses.DTOFiterGetCampaignRequst request)
+        public HttpResponseMessage getProducts(DTOGetProductFilter request)
         {
-            using (var db=new CRMEntities())
+            using (var db = new CRMEntities())
             {
                 var filter = request.getFilter();
                 filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 var countSql = filter.getCountSQL();
                 var rowCount = db.Database.SqlQuery<int>(countSql).First();
-                var querySql = filter.getPagingSQL(request.pageNo,request.rowsPerPage);
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.product_service.SqlQuery(querySql).ToList();
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+                    , "application/json");
+            }
+        }
+
+        [Route("saveProduct")]
+        [HttpPost]
+        public HttpResponseMessage saveProduct(DTOProduct_service request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var dpro = db.product_service.Where(t => t.productid == request.productid).FirstOrDefault();
+
+                dpro.productname = request.productname;
+                dpro.category = request.category;
+                dpro.maxduration = request.maxduration;
+                dpro.automandatorytasks = request.automandatorytasks;
+                dpro.lastupdated = DateTime.Now;
+                dpro.updatedby = 7;
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
+        [Route("insertProduct")]
+        [HttpPost]
+        public HttpResponseMessage insertProduct(DTOProduct_service request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var p = new product_service
+                {
+                    productname = request.productname,
+                    category = request.category,
+                    automandatorytasks = request.automandatorytasks,
+                    maxduration = request.maxduration,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby = 7
+                };
+                db.product_service.Add(p);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+        #endregion
+
+        //#region Personel Tanımlama Sayfası
+
+        //[Route("getPersonels")]
+        //[HttpPost]
+        //public HttpResponseMessage getPersonels(DTOFilterGetPersonelRequest request)
+        //{
+        //    using (var db = new CRMEntities())
+        //    {
+        //        var filter = request.getFilter();
+        //        filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+        //        var countSql = filter.getCountSQL();
+        //        var rowCount = db.Database.SqlQuery<int>(countSql).First();
+        //        var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+        //        var res = db.personel.SqlQuery(querySql).ToList();
+        //        DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+        //        {
+        //            pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+        //            pageNo = request.pageNo,
+        //            rowsPerPage = request.rowsPerPage,
+        //            totalRowCount = rowCount
+        //        };
+
+        //        return Request.CreateResponse(HttpStatusCode.OK,
+        //            new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+        //            , "application/json");
+        //    }
+        //}
+
+        //[Route("savePersonel")]
+        //[HttpPost]
+        //public HttpResponseMessage savePersonel(DTOpersonel request)
+        //{
+        //    using (var db = new CRMEntities())
+        //    {
+        //        var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+        //        var dp = db.personel.Where(t => t.personelid == request.personelid).FirstOrDefault();
+
+        //        dp.personelname = request.personelname;
+        //        dp.category =(int) request.category;
+        //        dp.mobile = request.mobile;
+        //        dp.email = request.email;
+        //        dp.password = request.password;
+        //        dp.notes = request.notes;
+        //        dp.lastupdated = DateTime.Now;
+        //        dp.updatedby = 7;
+        //        db.SaveChanges();
+        //        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+        //    }
+        //}
+
+
+        //[Route("insertPersonel")]
+        //[HttpPost]
+        //public HttpResponseMessage insertPersonel(DTOpersonel request)
+        //{
+        //    using (var db = new CRMEntities())
+        //    {
+        //        var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+        //        var p = new personel
+        //        {
+        //            personelname = request.personelname,
+        //            category = (int)request.category,
+        //            mobile = request.mobile,
+        //            email = request.email,
+        //            password = request.password,
+        //            notes=request.notes,
+        //            roles=(int)request.category,
+        //            creationdate = DateTime.Now,
+        //            lastupdated = DateTime.Now,
+        //            deleted = false,
+        //            updatedby = 7
+        //        };
+        //        db.personel.Add(p);
+        //        db.SaveChanges();
+        //        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+        //    }
+        //}
+        //#endregion
+
+        #region Depo Kart Tanımlamaları Sayfası
+
+        [Route("getStockCards")]
+        [HttpPost]
+        public HttpResponseMessage getStockCads(DTOFilterGetStockCardRequest request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.stockcard.SqlQuery(querySql).ToList();
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+                    , "application/json");
+            }
+        }
+
+        [Route("saveStockCard")]
+        [HttpPost]
+        public HttpResponseMessage saveStockCard(DTOstockcard request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var ds = db.stockcard.Where(t => t.stockid == request.stockid).FirstOrDefault();
+
+                ds.productname = request.productname;
+                ds.category = request.category;
+                ds.hasserial = request.hasserial;
+                ds.unit = request.unit;
+                ds.description = request.description;
+                ds.lastupdated = DateTime.Now;
+                ds.updatedby = 7;
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
+
+        [Route("insertStockCard")]
+        [HttpPost]
+        public HttpResponseMessage insertStockCard(DTOstockcard request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var s = new stockcard
+                {
+                    productname = request.productname,
+                    category = request.category,
+                    hasserial = request.hasserial,
+                    unit = request.unit,
+                    description = request.description,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby = 7
+                };
+                db.stockcard.Add(s);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+        #endregion
+
+        //#region Adsl Satış İşlemleri
+
+        //[Route("getAdress")]
+        //[HttpPost]
+        //public HttpResponseMessage getAdress (DTOGetAdressFilter request)
+        //{
+        //    using (var db=new CRMEntities())
+        //    {
+        //        var filter = request.getFilter();
+        //        var querySql = filter.getFilterSQL();
+        //        if (filter.tableName=="ilce")
+        //        {
+        //          var  res = db.ilce.SqlQuery(querySql).ToList();
+        //          return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+        //        else if (filter.tableName == "mahalleKoy")
+        //        {
+        //            var res = db.mahalleKoy.SqlQuery(querySql).ToList();
+        //            return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+        //        else if (filter.tableName == "cadde")
+        //        {
+        //            var res = db.cadde.SqlQuery(querySql).ToList();
+        //            return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+        //        else if (filter.tableName == "bina")
+        //        {
+        //            var res = db.bina.SqlQuery(querySql).ToList();
+        //            return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+        //        else if (filter.tableName == "daire")
+        //        {
+        //            var res = db.daire.SqlQuery(querySql).ToList();
+        //            return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+        //        else
+        //        {
+        //            var res = db.il.SqlQuery(querySql).ToList();
+        //            return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+        //        }
+
+        //    }
+
+        //}
+
+        //#endregion
+
+        #region Personel Tanımlama Sayfası
+
+        [Route("getPersonels")]
+        [HttpPost]
+        //[KOCAuthorize]
+        public HttpResponseMessage getPersonels(DTOFilterGetPersonelRequest request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.personel.SqlQuery(querySql).ToList();
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+                    , "application/json");
+            }
+        }
+
+        [Route("savePersonel")]
+        [HttpPost]
+        public HttpResponseMessage savePersonel(DTOpersonel request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var dp = db.personel.Where(t => t.personelid == request.personelid).FirstOrDefault();
+
+                dp.personelname = request.personelname;
+                dp.category = (int)request.category;
+                dp.mobile = request.mobile;
+                dp.email = request.email;
+                dp.password = request.password;
+                dp.notes = request.notes;
+                dp.lastupdated = DateTime.Now;
+                dp.updatedby = 7;
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
+
+        [Route("insertPersonel")]
+        [HttpPost]
+        public HttpResponseMessage insertPersonel(DTOpersonel request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
+                var p = new personel
+                {
+                    personelname = request.personelname,
+                    category = (int)request.category,
+                    mobile = request.mobile,
+                    email = request.email,
+                    password = request.password,
+                    notes = request.notes,
+                    roles = (int)request.category,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby = 7
+                };
+                db.personel.Add(p);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+        #endregion
+
+
+        #region Kampanya Sayfası 
+        [Route("getCampaigns")]
+        [HttpPost]
+        public HttpResponseMessage getCampaigns(DTOFiterGetCampaignRequst request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.campaigns.SqlQuery(querySql).ToList();
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
@@ -918,11 +1340,11 @@ namespace CRMWebApi.Controllers
 
         [Route("saveCampaigns")]
         [HttpPost]
-        public HttpResponseMessage saveCampaigns(DTOs.DTOcampaigns request)
+        public HttpResponseMessage saveCampaigns(DTOcampaigns request)
         {
             using (var db = new CRMEntities())
             {
-                var errormessage = new DTOResponseError {errorCode=1,errorMessage="İşlem Başarılı" };
+                var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
                 var dcamp = db.campaigns.Where(t => t.id == request.id).FirstOrDefault();
 
                 dcamp.name = request.name;
@@ -933,27 +1355,28 @@ namespace CRMWebApi.Controllers
                 dcamp.lastupdated = DateTime.Now;
                 dcamp.updatedby = 7;
                 db.SaveChanges();
-                return Request.CreateResponse(HttpStatusCode.OK,errormessage, "application/json");
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
 
         [Route("insertCampaigns")]
         [HttpPost]
-        public HttpResponseMessage insertCampaigns(DTOs.DTOcampaigns request)
+        public HttpResponseMessage insertCampaigns(DTOcampaigns request)
         {
             using (var db = new CRMEntities())
             {
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                var c = new campaigns {
-                    name=request.name,
-                    category=request.category,
-                    subcategory=request.subcategory,
-                    products=request.products,
-                    documents=request.documents,
-                    creationdate=DateTime.Now,
-                    lastupdated=DateTime.Now,
-                    deleted=false,
-                    updatedby=7
+                var c = new campaigns
+                {
+                    name = request.name,
+                    category = request.category,
+                    subcategory = request.subcategory,
+                    products = request.products,
+                    documents = request.documents,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby = 7
                 };
                 db.campaigns.Add(c);
                 db.SaveChanges();
@@ -961,7 +1384,5 @@ namespace CRMWebApi.Controllers
             }
         }
         #endregion
-
-       
     }
 }

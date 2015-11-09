@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="37e79bbdcd75434a8727a2d0fc820b8c" Name="Diagram1" ZoomLevel="67">
+        <EntityTypeShape EntityType="KOCSAMADLSModel.bina" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.cadde" Width="1.5" PointX="2.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_campaigns" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customer_status" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerdocument" Width="1.5" PointX="4.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerproduct" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.daire" Width="1.5" PointX="6.75" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_document" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_gsmKullanımıStatus" Width="1.5" PointX="6.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.il" Width="1.5" PointX="14.75" PointY="15.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.ilce" Width="1.5" PointX="14.75" PointY="17.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_issStatus" Width="1.5" PointX="8.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.mahalleKoy" Width="1.5" PointX="8.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_mailservices" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_netStatus" Width="1.5" PointX="10.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_objecttypes" Width="1.5" PointX="4.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_personel" Width="1.5" PointX="10.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_product_service" Width="1.5" PointX="6.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_stockcard" Width="1.5" PointX="0.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_stockmovement" Width="1.5" PointX="8.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_task" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskqueue" Width="1.5" PointX="14.125" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskstatematches" Width="1.5" PointX="12.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskstatepool" Width="1.5" PointX="2.75" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_tasktypes" Width="1.5" PointX="14.75" PointY="0.75" IsExpanded="true" />
+        <AssociationConnector Association="KOCSAMADLSModel.personeltaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.personeltaskqueue1" />
+        <AssociationConnector Association="KOCSAMADLSModel.personeltaskqueue2" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.customer" Width="1.5" PointX="11.375" PointY="14.75" />
+        <AssociationConnector Association="KOCSAMADLSModel.customertaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.customerproducttaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.stockmovementtaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.taskstatepooltaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.tasktaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.taskqueuetaskqueue" />
+        <AssociationConnector Association="KOCSAMADLSModel.taskqueuetaskqueue1" />
+        <AssociationConnector Association="KOCSAMADLSModel.campaignscustomerproduct" />
+        <AssociationConnector Association="KOCSAMADLSModel.ilcustomer" />
+        <AssociationConnector Association="KOCSAMADLSModel.ilcecustomer" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

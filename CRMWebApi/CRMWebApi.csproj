@@ -96,6 +96,16 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Models\Adsl\CRMAdslDataModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>CRMAdslDataModel.edmx</DependentUpon>
+      <LastGenOutput>CRMAdslDataModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\Adsl\CRMAdslDataModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>CRMAdslDataModel.edmx</DependentUpon>
+      <LastGenOutput>CRMAdslDataModel.cs</LastGenOutput>
+    </Content>
     <Content Include="Global.asax" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -103,191 +113,357 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\AdslCampaignController.cs" />
+    <Compile Include="Controllers\AdslFilterController.cs" />
+    <Compile Include="Controllers\AdslPersonelController.cs" />
+    <Compile Include="Controllers\AdslTaskController.cs" />
+    <Compile Include="Controllers\AdslTaskqueueController.cs" />
+    <Compile Include="Controllers\AuthorizeController.cs" />
+    <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\SiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\StockController.cs" />
     <Compile Include="Controllers\TaskController.cs" />
     <Compile Include="Controllers\FilterController.cs" />
-    <Compile Include="DTOs\attachedObjectTypeConverter.cs" />
-    <Compile Include="DTOs\BaseAttachedObject.cs" />
-    <Compile Include="DTOs\CustomerTransferObject.cs" />
-    <Compile Include="DTOs\DTOcampaigns.cs" />
-    <Compile Include="DTOs\DTOCloseTaskQueue.cs" />
-    <Compile Include="DTOs\DTOcustomerproduct.cs" />
-    <Compile Include="DTOs\DTOdocument.cs" />
-    <Compile Include="DTOs\DTOgsmStatus.cs" />
-    <Compile Include="DTOs\DTOissStatus.cs" />
-    <Compile Include="DTOs\DTOKatZiyareti.cs" />
-    <Compile Include="DTOs\DTOnetStatus.cs" />
-    <Compile Include="DTOs\DTOobjecttypes.cs" />
-    <Compile Include="DTOs\DTOProduct_service.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetBlockFilter.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetDocumentFilter.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetObjectRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetSiteFilter.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetStockMovementRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetTSMFilter.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOGetTSPFilter.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTORequestCloseTaskqueue.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTORequestSaveFaultTaks.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTORequestTopluAtamalar.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTORequestPagination.cs" />
-    <Compile Include="DTOs\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
-    <Compile Include="DTOs\DTOResponseClasses.cs" />
-    <Compile Include="DTOs\DTOstockcard.cs" />
-    <Compile Include="DTOs\DTOstockmovement.cs" />
-    <Compile Include="DTOs\DTOstockstatus.cs" />
-    <Compile Include="DTOs\DTOtaskstatematches.cs" />
-    <Compile Include="DTOs\DTOtelStatus.cs" />
-    <Compile Include="DTOs\DTOturkcelltvstatus.cs" />
-    <Compile Include="DTOs\DTOtvStatus.cs" />
-    <Compile Include="DTOs\FilterClasses.cs" />
-    <Compile Include="DTOs\DTOblock.cs" />
-    <Compile Include="DTOs\DTOcustomer.cs" />
-    <Compile Include="DTOs\DTOcustomer_status.cs" />
-    <Compile Include="DTOs\DTOpersonel.cs" />
-    <Compile Include="DTOs\DTOsite.cs" />
-    <Compile Include="DTOs\DTOtask.cs" />
-    <Compile Include="DTOs\DTOtaskqueue.cs" />
-    <Compile Include="DTOs\DTOFilter.cs" />
-    <Compile Include="DTOs\DTOtaskstatepool.cs" />
-    <Compile Include="DTOs\DTOTaskTypes.cs" />
+    <Compile Include="DTOs\Adsl\attachedObjectTypeConverter.cs" />
+    <Compile Include="DTOs\Adsl\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Adsl\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\Adsl\DTOilce.cs" />
+    <Compile Include="DTOs\Adsl\DTOcampaigns.cs" />
+    <Compile Include="DTOs\Adsl\DTOCloseTaskQueue.cs" />
+    <Compile Include="DTOs\Adsl\DTOcustomer.cs" />
+    <Compile Include="DTOs\Adsl\DTOcustomerproduct.cs" />
+    <Compile Include="DTOs\Adsl\DTOcustomer_status.cs" />
+    <Compile Include="DTOs\Adsl\DTOdocument.cs" />
+    <Compile Include="DTOs\Adsl\DTOFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTOgsmStatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOissStatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOKatZiyareti.cs" />
+    <Compile Include="DTOs\Adsl\DTOnetStatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOobjecttypes.cs" />
+    <Compile Include="DTOs\Adsl\DTOpersonel.cs" />
+    <Compile Include="DTOs\Adsl\DTOProduct_service.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetStockCardRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetAdressFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetBlockFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetDocumentFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetObjectRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetPersonelStock.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetProductFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetSerialOnPersonel.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetSiteFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetStockMovementRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTSMFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTSPFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestCloseTaskqueue.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestPagination.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestSaveFaultTaks.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestTopluAtamalar.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
+    <Compile Include="DTOs\Adsl\DTOResponseClasses.cs" />
+    <Compile Include="DTOs\Adsl\DTOil.cs" />
+    <Compile Include="DTOs\Adsl\DTOstockcard.cs" />
+    <Compile Include="DTOs\Adsl\DTOstockmovement.cs" />
+    <Compile Include="DTOs\Adsl\DTOstockstatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOtask.cs" />
+    <Compile Include="DTOs\Adsl\DTOtaskqueue.cs" />
+    <Compile Include="DTOs\Adsl\DTOtaskstatematches.cs" />
+    <Compile Include="DTOs\Adsl\DTOtaskstatepool.cs" />
+    <Compile Include="DTOs\Adsl\DTOTaskTypes.cs" />
+    <Compile Include="DTOs\Adsl\DTOtelStatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOturkcelltvstatus.cs" />
+    <Compile Include="DTOs\Adsl\DTOtvStatus.cs" />
+    <Compile Include="DTOs\Adsl\FilterClasses.cs" />
+    <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
+    <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
+    <Compile Include="KOCAuthorization\KOCAuthorizedUser.cs" />
+    <Compile Include="KOCAuthorization\KOCUserTypes.cs" />
+    <Compile Include="Models\Adsl\adsl_campaigns.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_customerdocument.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_customerproduct.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_customer_status.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_document.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_gsmKullanımıStatus.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_issStatus.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_mailservices.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_netStatus.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_objecttypes.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_personel.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_product_service.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_stockcard.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_stockmovement.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_task.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_taskqueue.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_taskstatematches.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_taskstatepool.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\adsl_tasktypes.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\bina.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\cadde.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\CRMAdslDataModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMAdslDataModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\CRMAdslDataModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\CRMAdslDataModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMAdslDataModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="DTOs\Fiber\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\Fiber\DTOcampaigns.cs" />
+    <Compile Include="DTOs\Fiber\DTOCloseTaskQueue.cs" />
+    <Compile Include="DTOs\Fiber\DTOcustomerproduct.cs" />
+    <Compile Include="DTOs\Fiber\DTOdocument.cs" />
+    <Compile Include="DTOs\Fiber\DTOgsmStatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOissStatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOKatZiyareti.cs" />
+    <Compile Include="DTOs\Fiber\DTOnetStatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOobjecttypes.cs" />
+    <Compile Include="DTOs\Fiber\DTOProduct_service.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetAdressFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetBlockFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetDocumentFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetObjectRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetPersonelStock.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetProductFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetSerialOnPersonel.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetSiteFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetStockCardRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetStockMovementRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetTSMFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOGetTSPFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestCloseTaskqueue.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestSaveFaultTaks.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTopluAtamalar.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestPagination.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
+    <Compile Include="DTOs\Fiber\DTOResponseClasses.cs" />
+    <Compile Include="DTOs\Fiber\DTOstockcard.cs" />
+    <Compile Include="DTOs\Fiber\DTOstockmovement.cs" />
+    <Compile Include="DTOs\Fiber\DTOstockstatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOtaskstatematches.cs" />
+    <Compile Include="DTOs\Fiber\DTOtelStatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOturkcelltvstatus.cs" />
+    <Compile Include="DTOs\Fiber\DTOtvStatus.cs" />
+    <Compile Include="DTOs\Fiber\FilterClasses.cs" />
+    <Compile Include="DTOs\Fiber\DTOblock.cs" />
+    <Compile Include="DTOs\Fiber\DTOcustomer.cs" />
+    <Compile Include="DTOs\Fiber\DTOcustomer_status.cs" />
+    <Compile Include="DTOs\Fiber\DTOpersonel.cs" />
+    <Compile Include="DTOs\Fiber\DTOsite.cs" />
+    <Compile Include="DTOs\Fiber\DTOtask.cs" />
+    <Compile Include="DTOs\Fiber\DTOtaskqueue.cs" />
+    <Compile Include="DTOs\Fiber\DTOFilter.cs" />
+    <Compile Include="DTOs\Fiber\DTOtaskstatepool.cs" />
+    <Compile Include="DTOs\Fiber\DTOTaskTypes.cs" />
+    <Compile Include="Models\Adsl\customer.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\daire.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\il.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\ilce.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\mahalleKoy.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\ModelExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\block.cs">
+    <Compile Include="Models\Fiber\block.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\campaigns.cs">
+    <Compile Include="Models\Fiber\campaigns.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\CRMDataModel.Context.cs">
+    <Compile Include="Models\Fiber\CRMDataModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.Context.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\CRMDataModel.cs">
+    <Compile Include="Models\Fiber\CRMDataModel.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\CRMDataModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CRMDataModel.edmx</DependentUpon>
-    </Compile>
-    <Compile Include="Models\CRMDataModel1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>CRMDataModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\CRMDataModel1.Designer.cs">
+    <Compile Include="Models\Fiber\CRMDataModel.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\customer.cs">
+    <Compile Include="Models\Fiber\CRMDataModel1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\customerdocument.cs">
+    <Compile Include="Models\Fiber\CRMDataModel1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CRMDataModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\customer.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\customerinfo.cs">
+    <Compile Include="Models\Fiber\customerdocument.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\customerproduct.cs">
+    <Compile Include="Models\Fiber\customerinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\customer_status.cs">
+    <Compile Include="Models\Fiber\customerproduct.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\document.cs">
+    <Compile Include="Models\Fiber\customer_status.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\flatinfo.cs">
+    <Compile Include="Models\Fiber\document.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\gsmKullanımıStatus.cs">
+    <Compile Include="Models\Fiber\flatinfo.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\issStatus.cs">
+    <Compile Include="Models\Fiber\getPersonelStock_Result.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\ModelExtensions.cs" />
-    <Compile Include="Models\netStatus.cs">
+    <Compile Include="Models\Fiber\gsmKullanımıStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\objecttypes.cs">
+    <Compile Include="Models\Fiber\issStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\personel.cs">
+    <Compile Include="Models\Fiber\ModelExtensions.cs" />
+    <Compile Include="Models\Fiber\netStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\product_service.cs">
+    <Compile Include="Models\Fiber\objecttypes.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\site.cs">
+    <Compile Include="Models\Fiber\personel.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\stockcard.cs">
+    <Compile Include="Models\Fiber\product_service.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\stockmovement.cs">
+    <Compile Include="Models\Fiber\site.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\stockstatus.cs">
+    <Compile Include="Models\Fiber\stockcard.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\task.cs">
+    <Compile Include="Models\Fiber\stockmovement.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\taskqueue.cs">
+    <Compile Include="Models\Fiber\stockstatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\taskstatematches.cs">
+    <Compile Include="Models\Fiber\task.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\taskstatepool.cs">
+    <Compile Include="Models\Fiber\taskqueue.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\tasktypes.cs">
+    <Compile Include="Models\Fiber\taskstatematches.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\telStatus.cs">
+    <Compile Include="Models\Fiber\taskstatepool.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\TurkcellTVStatus.cs">
+    <Compile Include="Models\Fiber\tasktypes.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\TvKullanımıStatus.cs">
+    <Compile Include="Models\Fiber\telStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\vcampaignproducts.cs">
+    <Compile Include="Models\Fiber\TurkcellTVStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\TvKullanımıStatus.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\vcampaignproducts.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
-    <EntityDeploy Include="Models\CRMDataModel.edmx">
+    <EntityDeploy Include="Models\Fiber\CRMDataModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>CRMDataModel1.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <Content Include="Models\CRMDataModel.Context.tt">
+    <Content Include="Models\Fiber\CRMDataModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
       <LastGenOutput>CRMDataModel.Context.cs</LastGenOutput>
     </Content>
-    <Content Include="Models\CRMDataModel.edmx.diagram">
+    <Content Include="Models\Fiber\CRMDataModel.edmx.diagram">
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
     </Content>
-    <Content Include="Models\CRMDataModel.tt">
+    <Content Include="Models\Fiber\CRMDataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>CRMDataModel.edmx</DependentUpon>
       <LastGenOutput>CRMDataModel1.cs</LastGenOutput>
@@ -300,6 +476,13 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <EntityDeploy Include="Models\Adsl\CRMAdslDataModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>CRMAdslDataModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\Adsl\CRMAdslDataModel.edmx.diagram">
+      <DependentUpon>CRMAdslDataModel.edmx</DependentUpon>
+    </Content>
     <None Include="Properties\PublishProfiles\CrmApi.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

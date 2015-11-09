@@ -1,5 +1,4 @@
-﻿using CRMWebApi.DTOs;
-using CRMWebApi.Models;
+﻿using CRMWebApi.DTOs.Fiber;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,17 +7,19 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
+using CRMWebApi.DTOs.Fiber.DTORequestClasses;
+using CRMWebApi.Models.Fiber;
 
 namespace CRMWebApi.Controllers
 {
-    [RoutePrefix("api/Stock")]
+    [RoutePrefix("api/Fiber/Stock")]
     public class StockController : ApiController
     {
 
         #region Stok Hareketleri Sayfası
         [Route("getStockMovements")]
         [HttpPost]
-        public HttpResponseMessage getStockMovements(DTOs.DTORequestClasses.DTOGetStockMovementRequest request)
+        public HttpResponseMessage getStockMovements(DTOGetStockMovementRequest request)
         {
             var userID = 12;
             using (var db = new CRMEntities())
@@ -148,52 +149,72 @@ namespace CRMWebApi.Controllers
         {
             //  var serinos = Request.Params.AllKeys;
             var serials = serinos.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var errormessage = new DTOResponseError();
             if (!serials.Any()) serials.Add(null);
             if (ModelState.IsValid)
             {
-                var userID = 7;
-                var userType = 0;
+                var userID = 12;//depocu
+                var userType = 2;
                 using (var db = new CRMEntities())
                 {
                     foreach (var seri in serials)
                     {
                         //serino kontrolü yap. varsa ekleme.
-                        stockmovement sm = new stockmovement();
-                        sm.serialno = seri;
-                        sm.lastupdated = DateTime.Now;
-                        sm.creationdate = DateTime.Now;
-                        sm.toobjecttype = r.toobjecttype;
-                        sm.stockcardid = r.stockcardid;
-                        sm.toobject = r.toobject;
-                        sm.deleted = false;
-                        sm.amount = seri == null ? r.amount : 1;
-                        sm.relatedtaskqueue = tqid;
-                        if (userID == userID)// (long)KocCRMRoles.kscrStockStaff
+                        var userControl = db.stockmovement.Where(s => s.serialno==seri).Select(s => s.fromobject).FirstOrDefault();
+                        if (userControl != userID)
                         {
-                            if (r.toobjecttype == 5000)
-                            {
-
-                                sm.fromobjecttype = 4000;
-                                sm.fromobject = 1000;
-                                sm.confirmationdate = DateTime.Now;
-                            }
-                            else
-                            {
-                                sm.fromobjecttype = 5000;
-                                sm.fromobject = userID;
-                            }
+                            errormessage.errorCode = -1;
+                            errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
                         }
                         else
                         {
-                            sm.fromobjecttype = userType;// Convert.ToInt32(User.Identity.TitleCode);
-                            sm.fromobject = userID;
-                        }
-                        if (r.relatedtaskqueue != null) sm.confirmationdate = DateTime.Now;
-                        sm.movementdate = DateTime.Now;
-                        sm.updatedby = userID;
-                        db.stockmovement.Add(sm);
-                        db.SaveChanges();
+                            var count = db.stockmovement.Where(s => s.serialno == seri).Count();
+                            if ((int)count >= 0)
+                            {
+                                errormessage.errorCode = -1;
+                                errormessage.errorMessage = seri + " Seri numarası daha önce girilmiş! Lütfen Kontrol Ediniz!";
+                            }
+                            else
+                            {
 
+
+                                stockmovement sm = new stockmovement();
+                                sm.serialno = seri;
+                                sm.lastupdated = DateTime.Now;
+                                sm.creationdate = DateTime.Now;
+                                sm.toobjecttype = r.toobjecttype;
+                                sm.stockcardid = r.stockcardid;
+                                sm.toobject = r.toobject;
+                                sm.deleted = false;
+                                sm.amount = seri == null ? r.amount : 1;
+                                sm.relatedtaskqueue = tqid;
+                                if (userID == userID)// (long)KocCRMRoles.kscrStockStaff
+                                {
+                                    if (r.toobjecttype == 5000)
+                                    {
+
+                                        sm.fromobjecttype = 4000;
+                                        sm.fromobject = 1000;
+                                        sm.confirmationdate = DateTime.Now;
+                                    }
+                                    else
+                                    {
+                                        sm.fromobjecttype = 5000;
+                                        sm.fromobject = userID;
+                                    }
+                                }
+                                else
+                                {
+                                    sm.fromobjecttype = userType;// Convert.ToInt32(User.Identity.TitleCode);
+                                    sm.fromobject = userID;
+                                }
+                                if (r.relatedtaskqueue != null) sm.confirmationdate = DateTime.Now;
+                                sm.movementdate = DateTime.Now;
+                                sm.updatedby = userID;
+                                db.stockmovement.Add(sm);
+                                db.SaveChanges();
+                            }
+                        }
                     }
 
                 }

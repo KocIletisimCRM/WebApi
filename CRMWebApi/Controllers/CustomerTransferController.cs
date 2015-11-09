@@ -1,19 +1,14 @@
 ﻿// compile with: /doc:DocFileName.xml
-using CRMWebApi.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Data.Entity;
-using CRMWebApi.DTOs;
-using System.Data.SqlClient;
-using CRMWebApi.DTOs.DTORequestClasses;
+using CRMWebApi.Models.Fiber;
+using CRMWebApi.DTOs.Fiber;
 
 namespace CRMWebApi.Controllers
 {
-     [RoutePrefix("api/Nakil")]
+    [RoutePrefix("api/Nakil")]
     public class CustomerTransferController : ApiController
     {
          [Route("findCustomer")]
@@ -78,7 +73,7 @@ namespace CRMWebApi.Controllers
        
              using (var db=new CRMEntities())
              {
-              var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<DTOs.CustomerTransferObject>(info.ToString());
+              var obj = Newtonsoft.Json.JsonConvert.DeserializeObject<CustomerTransferObject>(info.ToString());
              //eski daireyi siliyoruz.
               foreach (var item in  db.customer.Where(c=> c.blockid==obj.blockid && c.flat==obj.flat))
               {

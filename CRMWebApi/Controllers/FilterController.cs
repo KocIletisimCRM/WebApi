@@ -1,21 +1,20 @@
 ﻿// compile with: /doc:DocFileName.xml
-using CRMWebApi.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
-using CRMWebApi.DTOs;
-using System.Data.SqlClient;
-using CRMWebApi.DTOs.DTORequestClasses;
+using CRMWebApi.DTOs.Fiber;
+using CRMWebApi.DTOs.Fiber.DTORequestClasses;
+using CRMWebApi.Models.Fiber;
+
 namespace CRMWebApi.Controllers
 {
     /// <summary> 
     /// Web Uygulamasındaki filtreleme bileşenlerinin verilerini çekmek için kullanılır 
     /// </summary>
-     [RoutePrefix("api/Filter")]
+    [RoutePrefix("api/Fiber/Filter")]
     public class FilterController : ApiController
     {
         /// <summary> 
@@ -144,6 +143,7 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new CRMEntities())
             {
+
                 var res = db.issStatus.Where(i => i.deleted == 0).OrderBy(i => i.issText).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }
@@ -242,7 +242,7 @@ namespace CRMWebApi.Controllers
         /// <param name="request">kategori alt kategori ve ürün tanımlarını içerir</param>
         [Route("getCampaignInfo")]
         [HttpPost]
-        public HttpResponseMessage getCampaignInfo(DTOs.DTORequestClasses.DTOFiterGetCampaignRequst request)
+        public HttpResponseMessage getCampaignInfo(DTOFiterGetCampaignRequst request)
         {
             var filter = request.getFilter();
             filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
@@ -279,7 +279,7 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("getProducts")]
+        [Route("getProductList")]
         [HttpPost]
         public HttpResponseMessage getProduct()
         {
@@ -304,7 +304,7 @@ namespace CRMWebApi.Controllers
 
         [Route("getObject")]
         [HttpPost]
-        public HttpResponseMessage getObject(DTOs.DTORequestClasses.DTOGetObjectRequest request)
+        public HttpResponseMessage getObject(DTOGetObjectRequest request)
         {
             using (var db=new CRMEntities())
             {
@@ -320,6 +320,28 @@ namespace CRMWebApi.Controllers
                 else
                     res.AddRange(db.personel.SqlQuery(querySql).Select(p => new idName { id = p.personelid, name = p.personelname }));
                 return Request.CreateResponse(HttpStatusCode.OK,res.Select(r=>r.toDTO()),"application/json");
+            }
+        }
+
+        [Route("getPersonelStock")]
+        [HttpPost]
+        public HttpResponseMessage getPersonelStock(DTOGetPersonelStock request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.getPersonelStock(request.personelid).ToList();              
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=> new {r.productname,r.stockid,r.amount }), "application/json");
+            }
+        }
+
+        [Route("getSerialsOnPersonel")]
+        [HttpPost]
+        public HttpResponseMessage getSerialsOnPersonel(DTOGetSerialOnPersonel request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.getSerialsOnPersonel(request.personelid,request.stockcardid).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
             }
         }
     }

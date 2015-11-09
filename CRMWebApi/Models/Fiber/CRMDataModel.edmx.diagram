@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="74">
+        <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
+        <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="6.625" PointY="8.625" />
+        <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="4" PointY="8.625" />
+        <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="15.5" PointY="3" />
+        <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
+        <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
+        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="12.125" PointY="4.75" />
+        <EntityTypeShape EntityType="CRMModel.customer_status" Width="1.5" PointX="0.5" PointY="0.5" />
+        <AssociationConnector Association="CRMModel.customer_statuscustomer1" />
+        <AssociationConnector Association="CRMModel.customertaskqueue1" />
+        <AssociationConnector Association="CRMModel.blockcustomer1" />
+        <AssociationConnector Association="CRMModel.blocktaskqueue1" />
+        <AssociationConnector Association="CRMModel.taskstatepooltaskqueue1" />
+        <AssociationConnector Association="CRMModel.personeltaskqueue1" />
+        <AssociationConnector Association="CRMModel.siteblock" />
+        <AssociationConnector Association="CRMModel.tasktaskqueue" />
+        <AssociationConnector Association="CRMModel.asistantPersonel" />
+        <AssociationConnector Association="CRMModel.personeltaskqueue2" />
+        <AssociationConnector Association="CRMModel.personelblock" />
+        <AssociationConnector Association="CRMModel.personelcustomer" />
+        <AssociationConnector Association="CRMModel.personelsite" />
+        <AssociationConnector Association="CRMModel.personeltask" />
+        <AssociationConnector Association="CRMModel.personeltaskstatepool" />
+        <AssociationConnector Association="CRMModel.personelblock1" />
+        <EntityTypeShape EntityType="CRMModel.tasktypes" Width="1.5" PointX="8.625" PointY="0.5" />
+        <AssociationConnector Association="CRMModel.tasktypestask" />
+        <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="5.375" PointY="0.75" />
+        <EntityTypeShape EntityType="CRMModel.flatinfo" Width="1.5" PointX="9.375" PointY="5.75" />
+        <EntityTypeShape EntityType="CRMModel.gsmKullanımıStatus" Width="1.5" PointX="0.5" PointY="8.375" />
+        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="0.5" PointY="6.625" />
+        <EntityTypeShape EntityType="CRMModel.TvKullanımıStatus" Width="1.5" PointX="0.5" PointY="12.125" />
+        <EntityTypeShape EntityType="CRMModel.netStatus" Width="1.5" PointX="0.5" PointY="4.625" />
+        <EntityTypeShape EntityType="CRMModel.telStatus" Width="1.5" PointX="0.5" PointY="10.25" />
+        <EntityTypeShape EntityType="CRMModel.issStatus" Width="1.5" PointX="0.5" PointY="2.625" />
+        <AssociationConnector Association="CRMModel.issStatuscustomer" />
+        <AssociationConnector Association="CRMModel.netStatuscustomer" />
+        <AssociationConnector Association="CRMModel.TvKullanımıStatuscustomer" />
+        <AssociationConnector Association="CRMModel.telStatuscustomer" />
+        <AssociationConnector Association="CRMModel.gsmKullanımıStatuscustomer" />
+        <EntityTypeShape EntityType="CRMModel.campaigns" Width="1.5" PointX="5.125" PointY="15.625" />
+        <EntityTypeShape EntityType="CRMModel.customerproduct" Width="1.5" PointX="8.5" PointY="14.625" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_campaigns" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_customer" />
+        <AssociationConnector Association="CRMModel.customerproducttaskqueue" />
+        <EntityTypeShape EntityType="CRMModel.customerdocument" Width="1.5" PointX="11.125" PointY="13.375" />
+        <EntityTypeShape EntityType="CRMModel.document" Width="1.5" PointX="13.25" PointY="13.125" />
+        <AssociationConnector Association="CRMModel.customerdocumentdocument" />
+        <AssociationConnector Association="CRMModel.customerdocumentcustomer" />
+        <EntityTypeShape EntityType="CRMModel.taskstatematches" Width="1.5" PointX="17.75" PointY="1.375" />
+        <AssociationConnector Association="CRMModel.FK_taskstatematches_task" />
+        <AssociationConnector Association="CRMModel.FK_taskstatematches_taskstatepool" />
+        <EntityTypeShape EntityType="CRMModel.product_service" Width="1.5" PointX="9.375" PointY="9" />
+        <AssociationConnector Association="CRMModel.FK_customerproduct_product_service" />
+        <EntityTypeShape EntityType="CRMModel.stockcard" Width="1.5" PointX="14.25" PointY="10.75" />
+        <EntityTypeShape EntityType="CRMModel.stockmovement" Width="1.5" PointX="17.625" PointY="12.75" />
+        <AssociationConnector Association="CRMModel.FK_stockmovement_stockcard" />
+        <AssociationConnector Association="CRMModel.taskrel" />
+        <EntityTypeShape EntityType="CRMModel.vcampaignproducts" Width="1.5" PointX="5.375" PointY="4.75" />
+        <AssociationConnector Association="CRMModel.campaignsvcampaignproducts" />
+        <AssociationConnector Association="CRMModel.product_servicevcampaignproducts" />
+        <AssociationConnector Association="CRMModel.customerstockmovement" />
+        <AssociationConnector Association="CRMModel.taskqueuestockmovement" />
+        <EntityTypeShape EntityType="CRMModel.objecttypes" Width="1.5" PointX="13.25" PointY="19.375" />
+        <AssociationConnector Association="CRMModel.objecttypesstockmovement" />
+        <AssociationConnector Association="CRMModel.objecttypesstockmovement1" />
+        <AssociationConnector Association="CRMModel.customerstockmovement1" />
+        <AssociationConnector Association="CRMModel.personelstockmovement" />
+        <AssociationConnector Association="CRMModel.personelstockmovement1" />
+        <EntityTypeShape EntityType="CRMModel.stockstatus" Width="1.5" PointX="0.75" PointY="14.75" />
+        <AssociationConnector Association="CRMModel.personelstockstatus" ManuallyRouted="false" >
+        </AssociationConnector>
+        <AssociationConnector Association="CRMModel.taskobjecttypes" />
+        <AssociationConnector Association="CRMModel.taskobjecttypes1" />
+        <AssociationConnector Association="CRMModel.taskprev" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

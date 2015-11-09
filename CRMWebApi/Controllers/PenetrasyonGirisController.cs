@@ -1,18 +1,16 @@
-﻿using CRMWebApi.Models;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
-using CRMWebApi.DTOs;
+using CRMWebApi.DTOs.Fiber;
 using System.Data.SqlClient;
-
+using CRMWebApi.Models.Fiber;
 
 namespace CRMWebApi.Controllers
 {
-     [RoutePrefix("api/Penetrasyon")]
+    [RoutePrefix("api/Penetrasyon")]
     public class PenetrasyonGirisController : ApiController
     {
          public class getCustomerParams

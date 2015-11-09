@@ -1,25 +1,20 @@
-﻿using CRMWebApi.Models;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Data.Entity;
-using CRMWebApi.DTOs;
-using System.Data.SqlClient;
-using CRMWebApi.DTOs.DTORequestClasses;
-using System.Diagnostics;
-
+using CRMWebApi.DTOs.Fiber;
+using CRMWebApi.Models.Fiber;
+using CRMWebApi.DTOs.Fiber.DTORequestClasses;
 
 namespace CRMWebApi.Controllers
 {
-   [RoutePrefix("api/SiteBlock")]
+    [RoutePrefix("api/Fiber/SiteBlock")]
    public  class SiteBlockController : ApiController
     {
         [Route("getBlocks")]
         [HttpPost]
-        public HttpResponseMessage getBlocks(DTOs.DTORequestClasses.DTOGetBlockFilter request)
+        public HttpResponseMessage getBlocks(DTOGetBlockFilter request)
         {
             using (var db=new CRMEntities())
             {
@@ -55,7 +50,7 @@ namespace CRMWebApi.Controllers
 
         [Route("editBlock")]
         [HttpPost]
-        public HttpResponseMessage editBlock(DTOs.DTOblock request)
+        public HttpResponseMessage editBlock(DTOblock request)
         {
             using (var db = new CRMEntities())
             {
@@ -94,7 +89,7 @@ namespace CRMWebApi.Controllers
 
         [Route("getSites")]
         [HttpPost]
-        public HttpResponseMessage getSites(DTOs.DTORequestClasses.DTOGetSiteFilter request)
+        public HttpResponseMessage getSites(DTOGetSiteFilter request)
         {
             using (var db = new CRMEntities())
             {
@@ -121,7 +116,7 @@ namespace CRMWebApi.Controllers
 
         [Route("editSite")]
         [HttpPost]
-        public HttpResponseMessage editSite(DTOs.DTOsite request)
+        public HttpResponseMessage editSite(DTOsite request)
         {
             using (var db = new CRMEntities())
             {
