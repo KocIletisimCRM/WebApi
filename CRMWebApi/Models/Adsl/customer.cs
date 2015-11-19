@@ -18,54 +18,36 @@ namespace CRMWebApi.Models.Adsl
         public customer()
         {
             this.taskqueue = new HashSet<adsl_taskqueue>();
+            this.adsl_stockmovement = new HashSet<adsl_stockmovement>();
+            this.adsl_stockmovement1 = new HashSet<adsl_stockmovement>();
         }
     
         public int customerid { get; set; }
         public string customername { get; set; }
         public string tc { get; set; }
-        public string phone { get; set; }
-        public string acikAdres { get; set; }
-        public Nullable<int> adresTip { get; set; }
-        public string bagimsizBolumDurum { get; set; }
-        public Nullable<int> bagimsizBolumDurumKod { get; set; }
-        public string bagimsizBolumIcKapiNo { get; set; }
-        public Nullable<int> bagimsizBolumKimlikNo { get; set; }
-        public string bagimsizBolumTipiAciklama { get; set; }
-        public Nullable<int> bagimsizBolumTipiKod { get; set; }
-        public string binaDisKapiNo { get; set; }
-        public Nullable<int> binaKimlikNo { get; set; }
-        public string blokAd { get; set; }
-        public string bucakAciklama { get; set; }
-        public string bucakAd { get; set; }
-        public Nullable<int> bucakKimlikNo { get; set; }
-        public string csbmAciklama { get; set; }
-        public string csbmAd { get; set; }
-        public Nullable<int> csbmKimlikNo { get; set; }
-        public string ilAd { get; set; }
-        public Nullable<int> ilKimlikNo { get; set; }
-        public string ilceAd { get; set; }
-        public Nullable<int> ilceKimlikNo { get; set; }
-        public string koyAciklama { get; set; }
-        public string koyAd { get; set; }
-        public Nullable<int> koyKimlikNo { get; set; }
-        public string mahalleAciklama { get; set; }
-        public string mahalleAd { get; set; }
-        public Nullable<int> mahalleKimlikNo { get; set; }
-        public Nullable<bool> maksIntegrated { get; set; }
-        public string postaKod { get; set; }
-        public string siteAd { get; set; }
-        public string yapiKullanimAmacAciklama { get; set; }
-        public Nullable<int> yapiKullanimAmacKod { get; set; }
-        public Nullable<int> yolKimlikNo { get; set; }
-        public Nullable<bool> deleted { get; set; }
         public string gsm { get; set; }
+        public string phone { get; set; }
+        public Nullable<int> ilKimlikNo { get; set; }
+        public Nullable<int> ilceKimlikNo { get; set; }
+        public Nullable<int> mahalleKimlikNo { get; set; }
+        public Nullable<int> yolKimlikNo { get; set; }
+        public Nullable<int> binaKimlikNo { get; set; }
+        public Nullable<int> daire { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public string description { get; set; }
+        public Nullable<bool> deleted { get; set; }
+        public Nullable<System.DateTime> creationdate { get; set; }
+        public Nullable<System.DateTime> birthdate { get; set; }
+        public Nullable<int> customerstatus { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }
         public virtual il il { get; set; }
         public virtual ilce ilce { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_stockmovement> adsl_stockmovement { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_stockmovement> adsl_stockmovement1 { get; set; }
     }
 }

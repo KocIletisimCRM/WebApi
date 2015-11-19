@@ -10,16 +10,9 @@
 namespace CRMWebApi.Models.Adsl
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class adsl_stockcard
+    public partial class getPersonelStockAdsl_Result
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public adsl_stockcard()
-        {
-            this.stockmovement = new HashSet<adsl_stockmovement>();
-        }
-    
         public int stockid { get; set; }
         public string productname { get; set; }
         public string category { get; set; }
@@ -30,8 +23,6 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<adsl_stockmovement> stockmovement { get; set; }
+        public Nullable<int> amount { get; set; }
     }
 }

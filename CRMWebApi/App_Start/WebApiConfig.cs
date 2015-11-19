@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using Teknar_Proxy_Lib;
 
 namespace CRMWebApi
 {
@@ -19,6 +20,7 @@ namespace CRMWebApi
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            TeknarProxyService.Start();
         }
     }
 }

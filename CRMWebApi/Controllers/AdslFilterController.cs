@@ -7,6 +7,8 @@ using System.Data.Entity;
 using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using CRMWebApi.Models.Adsl;
+using System;
+using CRMWebApi.KOCAuthorization;
 
 namespace CRMWebApi.Controllers
 {
@@ -19,6 +21,7 @@ namespace CRMWebApi.Controllers
         /// <param name="request">Task tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getTasks")]
         [HttpPost]
+        [KOCAuthorize]
         public HttpResponseMessage getTasks(DTOFilterGetTasksRequest request)
         {
             using (var db = new KOCSAMADLSEntities())
@@ -190,49 +193,57 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }
+       
+
+        [Route("getAttacheablePersonel")]
+        [HttpPost]
+        [KOCAuthorize]
+        public HttpResponseMessage getPersonel(DTOTest request)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var task = db.taskqueue.Where(t => t.taskorderno == request.taskorderno).Select(s => s.taskid).FirstOrDefault();
+                var objects = db.task.Where(s => s.taskid == task).Select(s => s.attachablepersoneltype).FirstOrDefault() ;
+                var res = db.personel.Where(p => (p.roles & objects)==objects).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
+            }
+        }
 
         /// <summary> 
         /// Web Uygulamasındaki kampanya  seçenekleri bileşeninin verilerini çekmek için kullanılır. 
         /// </summary>
         /// <param name="request">kategori alt kategori ve ürün tanımlarını içerir</param>
-        //[Route("getCampaignInfo")]
-        //[HttpPost]
-        //public HttpResponseMessage getCampaignInfo(DTOFiterGetCampaignRequst request)
-        //{
-        //    var filter = request.getFilter();
-        //    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+        [Route("getCampaignInfo")]
+        [HttpPost]
+        public HttpResponseMessage getCampaignInfo(DTOFiterGetCampaignRequst request)
+        {
+            var filter = request.getFilter();
+            filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
 
-        //    using (var db = new KOCSAMADLSEntities())
-        //    {
-        //        //var p = db.campaigns.Where(c => c.id == 6080).FirstOrDefault();
-        //        //List<int> productids = new List<int>();
-        //        //foreach (var item in p.products.Split(',').ToList())
-        //        //{
-        //        //    productids.Add(Convert.ToInt32(item));
-        //        //}
-        //        //var products = db.product_service.Where(pp => productids.Contains(pp.productid)).ToList();
-        //        //return Request.CreateResponse(HttpStatusCode.OK, products.Select(s => new {s.productname,s.productid }), "application/json");              
-        //        if (request.isCategoryFilter())
-        //        {
-        //            return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.category }).Distinct().OrderBy(t => t.category).ToList(), "application/json");
-        //        }
-        //        else if (request.isSubcategoryFilter())
-        //        {
-        //            return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.subcategory }).Distinct().OrderBy(t => t.subcategory).ToList(), "application/json");
-        //        }
-        //        else if (request.isCampaignFilter())
-        //            return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name, tt.id }).OrderBy(t => t.name).ToList(), "application/json");
-        //        else
-        //        {
-        //            var cids = db.campaigns.SqlQuery(filter.getFilterSQL()).Select(s => s.id).ToList();
-        //            var pids = db.vcampaignproducts.Where(v => cids.Contains(v.cid)).Select(s => s.pid).ToList();
-        //            return Request.CreateResponse(HttpStatusCode.OK,
-        //                db.product_service.Where(p => pids.Contains(p.productid)).OrderBy(s => s.category).ToList().GroupBy(g => g.category, g => g.toDTO()).Select(g => new { category = g.Key, products = g })
-        //                , "application/json");
-
-        //        }
-        //    }
-        //}
+            using (var db = new KOCSAMADLSEntities())
+            {
+        
+                if (request.isCategoryFilter())
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.category }).Distinct().OrderBy(t => t.category).ToList(), "application/json");
+                }
+                else if (request.isSubcategoryFilter())
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.subcategory }).Distinct().OrderBy(t => t.subcategory).ToList(), "application/json");
+                }
+                else if (request.isCampaignFilter())
+                    return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name, tt.id }).OrderBy(t => t.name).ToList(), "application/json");
+                else
+                {
+                    var cids = db.campaigns.SqlQuery(filter.getFilterSQL()).Select(s => s.id).ToList();
+                    var pids = db.vcampaignproducts.Where(v => cids.Contains(v.cid)).Select(s => s.pid).ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                        db.product_service.Where(pp => pids.Contains(pp.productid)).OrderBy(s => s.category).ToList().GroupBy(g => g.category, g => g.toDTO()).Select(g => new { category = g.Key, products = g })
+                        , "application/json");
+                   // return Request.CreateResponse(HttpStatusCode.OK, db.campaigns.SqlQuery(filter.getFilterSQL()).Select(tt => new { tt.name, tt.id }).OrderBy(t => t.name).ToList(), "application/json");//silinecek
+                }
+            }
+        }
 
         [Route("getProductList")]
         [HttpPost]
@@ -278,26 +289,26 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        //[Route("getPersonelStock")]
-        //[HttpPost]
-        //public HttpResponseMessage getPersonelStock(DTOGetPersonelStock request)
-        //{
-        //    using (var db = new KOCSAMADLSEntities())
-        //    {
-        //        var res = db.getPersonelStock(request.personelid).ToList();
-        //        return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => new { r.productname, r.stockid, r.amount }), "application/json");
-        //    }
-        //}
+        [Route("getPersonelStock")]
+        [HttpPost]
+        public HttpResponseMessage getPersonelStock(DTOGetPersonelStock request)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var res = db.getPersonelStockAdsl(request.personelid).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => new { r.productname, r.stockid, r.amount }), "application/json");
+            }
+        }
 
-        //[Route("getSerialsOnPersonel")]
-        //[HttpPost]
-        //public HttpResponseMessage getSerialsOnPersonel(DTOGetSerialOnPersonel request)
-        //{
-        //    using (var db = new KOCSAMADLSEntities())
-        //    {
-        //        var res = db.getSerialsOnPersonel(request.personelid, request.stockcardid).ToList();
-        //        return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
-        //    }
-        //}
+        [Route("getSerialsOnPersonel")]
+        [HttpPost]
+        public HttpResponseMessage getSerialsOnPersonel(DTOGetSerialOnPersonel request)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var res = db.getSerialsOnPersonelAdsl(request.personelid, request.stockcardid).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
+            }
+        }
     }
 }

@@ -12,6 +12,8 @@ namespace CRMWebApi.Models.Adsl
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Core.Objects;
+    using System.Linq;
     
     public partial class KOCSAMADLSEntities : DbContext
     {
@@ -25,8 +27,6 @@ namespace CRMWebApi.Models.Adsl
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<bina> bina { get; set; }
-        public virtual DbSet<cadde> cadde { get; set; }
         public virtual DbSet<adsl_campaigns> campaigns { get; set; }
         public virtual DbSet<adsl_customer_status> customer_status { get; set; }
         public virtual DbSet<adsl_customerdocument> customerdocument { get; set; }
@@ -37,7 +37,6 @@ namespace CRMWebApi.Models.Adsl
         public virtual DbSet<il> il { get; set; }
         public virtual DbSet<ilce> ilce { get; set; }
         public virtual DbSet<adsl_issStatus> issStatus { get; set; }
-        public virtual DbSet<mahalleKoy> mahalleKoy { get; set; }
         public virtual DbSet<adsl_mailservices> mailservices { get; set; }
         public virtual DbSet<adsl_netStatus> netStatus { get; set; }
         public virtual DbSet<adsl_objecttypes> objecttypes { get; set; }
@@ -51,5 +50,50 @@ namespace CRMWebApi.Models.Adsl
         public virtual DbSet<adsl_taskstatepool> taskstatepool { get; set; }
         public virtual DbSet<adsl_tasktypes> tasktypes { get; set; }
         public virtual DbSet<customer> customer { get; set; }
+        public virtual DbSet<cadde> cadde { get; set; }
+        public virtual DbSet<mahalleKoy> mahalleKoy { get; set; }
+        public virtual DbSet<adsl_vcampaignproducts> vcampaignproducts { get; set; }
+        public virtual DbSet<adsl_stockstatus> stockstatus { get; set; }
+        public virtual DbSet<bina> bina { get; set; }
+    
+        [DbFunction("KOCSAMADLSEntities", "getSerialsOnPersonel")]
+        public virtual IQueryable<string> getSerialsOnPersonel(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
+        {
+            var pERSONELIDParameter = pERSONELID.HasValue ?
+                new ObjectParameter("PERSONELID", pERSONELID) :
+                new ObjectParameter("PERSONELID", typeof(int));
+    
+            var sTOCKCARDIDParameter = sTOCKCARDID.HasValue ?
+                new ObjectParameter("STOCKCARDID", sTOCKCARDID) :
+                new ObjectParameter("STOCKCARDID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[KOCSAMADLSEntities].[getSerialsOnPersonel](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
+        }
+    
+       
+    
+        [DbFunction("KOCSAMADLSEntities", "getSerialsOnPersonelAdsl")]
+        public virtual IQueryable<string> getSerialsOnPersonelAdsl(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
+        {
+            var pERSONELIDParameter = pERSONELID.HasValue ?
+                new ObjectParameter("PERSONELID", pERSONELID) :
+                new ObjectParameter("PERSONELID", typeof(int));
+    
+            var sTOCKCARDIDParameter = sTOCKCARDID.HasValue ?
+                new ObjectParameter("STOCKCARDID", sTOCKCARDID) :
+                new ObjectParameter("STOCKCARDID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[KOCSAMADLSEntities].[getSerialsOnPersonelAdsl](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
+        }
+    
+        [DbFunction("KOCSAMADLSEntities", "getPersonelStockAdsl")]
+        public virtual IQueryable<getPersonelStockAdsl_Result> getPersonelStockAdsl(Nullable<int> pERSONELID)
+        {
+            var pERSONELIDParameter = pERSONELID.HasValue ?
+                new ObjectParameter("PERSONELID", pERSONELID) :
+                new ObjectParameter("PERSONELID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getPersonelStockAdsl_Result>("[KOCSAMADLSEntities].[getPersonelStockAdsl](@PERSONELID)", pERSONELIDParameter);
+        }
     }
 }

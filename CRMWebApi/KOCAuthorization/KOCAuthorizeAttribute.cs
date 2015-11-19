@@ -133,7 +133,7 @@ namespace CRMWebApi.KOCAuthorization
 
         protected override void HandleUnauthorizedRequest(HttpActionContext actionContext)
         {
-            actionContext.Response = actionContext.Request.CreateResponse(new { error = ErrorMessage });
+            actionContext.Response = actionContext.Request.CreateResponse(new { loginError = ErrorMessage });
         }
     }
 }

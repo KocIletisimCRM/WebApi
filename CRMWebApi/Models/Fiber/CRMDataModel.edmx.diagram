@@ -4,17 +4,41 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="74">
+      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="86">
         <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
         <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="6.625" PointY="8.625" />
         <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="4" PointY="8.625" />
         <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="15.5" PointY="3" />
         <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
         <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
-        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="12.125" PointY="4.75" />
+        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="12" PointY="5.625" />
         <EntityTypeShape EntityType="CRMModel.customer_status" Width="1.5" PointX="0.5" PointY="0.5" />
         <AssociationConnector Association="CRMModel.customer_statuscustomer1" />
-        <AssociationConnector Association="CRMModel.customertaskqueue1" />
+        <AssociationConnector Association="CRMModel.customertaskqueue1" ManuallyRouted="true" >
+          <ConnectorPoint PointX="4.625" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="6.197916666666667" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="6.364583333333333" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="7.4479186666666672" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="7.6145853333333333" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="8.2916666666666661" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="8.4583333333333339" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="8.9166666666666661" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="9.0833333333333339" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="10.75" PointY="8.0186577265625" />
+          <ConnectorPoint PointX="10.75" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="10.947916666666666" PointY="4.8456022135416648" />
+          <ConnectorPoint PointX="11.130208333333334" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="12.166666666666666" PointY="4.8456022135416648" />
+          <ConnectorPoint PointX="12.333333333333334" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="13.104166666666666" PointY="4.8456022135416648" />
+          <ConnectorPoint PointX="13.270833333333334" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="15.25" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="15.25" PointY="2.75" />
+          <ConnectorPoint PointX="15.873234288148119" PointY="2.75" />
+          <ConnectorPoint PointX="15.873234288148119" PointY="2.9175" />
+          <ConnectorPoint PointX="15.905296614659708" PointY="2.9175" />
+          <ConnectorPoint PointX="15.905296614659708" PointY="3" />
+        </AssociationConnector>
         <AssociationConnector Association="CRMModel.blockcustomer1" />
         <AssociationConnector Association="CRMModel.blocktaskqueue1" />
         <AssociationConnector Association="CRMModel.taskstatepooltaskqueue1" />

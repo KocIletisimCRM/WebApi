@@ -12,17 +12,11 @@ namespace CRMWebApi.Models.Adsl
     using System;
     using System.Collections.Generic;
     
-    public partial class adsl_product_service
+    public partial class adsl_vcampaignproducts
     {
-        public int productid { get; set; }
+        public int cid { get; set; }
+        public int pid { get; set; }
+        public string cname { get; set; }
         public string productname { get; set; }
-        public string category { get; set; }
-        public string automandatorytasks { get; set; }
-        public Nullable<int> maxduration { get; set; }
-        public Nullable<System.DateTime> creationdate { get; set; }
-        public Nullable<System.DateTime> lastupdated { get; set; }
-        public Nullable<int> updatedby { get; set; }
-        public Nullable<bool> deleted { get; set; }
-        public string documents { get; set; }
     }
 }

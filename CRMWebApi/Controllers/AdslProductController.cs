@@ -1,23 +1,23 @@
 ﻿using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
-using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+
 namespace CRMWebApi.Controllers
 {
-    [RoutePrefix("api/Adsl/Campaign")]
-    public class AdslCampaignController : ApiController
+    [RoutePrefix("api/Adsl/Product")]
+    public class AdslProductController : ApiController
     {
-        #region Kampanya Sayfası 
-        [Route("getCampaigns")]
+        #region Depo Kart Tanımlamaları Sayfası
+
+        [Route("getProducts")]
         [HttpPost]
-        public HttpResponseMessage getCampaigns(DTOFiterGetCampaignRequst request)
+        public HttpResponseMessage getProducts(DTOGetProductFilter request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -26,7 +26,7 @@ namespace CRMWebApi.Controllers
                 var countSql = filter.getCountSQL();
                 var rowCount = db.Database.SqlQuery<int>(countSql).First();
                 var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
-                var res = db.campaigns.SqlQuery(querySql).ToList();
+                var res = db.product_service.SqlQuery(querySql).ToList();
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
                     pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
@@ -41,47 +41,45 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("saveCampaigns")]
+        [Route("saveProduct")]
         [HttpPost]
-        public HttpResponseMessage saveCampaigns(DTOcampaigns request)
+        public HttpResponseMessage saveProduct(DTOProduct_service request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                var dcamp = db.campaigns.Where(t => t.id == request.id).FirstOrDefault();
+                var dpro = db.product_service.Where(t => t.productid == request.productid).FirstOrDefault();
 
-                dcamp.name = request.name;
-                dcamp.category = request.category;
-                dcamp.subcategory = request.subcategory;
-                dcamp.products = request.products;
-                dcamp.documents = request.documents;
-                dcamp.lastupdated = DateTime.Now;
-                dcamp.updatedby = 7;
+                dpro.productname = request.productname;
+                dpro.category = request.category;
+                dpro.maxduration = request.maxduration;
+                dpro.automandatorytasks = request.automandatorytasks;
+                dpro.lastupdated = DateTime.Now;
+                dpro.updatedby = 7;
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
 
-        [Route("insertCampaigns")]
+        [Route("insertProduct")]
         [HttpPost]
-        public HttpResponseMessage insertCampaigns(DTOcampaigns request)
+        public HttpResponseMessage insertProduct(DTOProduct_service request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                var c = new adsl_campaigns
+                var p = new adsl_product_service
                 {
-                    name = request.name,
+                    productname = request.productname,
                     category = request.category,
-                    subcategory = request.subcategory,
-                    products = request.products,
-                    documents = request.documents,
+                    automandatorytasks = request.automandatorytasks,
+                    maxduration = request.maxduration,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
                     updatedby = 7
                 };
-                db.campaigns.Add(c);
+                db.product_service.Add(p);
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }

@@ -44,7 +44,6 @@ namespace CRMWebApi.Models.Adsl
         public virtual adsl_personel asistanPersonel { get; set; }
         public virtual adsl_personel attachedpersonel { get; set; }
         public virtual adsl_personel personel { get; set; }
-        public virtual customer attachedcustomer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_customerproduct> customerproduct { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -57,5 +56,6 @@ namespace CRMWebApi.Models.Adsl
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue2 { get; set; }
         public virtual adsl_taskqueue previousTaskQueue { get; set; }
+        public virtual customer attachedcustomer { get; set; }
     }
 }

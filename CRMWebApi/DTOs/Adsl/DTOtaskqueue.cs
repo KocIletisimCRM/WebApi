@@ -26,5 +26,6 @@ namespace CRMWebApi.DTOs.Adsl
         public List<object> customerproduct { get; set; }
         public List<object> stockmovement { get; set; }
         public List<object> stockcardlist { get; set; }
+        public List<object> documentlist { get; set; }
     }
 }

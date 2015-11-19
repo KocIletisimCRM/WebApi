@@ -18,6 +18,7 @@ namespace CRMWebApi.Models.Adsl
         public adsl_taskstatepool()
         {
             this.taskqueue = new HashSet<adsl_taskqueue>();
+            this.taskstatematches = new HashSet<adsl_taskstatematches>();
         }
     
         public int taskstateid { get; set; }
@@ -30,5 +31,7 @@ namespace CRMWebApi.Models.Adsl
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_taskstatematches> taskstatematches { get; set; }
     }
 }

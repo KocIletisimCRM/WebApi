@@ -1,23 +1,23 @@
 ﻿using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
-using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+
 namespace CRMWebApi.Controllers
 {
-    [RoutePrefix("api/Adsl/Campaign")]
-    public class AdslCampaignController : ApiController
+    [RoutePrefix("api/Adsl/StockCard")]
+    public class AdslStockCardController : ApiController
     {
-        #region Kampanya Sayfası 
-        [Route("getCampaigns")]
+        #region Depo Kart Tanımlamaları Sayfası
+
+        [Route("getStockCards")]
         [HttpPost]
-        public HttpResponseMessage getCampaigns(DTOFiterGetCampaignRequst request)
+        public HttpResponseMessage getStockCads(DTOFilterGetStockCardRequest request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -26,7 +26,7 @@ namespace CRMWebApi.Controllers
                 var countSql = filter.getCountSQL();
                 var rowCount = db.Database.SqlQuery<int>(countSql).First();
                 var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
-                var res = db.campaigns.SqlQuery(querySql).ToList();
+                var res = db.stockcard.SqlQuery(querySql).ToList();
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
                     pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
@@ -41,47 +41,48 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("saveCampaigns")]
+        [Route("saveStockCard")]
         [HttpPost]
-        public HttpResponseMessage saveCampaigns(DTOcampaigns request)
+        public HttpResponseMessage saveStockCard(DTOstockcard request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                var dcamp = db.campaigns.Where(t => t.id == request.id).FirstOrDefault();
+                var ds = db.stockcard.Where(t => t.stockid == request.stockid).FirstOrDefault();
 
-                dcamp.name = request.name;
-                dcamp.category = request.category;
-                dcamp.subcategory = request.subcategory;
-                dcamp.products = request.products;
-                dcamp.documents = request.documents;
-                dcamp.lastupdated = DateTime.Now;
-                dcamp.updatedby = 7;
+                ds.productname = request.productname;
+                ds.category = request.category;
+                ds.hasserial = request.hasserial;
+                ds.unit = request.unit;
+                ds.description = request.description;
+                ds.lastupdated = DateTime.Now;
+                ds.updatedby = 7;
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
 
-        [Route("insertCampaigns")]
+
+        [Route("insertStockCard")]
         [HttpPost]
-        public HttpResponseMessage insertCampaigns(DTOcampaigns request)
+        public HttpResponseMessage insertStockCard(DTOstockcard request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                var c = new adsl_campaigns
+                var s = new adsl_stockcard
                 {
-                    name = request.name,
+                    productname = request.productname,
                     category = request.category,
-                    subcategory = request.subcategory,
-                    products = request.products,
-                    documents = request.documents,
+                    hasserial = request.hasserial,
+                    unit = request.unit,
+                    description = request.description,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
                     updatedby = 7
                 };
-                db.campaigns.Add(c);
+                db.stockcard.Add(s);
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }

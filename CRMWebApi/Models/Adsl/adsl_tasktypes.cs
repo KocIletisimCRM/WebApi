@@ -14,7 +14,16 @@ namespace CRMWebApi.Models.Adsl
     
     public partial class adsl_tasktypes
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public adsl_tasktypes()
+        {
+            this.adsl_task = new HashSet<adsl_task>();
+        }
+    
         public int TaskTypeId { get; set; }
         public string TaskTypeName { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_task> adsl_task { get; set; }
     }
 }

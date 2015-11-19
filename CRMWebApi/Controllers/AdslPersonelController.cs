@@ -52,6 +52,7 @@ namespace CRMWebApi.Controllers
 
                 dp.personelname = request.personelname;
                 dp.category = (int)request.category;
+                dp.roles= dp.category = (int)request.category; ;
                 dp.mobile = request.mobile;
                 dp.email = request.email;
                 dp.password = request.password;

@@ -31,5 +31,10 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<bool> deleted { get; set; }
     
         public virtual adsl_taskqueue taskqueue { get; set; }
+        public virtual adsl_stockcard stockcard { get; set; }
+        public virtual adsl_personel topersonel { get; set; }
+        public virtual adsl_personel frompersonel { get; set; }
+        public virtual customer fromcustomer { get; set; }
+        public virtual customer tocustomer { get; set; }
     }
 }

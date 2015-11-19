@@ -56,45 +56,21 @@
           <Key>
             <PropertyRef Name="customerid" />
           </Key>
-          <Property Name="customerid" Type="int" Nullable="false" />
+          <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="customername" Type="nvarchar" MaxLength="50" />
           <Property Name="tc" Type="nvarchar" MaxLength="50" />
           <Property Name="gsm" Type="nvarchar" MaxLength="50" />
           <Property Name="phone" Type="nvarchar" MaxLength="50" />
-          <Property Name="acikAdres" Type="nvarchar(max)" />
-          <Property Name="adresTip" Type="int" />
-          <Property Name="bagimsizBolumDurum" Type="nvarchar(max)" />
-          <Property Name="bagimsizBolumDurumKod" Type="int" />
-          <Property Name="bagimsizBolumIcKapiNo" Type="nvarchar(max)" />
-          <Property Name="bagimsizBolumKimlikNo" Type="int" />
-          <Property Name="bagimsizBolumTipiAciklama" Type="nvarchar(max)" />
-          <Property Name="bagimsizBolumTipiKod" Type="int" />
-          <Property Name="binaDisKapiNo" Type="nvarchar(max)" />
-          <Property Name="binaKimlikNo" Type="int" />
-          <Property Name="blokAd" Type="nvarchar(max)" />
-          <Property Name="bucakAciklama" Type="nvarchar(max)" />
-          <Property Name="bucakAd" Type="nvarchar(max)" />
-          <Property Name="bucakKimlikNo" Type="int" />
-          <Property Name="csbmAciklama" Type="nvarchar(max)" />
-          <Property Name="csbmAd" Type="nvarchar(max)" />
-          <Property Name="csbmKimlikNo" Type="int" />
-          <Property Name="ilAd" Type="nvarchar(max)" />
+          <Property Name="birthdate" Type="datetime" />
           <Property Name="ilKimlikNo" Type="int" />
-          <Property Name="ilceAd" Type="nvarchar(max)" />
           <Property Name="ilceKimlikNo" Type="int" />
-          <Property Name="koyAciklama" Type="nvarchar(max)" />
-          <Property Name="koyAd" Type="nvarchar(max)" />
-          <Property Name="koyKimlikNo" Type="int" />
-          <Property Name="mahalleAciklama" Type="nvarchar(max)" />
-          <Property Name="mahalleAd" Type="nvarchar(max)" />
           <Property Name="mahalleKimlikNo" Type="int" />
-          <Property Name="maksIntegrated" Type="bit" />
-          <Property Name="postaKod" Type="nvarchar(max)" />
-          <Property Name="siteAd" Type="nvarchar(max)" />
-          <Property Name="yapiKullanimAmacAciklama" Type="nvarchar(max)" />
-          <Property Name="yapiKullanimAmacKod" Type="int" />
           <Property Name="yolKimlikNo" Type="int" />
+          <Property Name="binaKimlikNo" Type="int" />
+          <Property Name="daire" Type="int" />
+          <Property Name="customerstatus" Type="int" />
           <Property Name="updatedby" Type="int" />
+          <Property Name="creationdate" Type="datetime" />
           <Property Name="lastupdated" Type="datetime" />
           <Property Name="description" Type="nvarchar" MaxLength="50" />
           <Property Name="deleted" Type="bit" />
@@ -258,6 +234,7 @@
           <Property Name="productname" Type="nvarchar" MaxLength="255" />
           <Property Name="category" Type="nvarchar" MaxLength="255" />
           <Property Name="automandatorytasks" Type="nvarchar" MaxLength="255" />
+          <Property Name="documents" Type="nvarchar" MaxLength="255" />
           <Property Name="maxduration" Type="int" />
           <Property Name="creationdate" Type="datetime2" Precision="7" />
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
@@ -371,6 +348,66 @@
           <Property Name="TaskTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="TaskTypeName" Type="nvarchar" MaxLength="50" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMADLS.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="stockstatus">
+          <Key>
+            <PropertyRef Name="toobject" />
+            <PropertyRef Name="toobjecttype" />
+            <PropertyRef Name="stockcardid" />
+            <PropertyRef Name="INPUT" />
+            <PropertyRef Name="OUTPUT" />
+          </Key>
+          <Property Name="toobject" Type="int" Nullable="false" />
+          <Property Name="toobjecttype" Type="int" Nullable="false" />
+          <Property Name="stockcardid" Type="int" Nullable="false" />
+          <Property Name="INPUT" Type="int" Nullable="false" />
+          <Property Name="OUTPUT" Type="int" Nullable="false" />
+          <Property Name="amount" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="int" Nullable="false" />
+          <Property Name="pid" Type="int" Nullable="false" />
+          <Property Name="cname" Type="nvarchar" MaxLength="255" />
+          <Property Name="productname" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <Function Name="getPersonelStockAdsl" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="PERSONELID" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="stockid" Type="int" Nullable="false" />
+                <Property Name="productname" Type="nvarchar" MaxLength="255" />
+                <Property Name="category" Type="nvarchar" MaxLength="255" />
+                <Property Name="hasserial" Type="bit" />
+                <Property Name="unit" Type="nvarchar" MaxLength="255" />
+                <Property Name="description" Type="nvarchar(max)" />
+                <Property Name="creationdate" Type="datetime2" Precision="7" />
+                <Property Name="lastupdated" Type="datetime2" Precision="7" />
+                <Property Name="updatedby" Type="int" />
+                <Property Name="deleted" Type="bit" />
+                <Property Name="amount" Type="int" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
+        <Function Name="getSerialsOnPersonelAdsl" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="PERSONELID" Type="int" Mode="In" />
+          <Parameter Name="STOCKCARDID" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="serialno" Type="nvarchar" MaxLength="255" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
         <EntityContainer Name="KOCSAMADLSModelStoreContainer">
           <EntitySet Name="bina" EntityType="Self.bina" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="cadde" EntityType="Self.cadde" Schema="dbo" store:Type="Tables" />
@@ -398,43 +435,29 @@
           <EntitySet Name="taskstatematches" EntityType="Self.taskstatematches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="taskstatepool" EntityType="Self.taskstatepool" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tasktypes" EntityType="Self.tasktypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockstatus" EntityType="Self.stockstatus" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [stockstatus].[toobject] AS [toobject], 
+    [stockstatus].[toobjecttype] AS [toobjecttype], 
+    [stockstatus].[stockcardid] AS [stockcardid], 
+    [stockstatus].[INPUT] AS [INPUT], 
+    [stockstatus].[OUTPUT] AS [OUTPUT], 
+    [stockstatus].[amount] AS [amount]
+    FROM [dbo].[stockstatus] AS [stockstatus]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vcampaignproducts" EntityType="Self.vcampaignproducts" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vcampaignproducts].[cid] AS [cid], 
+    [vcampaignproducts].[pid] AS [pid], 
+    [vcampaignproducts].[cname] AS [cname], 
+    [vcampaignproducts].[productname] AS [productname]
+    FROM [dbo].[vcampaignproducts] AS [vcampaignproducts]</DefiningQuery>
+          </EntitySet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="KOCSAMADLSModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="bina">
-          <Key>
-            <PropertyRef Name="kimlikNo" />
-          </Key>
-          <Property Name="CsbmKimlikNo" Type="Int32" />
-          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="ada" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="binaDurum" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="binaDurumKod" Type="Int32" />
-          <Property Name="binaNumaratajTipiAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="binaNumaratajTipiKod" Type="Int32" />
-          <Property Name="binaYapiTipiAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="binaYapiTipiKod" Type="Int32" />
-          <Property Name="blokAdi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="kapiNo" Type="Int32" />
-          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
-          <Property Name="maksIntegrated" Type="Boolean" />
-          <Property Name="pafta" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="parsel" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="siteKooperatifAdi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="yolKimlikNo" Type="Int32" />
-          <Property Name="mahalleKoyBaglisiKimlikNo" Type="Int32" />
-        </EntityType>
-        <EntityType Name="cadde">
-          <Key>
-            <PropertyRef Name="kimlikNo" />
-          </Key>
-          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
-          <Property Name="mahalleKoyBaglisiKimlikNo" Type="Int32" />
-          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="maksIntegrated" Type="Boolean" />
-        </EntityType>
         <EntityType Name="adsl_campaigns">
           <Key>
             <PropertyRef Name="id" />
@@ -548,21 +571,6 @@
           <Property Name="issText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="deleted" Type="Int32" />
         </EntityType>
-        <EntityType Name="mahalleKoy">
-          <Key>
-            <PropertyRef Name="kimlikNo" />
-          </Key>
-          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
-          <Property Name="mahalleAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="koyKimlikNo" Type="Int32" />
-          <Property Name="koyAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="koyKurumTur" Type="Int32" />
-          <Property Name="bucakKimlikNo" Type="Int32" />
-          <Property Name="bucakAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="ilceKimlikNo" Type="Int32" />
-          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="maksIntegrated" Type="Boolean" />
-        </EntityType>
         <EntityType Name="adsl_mailservices">
           <Key>
             <PropertyRef Name="id" />
@@ -588,6 +596,8 @@
           </Key>
           <Property Name="typeid" Type="Int32" Nullable="false" />
           <Property Name="typname" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="adsl_task" Relationship="KOCSAMADLSModel.adsl_taskadsl_objecttypes" FromRole="adsl_objecttypes" ToRole="adsl_task" />
+          <NavigationProperty Name="adsl_task1" Relationship="KOCSAMADLSModel.adsl_objecttypesadsl_task" FromRole="adsl_objecttypes" ToRole="adsl_task" />
         </EntityType>
         <EntityType Name="adsl_personel">
           <Key>
@@ -608,6 +618,9 @@
           <NavigationProperty Name="attachedTaskqueue" Relationship="KOCSAMADLSModel.personeltaskqueue" FromRole="personel" ToRole="taskqueue" />
           <NavigationProperty Name="attachedtaskqueue" Relationship="KOCSAMADLSModel.personeltaskqueue1" FromRole="personel" ToRole="taskqueue" />
           <NavigationProperty Name="updatedTaskqueue" Relationship="KOCSAMADLSModel.personeltaskqueue2" FromRole="personel" ToRole="taskqueue" />
+          <NavigationProperty Name="stockstatus" Relationship="KOCSAMADLSModel.adsl_stockstatusadsl_personel" FromRole="adsl_personel" ToRole="adsl_stockstatus" />
+          <NavigationProperty Name="adsl_stockmovement" Relationship="KOCSAMADLSModel.adsl_stockmovementadsl_personel" FromRole="adsl_personel" ToRole="adsl_stockmovement" />
+          <NavigationProperty Name="adsl_stockmovement1" Relationship="KOCSAMADLSModel.adsl_personeladsl_stockmovement" FromRole="adsl_personel" ToRole="adsl_stockmovement" />
         </EntityType>
         <EntityType Name="adsl_product_service">
           <Key>
@@ -622,6 +635,7 @@
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
+          <Property Name="documents" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="adsl_stockcard">
           <Key>
@@ -637,6 +651,7 @@
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="stockmovement" Relationship="KOCSAMADLSModel.adsl_stockcardadsl_stockmovement" FromRole="adsl_stockcard" ToRole="adsl_stockmovement" />
         </EntityType>
         <EntityType Name="adsl_stockmovement">
           <Key>
@@ -658,6 +673,11 @@
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueue" Relationship="KOCSAMADLSModel.stockmovementtaskqueue" FromRole="stockmovement" ToRole="taskqueue" />
+          <NavigationProperty Name="stockcard" Relationship="KOCSAMADLSModel.adsl_stockcardadsl_stockmovement" FromRole="adsl_stockmovement" ToRole="adsl_stockcard" />
+          <NavigationProperty Name="topersonel" Relationship="KOCSAMADLSModel.adsl_stockmovementadsl_personel" FromRole="adsl_stockmovement" ToRole="adsl_personel" />
+          <NavigationProperty Name="frompersonel" Relationship="KOCSAMADLSModel.adsl_personeladsl_stockmovement" FromRole="adsl_stockmovement" ToRole="adsl_personel" />
+          <NavigationProperty Name="fromcustomer" Relationship="KOCSAMADLSModel.customeradsl_stockmovement" FromRole="adsl_stockmovement" ToRole="customer" />
+          <NavigationProperty Name="tocustomer" Relationship="KOCSAMADLSModel.customeradsl_stockmovement1" FromRole="adsl_stockmovement" ToRole="customer" />
         </EntityType>
         <EntityType Name="adsl_task">
           <Key>
@@ -674,6 +694,10 @@
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueue" Relationship="KOCSAMADLSModel.tasktaskqueue" FromRole="task" ToRole="taskqueue" />
+          <NavigationProperty Name="personeltypes" Relationship="KOCSAMADLSModel.adsl_taskadsl_objecttypes" FromRole="adsl_task" ToRole="adsl_objecttypes" />
+          <NavigationProperty Name="objecttypes" Relationship="KOCSAMADLSModel.adsl_objecttypesadsl_task" FromRole="adsl_task" ToRole="adsl_objecttypes" />
+          <NavigationProperty Name="tasktypes" Relationship="KOCSAMADLSModel.adsl_tasktypesadsl_task" FromRole="adsl_task" ToRole="adsl_tasktypes" />
+          <NavigationProperty Name="taskstatematches" Relationship="KOCSAMADLSModel.adsl_taskadsl_taskstatematches" FromRole="adsl_task" ToRole="adsl_taskstatematches" />
         </EntityType>
         <EntityType Name="adsl_taskqueue">
           <Key>
@@ -699,7 +723,6 @@
           <NavigationProperty Name="asistanPersonel" Relationship="KOCSAMADLSModel.personeltaskqueue" FromRole="taskqueue" ToRole="personel" />
           <NavigationProperty Name="attachedpersonel" Relationship="KOCSAMADLSModel.personeltaskqueue1" FromRole="taskqueue" ToRole="personel" />
           <NavigationProperty Name="personel" Relationship="KOCSAMADLSModel.personeltaskqueue2" FromRole="taskqueue" ToRole="personel" />
-          <NavigationProperty Name="attachedcustomer" Relationship="KOCSAMADLSModel.customertaskqueue" FromRole="taskqueue" ToRole="customer" />
           <NavigationProperty Name="customerproduct" Relationship="KOCSAMADLSModel.customerproducttaskqueue" FromRole="taskqueue" ToRole="customerproduct" />
           <NavigationProperty Name="stockmovement" Relationship="KOCSAMADLSModel.stockmovementtaskqueue" FromRole="taskqueue" ToRole="stockmovement" />
           <NavigationProperty Name="taskstatepool" Relationship="KOCSAMADLSModel.taskstatepooltaskqueue" FromRole="taskqueue" ToRole="taskstatepool" />
@@ -708,6 +731,7 @@
           <NavigationProperty Name="relatedTaskQueue" Relationship="KOCSAMADLSModel.taskqueuetaskqueue" FromRole="taskqueue1" ToRole="taskqueue" />
           <NavigationProperty Name="taskqueue2" Relationship="KOCSAMADLSModel.taskqueuetaskqueue1" FromRole="taskqueue" ToRole="taskqueue1" />
           <NavigationProperty Name="previousTaskQueue" Relationship="KOCSAMADLSModel.taskqueuetaskqueue1" FromRole="taskqueue1" ToRole="taskqueue" />
+          <NavigationProperty Name="attachedcustomer" Relationship="KOCSAMADLSModel.customeradsl_taskqueue" FromRole="adsl_taskqueue" ToRole="customer" />
         </EntityType>
         <EntityType Name="adsl_taskstatematches">
           <Key>
@@ -724,6 +748,8 @@
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="task" Relationship="KOCSAMADLSModel.adsl_taskadsl_taskstatematches" FromRole="adsl_taskstatematches" ToRole="adsl_task" />
+          <NavigationProperty Name="taskstatepool" Relationship="KOCSAMADLSModel.adsl_taskstatepooladsl_taskstatematches" FromRole="adsl_taskstatematches" ToRole="adsl_taskstatepool" />
         </EntityType>
         <EntityType Name="adsl_taskstatepool">
           <Key>
@@ -737,6 +763,7 @@
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueue" Relationship="KOCSAMADLSModel.taskstatepooltaskqueue" FromRole="taskstatepool" ToRole="taskqueue" />
+          <NavigationProperty Name="taskstatematches" Relationship="KOCSAMADLSModel.adsl_taskstatepooladsl_taskstatematches" FromRole="adsl_taskstatepool" ToRole="adsl_taskstatematches" />
         </EntityType>
         <EntityType Name="adsl_tasktypes">
           <Key>
@@ -744,10 +771,9 @@
           </Key>
           <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="adsl_task" Relationship="KOCSAMADLSModel.adsl_tasktypesadsl_task" FromRole="adsl_tasktypes" ToRole="adsl_task" />
         </EntityType>
         <EntityContainer Name="KOCSAMADLSEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="bina" EntityType="Self.bina" />
-          <EntitySet Name="cadde" EntityType="Self.cadde" />
           <EntitySet Name="campaigns" EntityType="KOCSAMADLSModel.adsl_campaigns" />
           <EntitySet Name="customer_status" EntityType="KOCSAMADLSModel.adsl_customer_status" />
           <EntitySet Name="customerdocument" EntityType="KOCSAMADLSModel.adsl_customerdocument" />
@@ -758,7 +784,6 @@
           <EntitySet Name="il" EntityType="Self.il" />
           <EntitySet Name="ilce" EntityType="Self.ilce" />
           <EntitySet Name="issStatus" EntityType="KOCSAMADLSModel.adsl_issStatus" />
-          <EntitySet Name="mahalleKoy" EntityType="Self.mahalleKoy" />
           <EntitySet Name="mailservices" EntityType="KOCSAMADLSModel.adsl_mailservices" />
           <EntitySet Name="netStatus" EntityType="KOCSAMADLSModel.adsl_netStatus" />
           <EntitySet Name="objecttypes" EntityType="KOCSAMADLSModel.adsl_objecttypes" />
@@ -781,11 +806,6 @@
           </AssociationSet>
           <AssociationSet Name="personeltaskqueue2" Association="KOCSAMADLSModel.personeltaskqueue2">
             <End Role="personel" EntitySet="personel" />
-            <End Role="taskqueue" EntitySet="taskqueue" />
-          </AssociationSet>
-          <EntitySet Name="customer" EntityType="KOCSAMADLSModel.customer" />
-          <AssociationSet Name="customertaskqueue" Association="KOCSAMADLSModel.customertaskqueue">
-            <End Role="customer" EntitySet="customer" />
             <End Role="taskqueue" EntitySet="taskqueue" />
           </AssociationSet>
           <AssociationSet Name="customerproducttaskqueue" Association="KOCSAMADLSModel.customerproducttaskqueue">
@@ -816,6 +836,31 @@
             <End Role="campaigns" EntitySet="campaigns" />
             <End Role="customerproduct" EntitySet="customerproduct" />
           </AssociationSet>
+          <AssociationSet Name="adsl_taskadsl_objecttypes" Association="KOCSAMADLSModel.adsl_taskadsl_objecttypes">
+            <End Role="adsl_task" EntitySet="task" />
+            <End Role="adsl_objecttypes" EntitySet="objecttypes" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_objecttypesadsl_task" Association="KOCSAMADLSModel.adsl_objecttypesadsl_task">
+            <End Role="adsl_objecttypes" EntitySet="objecttypes" />
+            <End Role="adsl_task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_tasktypesadsl_task" Association="KOCSAMADLSModel.adsl_tasktypesadsl_task">
+            <End Role="adsl_tasktypes" EntitySet="tasktypes" />
+            <End Role="adsl_task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_taskadsl_taskstatematches" Association="KOCSAMADLSModel.adsl_taskadsl_taskstatematches">
+            <End Role="adsl_task" EntitySet="task" />
+            <End Role="adsl_taskstatematches" EntitySet="taskstatematches" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_taskstatepooladsl_taskstatematches" Association="KOCSAMADLSModel.adsl_taskstatepooladsl_taskstatematches">
+            <End Role="adsl_taskstatepool" EntitySet="taskstatepool" />
+            <End Role="adsl_taskstatematches" EntitySet="taskstatematches" />
+          </AssociationSet>
+          <EntitySet Name="customer" EntityType="KOCSAMADLSModel.customer" />
+          <AssociationSet Name="customeradsl_taskqueue" Association="KOCSAMADLSModel.customeradsl_taskqueue">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="adsl_taskqueue" EntitySet="taskqueue" />
+          </AssociationSet>
           <AssociationSet Name="ilcustomer" Association="KOCSAMADLSModel.ilcustomer">
             <End Role="il" EntitySet="il" />
             <End Role="customer" EntitySet="customer" />
@@ -824,6 +869,49 @@
             <End Role="ilce" EntitySet="ilce" />
             <End Role="customer" EntitySet="customer" />
           </AssociationSet>
+          <EntitySet Name="cadde" EntityType="KOCSAMADLSModel.cadde" />
+          <EntitySet Name="mahalleKoy" EntityType="KOCSAMADLSModel.mahalleKoy" />
+          <EntitySet Name="vcampaignproducts" EntityType="KOCSAMADLSModel.adsl_vcampaignproducts" />
+          <AssociationSet Name="adsl_stockcardadsl_stockmovement" Association="KOCSAMADLSModel.adsl_stockcardadsl_stockmovement">
+            <End Role="adsl_stockcard" EntitySet="stockcard" />
+            <End Role="adsl_stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <FunctionImport Name="getSerialsOnPersonel" IsComposable="true" ReturnType="Collection(String)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="stockstatus" EntityType="KOCSAMADLSModel.adsl_stockstatus" />
+          <AssociationSet Name="adsl_stockstatusadsl_personel" Association="KOCSAMADLSModel.adsl_stockstatusadsl_personel">
+            <End Role="adsl_stockstatus" EntitySet="stockstatus" />
+            <End Role="adsl_personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_stockmovementadsl_personel" Association="KOCSAMADLSModel.adsl_stockmovementadsl_personel">
+            <End Role="adsl_stockmovement" EntitySet="stockmovement" />
+            <End Role="adsl_personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_personeladsl_stockmovement" Association="KOCSAMADLSModel.adsl_personeladsl_stockmovement">
+            <End Role="adsl_personel" EntitySet="personel" />
+            <End Role="adsl_stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="customeradsl_stockmovement" Association="KOCSAMADLSModel.customeradsl_stockmovement">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="adsl_stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <AssociationSet Name="customeradsl_stockmovement1" Association="KOCSAMADLSModel.customeradsl_stockmovement1">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="adsl_stockmovement" EntitySet="stockmovement" />
+          </AssociationSet>
+          <FunctionImport Name="getPersonelStock" IsComposable="true" ReturnType="Collection(KOCSAMADLSModel.getPersonelStock_Result)">
+          <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="getSerialsOnPersonelAdsl" IsComposable="true" ReturnType="Collection(String)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="getPersonelStockAdsl" IsComposable="true" ReturnType="Collection(KOCSAMADLSModel.getPersonelStockAdsl_Result)">
+          <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="bina" EntityType="KOCSAMADLSModel.bina" />
         </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -858,68 +946,6 @@
             </Principal>
             <Dependent Role="taskqueue">
               <PropertyRef Name="updatedby" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="customer">
-          <Key>
-            <PropertyRef Name="customerid" />
-          </Key>
-          <Property Name="customerid" Type="Int32" Nullable="false" />
-          <Property Name="customername" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="tc" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="phone" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="acikAdres" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="adresTip" Type="Int32" />
-          <Property Name="bagimsizBolumDurum" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bagimsizBolumDurumKod" Type="Int32" />
-          <Property Name="bagimsizBolumIcKapiNo" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bagimsizBolumKimlikNo" Type="Int32" />
-          <Property Name="bagimsizBolumTipiAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bagimsizBolumTipiKod" Type="Int32" />
-          <Property Name="binaDisKapiNo" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="binaKimlikNo" Type="Int32" />
-          <Property Name="blokAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bucakAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bucakAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="bucakKimlikNo" Type="Int32" />
-          <Property Name="csbmAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="csbmAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="csbmKimlikNo" Type="Int32" />
-          <Property Name="ilAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="ilKimlikNo" Type="Int32" />
-          <Property Name="ilceAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="ilceKimlikNo" Type="Int32" />
-          <Property Name="koyAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="koyAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="koyKimlikNo" Type="Int32" />
-          <Property Name="mahalleAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="mahalleAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="mahalleKimlikNo" Type="Int32" />
-          <Property Name="maksIntegrated" Type="Boolean" />
-          <Property Name="postaKod" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="siteAd" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="yapiKullanimAmacAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="yapiKullanimAmacKod" Type="Int32" />
-          <Property Name="yolKimlikNo" Type="Int32" />
-          <NavigationProperty Name="taskqueue" Relationship="KOCSAMADLSModel.customertaskqueue" FromRole="customer" ToRole="taskqueue" />
-          <Property Name="deleted" Type="Boolean" />
-          <Property Name="gsm" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="updatedby" Type="Int32" />
-          <Property Name="lastupdated" Type="DateTime" Precision="3" />
-          <Property Name="description" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="il" Relationship="KOCSAMADLSModel.ilcustomer" FromRole="customer" ToRole="il" />
-          <NavigationProperty Name="ilce" Relationship="KOCSAMADLSModel.ilcecustomer" FromRole="customer" ToRole="ilce" />
-        </EntityType>
-        <Association Name="customertaskqueue">
-          <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
-          <End Type="KOCSAMADLSModel.adsl_taskqueue" Role="taskqueue" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="customer">
-              <PropertyRef Name="customerid" />
-            </Principal>
-            <Dependent Role="taskqueue">
-              <PropertyRef Name="attachedobjectid" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1007,6 +1033,106 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="adsl_taskadsl_objecttypes">
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_objecttypes" Role="adsl_objecttypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="adsl_task">
+              <PropertyRef Name="attachablepersoneltype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_objecttypesadsl_task">
+          <End Type="KOCSAMADLSModel.adsl_objecttypes" Role="adsl_objecttypes" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_objecttypes">
+              <PropertyRef Name="typeid" />
+            </Principal>
+            <Dependent Role="adsl_task">
+              <PropertyRef Name="attachableobjecttype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_tasktypesadsl_task">
+          <End Type="KOCSAMADLSModel.adsl_tasktypes" Role="adsl_tasktypes" Multiplicity="1" />
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="adsl_task">
+              <PropertyRef Name="tasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_taskadsl_taskstatematches">
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_taskstatematches" Role="adsl_taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="adsl_taskstatematches">
+              <PropertyRef Name="taskid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_taskstatepooladsl_taskstatematches">
+          <End Type="KOCSAMADLSModel.adsl_taskstatepool" Role="adsl_taskstatepool" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_taskstatematches" Role="adsl_taskstatematches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_taskstatepool">
+              <PropertyRef Name="taskstateid" />
+            </Principal>
+            <Dependent Role="adsl_taskstatematches">
+              <PropertyRef Name="stateid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="customer">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="Int32" Nullable="false" />
+          <Property Name="customername" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="tc" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="gsm" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="phone" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ilKimlikNo" Type="Int32" />
+          <Property Name="ilceKimlikNo" Type="Int32" />
+          <Property Name="mahalleKimlikNo" Type="Int32" />
+          <Property Name="yolKimlikNo" Type="Int32" />
+          <Property Name="binaKimlikNo" Type="Int32" />
+          <Property Name="daire" Type="Int32" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="lastupdated" Type="DateTime" Precision="3" />
+          <Property Name="description" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Boolean" />
+          <NavigationProperty Name="taskqueue" Relationship="KOCSAMADLSModel.customeradsl_taskqueue" FromRole="customer" ToRole="adsl_taskqueue" />
+          <NavigationProperty Name="il" Relationship="KOCSAMADLSModel.ilcustomer" FromRole="customer" ToRole="il" />
+          <NavigationProperty Name="ilce" Relationship="KOCSAMADLSModel.ilcecustomer" FromRole="customer" ToRole="ilce" />
+          <Property Name="creationdate" Type="DateTime" Precision="3" />
+          <Property Name="birthdate" Type="DateTime" Precision="3" />
+          <Property Name="customerstatus" Type="Int32" />
+          <NavigationProperty Name="adsl_stockmovement" Relationship="KOCSAMADLSModel.customeradsl_stockmovement" FromRole="customer" ToRole="adsl_stockmovement" />
+          <NavigationProperty Name="adsl_stockmovement1" Relationship="KOCSAMADLSModel.customeradsl_stockmovement1" FromRole="customer" ToRole="adsl_stockmovement" />
+        </EntityType>
+        <Association Name="customeradsl_taskqueue">
+          <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_taskqueue" Role="adsl_taskqueue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="adsl_taskqueue">
+              <PropertyRef Name="attachedobjectid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="ilcustomer">
           <End Type="KOCSAMADLSModel.il" Role="il" Multiplicity="0..1" />
           <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="*" />
@@ -1031,46 +1157,183 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="cadde">
+          <Key>
+            <PropertyRef Name="kimlikNo" />
+          </Key>
+          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
+          <Property Name="mahalleKoyBaglisiKimlikNo" Type="Int32" />
+          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="maksIntegrated" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="mahalleKoy">
+          <Key>
+            <PropertyRef Name="kimlikNo" />
+          </Key>
+          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
+          <Property Name="mahalleAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="koyKimlikNo" Type="Int32" />
+          <Property Name="koyAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="koyKurumTur" Type="Int32" />
+          <Property Name="bucakKimlikNo" Type="Int32" />
+          <Property Name="bucakAciklama" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ilceKimlikNo" Type="Int32" />
+          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="maksIntegrated" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="adsl_vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="Int32" Nullable="false" />
+          <Property Name="pid" Type="Int32" Nullable="false" />
+          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="adsl_stockcardadsl_stockmovement">
+          <End Type="KOCSAMADLSModel.adsl_stockcard" Role="adsl_stockcard" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_stockmovement" Role="adsl_stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_stockcard">
+              <PropertyRef Name="stockid" />
+            </Principal>
+            <Dependent Role="adsl_stockmovement">
+              <PropertyRef Name="stockcardid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="adsl_stockstatus">
+          <Key>
+            <PropertyRef Name="toobject" />
+            <PropertyRef Name="toobjecttype" />
+            <PropertyRef Name="stockcardid" />
+            <PropertyRef Name="INPUT" />
+            <PropertyRef Name="OUTPUT" />
+          </Key>
+          <Property Name="toobject" Type="Int32" Nullable="false" />
+          <Property Name="toobjecttype" Type="Int32" Nullable="false" />
+          <Property Name="stockcardid" Type="Int32" Nullable="false" />
+          <Property Name="INPUT" Type="Int32" Nullable="false" />
+          <Property Name="OUTPUT" Type="Int32" Nullable="false" />
+          <Property Name="amount" Type="Int32" />
+          <NavigationProperty Name="personel" Relationship="KOCSAMADLSModel.adsl_stockstatusadsl_personel" FromRole="adsl_stockstatus" ToRole="adsl_personel" />
+        </EntityType>
+        <Association Name="adsl_stockstatusadsl_personel">
+          <End Type="KOCSAMADLSModel.adsl_stockstatus" Role="adsl_stockstatus" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="adsl_stockstatus">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_stockmovementadsl_personel">
+          <End Type="KOCSAMADLSModel.adsl_stockmovement" Role="adsl_stockmovement" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="adsl_stockmovement">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_personeladsl_stockmovement">
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_stockmovement" Role="adsl_stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="adsl_stockmovement">
+              <PropertyRef Name="fromobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customeradsl_stockmovement">
+          <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_stockmovement" Role="adsl_stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="adsl_stockmovement">
+              <PropertyRef Name="fromobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customeradsl_stockmovement1">
+          <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_stockmovement" Role="adsl_stockmovement" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="customerid" />
+            </Principal>
+            <Dependent Role="adsl_stockmovement">
+              <PropertyRef Name="toobject" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="getPersonelStock_Result">
+          <Property Type="Int32" Name="stockid" Nullable="false" />
+          <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
+          <Property Type="Boolean" Name="hasserial" Nullable="true" />
+          <Property Type="String" Name="unit" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="description" Nullable="true" />
+          <Property Type="DateTime" Name="creationdate" Nullable="true" Precision="27" />
+          <Property Type="DateTime" Name="lastupdated" Nullable="true" Precision="27" />
+          <Property Type="Int32" Name="updatedby" Nullable="true" />
+          <Property Type="Boolean" Name="deleted" Nullable="true" />
+          <Property Type="Int32" Name="amount" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="getPersonelStockAdsl_Result">
+          <Property Type="Int32" Name="stockid" Nullable="false" />
+          <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
+          <Property Type="Boolean" Name="hasserial" Nullable="true" />
+          <Property Type="String" Name="unit" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="description" Nullable="true" />
+          <Property Type="DateTime" Name="creationdate" Nullable="true" Precision="27" />
+          <Property Type="DateTime" Name="lastupdated" Nullable="true" Precision="27" />
+          <Property Type="Int32" Name="updatedby" Nullable="true" />
+          <Property Type="Boolean" Name="deleted" Nullable="true" />
+          <Property Type="Int32" Name="amount" Nullable="true" />
+        </ComplexType>
+        <EntityType Name="bina">
+          <Key>
+            <PropertyRef Name="kimlikNo" />
+          </Key>
+          <Property Name="CsbmKimlikNo" Type="Int32" />
+          <Property Name="aciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ada" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="binaDurum" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="binaDurumKod" Type="Int32" />
+          <Property Name="binaNumaratajTipiAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="binaNumaratajTipiKod" Type="Int32" />
+          <Property Name="binaYapiTipiAciklama" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="binaYapiTipiKod" Type="Int32" />
+          <Property Name="blokAdi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="kapiNo" Type="Int32" />
+          <Property Name="kimlikNo" Type="Int32" Nullable="false" />
+          <Property Name="maksIntegrated" Type="Boolean" />
+          <Property Name="pafta" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="parsel" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="siteKooperatifAdi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="yolKimlikNo" Type="Int32" />
+          <Property Name="mahalleKoyBaglisiKimlikNo" Type="Int32" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="KOCSAMADLSModelStoreContainer" CdmEntityContainer="KOCSAMADLSEntities">
-          <EntitySetMapping Name="bina">
-            <EntityTypeMapping TypeName="KOCSAMADLSModel.bina">
-              <MappingFragment StoreEntitySet="bina">
-                <ScalarProperty Name="CsbmKimlikNo" ColumnName="CsbmKimlikNo" />
-                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
-                <ScalarProperty Name="ada" ColumnName="ada" />
-                <ScalarProperty Name="binaDurum" ColumnName="binaDurum" />
-                <ScalarProperty Name="binaDurumKod" ColumnName="binaDurumKod" />
-                <ScalarProperty Name="binaNumaratajTipiAciklama" ColumnName="binaNumaratajTipiAciklama" />
-                <ScalarProperty Name="binaNumaratajTipiKod" ColumnName="binaNumaratajTipiKod" />
-                <ScalarProperty Name="binaYapiTipiAciklama" ColumnName="binaYapiTipiAciklama" />
-                <ScalarProperty Name="binaYapiTipiKod" ColumnName="binaYapiTipiKod" />
-                <ScalarProperty Name="blokAdi" ColumnName="blokAdi" />
-                <ScalarProperty Name="kapiNo" ColumnName="kapiNo" />
-                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
-                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
-                <ScalarProperty Name="pafta" ColumnName="pafta" />
-                <ScalarProperty Name="parsel" ColumnName="parsel" />
-                <ScalarProperty Name="siteKooperatifAdi" ColumnName="siteKooperatifAdi" />
-                <ScalarProperty Name="yolKimlikNo" ColumnName="yolKimlikNo" />
-                <ScalarProperty Name="mahalleKoyBaglisiKimlikNo" ColumnName="mahalleKoyBaglisiKimlikNo" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="cadde">
-            <EntityTypeMapping TypeName="KOCSAMADLSModel.cadde">
-              <MappingFragment StoreEntitySet="cadde">
-                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
-                <ScalarProperty Name="mahalleKoyBaglisiKimlikNo" ColumnName="mahalleKoyBaglisiKimlikNo" />
-                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
-                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="campaigns">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_campaigns">
               <MappingFragment StoreEntitySet="campaigns">
@@ -1189,22 +1452,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="mahalleKoy">
-            <EntityTypeMapping TypeName="KOCSAMADLSModel.mahalleKoy">
-              <MappingFragment StoreEntitySet="mahalleKoy">
-                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
-                <ScalarProperty Name="mahalleAciklama" ColumnName="mahalleAciklama" />
-                <ScalarProperty Name="koyKimlikNo" ColumnName="koyKimlikNo" />
-                <ScalarProperty Name="koyAciklama" ColumnName="koyAciklama" />
-                <ScalarProperty Name="koyKurumTur" ColumnName="koyKurumTur" />
-                <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />
-                <ScalarProperty Name="bucakAciklama" ColumnName="bucakAciklama" />
-                <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
-                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
-                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="mailservices">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_mailservices">
               <MappingFragment StoreEntitySet="mailservices">
@@ -1255,6 +1502,7 @@
           <EntitySetMapping Name="product_service">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_product_service">
               <MappingFragment StoreEntitySet="product_service">
+                <ScalarProperty Name="documents" ColumnName="documents" />
                 <ScalarProperty Name="productid" ColumnName="productid" />
                 <ScalarProperty Name="productname" ColumnName="productname" />
                 <ScalarProperty Name="category" ColumnName="category" />
@@ -1384,48 +1632,114 @@
           <EntitySetMapping Name="customer">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.customer">
               <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="customerstatus" ColumnName="customerstatus" />
+                <ScalarProperty Name="birthdate" ColumnName="birthdate" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
                 <ScalarProperty Name="description" ColumnName="description" />
                 <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
                 <ScalarProperty Name="updatedby" ColumnName="updatedby" />
-                <ScalarProperty Name="gsm" ColumnName="gsm" />
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="yolKimlikNo" ColumnName="yolKimlikNo" />
-                <ScalarProperty Name="yapiKullanimAmacKod" ColumnName="yapiKullanimAmacKod" />
-                <ScalarProperty Name="yapiKullanimAmacAciklama" ColumnName="yapiKullanimAmacAciklama" />
-                <ScalarProperty Name="siteAd" ColumnName="siteAd" />
-                <ScalarProperty Name="postaKod" ColumnName="postaKod" />
-                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
-                <ScalarProperty Name="mahalleKimlikNo" ColumnName="mahalleKimlikNo" />
-                <ScalarProperty Name="mahalleAd" ColumnName="mahalleAd" />
-                <ScalarProperty Name="mahalleAciklama" ColumnName="mahalleAciklama" />
-                <ScalarProperty Name="koyKimlikNo" ColumnName="koyKimlikNo" />
-                <ScalarProperty Name="koyAd" ColumnName="koyAd" />
-                <ScalarProperty Name="koyAciklama" ColumnName="koyAciklama" />
-                <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
-                <ScalarProperty Name="ilceAd" ColumnName="ilceAd" />
-                <ScalarProperty Name="ilKimlikNo" ColumnName="ilKimlikNo" />
-                <ScalarProperty Name="ilAd" ColumnName="ilAd" />
-                <ScalarProperty Name="csbmKimlikNo" ColumnName="csbmKimlikNo" />
-                <ScalarProperty Name="csbmAd" ColumnName="csbmAd" />
-                <ScalarProperty Name="csbmAciklama" ColumnName="csbmAciklama" />
-                <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />
-                <ScalarProperty Name="bucakAd" ColumnName="bucakAd" />
-                <ScalarProperty Name="bucakAciklama" ColumnName="bucakAciklama" />
-                <ScalarProperty Name="blokAd" ColumnName="blokAd" />
+                <ScalarProperty Name="daire" ColumnName="daire" />
                 <ScalarProperty Name="binaKimlikNo" ColumnName="binaKimlikNo" />
-                <ScalarProperty Name="binaDisKapiNo" ColumnName="binaDisKapiNo" />
-                <ScalarProperty Name="bagimsizBolumTipiKod" ColumnName="bagimsizBolumTipiKod" />
-                <ScalarProperty Name="bagimsizBolumTipiAciklama" ColumnName="bagimsizBolumTipiAciklama" />
-                <ScalarProperty Name="bagimsizBolumKimlikNo" ColumnName="bagimsizBolumKimlikNo" />
-                <ScalarProperty Name="bagimsizBolumIcKapiNo" ColumnName="bagimsizBolumIcKapiNo" />
-                <ScalarProperty Name="bagimsizBolumDurumKod" ColumnName="bagimsizBolumDurumKod" />
-                <ScalarProperty Name="bagimsizBolumDurum" ColumnName="bagimsizBolumDurum" />
-                <ScalarProperty Name="adresTip" ColumnName="adresTip" />
-                <ScalarProperty Name="acikAdres" ColumnName="acikAdres" />
+                <ScalarProperty Name="yolKimlikNo" ColumnName="yolKimlikNo" />
+                <ScalarProperty Name="mahalleKimlikNo" ColumnName="mahalleKimlikNo" />
+                <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
+                <ScalarProperty Name="ilKimlikNo" ColumnName="ilKimlikNo" />
                 <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="gsm" ColumnName="gsm" />
                 <ScalarProperty Name="tc" ColumnName="tc" />
                 <ScalarProperty Name="customername" ColumnName="customername" />
                 <ScalarProperty Name="customerid" ColumnName="customerid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cadde">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.cadde">
+              <MappingFragment StoreEntitySet="cadde">
+                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
+                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
+                <ScalarProperty Name="mahalleKoyBaglisiKimlikNo" ColumnName="mahalleKoyBaglisiKimlikNo" />
+                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="mahalleKoy">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.mahalleKoy">
+              <MappingFragment StoreEntitySet="mahalleKoy">
+                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
+                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
+                <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
+                <ScalarProperty Name="bucakAciklama" ColumnName="bucakAciklama" />
+                <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />
+                <ScalarProperty Name="koyKurumTur" ColumnName="koyKurumTur" />
+                <ScalarProperty Name="koyAciklama" ColumnName="koyAciklama" />
+                <ScalarProperty Name="koyKimlikNo" ColumnName="koyKimlikNo" />
+                <ScalarProperty Name="mahalleAciklama" ColumnName="mahalleAciklama" />
+                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vcampaignproducts">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_vcampaignproducts">
+              <MappingFragment StoreEntitySet="vcampaignproducts">
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="cname" ColumnName="cname" />
+                <ScalarProperty Name="pid" ColumnName="pid" />
+                <ScalarProperty Name="cid" ColumnName="cid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockstatus">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_stockstatus">
+              <MappingFragment StoreEntitySet="stockstatus">
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="OUTPUT" ColumnName="OUTPUT" />
+                <ScalarProperty Name="INPUT" ColumnName="INPUT" />
+                <ScalarProperty Name="stockcardid" ColumnName="stockcardid" />
+                <ScalarProperty Name="toobjecttype" ColumnName="toobjecttype" />
+                <ScalarProperty Name="toobject" ColumnName="toobject" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="getSerialsOnPersonelAdsl" FunctionName="KOCSAMADLSModel.Store.getSerialsOnPersonelAdsl" />
+          <FunctionImportMapping FunctionImportName="getPersonelStockAdsl" FunctionName="KOCSAMADLSModel.Store.getPersonelStockAdsl">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="KOCSAMADLSModel.getPersonelStockAdsl_Result">
+                <ScalarProperty Name="stockid" ColumnName="stockid" />
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="hasserial" ColumnName="hasserial" />
+                <ScalarProperty Name="unit" ColumnName="unit" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="bina">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.bina">
+              <MappingFragment StoreEntitySet="bina">
+                <ScalarProperty Name="mahalleKoyBaglisiKimlikNo" ColumnName="mahalleKoyBaglisiKimlikNo" />
+                <ScalarProperty Name="yolKimlikNo" ColumnName="yolKimlikNo" />
+                <ScalarProperty Name="siteKooperatifAdi" ColumnName="siteKooperatifAdi" />
+                <ScalarProperty Name="parsel" ColumnName="parsel" />
+                <ScalarProperty Name="pafta" ColumnName="pafta" />
+                <ScalarProperty Name="maksIntegrated" ColumnName="maksIntegrated" />
+                <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
+                <ScalarProperty Name="kapiNo" ColumnName="kapiNo" />
+                <ScalarProperty Name="blokAdi" ColumnName="blokAdi" />
+                <ScalarProperty Name="binaYapiTipiKod" ColumnName="binaYapiTipiKod" />
+                <ScalarProperty Name="binaYapiTipiAciklama" ColumnName="binaYapiTipiAciklama" />
+                <ScalarProperty Name="binaNumaratajTipiKod" ColumnName="binaNumaratajTipiKod" />
+                <ScalarProperty Name="binaNumaratajTipiAciklama" ColumnName="binaNumaratajTipiAciklama" />
+                <ScalarProperty Name="binaDurumKod" ColumnName="binaDurumKod" />
+                <ScalarProperty Name="binaDurum" ColumnName="binaDurum" />
+                <ScalarProperty Name="ada" ColumnName="ada" />
+                <ScalarProperty Name="aciklama" ColumnName="aciklama" />
+                <ScalarProperty Name="CsbmKimlikNo" ColumnName="CsbmKimlikNo" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

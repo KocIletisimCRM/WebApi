@@ -25,5 +25,8 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+    
+        public virtual adsl_task task { get; set; }
+        public virtual adsl_taskstatepool taskstatepool { get; set; }
     }
 }

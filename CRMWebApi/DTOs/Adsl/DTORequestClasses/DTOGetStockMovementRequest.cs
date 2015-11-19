@@ -42,13 +42,6 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 subFilterCustomer.fieldFilters.Add(new DTOFieldFilter { fieldName = "customername", op = 6, value = fromobject.value });
                 filter.subTables.Add("fromobject1", subFilterCustomer);
 
-                var subFilterBlock = new DTOFilter("block","blockid");
-                subFilterBlock.fieldFilters.Add(new DTOFieldFilter { fieldName = "blockname", op = 6, value = fromobject.value });
-                filter.subTables.Add("fromobject2",subFilterBlock);
-
-                var subFilterSite = new DTOFilter("site","siteid");
-                subFilterSite.fieldFilters.Add(new DTOFieldFilter { fieldName = "sitename", op = 6, value = fromobject.value });
-                filter.subTables.Add("fromobject3",subFilterSite);
             }
 
             if (toobject != null && !string.IsNullOrWhiteSpace((string)toobject.value))
@@ -66,13 +59,6 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 subFilterCustomer.fieldFilters.Add(new DTOFieldFilter { fieldName = "customername", op = 6, value = toobject.value });
                 filter.subTables.Add("toobject1", subFilterCustomer);
 
-                var subFilterBlock = new DTOFilter("block", "blockid");
-                subFilterBlock.fieldFilters.Add(new DTOFieldFilter { fieldName = "blockname", op = 6, value = toobject.value });
-                filter.subTables.Add("toobject2", subFilterBlock);
-
-                var subFilterSite = new DTOFilter("site", "siteid");
-                subFilterSite.fieldFilters.Add(new DTOFieldFilter { fieldName = "sitename", op = 6, value = toobject.value });
-                filter.subTables.Add("toobject3", subFilterSite);
             }
 
 
