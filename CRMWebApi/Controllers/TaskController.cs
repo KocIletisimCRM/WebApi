@@ -309,57 +309,57 @@ namespace CRMWebApi.Controllers
 
                 #endregion
 
-                #region Kurulum randevusu kapandığında ikinci donanım tasklarının oluşturulma kodu
-                /*25.10.2014 18:43  OZAL Ek ürün ve retention satış taskları ise yeniden
-                 * task türemesini önlemek için kontrol bloğu ekledim
-                 */
-                var test = false;
-                var ttqretek = dtq;
-                while (ttqretek != null && ttqretek.task.tasktype != 1 && ttqretek.taskid != 65)
-                    ttqretek = ttqretek.relatedTaskQueue;
-                if (ttqretek != null)
-                {
-                    if (ttqretek.taskid == 6117 || ttqretek.taskid == 6115)
-                        test = true;
-                }
-                if (!test)//Ek ürün veya retention değilse
-                {
-                    /* OZAL 25.10.2014 18:45*/
-                    if ((dtq.task.tasktype == 3 || dtq.task.tasktype == 4) && (dtq.status != null && dtq.taskstatepool.statetype == 1) && (dtq.task.tasktype != 0))
-                    {
-                        var ttq = dtq;
-                        while (ttq != null && ttq.task.tasktype != 1 && ttq.taskid != 65 && ttq.taskid != 69) /* Satış ziyareti veya Yönetim Odası Satışı--nakil taskı *///&& ttq.taskid != 53 27.12.2014 18:40 OZAL
-                            ttq = ttq.relatedTaskQueue;
-                        if (ttq == null)
-                            throw new Exception("Satış Taskı Bulunamadı.");
+                //#region Kurulum randevusu kapandığında ikinci donanım tasklarının oluşturulma kodu
+                ///*25.10.2014 18:43  OZAL Ek ürün ve retention satış taskları ise yeniden
+                // * task türemesini önlemek için kontrol bloğu ekledim
+                // */
+                //var test = false;
+                //var ttqretek = dtq;
+                //while (ttqretek != null && ttqretek.task.tasktype != 1 && ttqretek.taskid != 65)
+                //    ttqretek = ttqretek.relatedTaskQueue;
+                //if (ttqretek != null)
+                //{
+                //    if (ttqretek.taskid == 6117 || ttqretek.taskid == 6115)
+                //        test = true;
+                //}
+                //if (!test)//Ek ürün veya retention değilse
+                //{
+                //    /* OZAL 25.10.2014 18:45*/
+                //    if ((dtq.task.tasktype == 3 || dtq.task.tasktype == 4) && (dtq.status != null && dtq.taskstatepool.statetype == 1) && (dtq.task.tasktype != 0))
+                //    {
+                //        var ttq = dtq;
+                //        while (ttq != null && ttq.task.tasktype != 1 && ttq.taskid != 65 && ttq.taskid != 69) /* Satış ziyareti veya Yönetim Odası Satışı--nakil taskı *///&& ttq.taskid != 53 27.12.2014 18:40 OZAL
+                //            ttq = ttq.relatedTaskQueue;
+                //        if (ttq == null)
+                //            throw new Exception("Satış Taskı Bulunamadı.");
 
-                        var cust_pro = db.customerproduct.Where(r => r.taskid == ttq.taskorderno && r.deleted == false).ToList();
-                        foreach (var p in cust_pro.Select(r => r.productid))
-                            foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
-                            {
-                                if (db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item).Any())
-                                    continue;
-                                var personel_id = (db.task.Any(m => m.attachablepersoneltype == dtq.attachedpersonel.category && m.taskid == item));
-                                db.taskqueue.Add(new taskqueue
-                                {
-                                    attachedpersonelid = personel_id ? dtq.attachedpersonelid : (null),
+                //        var cust_pro = db.customerproduct.Where(r => r.taskid == ttq.taskorderno && r.deleted == false).ToList();
+                //        foreach (var p in cust_pro.Select(r => r.productid))
+                //            foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                //            {
+                //                if (db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item).Any())
+                //                    continue;
+                //                var personel_id = (db.task.Any(m => m.attachablepersoneltype == dtq.attachedpersonel.category && m.taskid == item));
+                //                db.taskqueue.Add(new taskqueue
+                //                {
+                //                    attachedpersonelid = personel_id ? dtq.attachedpersonelid : (null),
 
-                                    attachmentdate = personel_id ? (DateTime?)DateTime.Now : (null),
-                                    attachedobjectid = dtq.attachedobjectid,
-                                    taskid = item,
-                                    creationdate = DateTime.Now,
-                                    deleted = false,
-                                    lastupdated = DateTime.Now,
-                                    previoustaskorderid = dtq.taskorderno,
-                                    //Kullanıcı Kontrolü
-                                    updatedby = 7,// User.Identity.PersonelID,
-                                    relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
-                                });
-                            }
-                        db.SaveChanges();
-                    }
-                }
-                #endregion
+                //                    attachmentdate = personel_id ? (DateTime?)DateTime.Now : (null),
+                //                    attachedobjectid = dtq.attachedobjectid,
+                //                    taskid = item,
+                //                    creationdate = DateTime.Now,
+                //                    deleted = false,
+                //                    lastupdated = DateTime.Now,
+                //                    previoustaskorderid = dtq.taskorderno,
+                //                    //Kullanıcı Kontrolü
+                //                    updatedby = 7,// User.Identity.PersonelID,
+                //                    relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                //                });
+                //            }
+                //        db.SaveChanges();
+                //    }
+                //}
+                //#endregion
 
                 dtq.description = tq.description != null ? tq.description : dtq.description;
                 dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
@@ -550,9 +550,9 @@ namespace CRMWebApi.Controllers
                     }
                     else
                     {
-                        if (request.personelname != null)
+                        if (request.personelid != null)
                         {
-                            var apid = db.personel.Where(p => p.personelname.Contains(request.personelname) && p.deleted== false).Select(s => s.personelid).FirstOrDefault();
+                            var apid = db.personel.Where(p => p.personelid == request.personelid).Select(s => s.personelid).FirstOrDefault();
                             foreach (var item in request.ids)
                             {
                                 var tq = db.taskqueue.Where(t => t.taskorderno == item).FirstOrDefault();
@@ -1185,12 +1185,7 @@ namespace CRMWebApi.Controllers
         }
         #endregion
 
-        #region Adsl Satış İşlemleri
-
-        
-
-        #endregion
-
+ 
 
 
 

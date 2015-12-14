@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CRMWebApi.DTOs.Adsl
 {
-    class DTOstockstatus
+    public class DTOstockstatus
     {
         public int toobject { get; set; }
         public int toobjecttype { get; set; }

@@ -9,7 +9,7 @@
         {
             var filter = new DTOFilter("il","kimlikNo");
 
-            if (adres.fieldName.ToString() == "ilkimlikNo")
+            if (adres.fieldName.ToString() == "ilKimlikNo")
             {
                 filter = new DTOFilter("ilce","kimlikNo");      
                 filter.fieldFilters.Add(adres);
@@ -17,7 +17,13 @@
             }
             else if (adres.fieldName.ToString() == "ilceKimlikNo") // ilçe kimlik no seçilince mahalleler listelenmeli
             {
-                filter = new DTOFilter("mahalleKoy", "kimlikno");
+                filter = new DTOFilter("bucak", "kimlikNo");
+                filter.fieldFilters.Add(adres);
+                return filter;
+            }
+            else if (adres.fieldName.ToString() == "bucakKimlikNo") // ilçe kimlik no seçilince mahalleler listelenmeli
+            {
+                filter = new DTOFilter("mahalleKoy", "kimlikNo");
                 filter.fieldFilters.Add(adres);
                 return filter;
             }

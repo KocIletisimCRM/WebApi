@@ -7,6 +7,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int productid { get; set; }
         public string productname { get; set; }
         public string category { get; set; }
+        public string documents { get; set; }
         public string automandatorytasks { get; set; }
         public Nullable<int> maxduration { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }

@@ -40,6 +40,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> birthdate { get; set; }
         public Nullable<int> customerstatus { get; set; }
+        public Nullable<int> bucakKimlikNo { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }

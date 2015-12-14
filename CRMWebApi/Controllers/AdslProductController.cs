@@ -54,6 +54,7 @@ namespace CRMWebApi.Controllers
                 dpro.category = request.category;
                 dpro.maxduration = request.maxduration;
                 dpro.automandatorytasks = request.automandatorytasks;
+                dpro.documents = request.documents;
                 dpro.lastupdated = DateTime.Now;
                 dpro.updatedby = 7;
                 db.SaveChanges();
@@ -74,6 +75,7 @@ namespace CRMWebApi.Controllers
                     category = request.category,
                     automandatorytasks = request.automandatorytasks,
                     maxduration = request.maxduration,
+                    documents=request.documents,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,

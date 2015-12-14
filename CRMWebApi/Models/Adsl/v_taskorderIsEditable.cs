@@ -12,15 +12,9 @@ namespace CRMWebApi.Models.Adsl
     using System;
     using System.Collections.Generic;
     
-    public partial class adsl_stockstatus
+    public partial class v_taskorderIsEditable
     {
-        public int toobject { get; set; }
-        public int toobjecttype { get; set; }
-        public int stockcardid { get; set; }
-        public int INPUT { get; set; }
-        public int OUTPUT { get; set; }
-        public Nullable<int> amount { get; set; }
-    
-        public virtual adsl_personel personel { get; set; }
+        public int taskorderno { get; set; }
+        public Nullable<int> editable { get; set; }
     }
 }

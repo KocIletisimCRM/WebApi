@@ -12,10 +12,10 @@ namespace CRMWebApi.Models.Adsl
     using System;
     using System.Collections.Generic;
     
-    public partial class mahalleKoy
+    public partial class bucak
     {
         public int kimlikNo { get; set; }
         public string ad { get; set; }
-        public int bucakKimlikNo { get; set; }
+        public int ilceKimlikNo { get; set; }
     }
 }

@@ -14,11 +14,14 @@ namespace CRMWebApi.DTOs.Adsl
         public string password { get; set; }
         public string notes { get; set; }
         public int roles { get; set; }
+        public int ilKimlikNo { get; set; }
+        public int ilceKimlikNo { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
         public int updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
         
-        public List<object> stockstatus { get; set; }
+        public DTOil il { get; set; }
+        public DTOilce ilce { get; set; }
     }
 }

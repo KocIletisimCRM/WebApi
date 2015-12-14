@@ -78,6 +78,35 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
+
+        [Route("getDocumentIds")]
+        [HttpPost]
+        public HttpResponseMessage getDocumentIds(DTOGetDocumentIdsRequest request)
+        {
+            using (var db=new KOCSAMADLSEntities())
+            {
+                //taska ve durumuna bağlı müşteri dökümanları
+                var documentids = db.taskstatematches.Where(tsm => tsm.taskid == request.taskid && tsm.stateid == request.taskstate && tsm.documents != null && tsm.deleted==false).ToList()
+                .SelectMany(s => s.documents.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(ss => Convert.ToInt32(ss))).ToList();
+                if (request.campaignid != null)
+                {
+                    var campaignDocs = db.campaigns.Where(c => c.id == request.campaignid && c.documents != null && c.deleted == false).ToList()
+                      .SelectMany(s => s.documents.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(ss => Convert.ToInt32(ss))).ToList();
+                    documentids.AddRange(campaignDocs);
+
+                }
+                if (request.productIds!=null)
+                {
+                var productDocs = db.product_service.Where(p => request.productIds.Contains(p.productid) && p.documents != null && p.deleted == false).ToList()
+                    .SelectMany(s => s.documents.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(ss => Convert.ToInt32(ss))).ToList();
+                documentids.AddRange(productDocs);
+                }
+                var res = db.document.Where(d => documentids.Distinct().Contains(d.documentid) && d.deleted == false).ToList();
+
+                return Request.CreateResponse(HttpStatusCode.OK,res.Select(s=>s.toDTO()).ToList(),"application/json");
+            }
+
+        }
         #endregion
     }
 }

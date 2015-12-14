@@ -20,7 +20,6 @@ namespace CRMWebApi.Models.Adsl
             this.attachedTaskqueue = new HashSet<adsl_taskqueue>();
             this.attachedtaskqueue = new HashSet<adsl_taskqueue>();
             this.updatedTaskqueue = new HashSet<adsl_taskqueue>();
-            this.stockstatus = new HashSet<adsl_stockstatus>();
             this.adsl_stockmovement = new HashSet<adsl_stockmovement>();
             this.adsl_stockmovement1 = new HashSet<adsl_stockmovement>();
         }
@@ -37,6 +36,8 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<System.DateTime> lastupdated { get; set; }
         public int updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public Nullable<int> ilKimlikNo { get; set; }
+        public Nullable<int> ilceKimlikNo { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> attachedTaskqueue { get; set; }
@@ -45,10 +46,10 @@ namespace CRMWebApi.Models.Adsl
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> updatedTaskqueue { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<adsl_stockstatus> stockstatus { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_stockmovement> adsl_stockmovement { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_stockmovement> adsl_stockmovement1 { get; set; }
+        public virtual il il { get; set; }
+        public virtual ilce ilce { get; set; }
     }
 }

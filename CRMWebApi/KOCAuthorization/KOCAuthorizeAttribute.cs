@@ -36,7 +36,7 @@ namespace CRMWebApi.KOCAuthorization
                     ActiveUsers.TryRemove(t, out user);
                 }); 
             ActiveUsers.TryGetValue(Token, out user);
-            user.lastActivityTime = DateTime.Now;
+            if (user != null) user.lastActivityTime = DateTime.Now;
             return user;
         }
 

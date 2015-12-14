@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +16,9 @@ namespace CRMWebApi.DTOs.Adsl
         foLike = 6,
         foIn=7,
         foIsNull = 8, 
-        foRawCondition = 9
+        foRawCondition = 9,
+        foAnd=10
+       
     }
 
     public class fieldFilter
@@ -25,7 +28,7 @@ namespace CRMWebApi.DTOs.Adsl
         private object filterValue2 { get; set; }
         private filterOperators filterOperator { get; set; }
 
-        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null" };
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null","", "({0} & {1})={1}" };
 
         private string getValueCompairer(object val)
         {
@@ -36,7 +39,7 @@ namespace CRMWebApi.DTOs.Adsl
         public fieldFilter(string name, object value, filterOperators op)
         {
             fieldName = name;
-            if (name!=null && name.Contains("date"))
+            if (name!=null && name.Contains("date")&& op!=filterOperators.foIsNull)
             {
                 filterValue = value.ToString().Split('-')[0];
                 filterValue2 = value.ToString().Split('-')[1];
@@ -72,15 +75,20 @@ namespace CRMWebApi.DTOs.Adsl
                 case filterOperators.foLike:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName, (filterValue??string.Empty).ToString().Replace("'","''"));
                 case filterOperators.foIn:
+                    int[] array = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => (int)item).ToArray();
+                   filterValue = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => (int)item).ToArray();
                     if (filterValue is Array)
                         return string.Format(operatorStrings[(int)filterOperator], fieldName,
-                           string.Join(", ", (filterValue as Array)));
+                           string.Join(", ",array));
                     else
                         throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
                 case filterOperators.foIsNull:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName);
                 case filterOperators.foRawCondition:
                     return filterValue as string;
+                case filterOperators.foAnd:
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue));
+
                 default:
                     throw new Exception("Bilinmeyen operatör tipi!");
             }

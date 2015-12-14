@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CRMWebApi.Models.Adsl;
+using System;
+using System.Collections.Generic;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -25,5 +27,6 @@ namespace CRMWebApi.DTOs.Adsl
         public DTOpersonel topersonel { get; set; }
         public DTOcustomer tocustomer { get; set; }
         public DTOcustomer fromcustomer { get; set; }
+        public DTOgetPersonelStockAdsl_Result stockStatus { get; set; }
     }
 }

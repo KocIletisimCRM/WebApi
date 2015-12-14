@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,8 +14,11 @@ namespace CRMWebApi.DTOs.Fiber
         foGreaterOrEqual = 4,
         foBetween = 5,
         foLike = 6,
-        foIn=7,
-        foIsNull = 8
+        foIn = 7,
+        foIsNull = 8,
+        foRawCondition = 9,
+        foAnd = 10
+
     }
 
     public class fieldFilter
@@ -24,24 +28,29 @@ namespace CRMWebApi.DTOs.Fiber
         private object filterValue2 { get; set; }
         private filterOperators filterOperator { get; set; }
 
-        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null" };
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null", "", "({0} & {1})={1}" };
 
         private string getValueCompairer(object val)
         {
             var s = (val is string) || (val is DateTime) ? "'" : string.Empty;
-            return string.Format("{0}{1}{0}", s, (val is Array) ? string.Join(",", val) : val.ToString().Replace("'","''"));
+            return string.Format("{0}{1}{0}", s, (val is Array) ? string.Join(",", val) : val.ToString().Replace("'", "''"));
         }
 
         public fieldFilter(string name, object value, filterOperators op)
         {
             fieldName = name;
-            if (name.Contains("date"))
+            if (name != null && name.Contains("date"))
             {
                 filterValue = value.ToString().Split('-')[0];
                 filterValue2 = value.ToString().Split('-')[1];
             }
+            else if ((value is string) && (value as string).Contains(";"))
+            {
+                filterValue = value.ToString().Split(';')[0];
+                filterValue2 = value.ToString().Split(';')[1];
+            }
             else
-            filterValue = value;
+                filterValue = value;
             filterOperator = op;
         }
 
@@ -62,17 +71,24 @@ namespace CRMWebApi.DTOs.Fiber
                 case filterOperators.foGreaterOrEqual:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue));
                 case filterOperators.foBetween:
-                        return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue), getValueCompairer(filterValue2));
                 case filterOperators.foLike:
-                    return string.Format(operatorStrings[(int)filterOperator], fieldName, (filterValue??string.Empty).ToString().Replace("'","''"));
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, (filterValue ?? string.Empty).ToString().Replace("'", "''"));
                 case filterOperators.foIn:
+                    int[] array = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => (int)item).ToArray();
+                    filterValue = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => (int)item).ToArray();
                     if (filterValue is Array)
                         return string.Format(operatorStrings[(int)filterOperator], fieldName,
-                           string.Join(", ", (filterValue as Array)));
+                           string.Join(", ", array));
                     else
                         throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
                 case filterOperators.foIsNull:
                     return string.Format(operatorStrings[(int)filterOperator], fieldName);
+                case filterOperators.foRawCondition:
+                    return filterValue as string;
+                case filterOperators.foAnd:
+                    return string.Format(operatorStrings[(int)filterOperator], fieldName, getValueCompairer(filterValue));
+
                 default:
                     throw new Exception("Bilinmeyen operatör tipi!");
             }
@@ -122,7 +138,7 @@ namespace CRMWebApi.DTOs.Fiber
                 string.Format(sql, tableName);
         }
     }
-    
+
     public class lookupFilterSQL : filterSQL
     {
         private Dictionary<string, filterSQL> details = new Dictionary<string, filterSQL>();
@@ -175,12 +191,13 @@ namespace CRMWebApi.DTOs.Fiber
             var sqlwithpagingcolumn = selectstatement.Insert(pos, String.Format("ROW_NUMBER() OVER(ORDER BY {0} desc) ORDERNO, ", KeyFieldName));
             var withClauses = getSubWithClaueses();
             withClauses.Add("_paging", string.Format("_paging as ({0})", sqlwithpagingcolumn));
-            return string.Format("{0} {1}", 
-                string.Format("WITH {0}", string.Join(",", withClauses.Values)), 
+            return string.Format("{0} {1}",
+                string.Format("WITH {0}", string.Join(",", withClauses.Values)),
                 string.Format("SELECT * FROM _paging WHERE (CAST(ORDERNO/{0} as INT) = {1} - 1 OR {1} = 0)", rowsPerPage, pageNo));
         }
 
-        public string getCountSQL() {
+        public string getCountSQL()
+        {
             var withClauses = getSubWithClaueses();
             withClauses.Add("_all", string.Format("_all as ({0})", get()));
             return string.Format("{0} {1}",

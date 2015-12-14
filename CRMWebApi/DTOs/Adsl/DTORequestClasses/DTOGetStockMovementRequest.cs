@@ -10,6 +10,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         public DTOFieldFilter movementdate { get; set; }
         public DTOFieldFilter serialno { get; set; }
         public DTOFieldFilter movement { get; set; }
+        public DTOFieldFilter isconfirmed { get; set; }
 
         public DTOFilter getFilter()
         {
@@ -24,6 +25,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
             }
             if (movementdate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementdate", op = 5, value = movementdate.value });
             if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter {fieldName="serialno",op=2,value=serialno.value });
+            if (isconfirmed != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "confirmationdate", op = 8, value = null });
             if (movement != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementid", op = 2, value = movement.value });
             if (fromobject != null && !string.IsNullOrWhiteSpace((string)fromobject.value))
             {

@@ -24,7 +24,7 @@ namespace CRMWebApi.Controllers
         [KOCAuthorize]
         public HttpResponseMessage getTasks(DTOFilterGetTasksRequest request)
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new KOCSAMADLSEntities(false))
             {
                 var filter = request.getFilter();
                 if (request.isTaskFilter())
@@ -140,7 +140,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage getIssStatus()
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new KOCSAMADLSEntities(false))
             {
 
                 var res = db.issStatus.Where(i => i.deleted == 0).OrderBy(i => i.issText).ToList();
@@ -185,15 +185,15 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage getPersonel()
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new KOCSAMADLSEntities(false))
             {
                 var atanmamis = new adsl_personel { personelid = 0, personelname = "Atanmamış" };
-                var res = db.personel.Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
+                var res = db.personel.Include(p=>p.il).Include(p=>p.ilce)
+                    .Where(p=>p.deleted==false).OrderBy(p => p.personelname).ToList();
                 res.Insert(0, atanmamis);
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }
-       
 
         [Route("getAttacheablePersonel")]
         [HttpPost]
@@ -204,7 +204,7 @@ namespace CRMWebApi.Controllers
             {
                 var task = db.taskqueue.Where(t => t.taskorderno == request.taskorderno).Select(s => s.taskid).FirstOrDefault();
                 var objects = db.task.Where(s => s.taskid == task).Select(s => s.attachablepersoneltype).FirstOrDefault() ;
-                var res = db.personel.Where(p => (p.roles & objects)==objects).ToList();
+                var res = db.personel.Include(s=>s.il).Include(i=>i.ilce).Where(p => (p.roles & objects)==objects).OrderBy(o=>o.personelname).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }
@@ -220,7 +220,7 @@ namespace CRMWebApi.Controllers
             var filter = request.getFilter();
             filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
 
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new KOCSAMADLSEntities(false))
             {
         
                 if (request.isCategoryFilter())

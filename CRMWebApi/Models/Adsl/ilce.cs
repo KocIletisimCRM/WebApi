@@ -18,13 +18,16 @@ namespace CRMWebApi.Models.Adsl
         public ilce()
         {
             this.customer = new HashSet<customer>();
+            this.adsl_personel = new HashSet<adsl_personel>();
         }
     
         public int kimlikNo { get; set; }
         public string ad { get; set; }
-        public Nullable<int> ilKimlikNo { get; set; }
+        public int ilKimlikNo { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<customer> customer { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_personel> adsl_personel { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace CRMWebApi.Controllers
         [KOCAuthorize]
         public HttpResponseMessage getStockMovements(DTOGetStockMovementRequest request)
         {
-            var userID =KOCAuthorizeAttribute.getCurrentUser().userId ;
+            var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
             using (var db = new KOCSAMADLSEntities())
             {
                 var filter = request.getFilter();
@@ -72,7 +72,7 @@ namespace CRMWebApi.Controllers
                 var fromObjectIds = res.Select(s => s.fromobject).Distinct().ToList();
                 var fromPersonels = db.personel.Where(p => fromObjectIds.Contains(p.personelid)).ToList();
                 var fromCustomers = db.customer.Where(c => fromObjectIds.Contains(c.customerid)).ToList();
-               
+
 
                 var toObjectIds = res.Select(s => s.toobject).Distinct().ToList();
                 var toPersonels = db.personel.Where(p => toObjectIds.Contains(p.personelid)).ToList();
@@ -150,15 +150,15 @@ namespace CRMWebApi.Controllers
             if (!serials.Any()) serials.Add(null);
             if (ModelState.IsValid)
             {
-                var userID =KOCAuthorizeAttribute.getCurrentUser().userId ;//depocu
+                var userID = KOCAuthorizeAttribute.getCurrentUser().userId;//depocu
                 var userType = KOCAuthorizeAttribute.getCurrentUser().userRole;
                 using (var db = new KOCSAMADLSEntities())
                 {
                     foreach (var seri in serials)
                     {
                         //serino kontrolü yap. varsa ekleme.
-                        var userControl = db.stockmovement.Where(s => s.serialno == seri).OrderByDescending(s=>s.movementid).Select(s => s.toobject).FirstOrDefault();
-                        if ((userControl != userID) && (( r.toobjecttype & (int)KOCUserTypes.StockRoomStuff)!=(int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
+                        var userControl = db.stockmovement.Where(s => s.serialno == seri).OrderByDescending(s => s.movementid).Select(s => s.toobject).FirstOrDefault();
+                        if ((userControl != userID) && ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) != (int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
                         {
                             errormessage.errorCode = -1;
                             errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
@@ -188,7 +188,7 @@ namespace CRMWebApi.Controllers
                                 sm.relatedtaskqueue = tqid;
                                 if ((KOCAuthorizeAttribute.getCurrentUser().userRole & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)// (long)KocCRMRoles.kscrStockStaff
                                 {
-                                    if ((r.toobjecttype  & (int)KOCUserTypes.StockRoomStuff )== (int)KOCUserTypes.StockRoomStuff )
+                                    if ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)
                                     {
 
                                         sm.fromobjecttype = (int)KOCUserTypes.ADSLProcurementAssosiation;
@@ -221,7 +221,6 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, tqid, "application/json");
         }
 
-
         [Route("SaveStockMovement")]
         [HttpPost]
         [KOCAuthorize]
@@ -246,7 +245,7 @@ namespace CRMWebApi.Controllers
                         //    }).Select(role => (long)role).ToList();
                         var Record = Records.First();
 
-                        if (r.toobject == userID && r.confirmationdate!=null&& Record.confirmationdate == null)  //confirmationroles.Contains(r.toobjecttype) &&  if şartlarına eklenecek yetkilendirmeden sonra
+                        if (r.toobject == userID && r.confirmationdate != null && Record.confirmationdate == null)  //confirmationroles.Contains(r.toobjecttype) &&  if şartlarına eklenecek yetkilendirmeden sonra
                             Record.confirmationdate = DateTime.Now;
                         else
                         {
@@ -267,5 +266,50 @@ namespace CRMWebApi.Controllers
                 }
         }
         #endregion
+
+
+        [Route("confirmSM")]
+        [HttpPost]
+        [KOCAuthorize]
+        public HttpResponseMessage confirmSM(int[] movementIds)
+        {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            DTOResponseError errormessage = new DTOResponseError();
+            if (movementIds.Length > 0)
+            {
+                using (var db = new KOCSAMADLSEntities(false))
+                {
+                    //yalnızca kendine çıkılan stoklar onaylanabilir
+                    if (db.stockmovement.Where(s => movementIds.Contains(s.movementid)).Any(a => a.toobject == user.userId))
+                    {
+                        foreach (var item in movementIds)
+                        {
+                            var sm = db.stockmovement.Where(s => s.movementid == item && s.confirmationdate == null).FirstOrDefault();
+                            sm.confirmationdate = DateTime.Now;
+                            sm.updatedby = user.userId;
+                            sm.lastupdated = DateTime.Now;
+                            db.SaveChanges();
+                        }
+                        errormessage.errorMessage = "Onaylama işlemi başarılı";
+                        errormessage.errorCode = 1;
+                        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+                    }
+                    else
+                    {
+                        errormessage.errorMessage = "Sadece Üzerinize Atanmış Stokları Onaylayabilirsiniz";
+                        errormessage.errorCode = -1;
+                        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+
+                    }
+
+                }
+            }
+            else
+            {
+                errormessage.errorMessage = "Onaylamak İçin En Az 1 Stok Hareketi Seçmelisiniz!";
+                errormessage.errorCode = -1;
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
     }
 }

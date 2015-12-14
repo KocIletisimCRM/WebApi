@@ -21,6 +21,7 @@ namespace CRMWebApi.Models.Adsl
             this.stockmovement = new HashSet<adsl_stockmovement>();
             this.taskqueue1 = new HashSet<adsl_taskqueue>();
             this.taskqueue2 = new HashSet<adsl_taskqueue>();
+            this.customerdocument = new HashSet<adsl_customerdocument>();
         }
     
         public int taskorderno { get; set; }
@@ -57,5 +58,7 @@ namespace CRMWebApi.Models.Adsl
         public virtual ICollection<adsl_taskqueue> taskqueue2 { get; set; }
         public virtual adsl_taskqueue previousTaskQueue { get; set; }
         public virtual customer attachedcustomer { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_customerdocument> customerdocument { get; set; }
     }
 }

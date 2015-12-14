@@ -7,6 +7,15 @@ using CRMWebApi.DTOs.Adsl;
 
 namespace CRMWebApi.Models.Adsl
 {
+    public partial class KOCSAMADLSEntities
+    {
+        public KOCSAMADLSEntities(bool lazy) : this()
+        {
+            Configuration.AutoDetectChangesEnabled = false;
+            Configuration.LazyLoadingEnabled = false;
+            Configuration.ProxyCreationEnabled = false;
+        }
+    }
     public abstract class EntityBase
     {
         public T toDTO<T>()
@@ -14,14 +23,16 @@ namespace CRMWebApi.Models.Adsl
             T dto = Activator.CreateInstance<T>();
             Type thisType = GetType();
             Type dtoType = dto.GetType();
-            foreach(var p in dto.GetType().GetProperties()){
+            foreach (var p in dto.GetType().GetProperties())
+            {
                 PropertyInfo pInfo = thisType.GetProperty(p.Name);
                 object propertyValue = pInfo != null ? pInfo.GetValue(this) : null;
-                if (pInfo==null || propertyValue == null) continue;
+                if (pInfo == null || propertyValue == null) continue;
                 if (
-                    pInfo.GetGetMethod().IsVirtual && 
+                    pInfo.GetGetMethod().IsVirtual &&
                     ((propertyValue is EntityBase) || (propertyValue.GetType().IsGenericType && propertyValue.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(EntityBase))))
-                ){
+                )
+                {
                     if (propertyValue.GetType().IsGenericType) p.SetValue(dto, (propertyValue as IEnumerable).Cast<EntityBase>().Select(s => s.toDTO()).ToList());
                     else p.SetValue(dto, (propertyValue as EntityBase).toDTO());
                 }
@@ -46,14 +57,14 @@ namespace CRMWebApi.Models.Adsl
         }
     }
 
-    public partial class adsl_taskqueue:EntityBase
+    public partial class adsl_taskqueue : EntityBase
     {
-        public virtual List<adsl_stockcard> stockcardlist { get; set; }
+        public virtual bool editable { get; set; }
         public override object toDTO()
         {
-            var Dto= toDTO<DTOtaskqueue>();
+            var Dto = toDTO<DTOtaskqueue>();
             return Dto;
-        } 
+        }
     }
 
     public partial class adsl_task : EntityBase
@@ -104,7 +115,7 @@ namespace CRMWebApi.Models.Adsl
             return toDTO<DTOTaskTypes>();
         }
     }
-    public partial class adsl_issStatus : EntityBase 
+    public partial class adsl_issStatus : EntityBase
     {
         public override object toDTO()
         {
@@ -173,6 +184,7 @@ namespace CRMWebApi.Models.Adsl
     }
     public partial class adsl_stockmovement : EntityBase
     {
+        public virtual getPersonelStockAdsl_Result stockStatus { get; set; }
         public override object toDTO()
         {
             return toDTO<DTOstockmovement>();
@@ -227,6 +239,35 @@ namespace CRMWebApi.Models.Adsl
         public override object toDTO()
         {
             return toDTO<DTOilce>();
+        }
+    }
+    public partial class bucak : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTObucak>();
+        }
+    }
+    public partial class mahalleKoy : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOmahalle>();
+        }
+    }
+    public partial class adsl_customerdocument : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOcustomerdocument>();
+        }
+    }
+    public partial class getPersonelStockAdsl_Result : EntityBase
+    {
+        public virtual List<string> serials { get; set; }
+        public override object toDTO()
+        {
+            return toDTO<DTOgetPersonelStockAdsl_Result>();
         }
     }
 }

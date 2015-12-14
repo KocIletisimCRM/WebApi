@@ -49,8 +49,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
@@ -116,10 +116,12 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ADSLAddressController.cs" />
     <Compile Include="Controllers\AdslCampaignController.cs" />
+    <Compile Include="Controllers\AdslCustomerController.cs" />
     <Compile Include="Controllers\AdslDocumentController.cs" />
     <Compile Include="Controllers\AdslFilterController.cs" />
     <Compile Include="Controllers\AdslPersonelController.cs" />
     <Compile Include="Controllers\AdslProductController.cs" />
+    <Compile Include="Controllers\AdslReportsController.cs" />
     <Compile Include="Controllers\AdslStockCardController.cs" />
     <Compile Include="Controllers\AdslStockController.cs" />
     <Compile Include="Controllers\AdslTaskController.cs" />
@@ -138,6 +140,9 @@
     <Compile Include="DTOs\Adsl\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Adsl\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Adsl\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\Adsl\DTObucak.cs" />
+    <Compile Include="DTOs\Adsl\DTOcustomerdocument.cs" />
+    <Compile Include="DTOs\Adsl\DTOgetPersonelStockAdsl_Result.cs" />
     <Compile Include="DTOs\Adsl\DTOilce.cs" />
     <Compile Include="DTOs\Adsl\DTOcampaigns.cs" />
     <Compile Include="DTOs\Adsl\DTOCloseTaskQueue.cs" />
@@ -149,6 +154,7 @@
     <Compile Include="DTOs\Adsl\DTOgsmStatus.cs" />
     <Compile Include="DTOs\Adsl\DTOissStatus.cs" />
     <Compile Include="DTOs\Adsl\DTOKatZiyareti.cs" />
+    <Compile Include="DTOs\Adsl\DTOmahalle.cs" />
     <Compile Include="DTOs\Adsl\DTOnetStatus.cs" />
     <Compile Include="DTOs\Adsl\DTOobjecttypes.cs" />
     <Compile Include="DTOs\Adsl\DTOpersonel.cs" />
@@ -160,7 +166,9 @@
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetAdressFilter.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetBlockFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetCustomerRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetDocumentFilter.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetDocumentIdsRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetObjectRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetPersonelStock.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetProductFilter.cs" />
@@ -173,6 +181,8 @@
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestCloseTaskqueue.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestPagination.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestSaveFaultTaks.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestTaskqueueDocuments.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestTopluAtamalar.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
     <Compile Include="DTOs\Adsl\DTOResponseClasses.cs" />
@@ -193,6 +203,7 @@
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Fiber\DTOTest.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizedUser.cs" />
     <Compile Include="KOCAuthorization\KOCUserTypes.cs" />
@@ -238,9 +249,6 @@
     <Compile Include="Models\Adsl\adsl_stockmovement.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Adsl\adsl_stockstatus.cs">
-      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\Adsl\adsl_task.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
@@ -260,6 +268,9 @@
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\bina.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\bucak.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\cadde.cs">
@@ -353,6 +364,9 @@
     <Compile Include="Models\Adsl\ModelExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\v_taskorderIsEditable.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Fiber\block.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>

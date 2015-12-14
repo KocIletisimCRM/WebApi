@@ -27,6 +27,17 @@ namespace CRMWebApi.Controllers
                 var rowCount = db.Database.SqlQuery<int>(countSql).First();
                 var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.personel.SqlQuery(querySql).ToList();
+                var ilIds = res.Select(s => s.ilKimlikNo).Distinct().ToList();
+                var ils = db.il.Where(s => ilIds.Contains(s.kimlikNo)).ToList();
+
+                var ilceIds = res.Select(s => s.ilceKimlikNo).Distinct().ToList();
+                var ilces = db.ilce.Where(s => ilceIds.Contains(s.kimlikNo)).ToList();
+
+                res.ForEach(s=> {
+                    s.ilce = ilces.Where(i => i.kimlikNo == s.ilceKimlikNo).FirstOrDefault();
+                    s.il = ils.Where(i=>i.kimlikNo==s.ilKimlikNo).FirstOrDefault();
+
+                });
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
                     pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
@@ -52,7 +63,9 @@ namespace CRMWebApi.Controllers
 
                 dp.personelname = request.personelname;
                 dp.category = (int)request.category;
-                dp.roles= dp.category = (int)request.category; ;
+                dp.roles= dp.category = (int)request.category;
+                dp.ilceKimlikNo = request.ilceKimlikNo;
+                dp.ilKimlikNo = request.ilKimlikNo;
                 dp.mobile = request.mobile;
                 dp.email = request.email;
                 dp.password = request.password;
@@ -81,6 +94,8 @@ namespace CRMWebApi.Controllers
                     password = request.password,
                     notes = request.notes,
                     roles = (int)request.category,
+                    ilceKimlikNo=request.ilceKimlikNo,
+                    ilKimlikNo=request.ilKimlikNo,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,

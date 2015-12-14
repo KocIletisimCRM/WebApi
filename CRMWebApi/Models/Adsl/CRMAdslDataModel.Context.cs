@@ -20,6 +20,7 @@ namespace CRMWebApi.Models.Adsl
         public KOCSAMADLSEntities()
             : base("name=KOCSAMADLSEntities")
         {
+            this.Configuration.LazyLoadingEnabled = false;
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -51,26 +52,11 @@ namespace CRMWebApi.Models.Adsl
         public virtual DbSet<adsl_tasktypes> tasktypes { get; set; }
         public virtual DbSet<customer> customer { get; set; }
         public virtual DbSet<cadde> cadde { get; set; }
-        public virtual DbSet<mahalleKoy> mahalleKoy { get; set; }
         public virtual DbSet<adsl_vcampaignproducts> vcampaignproducts { get; set; }
-        public virtual DbSet<adsl_stockstatus> stockstatus { get; set; }
         public virtual DbSet<bina> bina { get; set; }
-    
-        [DbFunction("KOCSAMADLSEntities", "getSerialsOnPersonel")]
-        public virtual IQueryable<string> getSerialsOnPersonel(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
-        {
-            var pERSONELIDParameter = pERSONELID.HasValue ?
-                new ObjectParameter("PERSONELID", pERSONELID) :
-                new ObjectParameter("PERSONELID", typeof(int));
-    
-            var sTOCKCARDIDParameter = sTOCKCARDID.HasValue ?
-                new ObjectParameter("STOCKCARDID", sTOCKCARDID) :
-                new ObjectParameter("STOCKCARDID", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[KOCSAMADLSEntities].[getSerialsOnPersonel](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
-        }
-    
-       
+        public virtual DbSet<v_taskorderIsEditable> v_taskorderIsEditable { get; set; }
+        public virtual DbSet<bucak> bucak { get; set; }
+        public virtual DbSet<mahalleKoy> mahalleKoy { get; set; }
     
         [DbFunction("KOCSAMADLSEntities", "getSerialsOnPersonelAdsl")]
         public virtual IQueryable<string> getSerialsOnPersonelAdsl(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)

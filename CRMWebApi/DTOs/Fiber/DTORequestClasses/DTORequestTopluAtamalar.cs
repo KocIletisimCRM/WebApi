@@ -8,6 +8,6 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
     public class DTORequestAttachmentPersonel
     {
         public int[] ids { get; set; }
-        public string personelname { get; set; }
+        public int? personelid { get; set; }
     }
 }
