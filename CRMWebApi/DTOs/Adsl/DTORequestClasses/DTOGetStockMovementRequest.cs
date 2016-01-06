@@ -27,13 +27,16 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
             if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter {fieldName="serialno",op=2,value=serialno.value });
             if (isconfirmed != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "confirmationdate", op = 8, value = null });
             if (movement != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementid", op = 2, value = movement.value });
-            if (fromobject != null && !string.IsNullOrWhiteSpace((string)fromobject.value))
+            if (fromobject != null && fromobject.value!=null)
             {
                 var seachKey = (fromobject.value??string.Empty).ToString().ToUpper(CultureInfo.CurrentCulture);
                 //Satınalma
-                if (specialFilters[0].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobjecttype", op = 2, value = 4000 });
-                // Depo
-                else if(specialFilters[1].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobjecttype", op = 2, value = 5000 });
+                if (!string.IsNullOrWhiteSpace(seachKey))
+                {
+                    if (specialFilters[0].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobjecttype", op = 2, value = (int)KOCAuthorization.KOCUserTypes.ADSLProcurementAssosiation });
+                    // Depo
+                    else if (specialFilters[1].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobjecttype", op = 2, value = (int)KOCAuthorization.KOCUserTypes.ADSLStockRoomAssosiation });
+                }
                 // Diğer
                 var subFilterPersonel = new DTOFilter("personel", "personelid");
                 subFilterPersonel.fieldFilters.Add(new DTOFieldFilter { fieldName = "personelname", op = 6, value = fromobject.value });
@@ -50,7 +53,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
             {
                 var seachKey = (toobject.value ?? string.Empty).ToString().ToUpper(CultureInfo.CurrentCulture);
                 // Depo
-                if (specialFilters[1].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "toobjecttype", op = 2, value = 5000 });
+                if (specialFilters[1].Contains(seachKey)) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "toobjecttype", op = 2, value = (int)KOCAuthorization.KOCUserTypes.ADSLStockRoomAssosiation });
                 // Diğer
                 var subFilterPersonel = new DTOFilter("personel", "personelid");
                 subFilterPersonel.fieldFilters.Add(new DTOFieldFilter { fieldName = "personelname", op = 6, value = toobject.value });

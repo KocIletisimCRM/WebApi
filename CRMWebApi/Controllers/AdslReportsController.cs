@@ -19,7 +19,7 @@ namespace CRMWebApi.Controllers
             using (var db= new KOCSAMADLSEntities(false))
             {
                
-                var res = db.taskqueue.Include(s=>s.attachedcustomer).
+                var res = db.taskqueue.Include(s=>s.attachedcustomer).Include(c=>c.attachedcustomer.il).Include(c => c.attachedcustomer.il).
                     Include(t=>t.task).Include(d=>d.customerdocument).Include(c=>c.customerproduct).
                     Where(p=>p.attachedpersonelid==request.personelid&& p.deleted==false &&(p.task.taskid==32|| p.task.taskid==33|| p.task.taskid==38 || p.task.taskid == 39|| p.task.taskid == 40
                     || p.task.taskid == 41 || p.task.taskid == 49) && p.status==null).OrderBy(s=>s.attachedcustomer.customername).ToList();

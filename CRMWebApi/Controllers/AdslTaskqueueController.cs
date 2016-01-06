@@ -182,7 +182,7 @@ namespace CRMWebApi.Controllers
 
 
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
-                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != null))
+                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
                         if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
                         else dtq.status = tq.taskstatepool.taskstateid;
@@ -232,7 +232,7 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
-                                if (db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
+                                if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
                                 var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
                                 var amtq = new adsl_taskqueue
@@ -275,22 +275,65 @@ namespace CRMWebApi.Controllers
                         }));
                         #endregion
                         #region belgeler kaydediliyor
-                        db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
+                        if (customerdocuments.Any(c => c.documenturl != null))
                         {
-                            attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                            creationdate = DateTime.Now,
-                            customerid = dtq.attachedobjectid,
-                            deleted = false,
-                            //deliverydate = ?
-                            documentid = cd.documentid,
-                            documenturl = cd.documenturl,
-                            lastupdated = DateTime.Now,
-                            //receiptdate = ?
-                            taskqueueid = dtq.taskorderno,
-                            updatedby = user.userId
-                        }));
+                            db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
+                            {
+                                attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                                creationdate = DateTime.Now,
+                                customerid = dtq.attachedobjectid,
+                                deleted = false,
+                                //deliverydate = ?
+                                documentid = cd.documentid,
+                                documenturl = cd.documenturl,
+                                lastupdated = DateTime.Now,
+                                //receiptdate = ?
+                                taskqueueid = dtq.taskorderno,
+                                updatedby = user.userId
+                            }));
+                        }
                         #endregion
                         #region stok hareketleri kaydediliyor
+                        //foreach (var movement in stockmovements)
+                        //{
+                        //    if (movement.movementid != 0)
+                        //    {
+                        //        var sm = db.stockmovement.FirstOrDefault(s => s.movementid == movement.movementid);
+                        //        if (sm != null)
+                        //        {
+                        //            sm.amount = movement.amount;
+                        //            sm.confirmationdate = DateTime.Now;
+                        //            sm.lastupdated = DateTime.Now;
+                        //            sm.movementdate = DateTime.Now;
+                        //            sm.serialno = movement.serialno;
+                        //            sm.updatedby = user.userId;
+                        //        }
+                        //        else
+                        //        {
+                        //            throw new Exception("Stok Hareketi Bulunamadı");
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        db.stockmovement.Add(new adsl_stockmovement
+                        //        {
+                        //            amount = movement.amount,
+                        //            confirmationdate = DateTime.Now,
+                        //            creationdate = DateTime.Now,
+                        //            fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                        //            fromobject = dtq.attachedpersonelid,
+                        //            deleted = false,
+                        //            lastupdated = DateTime.Now,
+                        //            movementdate = DateTime.Now,
+                        //            relatedtaskqueue = dtq.taskorderno,
+                        //            serialno = movement.serialno,
+                        //            stockcardid = movement.stockcardid,
+                        //            toobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                        //            toobject = dtq.attachedobjectid,
+                        //            updatedby = user.userId
+                        //        });
+                        //    }
+                        //}
                         db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
                         {
                             amount = sm.amount,
@@ -305,7 +348,8 @@ namespace CRMWebApi.Controllers
                             serialno = sm.serialno,
                             stockcardid = sm.stockcardid,
                             toobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                            toobject = dtq.attachedobjectid
+                            toobject = dtq.attachedobjectid,
+                            updatedby = user.userId
                         }));
                         #endregion
                     }
@@ -313,7 +357,7 @@ namespace CRMWebApi.Controllers
                     else
                     {
                         #region ürünler kaydediliyor
-                        if (!customerproducts.Any(cp => cp.id != 0))
+                        if (customerproducts.Any(cp => cp.id != 0))
                             db.customerproduct.AddRange(customerproducts.Select(cd => new adsl_customerproduct
                             {
                                 campaignid = cd.campaignid,
@@ -327,7 +371,7 @@ namespace CRMWebApi.Controllers
                             }));
                         #endregion
                         #region belgeler kaydediliyor
-                        if (!customerdocuments.Any(cd => cd.id != 0))
+                        if (customerdocuments.Any(cd => cd.id != 0))
                             db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
                             {
                                 attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
@@ -344,23 +388,64 @@ namespace CRMWebApi.Controllers
                             }));
                         #endregion
                         #region stok hareketleri kaydediliyor
-                        if (!stockmovements.Any(sm => sm.movementid != 0))
-                            db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
+                        foreach (var movement in stockmovements)
+                        {
+                            if (movement.movementid != 0)
                             {
-                                amount = sm.amount,
-                                confirmationdate = DateTime.Now,
-                                creationdate = DateTime.Now,
-                                fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
-                                fromobject = dtq.attachedpersonelid,
-                                deleted = false,
-                                lastupdated = DateTime.Now,
-                                movementdate = DateTime.Now,
-                                relatedtaskqueue = dtq.taskorderno,
-                                serialno = sm.serialno,
-                                stockcardid = sm.stockcardid,
-                                toobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                                toobject = dtq.attachedobjectid
-                            }));
+                                var sm = db.stockmovement.FirstOrDefault(s => s.movementid == movement.movementid);
+                                if (sm != null)
+                                {
+                                    sm.amount = movement.amount;
+                                    sm.confirmationdate = DateTime.Now;
+                                    sm.lastupdated = DateTime.Now;
+                                    sm.movementdate = DateTime.Now;
+                                    sm.serialno = movement.serialno;
+                                    sm.updatedby = user.userId;
+                                }
+                                else
+                                {
+                                    throw new Exception("Stok Hareketi Bulunamadı");
+                                }
+                            }
+                            else
+                            {
+                                db.stockmovement.Add(new adsl_stockmovement
+                                {
+                                    amount = movement.amount,
+                                    confirmationdate = DateTime.Now,
+                                    creationdate = DateTime.Now,
+                                    fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                                    fromobject = dtq.attachedpersonelid,
+                                    deleted = false,
+                                    lastupdated = DateTime.Now,
+                                    movementdate = DateTime.Now,
+                                    relatedtaskqueue = dtq.taskorderno,
+                                    serialno = movement.serialno,
+                                    stockcardid = movement.stockcardid,
+                                    toobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                                    toobject = dtq.attachedobjectid,
+                                    updatedby = user.userId
+                                });
+                            }
+                        }
+                        //if (!stockmovements.Any(sm => sm.movementid != 0))
+                        //    db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
+                        //    {
+                        //        amount = sm.amount,
+                        //        confirmationdate = DateTime.Now,
+                        //        creationdate = DateTime.Now,
+                        //        fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                        //        fromobject = dtq.attachedpersonelid,
+                        //        deleted = false,
+                        //        lastupdated = DateTime.Now,
+                        //        movementdate = DateTime.Now,
+                        //        relatedtaskqueue = dtq.taskorderno,
+                        //        serialno = sm.serialno,
+                        //        stockcardid = sm.stockcardid,
+                        //        toobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                        //        toobject = dtq.attachedobjectid,
+                        //        updatedby=user.userId
+                        //    }));
                         #endregion
                     }
                     #region Kurulum randevusu kapandığında ikinci donanım tasklarının oluşturulma kodu
@@ -440,7 +525,7 @@ namespace CRMWebApi.Controllers
                 var request = HttpContext.Current.Request;
                 var docids = JsonConvert.DeserializeObject<List<int>>(request.Form["documentids"]);
                 var req = JsonConvert.DeserializeObject<DTOtaskqueue>(request.Form["tq"]);
-                var user = KOCAuthorizeAttribute.getCurrentUser();
+               // var user = KOCAuthorizeAttribute.getCurrentUser();
 
                 var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
                 var il = request.Form["il"].ToString();
@@ -450,7 +535,8 @@ namespace CRMWebApi.Controllers
                 //var filePath = subPath + ((request.Files["file_data"])).FileName;
                 for (int i = 0; i < request.Files.Count; i++)
                 {
-                    var filePath = subPath + docids[i].ToString() + "." + request.Files[i].FileName.Split('.')[1];
+                    // var filePath = subPath + (i+1).ToString() + "." + request.Files[i].FileName.Split('.')[1];
+                    var filePath = subPath + (request.Files[i]).FileName;
                     using (var fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
                     {
                         (request.Files[i]).InputStream.CopyTo(fs);
@@ -604,7 +690,8 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         status = null,
                         taskid = request.taskid,
-                        updatedby = user.userId
+                        updatedby = user.userId,
+                        fault=request.fault
                     };
 
                     db.taskqueue.Add(taskqueue);
@@ -911,10 +998,12 @@ namespace CRMWebApi.Controllers
             {
                 var bayi = db.personel.Where(p => p.personelid == bayiid).FirstOrDefault();
                 var customerinfo = db.customer.Where(c => c.customerid == customer).FirstOrDefault();
-            
-            mail.To.Add(bayi.email.ToString()); // kime gönderileceği adresin yazıldığı textbox'tan alınır.
+                for (int i = 0; i < bayi.email.ToString().Split(';').Count(); i++)
+                {
+                    mail.To.Add(bayi.email.ToString().Split(';')[i]); // kime gönderileceği adresin yazıldığı textbox'tan alınır.
 
-             mail.Body=  string.Format(@" Merhaba Sayın  {0}, {1}  {2}
+                }
+                mail.Body=  string.Format(@" Merhaba Sayın  {0}, {1}  {2}
                        Merkezimizden {3} adlı müşterimizin Kurulum Randevu Taskı size atanmıştır.Müşterimizin İletişim Numarası {4} 'dır.{5} İyi Çalışmalar Dileriz",
                        bayi.personelname.ToUpper().ToString(), 
                        Environment.NewLine,

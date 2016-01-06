@@ -40,7 +40,7 @@ namespace CRMWebApi.Controllers
                  db.Configuration.LazyLoadingEnabled = false;
                  db.Configuration.ProxyCreationEnabled = false;
                
-                 var penetarations = db.taskqueue.Where(tq => tq.taskid == 86  && (tq.status ==null || param.closedtasks) && tq.creationdate.Value.Year == 2015 && tq.deleted == false);
+                 var penetarations = db.taskqueue.Where(tq => tq.taskid == 86  && (tq.status ==null || param.closedtasks) &&( tq.creationdate.Value.Year == 2015 ||  tq.creationdate.Value.Year == 2016 )&& tq.deleted == false);
 
 
                  var res = db.customer

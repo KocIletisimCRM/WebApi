@@ -22,9 +22,13 @@ namespace CRMWebApi.Controllers
         [KOCAuthorize]
         public HttpResponseMessage getStockMovements(DTOGetStockMovementRequest request)
         {
-            var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
+            var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
+                if(request.fromobject!=null && request.fromobject.value == null && request.toobject.value == null)
+                {
+                    request.fromobject.value = "";
+                }
                 var filter = request.getFilter();
                 var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSql = filter.getCountSQL();
@@ -41,10 +45,10 @@ namespace CRMWebApi.Controllers
                     {
                         var clause = subTablesClauses[i];
                         if (clause.Contains("fromobject1"))
-                            newClauses[0].Add(clause.Replace("))", ")").Replace("stockmovement.fromobject1", "stockmovement.fromobject") + " AND fromobjecttype = 3000)");
+                            newClauses[0].Add(clause.Replace("))", ")").Replace("stockmovement.fromobject1", "stockmovement.fromobject") + ")");
 
                         else if (clause.Contains("toobject1"))
-                            newClauses[1].Add(clause.Replace("))", ")").Replace("stockmovement.toobject1", "stockmovement.toobject") + " AND toobjecttype = 3000)");
+                            newClauses[1].Add(clause.Replace("))", ")").Replace("stockmovement.toobject1", "stockmovement.toobject") + ")");
                         else
                             newClauses[clause.Contains("fromobject") ? 0 : 1].Add(clause + ")");
                         pagingWhereClauses.Remove(clause);
@@ -54,7 +58,12 @@ namespace CRMWebApi.Controllers
                     if (pagingWhereClauses.Skip(1).Any()) whereClauses.Add(string.Join(") AND", pagingWhereClauses.Skip(1)) + ")");
                     if (newClauses[0].Any()) whereClauses.Add($"({string.Join(" OR ", newClauses[0])})");
                     if (newClauses[1].Any()) whereClauses.Add($"({string.Join(" OR ", newClauses[1])})");
-                    whereClauses.Add($"(fromobject = {userID} or toobject = {userID})");
+                    if (user.hasRole(KOCUserTypes.TeamLeader))
+                    {
+                        var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
+                        whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
+                    }
+                    else whereClauses.Add($"(fromobject = {user.userId} or toobject = {user.userId})");
                     var whereClause = string.Join(" AND ", whereClauses);
                     querySql = $"{sqlPartitions[0]}paging as ({pagingWhereClauses[0]}stockmovement WHERE{whereClause}) SELECT *{sqlPartitions[2]} ";
 

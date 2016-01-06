@@ -40,7 +40,7 @@ namespace CRMWebApi.KOCAuthorization
             return user;
         }
 
-        private static TimeSpan SessionTimeout = TimeSpan.FromMinutes(10);
+        private static TimeSpan SessionTimeout = TimeSpan.FromMinutes(20);
         private static string UserName { get { return HttpContext.Current.Request.Headers[userNameHeader]; } }
         private static string Password { get { return HttpContext.Current.Request.Headers[passwordHeader]; } }
         private static string UserType { get { return HttpContext.Current.Request.Headers[userTypeHeader]; } }
@@ -79,7 +79,7 @@ namespace CRMWebApi.KOCAuthorization
                 {
                     using (var db = new KOCSAMADLSEntities())
                     {
-                        var user = db.personel.Where(p => p.email == UserName && p.password == Password).FirstOrDefault();
+                        var user = db.personel.Where(p => p.email.Contains(UserName) && p.password == Password).FirstOrDefault();
                         if (user != null)
                         {
                             token = createToken();
