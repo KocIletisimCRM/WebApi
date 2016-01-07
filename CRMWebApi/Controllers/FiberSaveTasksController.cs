@@ -63,7 +63,6 @@ namespace CRMWebApi.Controllers
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
-          
         }
     }
 }
