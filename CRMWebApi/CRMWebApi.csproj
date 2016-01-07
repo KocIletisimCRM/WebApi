@@ -204,6 +204,7 @@
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
     <Compile Include="DTOs\Fiber\DTOSavePenetrasyon.cs" />
     <Compile Include="DTOs\Fiber\DTOTest.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />

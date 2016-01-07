@@ -40,5 +40,30 @@ namespace CRMWebApi.Controllers
          
             return Request.CreateResponse(HttpStatusCode.OK,"İşlem Başarılı","application/json");
         }
+
+        [Route("saveGlobalTask")]
+        [HttpPost]
+        public HttpResponseMessage savetask(DTOSaveGlobalTask request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var taskqueue = new taskqueue
+                {
+                    taskid = request.taskid,
+                    creationdate = DateTime.Now,
+                    attachedobjectid = request.customerid != null ? request.customerid : request.blockid,
+                    attachmentdate = request.attachedpersonelid != null ? DateTime.Now : (DateTime?)null,
+                    attachedpersonelid = request.attachedpersonelid,
+                    description = request.description,
+                    deleted = false,
+                    fault = request.fault,
+                    updatedby = 7
+                };
+                db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
+            }
+          
+        }
     }
 }
