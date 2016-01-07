@@ -129,6 +129,7 @@
     <Compile Include="Controllers\AdslTaskStatePoolController.cs" />
     <Compile Include="Controllers\AdslTaskqueueController.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
+    <Compile Include="Controllers\FiberSaveTasksController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\SiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
@@ -203,6 +204,7 @@
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Fiber\DTOSavePenetrasyon.cs" />
     <Compile Include="DTOs\Fiber\DTOTest.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizedUser.cs" />
