@@ -162,9 +162,9 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();
-            var customerdocuments = tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList();
-            var customerproducts = tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList();
-            var stockmovements = tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList();
+            var customerdocuments =tq.customerdocument!=null? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList():null;
+            var customerproducts =tq.customerproduct!=null? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList():null;
+            var stockmovements =tq.stockmovement!=null ?tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList():null;
             //return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             using (var db = new KOCSAMADLSEntities())
             using (var transaction = db.Database.BeginTransaction())
