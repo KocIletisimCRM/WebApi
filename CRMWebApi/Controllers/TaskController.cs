@@ -606,6 +606,7 @@ namespace CRMWebApi.Controllers
                     item.customername = ct.customername;
                     item.customersurname = ct.customersurname;
                     item.gsm = ct.gsm;
+                    item.tckimlikno = ct.tckimlikno;
                     if (ct.netStatus.id != 0)
                         item.netstatu = ct.netStatus.id;
                     if (ct.telStatus.id!=0)
