@@ -222,6 +222,7 @@
           <Property Name="email" Type="nvarchar" MaxLength="255" />
           <Property Name="password" Type="nvarchar" MaxLength="50" />
           <Property Name="notes" Type="nvarchar(max)" />
+          <Property Name="relatedpersonelid" Type="int" />
           <Property Name="roles" Type="int" Nullable="false" />
           <Property Name="ilKimlikNo" Type="int" />
           <Property Name="ilceKimlikNo" Type="int" />
@@ -625,6 +626,9 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="ilceKimlikNo" Type="Int32" />
           <NavigationProperty Name="il" Relationship="KOCSAMADLSModel.adsl_personelil" FromRole="adsl_personel" ToRole="il" />
           <NavigationProperty Name="ilce" Relationship="KOCSAMADLSModel.adsl_personelilce" FromRole="adsl_personel" ToRole="ilce" />
+          <Property Name="relatedpersonelid" Type="Int32" />
+          <NavigationProperty Name="relatedpersonel2" Relationship="KOCSAMADLSModel.adsl_personeladsl_personel" FromRole="adsl_personel" ToRole="adsl_personel1" />
+          <NavigationProperty Name="relatedpersonel" Relationship="KOCSAMADLSModel.adsl_personeladsl_personel" FromRole="adsl_personel1" ToRole="adsl_personel" />
         </EntityType>
         <EntityType Name="adsl_product_service">
           <Key>
@@ -923,6 +927,10 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           </AssociationSet>
           <EntitySet Name="bucak" EntityType="KOCSAMADLSModel.bucak" />
           <EntitySet Name="mahalleKoy" EntityType="KOCSAMADLSModel.mahalleKoy" />
+          <AssociationSet Name="adsl_personeladsl_personel" Association="KOCSAMADLSModel.adsl_personeladsl_personel">
+            <End Role="adsl_personel" EntitySet="personel" />
+            <End Role="adsl_personel1" EntitySet="personel" />
+          </AssociationSet>
         </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -1355,6 +1363,18 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="ad" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="bucakKimlikNo" Type="Int32" Nullable="false" />
         </EntityType>
+        <Association Name="adsl_personeladsl_personel">
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="adsl_personel1">
+              <PropertyRef Name="relatedpersonelid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1511,6 +1531,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="personel">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_personel">
               <MappingFragment StoreEntitySet="personel">
+                <ScalarProperty Name="relatedpersonelid" ColumnName="relatedpersonelid" />
                 <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
                 <ScalarProperty Name="ilKimlikNo" ColumnName="ilKimlikNo" />
                 <ScalarProperty Name="personelid" ColumnName="personelid" />

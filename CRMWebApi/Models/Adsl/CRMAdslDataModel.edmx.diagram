@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="37e79bbdcd75434a8727a2d0fc820b8c" Name="Diagram1" ZoomLevel="78">
+      <Diagram DiagramId="37e79bbdcd75434a8727a2d0fc820b8c" Name="Diagram1" ZoomLevel="188">
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_campaigns" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customer_status" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerdocument" Width="1.5" PointX="4.75" PointY="3.375" IsExpanded="true" />
@@ -61,6 +61,7 @@
         <AssociationConnector Association="KOCSAMADLSModel.adsl_documentadsl_customerdocument" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.bucak" Width="1.5" PointX="16.375" PointY="7.75" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.mahalleKoy" Width="1.5" PointX="17.625" PointY="12.25" />
+        <AssociationConnector Association="KOCSAMADLSModel.adsl_personeladsl_personel" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

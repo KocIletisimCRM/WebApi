@@ -33,10 +33,13 @@ namespace CRMWebApi.Controllers
                 var ilceIds = res.Select(s => s.ilceKimlikNo).Distinct().ToList();
                 var ilces = db.ilce.Where(s => ilceIds.Contains(s.kimlikNo)).ToList();
 
+                var relatedPersonelIds = res.Select(s => s.relatedpersonelid).Distinct().ToList();
+                var relatedPersonels = db.personel.Where(s => relatedPersonelIds.Contains(s.personelid)).ToList();
+
                 res.ForEach(s=> {
                     s.ilce = ilces.Where(i => i.kimlikNo == s.ilceKimlikNo).FirstOrDefault();
                     s.il = ils.Where(i=>i.kimlikNo==s.ilKimlikNo).FirstOrDefault();
-
+                    s.relatedpersonel =relatedPersonels.Where(p => p.personelid == s.relatedpersonelid).FirstOrDefault();
                 });
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
@@ -64,6 +67,7 @@ namespace CRMWebApi.Controllers
                 dp.personelname = request.personelname;
                 dp.category = (int)request.category;
                 dp.roles= dp.category = (int)request.category;
+                dp.relatedpersonelid = request.relatedpersonelid;
                 dp.ilceKimlikNo = request.ilceKimlikNo;
                 dp.ilKimlikNo = request.ilKimlikNo;
                 dp.mobile = request.mobile;
@@ -94,6 +98,7 @@ namespace CRMWebApi.Controllers
                     password = request.password,
                     notes = request.notes,
                     roles = (int)request.category,
+                    relatedpersonelid=request.relatedpersonelid,
                     ilceKimlikNo=request.ilceKimlikNo,
                     ilKimlikNo=request.ilKimlikNo,
                     creationdate = DateTime.Now,

@@ -22,6 +22,7 @@ namespace CRMWebApi.Models.Adsl
             this.updatedTaskqueue = new HashSet<adsl_taskqueue>();
             this.adsl_stockmovement = new HashSet<adsl_stockmovement>();
             this.adsl_stockmovement1 = new HashSet<adsl_stockmovement>();
+            this.relatedpersonel2 = new HashSet<adsl_personel>();
         }
     
         public int personelid { get; set; }
@@ -38,6 +39,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<bool> deleted { get; set; }
         public Nullable<int> ilKimlikNo { get; set; }
         public Nullable<int> ilceKimlikNo { get; set; }
+        public Nullable<int> relatedpersonelid { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> attachedTaskqueue { get; set; }
@@ -51,5 +53,8 @@ namespace CRMWebApi.Models.Adsl
         public virtual ICollection<adsl_stockmovement> adsl_stockmovement1 { get; set; }
         public virtual il il { get; set; }
         public virtual ilce ilce { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_personel> relatedpersonel2 { get; set; }
+        public virtual adsl_personel relatedpersonel { get; set; }
     }
 }
