@@ -262,17 +262,39 @@ namespace CRMWebApi.Controllers
 
                         #endregion
                         #region ürünler kaydediliyor
-                        db.customerproduct.AddRange(customerproducts.Select(cd => new adsl_customerproduct
+                        foreach (var p in customerproducts)
                         {
-                            campaignid = cd.campaignid,
-                            creationdate = DateTime.Now,
-                            customerid = dtq.attachedobjectid,
-                            deleted = false,
-                            lastupdated = DateTime.Now,
-                            productid = cd.productid,
-                            taskid = dtq.taskorderno,
-                            updatedby = user.userId
-                        }));
+                            db.customerproduct.Add(new adsl_customerproduct
+                            {
+                                campaignid = p.campaignid,
+                                creationdate = DateTime.Now,
+                                customerid = dtq.attachedobjectid,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                productid = p.productid,
+                                taskid = dtq.taskorderno,
+                                updatedby = user.userId
+                            });
+
+
+                            foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                            {
+                                db.taskqueue.Add(new adsl_taskqueue
+                                {
+
+                                    appointmentdate = null,
+                                    attachmentdate = null,
+                                    attachedobjectid = dtq.attachedobjectid,
+                                    taskid = item,
+                                    creationdate = DateTime.Now,
+                                    deleted = false,
+                                    lastupdated = DateTime.Now,
+                                    previoustaskorderid = tq.taskorderno,
+                                    updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
+                                    relatedtaskorderid = tq.relatedtaskorderid
+                                });
+                            }
+                        }
                         #endregion
                         #region belgeler kaydediliyor
                         if (customerdocuments.Any(c => c.documenturl != null))
@@ -358,17 +380,41 @@ namespace CRMWebApi.Controllers
                     {
                         #region ürünler kaydediliyor
                         if (customerproducts.Any(cp => cp.id != 0))
-                            db.customerproduct.AddRange(customerproducts.Select(cd => new adsl_customerproduct
+                        {
+                            foreach (var p in customerproducts)
                             {
-                                campaignid = cd.campaignid,
-                                creationdate = DateTime.Now,
-                                customerid = dtq.attachedobjectid,
-                                deleted = false,
-                                lastupdated = DateTime.Now,
-                                productid = cd.productid,
-                                taskid = dtq.taskorderno,
-                                updatedby = user.userId
-                            }));
+                                db.customerproduct.Add( new adsl_customerproduct
+                                {
+                                    campaignid = p.campaignid,
+                                    creationdate = DateTime.Now,
+                                    customerid = dtq.attachedobjectid,
+                                    deleted = false,
+                                    lastupdated = DateTime.Now,
+                                    productid = p.productid,
+                                    taskid = dtq.taskorderno,
+                                    updatedby = user.userId
+                                });
+
+
+                                foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                                {
+                                    db.taskqueue.Add(new adsl_taskqueue
+                                    {
+
+                                        appointmentdate = null,
+                                        attachmentdate = null,
+                                        attachedobjectid = dtq.attachedobjectid,
+                                        taskid = item,
+                                        creationdate = DateTime.Now,
+                                        deleted = false,
+                                        lastupdated = DateTime.Now,
+                                        previoustaskorderid = tq.taskorderno,
+                                        updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
+                                        relatedtaskorderid = tq.relatedtaskorderid
+                                    });
+                                }
+                            }
+                        }
                         #endregion
                         #region belgeler kaydediliyor
                         if (customerdocuments.Any(cd => cd.id != 0))
