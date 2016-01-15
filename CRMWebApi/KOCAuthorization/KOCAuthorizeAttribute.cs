@@ -79,28 +79,34 @@ namespace CRMWebApi.KOCAuthorization
                 {
                     using (var db = new KOCSAMADLSEntities())
                     {
-                        var user = db.personel.Where(p => p.email==UserName && p.password == Password).FirstOrDefault();
-                        if (user != null)
-                        {
-                            token = createToken();
-                            ActiveUsers[token] = new KOCAuthorizedUser
-                            {
-                                userId = user.personelid,
-                                userName = user.email,
-                                userFullName = user.personelname,
-                                userRole = user.roles,
-                                lastActivityTime = DateTime.Now,
-                                creationTime = DateTime.Now
-                            };
-                            HttpContext.Current.Response.Headers.Add(authorizedTokenHeader, token);
+                       
+                        var emails = db.personel.Where(p=>p.deleted==false && p.email!=null).ToList();
 
+                            var user = emails.Where(p => p.email.ToString().Split(';')[0] == UserName && p.password == Password).FirstOrDefault();
+
+                            #region girişi kontrol et
+                            if (user != null)
+                            {
+                                token = createToken();
+                                ActiveUsers[token] = new KOCAuthorizedUser
+                                {
+                                    userId = user.personelid,
+                                    userName = user.email,
+                                    userFullName = user.personelname,
+                                    userRole = user.roles,
+                                    lastActivityTime = DateTime.Now,
+                                    creationTime = DateTime.Now
+                                };
+                                HttpContext.Current.Response.Headers.Add(authorizedTokenHeader, token);
+
+                            }
+                            else
+                            {
+                                ErrorMessage = "Kullanıcı bilgileri hatalı...";
+                                HandleUnauthorizedRequest(actionContext);
+                            }
+                            #endregion
                         }
-                        else
-                        {
-                            ErrorMessage = "Kullanıcı bilgileri hatalı...";
-                            HandleUnauthorizedRequest(actionContext);
-                        }
-                    }
                 }
                 else
                 {
