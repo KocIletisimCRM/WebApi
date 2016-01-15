@@ -98,7 +98,7 @@ namespace CRMWebApi.Controllers
                     password = request.password,
                     notes = request.notes,
                     roles = (int)request.category,
-                    relatedpersonelid=request.relatedpersonelid,
+                    relatedpersonelid=request.relatedpersonelid!=0?request.relatedpersonelid:null,
                     ilceKimlikNo=request.ilceKimlikNo,
                     ilKimlikNo=request.ilKimlikNo,
                     creationdate = DateTime.Now,
