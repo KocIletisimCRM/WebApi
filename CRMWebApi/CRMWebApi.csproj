@@ -128,15 +128,24 @@
     <Compile Include="Controllers\AdslTaskStateMatchesController.cs" />
     <Compile Include="Controllers\AdslTaskStatePoolController.cs" />
     <Compile Include="Controllers\AdslTaskqueueController.cs" />
+    <Compile Include="Controllers\FiberAuthorizeController.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
+    <Compile Include="Controllers\FiberCampaignController.cs" />
+    <Compile Include="Controllers\FiberDocumentController.cs" />
+    <Compile Include="Controllers\FiberPersonelController.cs" />
+    <Compile Include="Controllers\FiberProductController.cs" />
     <Compile Include="Controllers\FiberSaveTasksController.cs" />
+    <Compile Include="Controllers\FiberStockCardController.cs" />
+    <Compile Include="Controllers\FiberTaskController.cs" />
+    <Compile Include="Controllers\FiberTaskStateMatchesController.cs" />
+    <Compile Include="Controllers\FiberTaskStatePoolController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
-    <Compile Include="Controllers\SiteBlockController.cs" />
+    <Compile Include="Controllers\FiberSiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
-    <Compile Include="Controllers\StockController.cs" />
-    <Compile Include="Controllers\TaskController.cs" />
-    <Compile Include="Controllers\FilterController.cs" />
+    <Compile Include="Controllers\FiberStockController.cs" />
+    <Compile Include="Controllers\FiberTaskqueueController.cs" />
+    <Compile Include="Controllers\FiberFilterController.cs" />
     <Compile Include="Controllers\FiberUploadController.cs" />
     <Compile Include="DTOs\Adsl\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Adsl\BaseAttachedObject.cs" />
@@ -204,7 +213,11 @@
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Fiber\DTOcustomerdocument.cs" />
+    <Compile Include="DTOs\Fiber\DTOgetPersonelStockFiber_Result.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueDocuments.cs" />
     <Compile Include="DTOs\Fiber\DTOSavePenetrasyon.cs" />
     <Compile Include="DTOs\Fiber\DTOTest.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
@@ -420,10 +433,7 @@
     <Compile Include="Models\Fiber\document.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Fiber\flatinfo.cs">
-      <DependentUpon>CRMDataModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Fiber\getPersonelStock_Result.cs">
+    <Compile Include="Models\Fiber\getPersonelStockFiber_Result.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Fiber\gsmKullanımıStatus.cs">
@@ -482,6 +492,9 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Fiber\vcampaignproducts.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\v_taskorderIsEditableCRM.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -27,7 +27,7 @@ namespace CRMWebApi.Models.Fiber
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
     
-        public virtual document document { get; set; }
+        public virtual document fiber_document { get; set; }
         public virtual customer customer { get; set; }
     }
 }

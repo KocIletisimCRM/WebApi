@@ -17,7 +17,6 @@ namespace CRMWebApi.Models.Fiber
         public product_service()
         {
             this.customerproduct = new HashSet<customerproduct>();
-            this.vcampaignproducts = new HashSet<vcampaignproducts>();
         }
     
         public int productid { get; set; }
@@ -29,8 +28,8 @@ namespace CRMWebApi.Models.Fiber
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public string documents { get; set; }
     
         public virtual ICollection<customerproduct> customerproduct { get; set; }
-        public virtual ICollection<vcampaignproducts> vcampaignproducts { get; set; }
     }
 }

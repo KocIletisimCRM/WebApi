@@ -38,7 +38,7 @@ namespace CRMWebApi.Models.Fiber
         public Nullable<bool> deleted { get; set; }
         public Nullable<int> customerstatus { get; set; }
         public Nullable<int> telstatu { get; set; }
-        public string turkcellTv { get; set; }
+        public Nullable<int> turkcellTv { get; set; }
         public Nullable<int> netstatu { get; set; }
         public string description { get; set; }
         public Nullable<int> tvstatu { get; set; }
@@ -50,14 +50,15 @@ namespace CRMWebApi.Models.Fiber
         public virtual ICollection<taskqueue> taskqueues { get; set; }
         public virtual block block { get; set; }
         public virtual personel updatedpersonel { get; set; }
-        public virtual issStatus issStatus { get; set; }
-        public virtual netStatus netStatus { get; set; }
-        public virtual TvKullanımıStatus TvKullanımıStatus { get; set; }
-        public virtual telStatus telStatus { get; set; }
-        public virtual gsmKullanımıStatus gsmKullanımıStatus { get; set; }
         public virtual ICollection<customerproduct> customerproduct { get; set; }
         public virtual ICollection<customerdocument> customerdocument { get; set; }
         public virtual ICollection<stockmovement> instockmovement { get; set; }
         public virtual ICollection<stockmovement> outstockmovement1 { get; set; }
+        public virtual gsmKullanımıStatus gsmKullanımıStatus { get; set; }
+        public virtual issStatus issStatus { get; set; }
+        public virtual netStatus netStatus { get; set; }
+        public virtual telStatus telStatus { get; set; }
+        public virtual TvKullanımıStatus TvKullanımıStatus { get; set; }
+        public virtual TurkcellTVStatus TurkcellTVStatus { get; set; }
     }
 }

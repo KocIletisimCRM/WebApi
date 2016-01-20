@@ -51,16 +51,16 @@ namespace CRMWebApi.Controllers
         
 
 
-         [Route("findFlat")]
-         [HttpGet]
-         public HttpResponseMessage findFlat(int blockid)
-         {
-             using (var db=new CRMEntities())
-             {
-                 var res = db.flatinfo.Where(c => c.blockid == blockid).ToList();
-                 return Request.CreateResponse(HttpStatusCode.OK,res,"application/json");
-             }
-         }
+         //[Route("findFlat")]
+         //[HttpGet]
+         //public HttpResponseMessage findFlat(int blockid)
+         //{
+         //    using (var db=new CRMEntities())
+         //    {
+         //        var res = db.flatinfo.Where(c => c.blockid == blockid).ToList();
+         //        return Request.CreateResponse(HttpStatusCode.OK,res,"application/json");
+         //    }
+         //}
 
          [Route("saveTransfer")]
          [HttpPost]

@@ -55,7 +55,7 @@
           <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="blockid" Type="int" />
           <Property Name="tckimlikno" Type="nvarchar" MaxLength="255" />
-          <Property Name="customername" Type="nvarchar" MaxLength="45" />
+          <Property Name="customername" Type="nvarchar" MaxLength="255" />
           <Property Name="customersurname" Type="nvarchar" MaxLength="45" />
           <Property Name="flat" Type="nvarchar" MaxLength="45" />
           <Property Name="gsm" Type="nvarchar" MaxLength="15" />
@@ -67,7 +67,7 @@
           <Property Name="deleted" Type="bit" />
           <Property Name="customerstatus" Type="int" />
           <Property Name="telstatu" Type="int" />
-          <Property Name="turkcellTv" Type="nvarchar" MaxLength="50" />
+          <Property Name="turkcellTv" Type="int" />
           <Property Name="netstatu" Type="int" />
           <Property Name="description" Type="nvarchar" MaxLength="255" />
           <Property Name="tvstatu" Type="int" />
@@ -163,15 +163,15 @@
           </Key>
           <Property Name="personelid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="personelname" Type="nvarchar" MaxLength="255" />
-          <Property Name="category" Type="bigint" />
+          <Property Name="category" Type="int" />
           <Property Name="mobile" Type="nvarchar" MaxLength="255" />
           <Property Name="email" Type="nvarchar" MaxLength="255" />
           <Property Name="password" Type="nvarchar" MaxLength="50" />
           <Property Name="notes" Type="nvarchar(max)" />
-          <Property Name="roles" Type="bigint" />
+          <Property Name="roles" Type="int" />
           <Property Name="creationdate" Type="datetime2" Precision="7" />
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
-          <Property Name="updatedby" Type="bigint" />
+          <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
         </EntityType>
         <EntityType Name="product_service">
@@ -187,6 +187,7 @@
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="documents" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="site">
           <Key>
@@ -336,7 +337,7 @@
           <Property Name="deleted" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRMTest.dbo.customerinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="customerinfo">
           <Key>
             <PropertyRef Name="customerid" />
@@ -353,18 +354,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primar
           <Property Name="emptorcustomernum" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRM.dbo.flatinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
-        <EntityType Name="flatinfo">
-          <Key>
-            <PropertyRef Name="customerid" />
-          </Key>
-          <Property Name="customerid" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
-          <Property Name="flat" Type="nvarchar" MaxLength="45" />
-          <Property Name="flatinfo" Type="nvarchar" MaxLength="448" />
-          <Property Name="blockid" Type="int" />
-        </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRM.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRMTest.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="stockstatus">
           <Key>
             <PropertyRef Name="toobject" />
@@ -381,7 +371,16 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.stockstatus' does not have a primary
           <Property Name="amount" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRMTest.dbo.v_taskorderIsEditableCRM' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="v_taskorderIsEditableCRM">
+          <Key>
+            <PropertyRef Name="taskorderno" />
+          </Key>
+          <Property Name="taskorderno" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="editable" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="vcampaignproducts">
           <Key>
             <PropertyRef Name="cid" />
@@ -500,7 +499,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Function Name="getPersonelStock" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+        <Function Name="getPersonelStockFiber" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="PERSONELID" Type="int" Mode="In" />
           <ReturnType>
             <CollectionType>
@@ -520,7 +519,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </CollectionType>
           </ReturnType>
         </Function>
-        <Function Name="getSerialsOnPersonel" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+        <Function Name="getSerialsOnPersonelFiber" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="PERSONELID" Type="int" Mode="In" />
           <Parameter Name="STOCKCARDID" Type="int" Mode="In" />
           <ReturnType>
@@ -531,60 +530,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </CollectionType>
           </ReturnType>
         </Function>
-        <Function Name="sf_task" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
-          <Parameter Name="pageNo" Type="int" Mode="In" />
-          <Parameter Name="rowsPerPage" Type="int" Mode="In" />
-          <Parameter Name="taskFilter" Type="varchar(max)" Mode="In" />
-          <ReturnType>
-            <CollectionType>
-              <RowType>
-                <Property Name="taskid" Type="int" Nullable="false" />
-                <Property Name="taskname" Type="nvarchar" MaxLength="255" />
-                <Property Name="tasktype" Type="int" Nullable="false" />
-                <Property Name="attachablepersoneltype" Type="int" />
-                <Property Name="attachableobjecttype" Type="int" />
-                <Property Name="performancescore" Type="float" />
-                <Property Name="creationdate" Type="datetime2" Precision="7" />
-                <Property Name="lastupdated" Type="datetime2" Precision="7" />
-                <Property Name="updatedby" Type="int" />
-                <Property Name="deleted" Type="bit" />
-              </RowType>
-            </CollectionType>
-          </ReturnType>
-        </Function>
-        <Function Name="sf_taskqueue" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
-          <Parameter Name="pageNo" Type="int" Mode="In" />
-          <Parameter Name="rowsPerPage" Type="int" Mode="In" />
-          <Parameter Name="taskFilter" Type="varchar(max)" Mode="In" />
-          <Parameter Name="attachedobjectFilter" Type="varchar(max)" Mode="In" />
-          <Parameter Name="personelFilter" Type="varchar(max)" Mode="In" />
-          <Parameter Name="taskstateFilter" Type="varchar(max)" Mode="In" />
-          <Parameter Name="attachmentdate" Type="datetime" Mode="In" />
-          <Parameter Name="creationdate" Type="datetime" Mode="In" />
-          <Parameter Name="consummationdate" Type="datetime" Mode="In" />
-          <ReturnType>
-            <CollectionType>
-              <RowType>
-                <Property Name="taskorderno" Type="int" Nullable="false" />
-                <Property Name="taskid" Type="int" Nullable="false" />
-                <Property Name="previoustaskorderid" Type="int" />
-                <Property Name="relatedtaskorderid" Type="int" />
-                <Property Name="creationdate" Type="datetime2" Precision="7" />
-                <Property Name="attachedobjectid" Type="int" />
-                <Property Name="attachmentdate" Type="datetime2" Precision="7" />
-                <Property Name="attachedpersonelid" Type="int" />
-                <Property Name="appointmentdate" Type="datetime2" Precision="7" />
-                <Property Name="status" Type="int" />
-                <Property Name="consummationdate" Type="datetime2" Precision="7" />
-                <Property Name="description" Type="nvarchar" MaxLength="511" />
-                <Property Name="lastupdated" Type="datetime2" Precision="7" />
-                <Property Name="updatedby" Type="int" />
-                <Property Name="deleted" Type="bit" />
-                <Property Name="assistant_personel" Type="int" />
-                <Property Name="fault" Type="nvarchar" MaxLength="255" />
-              </RowType>
-            </CollectionType>
-          </ReturnType>
+        <Function Name="taskorderIsEditable" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" ReturnType="int">
+          <Parameter Name="taskorderno" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="CRMModelStoreContainer">
           <EntitySet Name="block" EntityType="Self.block" Schema="dbo" store:Type="Tables" />
@@ -625,14 +572,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
     [customerinfo].[emptorcustomernum] AS [emptorcustomernum]
     FROM [dbo].[customerinfo] AS [customerinfo]</DefiningQuery>
           </EntitySet>
-          <EntitySet Name="flatinfo" EntityType="Self.flatinfo" store:Type="Views" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [flatinfo].[customerid] AS [customerid], 
-    [flatinfo].[flat] AS [flat], 
-    [flatinfo].[flatinfo] AS [flatinfo], 
-    [flatinfo].[blockid] AS [blockid]
-    FROM [dbo].[flatinfo] AS [flatinfo]</DefiningQuery>
-          </EntitySet>
           <EntitySet Name="stockstatus" EntityType="Self.stockstatus" store:Type="Views" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [stockstatus].[toobject] AS [toobject], 
@@ -642,6 +581,12 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
     [stockstatus].[OUTPUT] AS [OUTPUT], 
     [stockstatus].[amount] AS [amount]
     FROM [dbo].[stockstatus] AS [stockstatus]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="v_taskorderIsEditableCRM" EntityType="Self.v_taskorderIsEditableCRM" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [v_taskorderIsEditableCRM].[taskorderno] AS [taskorderno], 
+    [v_taskorderIsEditableCRM].[editable] AS [editable]
+    FROM [dbo].[v_taskorderIsEditableCRM] AS [v_taskorderIsEditableCRM]</DefiningQuery>
           </EntitySet>
           <EntitySet Name="vcampaignproducts" EntityType="Self.vcampaignproducts" store:Type="Views" store:Schema="dbo">
             <DefiningQuery>SELECT 
@@ -813,39 +758,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             <Parameter Name="rowsPerPage" Mode="In" Type="Int32" />
             <Parameter Name="taskFilter" Mode="In" Type="String" />
           </FunctionImport>
-          <EntitySet Name="tasktypes" EntityType="CRMModel.tasktypes" />
-          <AssociationSet Name="tasktypestask" Association="CRMModel.tasktypestask">
-            <End Role="tasktypes" EntitySet="tasktypes" />
-            <End Role="task" EntitySet="task" />
-          </AssociationSet>
-          <EntitySet Name="customerinfo" EntityType="CRMModel.customerinfo" />
-          <EntitySet Name="flatinfo" EntityType="CRMModel.flatinfo" />
-          <EntitySet Name="gsmKullanımıStatus" EntityType="CRMModel.gsmKullanımıStatus" />
-          <EntitySet Name="TurkcellTVStatus" EntityType="CRMModel.TurkcellTVStatus" />
-          <EntitySet Name="TvKullanımıStatus" EntityType="CRMModel.TvKullanımıStatus" />
-          <EntitySet Name="netStatus" EntityType="CRMModel.netStatus" />
-          <EntitySet Name="telStatus" EntityType="CRMModel.telStatus" />
-          <EntitySet Name="issStatus" EntityType="CRMModel.issStatus" />
-          <AssociationSet Name="issStatuscustomer" Association="CRMModel.issStatuscustomer">
-            <End Role="issStatus" EntitySet="issStatus" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="netStatuscustomer" Association="CRMModel.netStatuscustomer">
-            <End Role="netStatus" EntitySet="netStatus" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="TvKullanımıStatuscustomer" Association="CRMModel.TvKullanımıStatuscustomer">
-            <End Role="TvKullanımıStatus" EntitySet="TvKullanımıStatus" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="telStatuscustomer" Association="CRMModel.telStatuscustomer">
-            <End Role="telStatus" EntitySet="telStatus" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="gsmKullanımıStatuscustomer" Association="CRMModel.gsmKullanımıStatuscustomer">
-            <End Role="gsmKullanımıStatus" EntitySet="gsmKullanımıStatus" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
           <EntitySet Name="campaigns" EntityType="CRMModel.campaigns" />
           <EntitySet Name="customerproduct" EntityType="CRMModel.customerproduct" />
           <AssociationSet Name="FK_customerproduct_campaigns" Association="CRMModel.FK_customerproduct_campaigns">
@@ -879,11 +791,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             <End Role="taskstatepool" EntitySet="taskstatepool" />
             <End Role="taskstatematches" EntitySet="taskstatematches" />
           </AssociationSet>
-          <EntitySet Name="product_service" EntityType="CRMModel.product_service" />
-          <AssociationSet Name="FK_customerproduct_product_service" Association="CRMModel.FK_customerproduct_product_service">
-            <End Role="product_service" EntitySet="product_service" />
-            <End Role="customerproduct" EntitySet="customerproduct" />
-          </AssociationSet>
           <EntitySet Name="stockcard" EntityType="CRMModel.stockcard" />
           <EntitySet Name="stockmovement" EntityType="CRMModel.stockmovement" />
           <AssociationSet Name="FK_stockmovement_stockcard" Association="CRMModel.FK_stockmovement_stockcard">
@@ -893,15 +800,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <AssociationSet Name="taskrel" Association="CRMModel.taskrel">
             <End Role="taskqueue" EntitySet="taskqueue" />
             <End Role="taskqueue1" EntitySet="taskqueue" />
-          </AssociationSet>
-          <EntitySet Name="vcampaignproducts" EntityType="CRMModel.vcampaignproducts" />
-          <AssociationSet Name="campaignsvcampaignproducts" Association="CRMModel.campaignsvcampaignproducts">
-            <End Role="campaigns" EntitySet="campaigns" />
-            <End Role="vcampaignproducts" EntitySet="vcampaignproducts" />
-          </AssociationSet>
-          <AssociationSet Name="product_servicevcampaignproducts" Association="CRMModel.product_servicevcampaignproducts">
-            <End Role="product_service" EntitySet="product_service" />
-            <End Role="vcampaignproducts" EntitySet="vcampaignproducts" />
           </AssociationSet>
           <AssociationSet Name="customerstockmovement" Association="CRMModel.customerstockmovement">
             <End Role="customer" EntitySet="customer" />
@@ -945,16 +843,59 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             <End Role="task" EntitySet="task" />
             <End Role="objecttypes" EntitySet="objecttypes" />
           </AssociationSet>
-          <FunctionImport Name="getSerialsOnPersonel" IsComposable="true" ReturnType="Collection(String)">
-            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
-            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
-          </FunctionImport>
           <AssociationSet Name="taskprev" Association="CRMModel.taskprev">
             <End Role="taskqueue" EntitySet="taskqueue" />
             <End Role="taskqueue1" EntitySet="taskqueue" />
           </AssociationSet>
-          <FunctionImport Name="getPersonelStock" IsComposable="true" ReturnType="Collection(CRMModel.getPersonelStock_Result)">
-          <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+          <EntitySet Name="tasktypes" EntityType="CRMModel.tasktypes" />
+          <AssociationSet Name="tasktasktypes" Association="CRMModel.tasktasktypes">
+            <End Role="task" EntitySet="task" />
+            <End Role="tasktypes" EntitySet="tasktypes" />
+          </AssociationSet>
+          <EntitySet Name="gsmKullanımıStatus" EntityType="CRMModel.gsmKullanımıStatus" />
+          <EntitySet Name="issStatus" EntityType="CRMModel.issStatus" />
+          <EntitySet Name="netStatus" EntityType="CRMModel.netStatus" />
+          <EntitySet Name="telStatus" EntityType="CRMModel.telStatus" />
+          <EntitySet Name="TvKullanımıStatus" EntityType="CRMModel.TvKullanımıStatus" />
+          <AssociationSet Name="customergsmKullanımıStatus" Association="CRMModel.customergsmKullanımıStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="gsmKullanımıStatus" EntitySet="gsmKullanımıStatus" />
+          </AssociationSet>
+          <AssociationSet Name="customerissStatus" Association="CRMModel.customerissStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="issStatus" EntitySet="issStatus" />
+          </AssociationSet>
+          <AssociationSet Name="customernetStatus" Association="CRMModel.customernetStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="netStatus" EntitySet="netStatus" />
+          </AssociationSet>
+          <AssociationSet Name="customertelStatus" Association="CRMModel.customertelStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="telStatus" EntitySet="telStatus" />
+          </AssociationSet>
+          <AssociationSet Name="customerTvKullanımıStatus" Association="CRMModel.customerTvKullanımıStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="TvKullanımıStatus" EntitySet="TvKullanımıStatus" />
+          </AssociationSet>
+          <EntitySet Name="customerinfo" EntityType="CRMModel.customerinfo" />
+          <EntitySet Name="product_service" EntityType="CRMModel.product_service" />
+          <AssociationSet Name="FK_customerproduct_product_service" Association="CRMModel.FK_customerproduct_product_service">
+            <End Role="product_service" EntitySet="product_service" />
+            <End Role="customerproduct" EntitySet="customerproduct" />
+          </AssociationSet>
+          <EntitySet Name="TurkcellTVStatus" EntityType="CRMModel.TurkcellTVStatus" />
+          <AssociationSet Name="customerTurkcellTVStatus" Association="CRMModel.customerTurkcellTVStatus">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="TurkcellTVStatus" EntitySet="TurkcellTVStatus" />
+          </AssociationSet>
+          <EntitySet Name="vcampaignproducts" EntityType="CRMModel.vcampaignproducts" />
+          <EntitySet Name="v_taskorderIsEditableCRM" EntityType="CRMModel.v_taskorderIsEditableCRM" />
+          <FunctionImport Name="getSerialsOnPersonelFiber" IsComposable="true" ReturnType="Collection(String)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="getPersonelStockFiber" IsComposable="true" ReturnType="Collection(CRMModel.getPersonelStockFiber_Result)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
           </FunctionImport>
         </EntityContainer>
         <EntityType Name="task">
@@ -966,17 +907,17 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="tasktype" Type="Int32" Nullable="false" />
           <Property Name="attachablepersoneltype" Type="Int32" />
           <Property Name="attachableobjecttype" Type="Int32" />
-          <Property Name="performancescore" Type="Double" />
+          <Property Name="performancescore" Type="Double" Nullable="true" />
           <Property Name="creationdate" Type="DateTime" Precision="7" />
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="taskqueues" Relationship="CRMModel.tasktaskqueue" FromRole="task" ToRole="taskqueue" />
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personeltask" FromRole="task" ToRole="personel" />
-          <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktypestask" FromRole="task" ToRole="tasktypes" />
           <NavigationProperty Name="taskstatematches" Relationship="CRMModel.FK_taskstatematches_task" FromRole="task" ToRole="taskstatematches" />
           <NavigationProperty Name="objecttypes" Relationship="CRMModel.taskobjecttypes" FromRole="task" ToRole="objecttypes" />
           <NavigationProperty Name="personeltypes" Relationship="CRMModel.taskobjecttypes1" FromRole="task" ToRole="objecttypes" />
+          <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktasktypes" FromRole="task" ToRole="tasktypes" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -1112,7 +1053,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="blockid" Type="Int32" />
           <Property Name="tckimlikno" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="customername" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="customername" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="customersurname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
@@ -1124,7 +1065,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="deleted" Type="Boolean" />
           <Property Name="customerstatus" Type="Int32" />
           <Property Name="telstatu" Type="Int32" />
-          <Property Name="turkcellTv" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="turkcellTv" Type="Int32" />
           <Property Name="netstatu" Type="Int32" />
           <Property Name="description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="tvstatu" Type="Int32" />
@@ -1135,15 +1076,16 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <NavigationProperty Name="updatedpersonel" Relationship="CRMModel.personelcustomer" FromRole="customer" ToRole="personel" />
           <Property Name="iss" Type="Int32" />
           <Property Name="emptorcustomernum" Type="Int32" />
-          <NavigationProperty Name="issStatus" Relationship="CRMModel.issStatuscustomer" FromRole="customer" ToRole="issStatus" />
-          <NavigationProperty Name="netStatus" Relationship="CRMModel.netStatuscustomer" FromRole="customer" ToRole="netStatus" />
-          <NavigationProperty Name="TvKullanımıStatus" Relationship="CRMModel.TvKullanımıStatuscustomer" FromRole="customer" ToRole="TvKullanımıStatus" />
-          <NavigationProperty Name="telStatus" Relationship="CRMModel.telStatuscustomer" FromRole="customer" ToRole="telStatus" />
-          <NavigationProperty Name="gsmKullanımıStatus" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="customer" ToRole="gsmKullanımıStatus" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_customer" FromRole="customer" ToRole="customerproduct" />
           <NavigationProperty Name="customerdocument" Relationship="CRMModel.customerdocumentcustomer" FromRole="customer" ToRole="customerdocument" />
           <NavigationProperty Name="instockmovement" Relationship="CRMModel.customerstockmovement" FromRole="customer" ToRole="stockmovement" />
           <NavigationProperty Name="outstockmovement1" Relationship="CRMModel.customerstockmovement1" FromRole="customer" ToRole="stockmovement" />
+          <NavigationProperty Name="gsmKullanımıStatus" Relationship="CRMModel.customergsmKullanımıStatus" FromRole="customer" ToRole="gsmKullanımıStatus" />
+          <NavigationProperty Name="issStatus" Relationship="CRMModel.customerissStatus" FromRole="customer" ToRole="issStatus" />
+          <NavigationProperty Name="netStatus" Relationship="CRMModel.customernetStatus" FromRole="customer" ToRole="netStatus" />
+          <NavigationProperty Name="telStatus" Relationship="CRMModel.customertelStatus" FromRole="customer" ToRole="telStatus" />
+          <NavigationProperty Name="TvKullanımıStatus" Relationship="CRMModel.customerTvKullanımıStatus" FromRole="customer" ToRole="TvKullanımıStatus" />
+          <NavigationProperty Name="TurkcellTVStatus" Relationship="CRMModel.customerTurkcellTVStatus" FromRole="customer" ToRole="TurkcellTVStatus" />
         </EntityType>
         <EntityType Name="personel">
           <Key>
@@ -1151,15 +1093,15 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           </Key>
           <Property Name="personelid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="personelname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="category" Type="Int64" />
+          <Property Name="category" Type="Int32" />
           <Property Name="mobile" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="email" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="roles" Type="Int64" />
+          <Property Name="roles" Type="Int32" />
           <Property Name="creationdate" Type="DateTime" Precision="7" />
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
-          <Property Name="updatedby" Type="Int64" />
+          <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="attachedtaskqueues" Relationship="CRMModel.personeltaskqueue1" FromRole="personel" ToRole="taskqueue" />
           <NavigationProperty Name="attachedTaskqueuesAsistant" Relationship="CRMModel.asistantPersonel" FromRole="personel" ToRole="taskqueue" />
@@ -1447,163 +1389,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="tasktypes">
-          <Key>
-            <PropertyRef Name="TaskTypeId" />
-          </Key>
-          <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="task" Relationship="CRMModel.tasktypestask" FromRole="tasktypes" ToRole="task" />
-        </EntityType>
-        <Association Name="tasktypestask">
-          <End Type="CRMModel.tasktypes" Role="tasktypes" Multiplicity="1" />
-          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="tasktypes">
-              <PropertyRef Name="TaskTypeId" />
-            </Principal>
-            <Dependent Role="task">
-              <PropertyRef Name="tasktype" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="customerinfo">
-          <Key>
-            <PropertyRef Name="customerid" />
-          </Key>
-          <Property Name="customerid" Type="Int32" Nullable="false" />
-          <Property Name="sitename" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
-          <Property Name="blockname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
-          <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
-          <Property Name="customerinfo1" Type="String" MaxLength="91" FixedLength="false" Unicode="true" />
-          <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
-          <Property Name="phone" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
-          <Property Name="sosaledate" Type="DateTime" Precision="0" />
-          <Property Name="contratfinish" Type="DateTime" Precision="0" />
-          <Property Name="emptorcustomernum" Type="Int32" />
-        </EntityType>
-        <EntityType Name="flatinfo">
-          <Key>
-            <PropertyRef Name="customerid" />
-          </Key>
-          <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="flatinfo1" Type="String" MaxLength="448" FixedLength="false" Unicode="true" />
-          <Property Name="blockid" Type="Int32" />
-          <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
-        </EntityType>
-        <EntityType Name="gsmKullanımıStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="gsmText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-          <NavigationProperty Name="customer" Relationship="CRMModel.gsmKullanımıStatuscustomer" FromRole="gsmKullanımıStatus" ToRole="customer" />
-        </EntityType>
-        <EntityType Name="TurkcellTVStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="TurkcellTvText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-        </EntityType>
-        <EntityType Name="TvKullanımıStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="tvKullanımıText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-          <NavigationProperty Name="customer" Relationship="CRMModel.TvKullanımıStatuscustomer" FromRole="TvKullanımıStatus" ToRole="customer" />
-        </EntityType>
-        <EntityType Name="netStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="netText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-          <NavigationProperty Name="customer" Relationship="CRMModel.netStatuscustomer" FromRole="netStatus" ToRole="customer" />
-        </EntityType>
-        <EntityType Name="telStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="telText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-          <NavigationProperty Name="customer" Relationship="CRMModel.telStatuscustomer" FromRole="telStatus" ToRole="customer" />
-        </EntityType>
-        <EntityType Name="issStatus">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="issText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="deleted" Type="Int32" />
-          <NavigationProperty Name="customer" Relationship="CRMModel.issStatuscustomer" FromRole="issStatus" ToRole="customer" />
-        </EntityType>
-        <Association Name="issStatuscustomer">
-          <End Type="CRMModel.issStatus" Role="issStatus" Multiplicity="0..1" />
-          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="issStatus">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="iss" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="netStatuscustomer">
-          <End Type="CRMModel.netStatus" Role="netStatus" Multiplicity="0..1" />
-          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="netStatus">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="netstatu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="TvKullanımıStatuscustomer">
-          <End Type="CRMModel.TvKullanımıStatus" Role="TvKullanımıStatus" Multiplicity="0..1" />
-          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TvKullanımıStatus">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="tvstatu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="telStatuscustomer">
-          <End Type="CRMModel.telStatus" Role="telStatus" Multiplicity="0..1" />
-          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="telStatus">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="telstatu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="gsmKullanımıStatuscustomer">
-          <End Type="CRMModel.gsmKullanımıStatus" Role="gsmKullanımıStatus" Multiplicity="0..1" />
-          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="gsmKullanımıStatus">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="gsmstatu" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="campaigns">
           <Key>
             <PropertyRef Name="id" />
@@ -1619,7 +1404,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_campaigns" FromRole="campaigns" ToRole="customerproduct" />
-          <NavigationProperty Name="vcampaignproducts" Relationship="CRMModel.campaignsvcampaignproducts" FromRole="campaigns" ToRole="vcampaignproducts" />
         </EntityType>
         <EntityType Name="customerproduct">
           <Key>
@@ -1691,7 +1475,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
-          <NavigationProperty Name="document" Relationship="CRMModel.customerdocumentdocument" FromRole="customerdocument" ToRole="document" />
+          <NavigationProperty Name="fiber_document" Relationship="CRMModel.customerdocumentdocument" FromRole="customerdocument" ToRole="document" />
           <NavigationProperty Name="customer" Relationship="CRMModel.customerdocumentcustomer" FromRole="customerdocument" ToRole="customer" />
         </EntityType>
         <EntityType Name="document">
@@ -1773,34 +1557,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="product_service">
-          <Key>
-            <PropertyRef Name="productid" />
-          </Key>
-          <Property Name="productid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="automandatorytasks" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="maxduration" Type="Int32" />
-          <Property Name="creationdate" Type="DateTime" Precision="7" />
-          <Property Name="lastupdated" Type="DateTime" Precision="7" />
-          <Property Name="updatedby" Type="Int32" />
-          <Property Name="deleted" Type="Boolean" />
-          <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_product_service" FromRole="product_service" ToRole="customerproduct" />
-          <NavigationProperty Name="vcampaignproducts" Relationship="CRMModel.product_servicevcampaignproducts" FromRole="product_service" ToRole="vcampaignproducts" />
-        </EntityType>
-        <Association Name="FK_customerproduct_product_service">
-          <End Type="CRMModel.product_service" Role="product_service" Multiplicity="0..1" />
-          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="product_service">
-              <PropertyRef Name="productid" />
-            </Principal>
-            <Dependent Role="customerproduct">
-              <PropertyRef Name="productid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="stockcard">
           <Key>
             <PropertyRef Name="stockid" />
@@ -1867,42 +1623,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Principal>
             <Dependent Role="taskqueue1">
               <PropertyRef Name="relatedtaskorderid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="vcampaignproducts">
-          <Key>
-            <PropertyRef Name="cid" />
-            <PropertyRef Name="pid" />
-          </Key>
-          <Property Name="cid" Type="Int32" Nullable="false" />
-          <Property Name="pid" Type="Int32" Nullable="false" />
-          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="campaigns" Relationship="CRMModel.campaignsvcampaignproducts" FromRole="vcampaignproducts" ToRole="campaigns" />
-          <NavigationProperty Name="product_service" Relationship="CRMModel.product_servicevcampaignproducts" FromRole="vcampaignproducts" ToRole="product_service" />
-          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-        </EntityType>
-        <Association Name="campaignsvcampaignproducts">
-          <End Type="CRMModel.campaigns" Role="campaigns" Multiplicity="1" />
-          <End Type="CRMModel.vcampaignproducts" Role="vcampaignproducts" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="campaigns">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="vcampaignproducts">
-              <PropertyRef Name="cid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="product_servicevcampaignproducts">
-          <End Type="CRMModel.product_service" Role="product_service" Multiplicity="1" />
-          <End Type="CRMModel.vcampaignproducts" Role="vcampaignproducts" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="product_service">
-              <PropertyRef Name="productid" />
-            </Principal>
-            <Dependent Role="vcampaignproducts">
-              <PropertyRef Name="pid" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2065,7 +1785,213 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <ComplexType Name="getPersonelStock_Result">
+        <EntityType Name="tasktypes">
+          <Key>
+            <PropertyRef Name="TaskTypeId" />
+          </Key>
+          <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="task" Relationship="CRMModel.tasktasktypes" FromRole="tasktypes" ToRole="task" />
+        </EntityType>
+        <Association Name="tasktasktypes">
+          <End Type="CRMModel.task" Role="task" Multiplicity="*" />
+          <End Type="CRMModel.tasktypes" Role="tasktypes" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="task">
+              <PropertyRef Name="tasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="gsmKullanımıStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="gsmText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customergsmKullanımıStatus" FromRole="gsmKullanımıStatus" ToRole="customer" />
+        </EntityType>
+        <EntityType Name="issStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="issText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customerissStatus" FromRole="issStatus" ToRole="customer" />
+        </EntityType>
+        <EntityType Name="netStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="netText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customernetStatus" FromRole="netStatus" ToRole="customer" />
+        </EntityType>
+        <EntityType Name="telStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="telText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customertelStatus" FromRole="telStatus" ToRole="customer" />
+        </EntityType>
+        <EntityType Name="TvKullanımıStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="tvKullanımıText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customerTvKullanımıStatus" FromRole="TvKullanımıStatus" ToRole="customer" />
+        </EntityType>
+        <Association Name="customergsmKullanımıStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.gsmKullanımıStatus" Role="gsmKullanımıStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="gsmKullanımıStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="gsmstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerissStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.issStatus" Role="issStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="issStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="iss" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customernetStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.netStatus" Role="netStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="netStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="netstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customertelStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.telStatus" Role="telStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="telStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="telstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="customerTvKullanımıStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.TvKullanımıStatus" Role="TvKullanımıStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="TvKullanımıStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="tvstatu" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="customerinfo">
+          <Key>
+            <PropertyRef Name="customerid" />
+          </Key>
+          <Property Name="customerid" Type="Int32" Nullable="false" />
+          <Property Name="sitename" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="blockname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="customerinfo1" Type="String" MaxLength="91" FixedLength="false" Unicode="true" />
+          <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="phone" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="sosaledate" Type="DateTime" Precision="0" />
+          <Property Name="contratfinish" Type="DateTime" Precision="0" />
+          <Property Name="emptorcustomernum" Type="Int32" />
+        </EntityType>
+        <EntityType Name="product_service">
+          <Key>
+            <PropertyRef Name="productid" />
+          </Key>
+          <Property Name="productid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="automandatorytasks" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="maxduration" Type="Int32" />
+          <Property Name="creationdate" Type="DateTime" Precision="7" />
+          <Property Name="lastupdated" Type="DateTime" Precision="7" />
+          <Property Name="updatedby" Type="Int32" />
+          <Property Name="deleted" Type="Boolean" />
+          <Property Name="documents" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="customerproduct" Relationship="CRMModel.FK_customerproduct_product_service" FromRole="product_service" ToRole="customerproduct" />
+        </EntityType>
+        <Association Name="FK_customerproduct_product_service">
+          <End Type="CRMModel.product_service" Role="product_service" Multiplicity="0..1" />
+          <End Type="CRMModel.customerproduct" Role="customerproduct" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="product_service">
+              <PropertyRef Name="productid" />
+            </Principal>
+            <Dependent Role="customerproduct">
+              <PropertyRef Name="productid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TurkcellTVStatus">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="TurkcellTvText" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="deleted" Type="Int32" />
+          <NavigationProperty Name="customer" Relationship="CRMModel.customerTurkcellTVStatus" FromRole="TurkcellTVStatus" ToRole="customer" />
+        </EntityType>
+        <Association Name="customerTurkcellTVStatus">
+          <End Type="CRMModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="CRMModel.TurkcellTVStatus" Role="TurkcellTVStatus" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="TurkcellTVStatus">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="turkcellTv" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="Int32" Nullable="false" />
+          <Property Name="pid" Type="Int32" Nullable="false" />
+          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="v_taskorderIsEditableCRM">
+          <Key>
+            <PropertyRef Name="taskorderno" />
+          </Key>
+          <Property Name="taskorderno" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="editable" Type="Int32" />
+        </EntityType>
+        <ComplexType Name="getPersonelStockFiber_Result">
           <Property Type="Int32" Name="stockid" Nullable="false" />
           <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
           <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
@@ -2237,98 +2163,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="sf_taskqueue" FunctionName="CRMModel.Store.sf_taskqueue">
-          </FunctionImportMapping>
-          <FunctionImportMapping FunctionImportName="sf_task" FunctionName="CRMModel.Store.sf_task">
-          </FunctionImportMapping>
-          <EntitySetMapping Name="tasktypes">
-            <EntityTypeMapping TypeName="CRMModel.tasktypes">
-              <MappingFragment StoreEntitySet="tasktypes">
-                <ScalarProperty Name="TaskTypeName" ColumnName="TaskTypeName" />
-                <ScalarProperty Name="TaskTypeId" ColumnName="TaskTypeId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="customerinfo">
-            <EntityTypeMapping TypeName="CRMModel.customerinfo">
-              <MappingFragment StoreEntitySet="customerinfo">
-                <ScalarProperty Name="emptorcustomernum" ColumnName="emptorcustomernum" />
-                <ScalarProperty Name="contratfinish" ColumnName="contratfinish" />
-                <ScalarProperty Name="sosaledate" ColumnName="sosaledate" />
-                <ScalarProperty Name="phone" ColumnName="phone" />
-                <ScalarProperty Name="gsm" ColumnName="gsm" />
-                <ScalarProperty Name="customerinfo1" ColumnName="customerinfo" />
-                <ScalarProperty Name="flat" ColumnName="flat" />
-                <ScalarProperty Name="blockname" ColumnName="blockname" />
-                <ScalarProperty Name="sitename" ColumnName="sitename" />
-                <ScalarProperty Name="customerid" ColumnName="customerid" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="flatinfo">
-            <EntityTypeMapping TypeName="CRMModel.flatinfo">
-              <MappingFragment StoreEntitySet="flatinfo">
-                <ScalarProperty Name="flat" ColumnName="flat" />
-                <ScalarProperty Name="blockid" ColumnName="blockid" />
-                <ScalarProperty Name="flatinfo1" ColumnName="flatinfo" />
-                <ScalarProperty Name="customerid" ColumnName="customerid" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="gsmKullanımıStatus">
-            <EntityTypeMapping TypeName="CRMModel.gsmKullanımıStatus">
-              <MappingFragment StoreEntitySet="gsmKullanımıStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="gsmText" ColumnName="gsmText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TurkcellTVStatus">
-            <EntityTypeMapping TypeName="CRMModel.TurkcellTVStatus">
-              <MappingFragment StoreEntitySet="TurkcellTVStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="TurkcellTvText" ColumnName="TurkcellTvText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TvKullanımıStatus">
-            <EntityTypeMapping TypeName="CRMModel.TvKullanımıStatus">
-              <MappingFragment StoreEntitySet="TvKullanımıStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="tvKullanımıText" ColumnName="tvKullanımıText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="netStatus">
-            <EntityTypeMapping TypeName="CRMModel.netStatus">
-              <MappingFragment StoreEntitySet="netStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="netText" ColumnName="netText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="telStatus">
-            <EntityTypeMapping TypeName="CRMModel.telStatus">
-              <MappingFragment StoreEntitySet="telStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="telText" ColumnName="telText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="issStatus">
-            <EntityTypeMapping TypeName="CRMModel.issStatus">
-              <MappingFragment StoreEntitySet="issStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="issText" ColumnName="issText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="campaigns">
             <EntityTypeMapping TypeName="CRMModel.campaigns">
               <MappingFragment StoreEntitySet="campaigns">
@@ -2408,21 +2242,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="product_service">
-            <EntityTypeMapping TypeName="CRMModel.product_service">
-              <MappingFragment StoreEntitySet="product_service">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
-                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
-                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
-                <ScalarProperty Name="maxduration" ColumnName="maxduration" />
-                <ScalarProperty Name="automandatorytasks" ColumnName="automandatorytasks" />
-                <ScalarProperty Name="category" ColumnName="category" />
-                <ScalarProperty Name="productname" ColumnName="productname" />
-                <ScalarProperty Name="productid" ColumnName="productid" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="stockcard">
             <EntityTypeMapping TypeName="CRMModel.stockcard">
               <MappingFragment StoreEntitySet="stockcard">
@@ -2460,16 +2279,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="vcampaignproducts">
-            <EntityTypeMapping TypeName="CRMModel.vcampaignproducts">
-              <MappingFragment StoreEntitySet="vcampaignproducts">
-                <ScalarProperty Name="productname" ColumnName="productname" />
-                <ScalarProperty Name="cname" ColumnName="cname" />
-                <ScalarProperty Name="pid" ColumnName="pid" />
-                <ScalarProperty Name="cid" ColumnName="cid" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="objecttypes">
             <EntityTypeMapping TypeName="CRMModel.objecttypes">
               <MappingFragment StoreEntitySet="objecttypes">
@@ -2490,10 +2299,122 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="getSerialsOnPersonel" FunctionName="CRMModel.Store.getSerialsOnPersonel" />
-          <FunctionImportMapping FunctionImportName="getPersonelStock" FunctionName="CRMModel.Store.getPersonelStock">
+          <EntitySetMapping Name="tasktypes">
+            <EntityTypeMapping TypeName="CRMModel.tasktypes">
+              <MappingFragment StoreEntitySet="tasktypes">
+                <ScalarProperty Name="TaskTypeName" ColumnName="TaskTypeName" />
+                <ScalarProperty Name="TaskTypeId" ColumnName="TaskTypeId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="gsmKullanımıStatus">
+            <EntityTypeMapping TypeName="CRMModel.gsmKullanımıStatus">
+              <MappingFragment StoreEntitySet="gsmKullanımıStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="gsmText" ColumnName="gsmText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="issStatus">
+            <EntityTypeMapping TypeName="CRMModel.issStatus">
+              <MappingFragment StoreEntitySet="issStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="issText" ColumnName="issText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="netStatus">
+            <EntityTypeMapping TypeName="CRMModel.netStatus">
+              <MappingFragment StoreEntitySet="netStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="netText" ColumnName="netText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="telStatus">
+            <EntityTypeMapping TypeName="CRMModel.telStatus">
+              <MappingFragment StoreEntitySet="telStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="telText" ColumnName="telText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TvKullanımıStatus">
+            <EntityTypeMapping TypeName="CRMModel.TvKullanımıStatus">
+              <MappingFragment StoreEntitySet="TvKullanımıStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="tvKullanımıText" ColumnName="tvKullanımıText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customerinfo">
+            <EntityTypeMapping TypeName="CRMModel.customerinfo">
+              <MappingFragment StoreEntitySet="customerinfo">
+                <ScalarProperty Name="emptorcustomernum" ColumnName="emptorcustomernum" />
+                <ScalarProperty Name="contratfinish" ColumnName="contratfinish" />
+                <ScalarProperty Name="sosaledate" ColumnName="sosaledate" />
+                <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="gsm" ColumnName="gsm" />
+                <ScalarProperty Name="customerinfo1" ColumnName="customerinfo" />
+                <ScalarProperty Name="flat" ColumnName="flat" />
+                <ScalarProperty Name="blockname" ColumnName="blockname" />
+                <ScalarProperty Name="sitename" ColumnName="sitename" />
+                <ScalarProperty Name="customerid" ColumnName="customerid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="product_service">
+            <EntityTypeMapping TypeName="CRMModel.product_service">
+              <MappingFragment StoreEntitySet="product_service">
+                <ScalarProperty Name="documents" ColumnName="documents" />
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="updatedby" ColumnName="updatedby" />
+                <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />
+                <ScalarProperty Name="creationdate" ColumnName="creationdate" />
+                <ScalarProperty Name="maxduration" ColumnName="maxduration" />
+                <ScalarProperty Name="automandatorytasks" ColumnName="automandatorytasks" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="productid" ColumnName="productid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TurkcellTVStatus">
+            <EntityTypeMapping TypeName="CRMModel.TurkcellTVStatus">
+              <MappingFragment StoreEntitySet="TurkcellTVStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="TurkcellTvText" ColumnName="TurkcellTvText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vcampaignproducts">
+            <EntityTypeMapping TypeName="CRMModel.vcampaignproducts">
+              <MappingFragment StoreEntitySet="vcampaignproducts">
+                <ScalarProperty Name="productname" ColumnName="productname" />
+                <ScalarProperty Name="cname" ColumnName="cname" />
+                <ScalarProperty Name="pid" ColumnName="pid" />
+                <ScalarProperty Name="cid" ColumnName="cid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="v_taskorderIsEditableCRM">
+            <EntityTypeMapping TypeName="CRMModel.v_taskorderIsEditableCRM">
+              <MappingFragment StoreEntitySet="v_taskorderIsEditableCRM">
+                <ScalarProperty Name="editable" ColumnName="editable" />
+                <ScalarProperty Name="taskorderno" ColumnName="taskorderno" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="getSerialsOnPersonelFiber" FunctionName="CRMModel.Store.getSerialsOnPersonelFiber" />
+          <FunctionImportMapping FunctionImportName="getPersonelStockFiber" FunctionName="CRMModel.Store.getPersonelStockFiber">
             <ResultMapping>
-              <ComplexTypeMapping TypeName="CRMModel.getPersonelStock_Result">
+              <ComplexTypeMapping TypeName="CRMModel.getPersonelStockFiber_Result">
                 <ScalarProperty Name="stockid" ColumnName="stockid" />
                 <ScalarProperty Name="productname" ColumnName="productname" />
                 <ScalarProperty Name="category" ColumnName="category" />
@@ -2508,7 +2429,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-        </EntityContainerMapping>
+          </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>

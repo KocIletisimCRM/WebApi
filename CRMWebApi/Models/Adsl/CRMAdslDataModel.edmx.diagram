@@ -4,10 +4,10 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="37e79bbdcd75434a8727a2d0fc820b8c" Name="Diagram1" ZoomLevel="188">
+      <Diagram DiagramId="37e79bbdcd75434a8727a2d0fc820b8c" Name="Diagram1" ZoomLevel="79">
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_campaigns" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customer_status" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerdocument" Width="1.5" PointX="4.75" PointY="3.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerdocument" Width="2" PointX="4.75" PointY="3.375" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerproduct" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.daire" Width="1.5" PointX="18.375" PointY="7.375" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_document" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />

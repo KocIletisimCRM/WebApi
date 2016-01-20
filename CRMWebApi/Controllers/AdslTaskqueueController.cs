@@ -34,10 +34,10 @@ namespace CRMWebApi.Controllers
                 // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
 
-                if ((user.userRole & (int)KOCUserTypes.Admin) != (int)KOCUserTypes.Admin)
+                if ((user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin)
                     filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { op = 9, value = $"(attachablepersoneltype = (attachablepersoneltype & {user.userRole}))" });
 
-                if ((user.userRole & (int)KOCUserTypes.TeamLeader) != (int)KOCUserTypes.TeamLeader)
+                if ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader)
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 2, value = user.userId });
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
@@ -290,7 +290,7 @@ namespace CRMWebApi.Controllers
                         #region ürünler kaydediliyor
                         foreach (var p in customerproducts)
                         {
-                            db.customerproduct.Add(new adsl_customerproduct
+                                db.customerproduct.Add(new adsl_customerproduct
                             {
                                 campaignid = p.campaignid,
                                 creationdate = DateTime.Now,
@@ -409,7 +409,7 @@ namespace CRMWebApi.Controllers
                         {
                             foreach (var p in customerproducts)
                             {
-                                db.customerproduct.Add( new adsl_customerproduct
+                                    db.customerproduct.Add( new adsl_customerproduct
                                 {
                                     campaignid = p.campaignid,
                                     creationdate = DateTime.Now,
@@ -583,7 +583,7 @@ namespace CRMWebApi.Controllers
                 var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
                 var il = request.Form["il"].ToString();
                 var ilce = request.Form["ilce"].ToString();
-                string subPath = "E:\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
+                string subPath = "A:\\Ediski\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
                 System.IO.Directory.CreateDirectory(subPath);
                 //var filePath = subPath + ((request.Files["file_data"])).FileName;
                 for (int i = 0; i < request.Files.Count; i++)

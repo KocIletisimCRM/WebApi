@@ -39,7 +39,7 @@ namespace CRMWebApi.DTOs.Fiber
         public fieldFilter(string name, object value, filterOperators op)
         {
             fieldName = name;
-            if (name != null && name.Contains("date"))
+            if (name != null && name.Contains("date") && op != filterOperators.foIsNull)
             {
                 filterValue = value.ToString().Split('-')[0];
                 filterValue2 = value.ToString().Split('-')[1];

@@ -18,8 +18,5 @@ namespace CRMWebApi.Models.Fiber
         public int pid { get; set; }
         public string cname { get; set; }
         public string productname { get; set; }
-    
-        public virtual campaigns campaigns { get; set; }
-        public virtual product_service product_service { get; set; }
     }
 }

@@ -48,6 +48,7 @@ namespace CRMWebApi.Models.Fiber
 
     public partial class taskqueue:EntityBase
     {
+        public virtual bool editable { get; set; }
         public virtual List<stockcard> stockcardlist { get; set; }
         public override object toDTO()
         {
@@ -198,6 +199,7 @@ namespace CRMWebApi.Models.Fiber
     }
     public partial class stockmovement : EntityBase
     {
+        public virtual getPersonelStockFiber_Result stockStatus { get; set; }
         public override object toDTO()
         {
             return toDTO<DTOstockmovement>();
@@ -238,6 +240,28 @@ namespace CRMWebApi.Models.Fiber
         public override object toDTO()
         {
             return toDTO<DTOdocument>();
+        }
+    }
+    public partial class fiber_document : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOdocument>();
+        }
+    }
+    public partial class customerdocument : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOcustomerdocument>();
+        }
+    }
+    public partial class getPersonelStockFiber_Result : EntityBase
+    {
+        public virtual List<string> serials { get; set; }
+        public override object toDTO()
+        {
+            return toDTO<DTOgetPersonelStockFiber_Result>();
         }
     }
 }

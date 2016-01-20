@@ -104,17 +104,17 @@ namespace CRMWebApi.Controllers
              }
          }
 
-         [Route("getTurkcellTv")]
-         [HttpGet]
-         public HttpResponseMessage getTurkcellTv()
-         {
-             using (var db = new CRMEntities())
-             {
-                 var res = db.TurkcellTVStatus.Where(g => g.deleted == 0);
-                 return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
-             }
+         //[Route("getTurkcellTv")]
+         //[HttpGet]
+         //public HttpResponseMessage getTurkcellTv()
+         //{
+         //    using (var db = new CRMEntities())
+         //    {
+         //        var res = db.TurkcellTVStatus.Where(g => g.deleted == 0);
+         //        return Request.CreateResponse(HttpStatusCode.OK, res.ToList(), "application/json");
+         //    }
 
-         }
+         //}
          [Route("getGsmStatus")]
          [HttpGet]
          public HttpResponseMessage getGsmStatus()

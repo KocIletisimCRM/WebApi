@@ -14,8 +14,15 @@ namespace CRMWebApi.Models.Fiber
     
     public partial class TurkcellTVStatus
     {
+        public TurkcellTVStatus()
+        {
+            this.customer = new HashSet<customer>();
+        }
+    
         public int id { get; set; }
         public string TurkcellTvText { get; set; }
         public Nullable<int> deleted { get; set; }
+    
+        public virtual ICollection<customer> customer { get; set; }
     }
 }

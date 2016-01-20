@@ -10,6 +10,7 @@ using CRMWebApi.DTOs.Fiber;
 using CRMWebApi.DTOs.Fiber.DTORequestClasses;
 using System.Diagnostics;
 using CRMWebApi.Models.Fiber;
+using CRMWebApi.KOCAuthorization;
 
 namespace CRMWebApi.Controllers
 {
@@ -20,7 +21,8 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage savePE(DTOSavePenetrasyon request)
         {
-                using (var db = new CRMEntities())
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new CRMEntities())
                 {
                     var taskqueue = new taskqueue
                     {
@@ -32,7 +34,7 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         status = null,
                         taskid = 8164,
-                        updatedby = 7
+                        updatedby = user.userId
                     };
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
@@ -45,6 +47,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage savetask(DTOSaveGlobalTask request)
         {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
             {
                 var taskqueue = new taskqueue
@@ -55,9 +58,10 @@ namespace CRMWebApi.Controllers
                     attachmentdate = request.attachedpersonelid != null ? DateTime.Now : (DateTime?)null,
                     attachedpersonelid = request.attachedpersonelid,
                     description = request.description,
+                    lastupdated=DateTime.Now,
                     deleted = false,
                     fault = request.fault,
-                    updatedby = 7
+                    updatedby = user.userId
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();

@@ -19,5 +19,9 @@ namespace CRMWebApi.KOCAuthorization
         {
             return (userRole & (int)role) == (int)role;
         }
+        public bool hasRoleFiber(FiberKocUserTypes role)
+        {
+            return (userRole & (int)role) == (int)role;
+        }
     }
 }

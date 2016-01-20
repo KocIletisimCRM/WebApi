@@ -108,7 +108,7 @@ namespace CRMWebApi.KOCAuthorization
                             #endregion
                         }
                 }
-                else
+                else if(userType.Trim().ToUpper() == "FIBER")
                 {
                     using (var db = new CRMEntities())
                     {
@@ -121,7 +121,7 @@ namespace CRMWebApi.KOCAuthorization
                                 userId = user.personelid,
                                 userName = user.email,
                                 userFullName = user.personelname,
-                                //userRole = user.roles
+                                userRole = (int)user.roles,
                                 lastActivityTime = DateTime.Now,
                                 creationTime = DateTime.Now
                             };

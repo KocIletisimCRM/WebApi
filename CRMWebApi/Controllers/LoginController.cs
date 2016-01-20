@@ -13,7 +13,6 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage login(DTOpersonel request)
         {
-            var userID = 12;
             using (var db = new CRMEntities())
             {
                

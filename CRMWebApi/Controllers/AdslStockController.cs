@@ -197,7 +197,7 @@ namespace CRMWebApi.Controllers
                                 sm.relatedtaskqueue = tqid;
                                 if ((KOCAuthorizeAttribute.getCurrentUser().userRole & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)// (long)KocCRMRoles.kscrStockStaff
                                 {
-                                    if ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)
+                                    if ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)// ise bu bir satınalma işlemidir.
                                     {
 
                                         sm.fromobjecttype = (int)KOCUserTypes.ADSLProcurementAssosiation;

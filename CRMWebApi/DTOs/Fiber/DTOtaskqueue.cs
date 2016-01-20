@@ -16,6 +16,7 @@ namespace CRMWebApi.DTOs.Fiber
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<bool> deleted { get; set; }
         public string fault { get; set; }
+        public bool editable { get; set; }
         public DTOtask task { get; set; }
         public DTOpersonel asistanPersonel { get; set; }
         public DTOpersonel Updatedpersonel { get; set; }
@@ -26,5 +27,6 @@ namespace CRMWebApi.DTOs.Fiber
         public List<object> customerproduct { get; set; }
         public List<object> stockmovement { get; set; }
         public List<object> stockcardlist { get; set; }
+        public List<object> customerdocument { get; set; }
     }
 }

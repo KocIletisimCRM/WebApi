@@ -36,26 +36,26 @@ namespace CRMWebApi.Models.Fiber
         public virtual DbSet<customer> customer { get; set; }
         public virtual DbSet<personel> personel { get; set; }
         public virtual DbSet<customer_status> customer_status { get; set; }
-        public virtual DbSet<tasktypes> tasktypes { get; set; }
-        public virtual DbSet<customerinfo> customerinfo { get; set; }
-        public virtual DbSet<flatinfo> flatinfo { get; set; }
-        public virtual DbSet<gsmKullanımıStatus> gsmKullanımıStatus { get; set; }
-        public virtual DbSet<TurkcellTVStatus> TurkcellTVStatus { get; set; }
-        public virtual DbSet<TvKullanımıStatus> TvKullanımıStatus { get; set; }
-        public virtual DbSet<netStatus> netStatus { get; set; }
-        public virtual DbSet<telStatus> telStatus { get; set; }
-        public virtual DbSet<issStatus> issStatus { get; set; }
         public virtual DbSet<campaigns> campaigns { get; set; }
         public virtual DbSet<customerproduct> customerproduct { get; set; }
         public virtual DbSet<customerdocument> customerdocument { get; set; }
         public virtual DbSet<document> document { get; set; }
         public virtual DbSet<taskstatematches> taskstatematches { get; set; }
-        public virtual DbSet<product_service> product_service { get; set; }
         public virtual DbSet<stockcard> stockcard { get; set; }
         public virtual DbSet<stockmovement> stockmovement { get; set; }
-        public virtual DbSet<vcampaignproducts> vcampaignproducts { get; set; }
         public virtual DbSet<objecttypes> objecttypes { get; set; }
         public virtual DbSet<stockstatus> stockstatus { get; set; }
+        public virtual DbSet<tasktypes> tasktypes { get; set; }
+        public virtual DbSet<gsmKullanımıStatus> gsmKullanımıStatus { get; set; }
+        public virtual DbSet<issStatus> issStatus { get; set; }
+        public virtual DbSet<netStatus> netStatus { get; set; }
+        public virtual DbSet<telStatus> telStatus { get; set; }
+        public virtual DbSet<TvKullanımıStatus> TvKullanımıStatus { get; set; }
+        public virtual DbSet<customerinfo> customerinfo { get; set; }
+        public virtual DbSet<product_service> product_service { get; set; }
+        public virtual DbSet<TurkcellTVStatus> TurkcellTVStatus { get; set; }
+        public virtual DbSet<vcampaignproducts> vcampaignproducts { get; set; }
+        public virtual DbSet<v_taskorderIsEditableCRM> v_taskorderIsEditableCRM { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)
@@ -117,8 +117,8 @@ namespace CRMWebApi.Models.Fiber
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<task>("[CRMEntities].[sf_task](@pageNo, @rowsPerPage, @taskFilter)", pageNoParameter, rowsPerPageParameter, taskFilterParameter);
         }
     
-        [DbFunction("CRMEntities", "getSerialsOnPersonel")]
-        public virtual IQueryable<string> getSerialsOnPersonel(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
+        [DbFunction("CRMEntities", "getSerialsOnPersonelFiber")]
+        public virtual IQueryable<string> getSerialsOnPersonelFiber(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
         {
             var pERSONELIDParameter = pERSONELID.HasValue ?
                 new ObjectParameter("PERSONELID", pERSONELID) :
@@ -128,17 +128,17 @@ namespace CRMWebApi.Models.Fiber
                 new ObjectParameter("STOCKCARDID", sTOCKCARDID) :
                 new ObjectParameter("STOCKCARDID", typeof(int));
     
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[CRMEntities].[getSerialsOnPersonel](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[CRMEntities].[getSerialsOnPersonelFiber](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
         }
     
-        [DbFunction("CRMEntities", "getPersonelStock")]
-        public virtual IQueryable<getPersonelStock_Result> getPersonelStock(Nullable<int> pERSONELID)
+        [DbFunction("CRMEntities", "getPersonelStockFiber")]
+        public virtual IQueryable<getPersonelStockFiber_Result> getPersonelStockFiber(Nullable<int> pERSONELID)
         {
             var pERSONELIDParameter = pERSONELID.HasValue ?
                 new ObjectParameter("PERSONELID", pERSONELID) :
                 new ObjectParameter("PERSONELID", typeof(int));
     
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getPersonelStock_Result>("[CRMEntities].[getPersonelStock](@PERSONELID)", pERSONELIDParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getPersonelStockFiber_Result>("[CRMEntities].[getPersonelStockFiber](@PERSONELID)", pERSONELIDParameter);
         }
     }
 }

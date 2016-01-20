@@ -25,5 +25,7 @@ namespace CRMWebApi.DTOs.Fiber
         public DTOpersonel topersonel { get; set; }
         public DTOcustomer tocustomer { get; set; }
         public DTOcustomer fromcustomer { get; set; }
+        public DTOgetPersonelStockFiber_Result stockStatus { get; set; }
+
     }
 }
