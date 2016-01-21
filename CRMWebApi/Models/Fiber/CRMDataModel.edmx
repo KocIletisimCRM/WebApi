@@ -415,42 +415,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_customerproduct_campaigns">
-          <End Role="campaigns" Type="Self.campaigns" Multiplicity="0..1" />
-          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="campaigns">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="customerproduct">
-              <PropertyRef Name="campaignid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_customerproduct_customer">
-          <End Role="customer" Type="Self.customer" Multiplicity="0..1" />
-          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="customer">
-              <PropertyRef Name="customerid" />
-            </Principal>
-            <Dependent Role="customerproduct">
-              <PropertyRef Name="customerid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_customerproduct_product_service">
-          <End Role="product_service" Type="Self.product_service" Multiplicity="0..1" />
-          <End Role="customerproduct" Type="Self.customerproduct" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="product_service">
-              <PropertyRef Name="productid" />
-            </Principal>
-            <Dependent Role="customerproduct">
-              <PropertyRef Name="productid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_stockmovement_stockcard">
           <End Role="stockcard" Type="Self.stockcard" Multiplicity="0..1" />
           <End Role="stockmovement" Type="Self.stockmovement" Multiplicity="*" />
@@ -603,18 +567,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <AssociationSet Name="FK_customer_block" Association="Self.FK_customer_block">
             <End Role="block" EntitySet="block" />
             <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="FK_customerproduct_campaigns" Association="Self.FK_customerproduct_campaigns">
-            <End Role="campaigns" EntitySet="campaigns" />
-            <End Role="customerproduct" EntitySet="customerproduct" />
-          </AssociationSet>
-          <AssociationSet Name="FK_customerproduct_customer" Association="Self.FK_customerproduct_customer">
-            <End Role="customer" EntitySet="customer" />
-            <End Role="customerproduct" EntitySet="customerproduct" />
-          </AssociationSet>
-          <AssociationSet Name="FK_customerproduct_product_service" Association="Self.FK_customerproduct_product_service">
-            <End Role="product_service" EntitySet="product_service" />
-            <End Role="customerproduct" EntitySet="customerproduct" />
           </AssociationSet>
           <AssociationSet Name="FK_stockmovement_stockcard" Association="Self.FK_stockmovement_stockcard">
             <End Role="stockcard" EntitySet="stockcard" />
@@ -891,7 +843,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           </AssociationSet>
           <EntitySet Name="v_taskorderIsEditableCRM1Set" EntityType="CRMModel.v_taskorderIsEditableCRM1" />
           <FunctionImport Name="getPersonelStockFiber" IsComposable="true" ReturnType="Collection(CRMModel.getPersonelStockFiber_Result1)">
-            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+          <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="getSerialsOnPersonelFiber" IsComposable="true" ReturnType="Collection(String)">
             <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
