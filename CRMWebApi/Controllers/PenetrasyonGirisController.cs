@@ -221,6 +221,8 @@ namespace CRMWebApi.Controllers
                  {
                      var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
                      res.status = 1079;
+                    res.consummationdate = DateTime.Now;
+                    res.lastupdated = DateTime.Now;
                  }
                 
                  db.SaveChanges();
