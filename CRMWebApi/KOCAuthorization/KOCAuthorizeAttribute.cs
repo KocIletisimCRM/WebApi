@@ -112,7 +112,7 @@ namespace CRMWebApi.KOCAuthorization
                 {
                     using (var db = new CRMEntities())
                     {
-                        var user = db.personel.Where(p => p.email == UserName && p.password == Password).FirstOrDefault();
+                        var user = db.personel.Where(p => p.deleted==false &&p.email == UserName && p.password == Password).FirstOrDefault();
                         if (user != null)
                         {
                             token = createToken();

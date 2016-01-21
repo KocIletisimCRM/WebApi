@@ -1,37 +1,39 @@
-﻿using CRMWebApi.DTOs.Adsl;
-using CRMWebApi.DTOs.Adsl.DTORequestClasses;
-using CRMWebApi.KOCAuthorization;
-using CRMWebApi.Models.Adsl;
+﻿using CRMWebApi.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Data.Entity;
-using Newtonsoft.Json;
+using CRMWebApi.DTOs.Fiber;
+using CRMWebApi.DTOs.Fiber.DTORequestClasses;
+using System.Diagnostics;
+using CRMWebApi.Models.Fiber;
+using CRMWebApi.KOCAuthorization;
 using System.Web;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net.Mail;
 
 namespace CRMWebApi.Controllers
 {
-    [RoutePrefix("api/Adsl/TaskQueues")]
 
-    [KOCAuthorize]
-    public class AdslTaskqueueController : ApiController
+    [RoutePrefix("api/Fiber/Taskqueue")]
+    public class FiberTaskqueueController : ApiController
     {
         [Route("getTaskQueues")]
         [HttpPost]
         public HttpResponseMessage getTaskQueues(DTOGetTaskQueueRequest request)
         {
-            using (var db = new KOCSAMADLSEntities(false))
+            using (var db = new CRMEntities())
             {
+                db.Configuration.AutoDetectChangesEnabled = false;
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
                 var filter = request.getFilter();
                 filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+
                 var user = KOCAuthorizeAttribute.getCurrentUser();
-                // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
 
                 if ((user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin)
@@ -40,8 +42,25 @@ namespace CRMWebApi.Controllers
                 if ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader)
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 2, value = user.userId });
 
+
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
+
+                #region scb filter düzeltmesi
+                if (request.hasCSBFilter())
+                {
+                    var sqlPart = "(EXISTS (SELECT * from _attachedobjectid WHERE _attachedobjectid.customerid = taskqueue.attachedobjectid))";
+                    querySQL = querySQL.Replace(sqlPart, "@");
+                    List<string> sbcExistsClauses = new List<string>(new string[] { sqlPart });
+                    if (!request.isCustomerFilter())
+                    {
+                        sbcExistsClauses.Add("(EXISTS (SELECT * from _blockid WHERE _blockid.blockid = taskqueue.attachedobjectid))");
+                        if (!request.isBlockFilter()) sbcExistsClauses.Add("(EXISTS (SELECT * from _siteid WHERE _siteid.siteid = taskqueue.attachedobjectid))");
+                    }
+                    querySQL = querySQL.Replace("@", string.Format("({0})", string.Join(" OR ", sbcExistsClauses)));
+                    countSQL = countSQL.Replace(sbcExistsClauses[0], string.Format("({0})", string.Join(" OR ", sbcExistsClauses)));
+                }
+                #endregion
 
                 var perf = Stopwatch.StartNew();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
@@ -52,90 +71,76 @@ namespace CRMWebApi.Controllers
                 perf.Restart();
                 var taskIds = res.Select(r => r.taskid).Distinct().ToList();
                 var tasks = db.task.Where(t => taskIds.Contains(t.taskid)).ToList();
-
                 var tasktypeıds = res.Select(r => r.task.tasktype).Distinct().ToList();
                 var tasktypes = db.tasktypes.Where(tt => tasktypeıds.Contains(tt.TaskTypeId)).ToList();
-
                 var personelIds = res.Select(r => r.attachedpersonelid)
                     .Union(res.Select(r => r.assistant_personel))
                     .Union(res.Select(r => r.updatedby)).Distinct().ToList();
 
-                var personels = db.personel.Where(p => personelIds.Contains(p.personelid)).ToList();
+                List<personel> personels;// personelin stok durumuna ihtiyaç yoksa sorgulanmasın
+                if (request.taskOrderNo != null) personels = db.personel.Include(p => p.stockstatus).Where(p => personelIds.Contains(p.personelid)).ToList();
+                else personels = db.personel.Where(p => personelIds.Contains(p.personelid)).ToList();
 
                 var customerIds = res.Select(c => c.attachedobjectid).Distinct().ToList();
-                var customers = db.customer.Where(c => customerIds.Contains(c.customerid)).ToList();
+                var customers = db.customer.Include(c => c.block.site).Where(c => customerIds.Contains(c.customerid)).ToList();
 
-                var ilIds = res.Select(s => s.attachedcustomer.ilKimlikNo).Distinct().ToList();
-                var iller = db.il.Where(i => ilIds.Contains(i.kimlikNo)).ToList();
-
-                var ilceIds = res.Select(s => s.attachedcustomer.ilceKimlikNo).Distinct().ToList();
-                var ilceler = db.ilce.Where(i => ilceIds.Contains(i.kimlikNo)).ToList();
+                var blockIds = res.Select(b => b.attachedobjectid).Distinct().ToList();
+                var blocks = db.block.Include(b => b.site).Where(b => blockIds.Contains(b.blockid)).ToList();
 
                 var taskstateIds = res.Select(tsp => tsp.status).Distinct().ToList();
                 var taskstates = db.taskstatepool.Where(tsp => taskstateIds.Contains(tsp.taskstateid)).ToList();
 
+                var issIds = res.Where(i => i.attachedcustomer != null && i.attachedcustomer.iss != null).Select(i => i.attachedcustomer.iss).Distinct().ToList();
+                var isss = db.issStatus.Where(i => issIds.Contains(i.id)).ToList();
+
+                var cststatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.customerstatus != null).Select(c => c.attachedcustomer.customerstatus).Distinct().ToList();
+                var cststatus = db.customer_status.Where(c => cststatusIds.Contains(c.ID)).ToList();
+
                 var taskorderIds = res.Select(r => r.taskorderno).ToList();
-                var editables = db.v_taskorderIsEditable.Where(r => taskorderIds.Contains(r.taskorderno)).ToList();
-
-
+                var editables = db.v_taskorderIsEditableCRM1Set.Where(r => taskorderIds.Contains(r.taskorderno)).ToList();
                 res.ForEach(r =>
-                {
-                    r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
-                    r.task.tasktypes = tasktypes.Where(t => t.TaskTypeId == r.task.tasktype).FirstOrDefault();
-                    r.attachedpersonel = personels.Where(p => p.personelid == r.attachedpersonelid).FirstOrDefault();
-                    r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
-                    r.attachedcustomer.il = iller.Where(i => i.kimlikNo == r.attachedcustomer.ilKimlikNo).FirstOrDefault();
-                    r.attachedcustomer.ilce = ilceler.Where(i => i.kimlikNo == r.attachedcustomer.ilceKimlikNo).FirstOrDefault();
-                    r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
-                    //r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
-                    r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
-                    r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
-                    if (request.taskOrderNo != null)
-                    {
-                        var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
-                        var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
-                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                 {
+                                     r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
+                                     r.task.tasktypes = tasktypes.Where(t => t.TaskTypeId == r.task.tasktype).FirstOrDefault();
+                                     r.attachedpersonel = personels.Where(p => p.personelid == r.attachedpersonelid).FirstOrDefault();
+                                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
+                                     r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
+                                     if (r.attachedcustomer == null)
+                                     {
+                                         r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
+                                     }
+                                     if (r.attachedcustomer != null) r.attachedcustomer.issStatus = isss.Where(i => i.id == (r.attachedcustomer.iss ?? 0)).FirstOrDefault();
+                                     if (r.attachedcustomer != null) r.attachedcustomer.customer_status = cststatus.Where(c => c.ID == (r.attachedcustomer.customerstatus ?? 0)).FirstOrDefault();
+                                     r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
+                                     r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
+                                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
+                                     if (request.taskOrderNo != null)
+                                     {
+                                         var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
+                                         var salestaskorderno = db.taskqueue.Where(t => t.taskid == 3 && t.attachedobjectid == customerid)
+                                             .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
 
-                        // taska bağlı müşteri kampanyası ve bilgileri
-                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno && c.deleted == false).ToList();
-                        r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, r.task.tasktype == 1, r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
-                        if (r.customerdocument.Any())
-                        {
-                            var dIds = r.customerdocument.Select(csd => csd.documentid).ToList();
-                            var documents = db.document.Where(d => dIds.Contains(d.documentid)).ToList();
-                            r.customerdocument.AsParallel().ForAll((csd) =>
-                            {
-                                csd.adsl_document = documents.First(d => d.documentid == csd.documentid);
-                            });
-                        }
-                        // taska bağlı stok hareketleri yükleniyor
-                        if (r.status != null)
-                        {
-                            r.stockmovement = getStockmovements(db, r.taskorderno, r.taskid, r.status ?? 0);
-                            var scIds = r.stockmovement.Select(sm => sm.stockcardid).ToList();
-                            var stockCards = db.stockcard.Where(sc => scIds.Contains(sc.stockid)).ToList();
-                            var stockStatus = db.getPersonelStockAdsl(r.attachedpersonelid).Where(ss => scIds.Contains(ss.stockid)).ToList();
-                            // stok kartı seri numaralı ürün ise task personelinin elindeki ürün seri noları alınıyor.
-                            r.stockmovement.AsParallel().ForAll((sm) =>
-                            {
-                                sm.stockStatus = stockStatus.FirstOrDefault(ss => ss.stockid == sm.stockcardid);
-                                if (sm.stockStatus != null)
-                                {
-                                    sm.stockStatus.serials = db.getSerialsOnPersonelAdsl(r.attachedpersonelid, sm.stockcardid).ToList();
-                                    // seçili seri no listede olmayacağı için listeye ekleniyor
-                                    if (!string.IsNullOrWhiteSpace(sm.serialno))
-                                        sm.stockStatus.serials.Insert(0, sm.serialno);
-                                }
-                                sm.stockcard = stockCards.First(sc => sc.stockid == sm.stockcardid);
-                                sm.fromobjecttype = (int)KOCUserTypes.TechnicalStuff;
-                                sm.frompersonel = r.attachedpersonel;
-                                sm.toobjecttype = (int)KOCUserTypes.ADSLCustomer;
-                                sm.tocustomer = r.attachedcustomer;
-                            });
-                        }
-                    }
+                                         //taska bağlı müşteri kampanyası ve bilgileri
+                                         r.customerproduct = db.customerproduct.Include(c => c.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
+                                         //taska bağlı stock hareketleri
+                                         r.stockmovement = db.stockmovement.Include(s => s.stockcard).Where(s => s.relatedtaskqueue == r.taskorderno).ToList();
+                                         var stockcardids = db.taskstatematches.Where(tsm => tsm.taskid == r.taskid && tsm.stateid == r.status && tsm.stockcards != null).ToList()
+                                         .SelectMany(s => s.stockcards.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(ss => Convert.ToInt32(ss))).ToList();
+                                         var document=
+                                         r.stockcardlist = db.stockcard.Where(s => stockcardids.Contains(s.stockid)).ToList();
+                                         //sadece task durumuyla ilişkili stockcardid'ler seçiliyor
+                                         if (stockcardids.Count() > 0)
+                                         {
+                                             r.attachedpersonel.stockstatus = r.attachedpersonel.stockstatus.
+                                                Where(ss => stockcardids.Contains(ss.stockcardid)).ToList();
+                                             foreach (var ss in r.attachedpersonel.stockstatus)
+                                             {
+                                                 ss.serials = db.getSerialsOnPersonelFiber(ss.toobject, ss.stockcardid).ToList();
+                                             }
+                                         }
+                                     }
 
-                });
+                                 });
                 var ld = perf.Elapsed;
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
@@ -161,12 +166,13 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
+
             var user = KOCAuthorizeAttribute.getCurrentUser();
-            var customerdocuments =tq.customerdocument!=null? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList():null;
-            var customerproducts =tq.customerproduct!=null? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList():null;
-            var stockmovements =tq.stockmovement!=null ?tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList():null;
+            var customerdocuments = tq.customerdocument != null ? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList() : null;
+            var customerproducts = tq.customerproduct != null ? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : null;
+            var stockmovements = tq.stockmovement != null ? tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList() : null;
             //return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             using (var transaction = db.Database.BeginTransaction())
                 try
                 {
@@ -178,9 +184,6 @@ namespace CRMWebApi.Controllers
                                           .Include(rt => rt.relatedTaskQueue)
                                           .Include(pt => pt.previousTaskQueue)
                                           .Where(r => r.taskorderno == tq.taskorderno).First();
-
-
-
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
                     if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
@@ -232,10 +235,10 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
-                                if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
+                                if (db.taskqueue.Where(r => r.deleted == false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
                                 var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
-                                var amtq = new adsl_taskqueue
+                                var amtq = new taskqueue
                                 {
                                     appointmentdate = (dtq.task.tasktype == 2) ? (tq.appointmentdate) : (null),
                                     attachedpersonelid = (personel_id ? dtq.attachedpersonelid : (null)),
@@ -249,28 +252,21 @@ namespace CRMWebApi.Controllers
                                     updatedby = user.userId, //User.Identity.PersonelID,
                                     relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                                 };
-                                if(automandatoryTasks.Contains(38)&&dtq.attachedpersonelid!=1016)
-                                {
-                                    mailInfo.Add(dtq.attachedobjectid);
-                                    mailInfo.Add(dtq.attachedpersonelid);
-                                    sendemail(mailInfo);
-                                }
-
                                 db.taskqueue.Add(amtq);
                             }
                         }
 
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if (tq.task.taskid==41 && tq.taskstatepool.taskstateid==9117)
+                        if (tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117)
                         {
                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
-                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
-                            if (autotasks.Count>0)
+                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s => s.automandatorytasks).ToList();
+                            if (autotasks.Count > 0)
                             {
                                 foreach (var item in (autotasks.First() ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                                 {
-                                    db.taskqueue.Add(new adsl_taskqueue
+                                    db.taskqueue.Add(new taskqueue
                                     {
                                         appointmentdate = null,
                                         attachmentdate = null,
@@ -284,13 +280,13 @@ namespace CRMWebApi.Controllers
                                         relatedtaskorderid = tq.relatedtaskorderid
                                     });
                                 }
-                            }                            
+                            }
                         }
                         #endregion
                         #region ürünler kaydediliyor
                         foreach (var p in customerproducts)
                         {
-                                db.customerproduct.Add(new adsl_customerproduct
+                                db.customerproduct.Add(new customerproduct
                             {
                                 campaignid = p.campaignid,
                                 creationdate = DateTime.Now,
@@ -325,7 +321,7 @@ namespace CRMWebApi.Controllers
                         #region belgeler kaydediliyor
                         if (customerdocuments.Any(c => c.documenturl != null))
                         {
-                            db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
+                            db.customerdocument.AddRange(customerdocuments.Select(cd => new customerdocument
                             {
                                 attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
                                 creationdate = DateTime.Now,
@@ -382,7 +378,7 @@ namespace CRMWebApi.Controllers
                         //        });
                         //    }
                         //}
-                        db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
+                        db.stockmovement.AddRange(stockmovements.Select(sm => new stockmovement
                         {
                             amount = sm.amount,
                             confirmationdate = DateTime.Now,
@@ -409,7 +405,7 @@ namespace CRMWebApi.Controllers
                         {
                             foreach (var p in customerproducts)
                             {
-                                    db.customerproduct.Add( new adsl_customerproduct
+                                    db.customerproduct.Add(new customerproduct
                                 {
                                     campaignid = p.campaignid,
                                     creationdate = DateTime.Now,
@@ -425,7 +421,7 @@ namespace CRMWebApi.Controllers
                         #endregion
                         #region belgeler kaydediliyor
                         if (customerdocuments.Any(cd => cd.id != 0))
-                            db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
+                            db.customerdocument.AddRange(customerdocuments.Select(cd => new customerdocument
                             {
                                 attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
                                 creationdate = DateTime.Now,
@@ -462,7 +458,7 @@ namespace CRMWebApi.Controllers
                             }
                             else
                             {
-                                db.stockmovement.Add(new adsl_stockmovement
+                                db.stockmovement.Add(new stockmovement
                                 {
                                     amount = movement.amount,
                                     confirmationdate = DateTime.Now,
@@ -552,7 +548,60 @@ namespace CRMWebApi.Controllers
                     //    }
                     //}
                     #endregion
+                    #region saha çalışması kat ziyareti oluşturma
 
+                    if (dtq.taskid == 85 && (dtq.status == 75 || dtq.status == 77 || dtq.status == 78))
+                    {
+                        var blok = dtq.attachedobjectid;
+                        foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted == false)))
+                        {
+                            db.taskqueue.Add(new taskqueue
+                            {
+                                attachedpersonelid = dtq.attachedpersonelid,
+
+                                attachmentdate = (DateTime?)DateTime.Now,
+                                attachedobjectid = hps.customerid,
+                                taskid = 86,
+                                creationdate = DateTime.Now,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                previoustaskorderid = dtq.taskorderno,
+                                //Kullanıcı Kontrolü
+                                updatedby = user.userId, // User.Identity.PersonelID,
+                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                            });
+                        }
+
+                        db.SaveChanges();
+                    }
+                    #endregion
+                    #region penetrasyon taskı kat ziyareti oluşturma Miraç 06.05.2015
+                    if (dtq.taskid == 8164 && dtq.status == 8110)
+                    {
+                        var blok = dtq.attachedobjectid;
+                        foreach (var hps in (db.customer.Where(r => r.blockid == blok && r.deleted == false)))
+                        {
+                            db.taskqueue.Add(new taskqueue
+                            {
+                                attachedpersonelid = dtq.attachedpersonelid,
+
+                                attachmentdate = (DateTime?)DateTime.Now,
+                                attachedobjectid = hps.customerid,
+                                taskid = 86,
+                                creationdate = DateTime.Now,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                previoustaskorderid = dtq.taskorderno,
+                                //Kullanıcı Kontrolü
+                                updatedby = user.userId,// User.Identity.PersonelID,
+                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                            });
+                        }
+
+                        db.SaveChanges();
+                    }
+
+                    #endregion
                     dtq.description = tq.description != null ? tq.description : dtq.description;
                     dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
@@ -578,12 +627,12 @@ namespace CRMWebApi.Controllers
                 var request = HttpContext.Current.Request;
                 var docids = JsonConvert.DeserializeObject<List<int>>(request.Form["documentids"]);
                 var req = JsonConvert.DeserializeObject<DTOtaskqueue>(request.Form["tq"]);
-               // var user = KOCAuthorizeAttribute.getCurrentUser();
+                // var user = KOCAuthorizeAttribute.getCurrentUser();
 
-                var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
-                var il = request.Form["il"].ToString();
-                var ilce = request.Form["ilce"].ToString();
-                string subPath = "\\192.168.1.202\\A:\\Ediski\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
+                var customername = request.Form["customer"].ToString();
+                var sitename = request.Form["sitename"].ToString();
+                var blockname = request.Form["blockname"].ToString();
+                string subPath = "C:\\CRMFİBERWEB\\Files" + sitename + '\\' + blockname + '\\' +customername + "\\";
                 System.IO.Directory.CreateDirectory(subPath);
                 //var filePath = subPath + ((request.Files["file_data"])).FileName;
                 for (int i = 0; i < request.Files.Count; i++)
@@ -610,7 +659,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage closeTaskQueues(DTORequestCloseTaskqueue request)
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             {
                 var user = KOCAuthorizeAttribute.getCurrentUser();
                 var tq = db.taskqueue.Include(t => t.attachedpersonel).Where(r => r.taskorderno == request.taskorderno).First();
@@ -631,7 +680,7 @@ namespace CRMWebApi.Controllers
                 #region Yeni kampanya belgeleri ekleniyor
                 foreach (var item in newdocs.Where(r => !olddocs.Contains(r)))
                 {
-                    db.customerdocument.Add(new adsl_customerdocument
+                    db.customerdocument.Add(new customerdocument
                     {
                         creationdate = DateTime.Now,
                         customerid = tq.attachedobjectid,
@@ -640,19 +689,19 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         taskqueueid = tq.taskorderno,
                         updatedby = user.userId,// User.Identity.PersonelID,
-                        attachedobjecttype = 3000
+                        attachedobjecttype = tq.task.attachableobjecttype ?? 0
                     });
                 }
                 #endregion
                 var tsm = db.taskstatematches.Where(r => r.taskid == tq.taskid && r.stateid == tq.status).FirstOrDefault();
                 #region Eski ürünler siliniyor
-                db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where taskid={1}", new object[] { 7, tq.taskorderno });
+                db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where taskid={1}", new object[] { user.userId, tq.taskorderno });
                 #endregion
                 #region  Yeni ürün ekleniyor
                 foreach (var p in request.selectedProductsIds.Where(s => s != 0))
                 {
 
-                    db.customerproduct.Add(new adsl_customerproduct
+                    db.customerproduct.Add(new customerproduct
                     {
                         campaignid = request.campaignid,
                         creationdate = DateTime.Now,
@@ -661,7 +710,7 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         productid = p,
                         taskid = tq.taskorderno,
-                        updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,// User.Identity.PersonelID
+                        updatedby = user.userId,// User.Identity.PersonelID
                     });
                     #region Ek ürün için otomatik zorunlu taskların türetilmesi-- OZAL 10.10.2014 17:45 ve Retention
                     if (tq.taskid == 6115 || tq.taskid == 6117)
@@ -669,7 +718,7 @@ namespace CRMWebApi.Controllers
                         foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                         {
                             var personel_id = (db.task.Where(t => t.attachablepersoneltype == tq.attachedpersonel.category && t.taskid == item).Any());
-                            db.taskqueue.Add(new adsl_taskqueue
+                            db.taskqueue.Add(new taskqueue
                             {
 
                                 appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
@@ -682,7 +731,7 @@ namespace CRMWebApi.Controllers
                                 deleted = false,
                                 lastupdated = DateTime.Now,
                                 previoustaskorderid = tq.taskorderno,
-                                updatedby = KOCAuthorizeAttribute.getCurrentUser().userId, //User.Identity.PersonelID,
+                                updatedby = user.userId, //User.Identity.PersonelID,
                                 /*25.10.2014 17:33 OZAL  Önceki kod kısmında alttaki satır kapalıydı ve task oluşurken ilişkilendirme yapılamıyordu*/
                                 relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
                                 /*25.10.2014 17:33 */
@@ -697,82 +746,30 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("saveAdslSalesTask")]
+        [Route("saveSalesTask")]
         [HttpPost]
-        public HttpResponseMessage saveSalesTask(DTOcustomer request)
+        public HttpResponseMessage saveSalesTask(DTOSaveFiberSalesTask request)
         {
-            var user = KOCAuthorizeAttribute.getCurrentUser();
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             {
-                var oldCust = db.customer.Where(c => c.tc == request.tc).ToList();
-                if (oldCust.Count == 0)
+                var user = KOCAuthorizeAttribute.getCurrentUser();
+                var taskqueue = new taskqueue
                 {
-                    var customer = new customer
-                    {
-                        customername = request.customername.ToUpper(),
-                        tc = request.tc,
-                        gsm = request.gsm,
-                        phone = request.phone,
-                        ilKimlikNo = request.ilKimlikNo,
-                        ilceKimlikNo = request.ilceKimlikNo,
-                        bucakKimlikNo=request.bucakKimlikNo,
-                        mahalleKimlikNo = request.mahalleKimlikNo,
-                        yolKimlikNo = request.yolKimlikNo,
-                        binaKimlikNo = request.binaKimlikNo,
-                        daire = request.daire,
-                        updatedby = user.userId,
-                        description=request.description,
-                        lastupdated = DateTime.Now,
-                        creationdate = DateTime.Now,
-                        deleted = false
-                    };
-                    db.customer.Add(customer);
-                    db.SaveChanges();
-
-                    var cust = db.customer.Where(c => c.tc == request.tc && c.customername == request.customername).FirstOrDefault();
-
-                    var taskqueue = new adsl_taskqueue
-                    {
-                        appointmentdate = null,
-                        attachedobjectid = cust.customerid,
-                        attachedpersonelid = request.salespersonel ?? user.userId,
-                        attachmentdate = DateTime.Now,
-                        creationdate = DateTime.Now,
-                        deleted = false,
-                        description = request.taskdescription,
-                        lastupdated = DateTime.Now,
-                        status = null,
-                        taskid = request.taskid,
-                        updatedby = user.userId,
-                        fault=request.fault
-                    };
-
-                    db.taskqueue.Add(taskqueue);
-                    db.SaveChanges();
-
-                    if (request.productids!=null)
-                    {
-                        foreach (var item in request.productids)
-                        {
-                            var customerproducst = new adsl_customerproduct
-                            {
-                                taskid = taskqueue.taskorderno,
-                                customerid = customer.customerid,
-                                productid = item,
-                                campaignid = request.campaignid,
-                                creationdate = DateTime.Now,
-                                lastupdated = DateTime.Now,
-                                updatedby = user.userId,
-                                deleted = false
-                            };
-                            db.customerproduct.Add(customerproducst);
-                            db.SaveChanges();
-                        }
-                    }
-
-                    return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
-                }
-                return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
+                    appointmentdate = request.appointmentdate != null ? request.appointmentdate : DateTime.Now,
+                    attachedobjectid = request.customerid ?? 0,
+                    attachedpersonelid = request.attachedpersonelid,
+                    attachmentdate = DateTime.Now,
+                    creationdate = DateTime.Now,
+                    deleted = false,
+                    description = "Doğrudan Satış",
+                    lastupdated = DateTime.Now,
+                    status = null,
+                    taskid = 3,
+                    updatedby = user.userId
+                };
+                db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
         }
 
@@ -780,9 +777,10 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage SaveFaultTask(DTORequestSaveFaultTaks request)
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             {
-                var taskqueue = new adsl_taskqueue
+                var user = KOCAuthorizeAttribute.getCurrentUser();
+                var taskqueue = new taskqueue
                 {
                     appointmentdate = request.appointmentdate,
                     attachedobjectid = request.customerid ?? 0,
@@ -795,7 +793,7 @@ namespace CRMWebApi.Controllers
                     lastupdated = DateTime.Now,
                     status = null,
                     taskid = 66,
-                    updatedby = 7,//User.Identity.PersonelID
+                    updatedby = user.userId,//User.Identity.PersonelID
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();
@@ -803,58 +801,14 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        [Route("confirmCustomer")]
-        [HttpPost]
-        public HttpResponseMessage confirmCustomer(DTOcustomer request)
-        {
-            using (var db=new KOCSAMADLSEntities(false))
-            {
-                var res = db.customer.Include(i=>i.il).Include(m=>m.ilce).Where(c => c.tc == request.tc).FirstOrDefault();              
-                if (res !=null)
-                {
-                    return Request.CreateResponse(HttpStatusCode.OK,res.toDTO(), "application/json");
-                }
-                else
-                {
-                    DTOResponseError error = new DTOResponseError();
-                    error.errorCode = -1;
-                    return Request.CreateResponse(HttpStatusCode.OK,error.errorCode, "application/json");
-                }
-            }
-
-        }
-
-        [Route("insertTaskqueue")]
-        [HttpPost]
-        public HttpResponseMessage insertTaskqueue(DTOtaskqueue request)
-        {
-            var user = KOCAuthorizeAttribute.getCurrentUser();
-            using (var db = new KOCSAMADLSEntities(false))
-            {
-                adsl_taskqueue taskqueue = new adsl_taskqueue
-                {
-                    taskid = request.task.taskid,
-                    attachedobjectid = request.attachedcustomer.customerid,
-                    attachedpersonelid=user.userId,
-                    creationdate = DateTime.Now,
-                    attachmentdate = DateTime.Now,
-                    lastupdated = DateTime.Now,
-                    updatedby = user.userId,
-                    deleted = false
-                };
-                db.taskqueue.Add(taskqueue);
-                db.SaveChanges();
-                return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
-            }
-
-        }
         [Route("personelattachment")]
         [HttpPost]
         public HttpResponseMessage personelattachment(DTORequestAttachmentPersonel request)
         {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
             if (request.ids.Count() > 0)
             {
-                using (var db = new KOCSAMADLSEntities())
+                using (var db = new CRMEntities())
                 {
                     var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno) && t.status != null).Count();
                     if (tqs > 0)
@@ -867,7 +821,7 @@ namespace CRMWebApi.Controllers
                         return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
                     }
                 }
-                using (var db = new KOCSAMADLSEntities())
+                using (var db = new CRMEntities())
                 {
                     var tqs = db.taskqueue.Where(t => request.ids.Contains(t.taskorderno))
                              .Select(t => t.task.attachablepersoneltype).Distinct().ToList();
@@ -892,7 +846,7 @@ namespace CRMWebApi.Controllers
                                 tq.attachedpersonelid = apid;
                                 tq.attachmentdate = DateTime.Now;
                                 tq.lastupdated = DateTime.Now;
-                                tq.updatedby = 7;
+                                tq.updatedby = user.userId;
                                 db.SaveChanges();
                             }
                             DTOResponseError re = new DTOResponseError
@@ -926,13 +880,46 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        public HttpResponseMessage getTaskQueueHierarchy(int taskqueueid)
+        [Route("saveCustomerCard")]
+        [HttpPost]
+        public HttpResponseMessage saveCustomerCard(DTOKatZiyareti ct)
         {
-            //Önce bu task üzerinde kullanıcı yetkisi var mı baklıalacak
-            using (var db = new KOCSAMADLSEntities())
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new CRMEntities())
             {
-                var taskqueue = db.taskqueue.Where(tq => tq.taskorderno == taskqueueid);
-                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");//silinecek
+                if (db.customer.Any(c => c.customerid == ct.customerid))
+                {
+                    var item = db.customer.Where(c => c.customerid == ct.customerid).First();
+
+                    item.customername = ct.customername;
+                    item.customersurname = ct.customersurname;
+                    item.gsm = ct.gsm;
+                    item.tckimlikno = ct.tckimlikno;
+                    if (ct.netStatus.id != 0)
+                        item.netstatu = ct.netStatus.id;
+                    if (ct.telStatus.id!=0)
+                        item.telstatu = ct.telStatus.id;
+                    if (ct.gsmKullanımıStatus.id!=0)
+                        item.gsmstatu = ct.gsmKullanımıStatus.id;
+                    if (ct.issStatus.id!=0)
+                        item.iss = ct.issStatus.id;
+                    if(ct.TvKullanımıStatus.id!=0)
+                         item.tvstatu = ct.TvKullanımıStatus.id;
+                    if (ct.telStatus.id != 0)
+                        item.telstatu = ct.telStatus.id;
+                    item.description = ct.description;
+                    item.lastupdated = DateTime.Now;
+                    item.updatedby = user.userId;
+
+                }
+                if (ct.closedKatZiyareti == true)
+                {
+                    var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
+                    res.status = 1079;
+                }
+
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             }
         }
 
@@ -941,14 +928,14 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage getStockMovements(DTORequestTaskqueueStockMovements request)
         {
             DTOResponseError errormessage = new DTOResponseError();
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             {
                 var tq = db.taskqueue.Include(t => t.attachedpersonel).Include(t => t.attachedcustomer).Single(t => t.taskorderno == request.taskorderno);
                 var stockmovement = getStockmovements(db, request.taskorderno, request.taskid, request.stateid);
                 if (!stockmovement.Any()) return Request.CreateResponse(HttpStatusCode.OK, stockmovement, "application/json");
                 var scIds = stockmovement.Select(sm => sm.stockcardid).ToList();
                 var stockCards = db.stockcard.Where(sc => scIds.Contains(sc.stockid)).ToList();
-                var stockStatus = db.getPersonelStockAdsl(tq.attachedpersonelid).Where(ss => scIds.Contains(ss.stockid)).ToList();
+                var stockStatus = db.getPersonelStockFiber(tq.attachedpersonelid).Where(ss => scIds.Contains(ss.stockid)).ToList();
 
                 // stok kartı seri numaralı ürün ise task personelinin elindeki ürün seri noları alınıyor.
                 stockmovement.AsParallel().ForAll((sm) =>
@@ -956,15 +943,19 @@ namespace CRMWebApi.Controllers
                     sm.stockStatus = stockStatus.FirstOrDefault(ss => ss.stockid == sm.stockcardid);
                     if (sm.stockStatus != null)
                     {
-                        sm.stockStatus.serials = db.getSerialsOnPersonelAdsl(tq.attachedpersonelid, sm.stockcardid).ToList();
+                        if (sm.stockStatus.hasserial!=false)
+                        {
+                            sm.stockStatus.serials = db.getSerialsOnPersonelFiber(tq.attachedpersonelid, sm.stockcardid).ToList();
+
+                        }
                         // seçili seri no listede olmayacağı için listeye ekleniyor
                         if (!string.IsNullOrWhiteSpace(sm.serialno))
                             sm.stockStatus.serials.Insert(0, sm.serialno);
                     }
                     sm.stockcard = stockCards.First(sc => sc.stockid == sm.stockcardid);
-                    sm.fromobjecttype = (int)KOCUserTypes.TechnicalStuff;
+                    sm.fromobjecttype = (int)FiberKocUserTypes.TechnicalStuff;
                     sm.frompersonel = tq.attachedpersonel;
-                    sm.toobjecttype = (int)KOCUserTypes.ADSLCustomer;
+                    sm.toobjecttype = (int)FiberKocUserTypes.Customer;
                     sm.tocustomer = tq.attachedcustomer;
                 });
                 return Request.CreateResponse(HttpStatusCode.OK, stockmovement.Select(sm => sm.toDTO()), "application/json");
@@ -981,7 +972,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage getDocuments(DTORequestTaskqueueDocuments request)
         {
-            using (var db = new KOCSAMADLSEntities())
+            using (var db = new CRMEntities())
             {
                 var docs = getDocuments(db, request.taskorderno, request.taskid, request.isSalesTask, request.stateid, request.campaignid, request.customerproducts);
                 if (docs.Any())
@@ -990,35 +981,35 @@ namespace CRMWebApi.Controllers
                     var documents = db.document.Where(d => dIds.Contains(d.documentid)).ToList();
                     docs.AsParallel().ForAll((csd) =>
                     {
-                        csd.adsl_document = documents.First(d => d.documentid == csd.documentid);
+                        csd.fiber_document = documents.First(d => d.documentid == csd.documentid);
                     });
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, docs.Select(d => d.toDTO()), "application/json");
             }
         }
 
-        private List<adsl_stockmovement> getStockmovements(KOCSAMADLSEntities db, int taskorderno, int taskid, int stateid)
+        private List<stockmovement> getStockmovements(CRMEntities db, int taskorderno, int taskid, int stateid)
         {
             var tsm = db.taskstatematches.FirstOrDefault(t => t.taskid == taskid && t.stateid == stateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty));
-            if (tsm == null) return Enumerable.Empty<adsl_stockmovement>().ToList();
+            if (tsm == null) return Enumerable.Empty<stockmovement>().ToList();
             var stockcardIds = new List<int>();
             if (!string.IsNullOrWhiteSpace(tsm.stockcards))
             {
                 stockcardIds.AddRange(tsm.stockcards.Split(',').Select(s => Convert.ToInt32(s)));
             }
             var stockmovements = db.stockmovement.Where(s => s.relatedtaskqueue == taskorderno && s.deleted == false).ToList();
-            return stockcardIds.Select(s => stockmovements.Where(sm => sm.stockcardid == s).FirstOrDefault() ?? new adsl_stockmovement
+            return stockcardIds.Select(s => stockmovements.Where(sm => sm.stockcardid == s).FirstOrDefault() ?? new stockmovement
             {
                 stockcardid = s,
                 relatedtaskqueue = taskorderno
             }).ToList();
         }
 
-        private List<adsl_customerdocument> getDocuments(KOCSAMADLSEntities db, int taskorderno, int taskid, bool isSalesTask, int stateid, int? campaignid = null, List<int> customerproducts = null)
+        private List<customerdocument> getDocuments(CRMEntities db, int taskorderno, int taskid, bool isSalesTask, int stateid, int? campaignid = null, List<int> customerproducts = null)
         {
             var customerid = db.taskqueue.Single(tq => tq.taskorderno == taskorderno && tq.deleted == false).attachedobjectid;
             // müsteri evrağı alınıyor
-            var customerdocuments = db.customerdocument.Where(cd => cd.customerid == customerid && cd.deleted == false).ToList();
+            var customerdocuments = db.customerdocument.Where(cd => cd.customerid == customerid && cd.deleted == false && cd.taskqueueid==taskorderno).ToList();
             // gerekli evrak bilgileri alınıyor
             var documents = new List<int>();
             if (db.taskstatematches.Any(tsm => tsm.deleted == false && tsm.taskid == taskid && tsm.stateid == stateid && !(tsm.documents == null || tsm.documents.Trim() == string.Empty)))
@@ -1030,7 +1021,7 @@ namespace CRMWebApi.Controllers
                 if (customerproducts != null && db.product_service.Any(ps => ps.deleted == false && customerproducts.Contains(ps.productid) && !(ps.documents == null || ps.documents.Trim() == string.Empty)))
                     documents.AddRange(db.product_service.First(ps => ps.deleted == false && customerproducts.Contains(ps.productid) && !(ps.documents == null || ps.documents.Trim() == string.Empty)).documents.Split(',').Select(si => Convert.ToInt32(si)));
             }
-            return documents.Select(d => customerdocuments.Where(cd => cd.documentid == d).FirstOrDefault() ?? new adsl_customerdocument
+            return documents.Select(d => customerdocuments.Where(cd => cd.documentid == d).FirstOrDefault() ?? new customerdocument
             {
                 documentid = d,
                 customerid = customerid,
@@ -1038,48 +1029,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        public void sendemail(List<object> info)
-        {
 
-            MailMessage mail = new MailMessage();
-            mail.From = new MailAddress("adslbayidestek@kociletisim.com.tr"); // Mail'in kimden olduğu adresi buraya yazılır.
-            mail.Subject = "KOÇ İLETİŞİM RANDEVU TASKI"; // mail'in konusu
-            int customer =Convert.ToInt32(info[0].ToString());
-            int bayiid = Convert.ToInt32(info[1]);
 
-            using (var db = new KOCSAMADLSEntities(false))
-            {
-                var bayi = db.personel.Where(p => p.personelid == bayiid).FirstOrDefault();
-                var customerinfo = db.customer.Where(c => c.customerid == customer).FirstOrDefault();
-                for (int i = 0; i < bayi.email.ToString().Split(';').Count(); i++)
-                {
-                    mail.To.Add(bayi.email.ToString().Split(';')[i]); // kime gönderileceği adresin yazıldığı textbox'tan alınır.
-
-                }
-                mail.Body=  string.Format(@" Merhaba Sayın  {0}, {1}  {2}
-                       Merkezimizden {3} adlı müşterimizin Kurulum Randevu Taskı size atanmıştır.Müşterimizin İletişim Numarası {4} 'dır.{5} İyi Çalışmalar Dileriz",
-                       bayi.personelname.ToUpper().ToString(), 
-                       Environment.NewLine,
-                       Environment.NewLine,
-                       customerinfo.customername,
-                       customerinfo.gsm,
-                       Environment.NewLine);
-             // mail'in ana kısmı, içeriği.. 
-            SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
-
-            smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
-
-            smtp.EnableSsl = true;
-
-            try
-            {
-                smtp.Send(mail); // mail gönderilir.
-            }
-            catch (Exception e)
-            {
-                throw ;
-            }
-            }
-        }
     }
 }
