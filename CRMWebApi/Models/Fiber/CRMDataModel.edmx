@@ -55,7 +55,7 @@
           <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="blockid" Type="int" />
           <Property Name="tckimlikno" Type="nvarchar" MaxLength="255" />
-          <Property Name="customername" Type="nvarchar" MaxLength="255" />
+          <Property Name="customername" Type="nvarchar" MaxLength="45" />
           <Property Name="customersurname" Type="nvarchar" MaxLength="45" />
           <Property Name="flat" Type="nvarchar" MaxLength="45" />
           <Property Name="gsm" Type="nvarchar" MaxLength="15" />
@@ -182,12 +182,12 @@
           <Property Name="productname" Type="nvarchar" MaxLength="255" />
           <Property Name="category" Type="nvarchar" MaxLength="255" />
           <Property Name="automandatorytasks" Type="nvarchar" MaxLength="255" />
+          <Property Name="documents" Type="nvarchar" MaxLength="255" />
           <Property Name="maxduration" Type="int" />
           <Property Name="creationdate" Type="datetime2" Precision="7" />
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
-          <Property Name="documents" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="site">
           <Key>
@@ -337,7 +337,7 @@
           <Property Name="deleted" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRMTest.dbo.customerinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRM.dbo.customerinfo' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="customerinfo">
           <Key>
             <PropertyRef Name="customerid" />
@@ -354,7 +354,7 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.customerinfo' does not have a pr
           <Property Name="emptorcustomernum" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRMTest.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRM.dbo.stockstatus' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="stockstatus">
           <Key>
             <PropertyRef Name="toobject" />
@@ -371,7 +371,7 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.stockstatus' does not have a pri
           <Property Name="amount" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRMTest.dbo.v_taskorderIsEditableCRM' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRM.dbo.v_taskorderIsEditableCRM' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="v_taskorderIsEditableCRM">
           <Key>
             <PropertyRef Name="taskorderno" />
@@ -380,7 +380,7 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.v_taskorderIsEditableCRM' does n
           <Property Name="editable" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
-warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="vcampaignproducts">
           <Key>
             <PropertyRef Name="cid" />
@@ -883,19 +883,19 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
             <End Role="product_service" EntitySet="product_service" />
             <End Role="customerproduct" EntitySet="customerproduct" />
           </AssociationSet>
+          <EntitySet Name="vcampaignproducts" EntityType="CRMModel.vcampaignproducts" />
           <EntitySet Name="TurkcellTVStatus" EntityType="CRMModel.TurkcellTVStatus" />
           <AssociationSet Name="customerTurkcellTVStatus" Association="CRMModel.customerTurkcellTVStatus">
             <End Role="customer" EntitySet="customer" />
             <End Role="TurkcellTVStatus" EntitySet="TurkcellTVStatus" />
           </AssociationSet>
-          <EntitySet Name="vcampaignproducts" EntityType="CRMModel.vcampaignproducts" />
-          <EntitySet Name="v_taskorderIsEditableCRM" EntityType="CRMModel.v_taskorderIsEditableCRM" />
+          <EntitySet Name="v_taskorderIsEditableCRM1Set" EntityType="CRMModel.v_taskorderIsEditableCRM1" />
+          <FunctionImport Name="getPersonelStockFiber" IsComposable="true" ReturnType="Collection(CRMModel.getPersonelStockFiber_Result1)">
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+          </FunctionImport>
           <FunctionImport Name="getSerialsOnPersonelFiber" IsComposable="true" ReturnType="Collection(String)">
             <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
             <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
-          </FunctionImport>
-          <FunctionImport Name="getPersonelStockFiber" IsComposable="true" ReturnType="Collection(CRMModel.getPersonelStockFiber_Result)">
-            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
           </FunctionImport>
         </EntityContainer>
         <EntityType Name="task">
@@ -1053,7 +1053,7 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
           <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="blockid" Type="Int32" />
           <Property Name="tckimlikno" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="customername" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="customername" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="customersurname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
@@ -1953,6 +1953,42 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="vcampaignproducts">
+          <Key>
+            <PropertyRef Name="cid" />
+            <PropertyRef Name="pid" />
+          </Key>
+          <Property Name="cid" Type="Int32" Nullable="false" />
+          <Property Name="pid" Type="Int32" Nullable="false" />
+          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <ComplexType Name="getPersonelStockFiber_Result">
+          <Property Type="Int32" Name="stockid" Nullable="false" />
+          <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
+          <Property Type="Boolean" Name="hasserial" Nullable="true" />
+          <Property Type="String" Name="unit" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="description" Nullable="true" />
+          <Property Type="DateTime" Name="creationdate" Nullable="true" Precision="27" />
+          <Property Type="DateTime" Name="lastupdated" Nullable="true" Precision="27" />
+          <Property Type="Int32" Name="updatedby" Nullable="true" />
+          <Property Type="Boolean" Name="deleted" Nullable="true" />
+          <Property Type="Int32" Name="amount" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="getPersonelStock_Result">
+          <Property Type="Int32" Name="stockid" Nullable="false" />
+          <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
+          <Property Type="Boolean" Name="hasserial" Nullable="true" />
+          <Property Type="String" Name="unit" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="description" Nullable="true" />
+          <Property Type="DateTime" Name="creationdate" Nullable="true" Precision="27" />
+          <Property Type="DateTime" Name="lastupdated" Nullable="true" Precision="27" />
+          <Property Type="Int32" Name="updatedby" Nullable="true" />
+          <Property Type="Boolean" Name="deleted" Nullable="true" />
+          <Property Type="Int32" Name="amount" Nullable="true" />
+        </ComplexType>
         <EntityType Name="TurkcellTVStatus">
           <Key>
             <PropertyRef Name="id" />
@@ -1974,24 +2010,14 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="vcampaignproducts">
-          <Key>
-            <PropertyRef Name="cid" />
-            <PropertyRef Name="pid" />
-          </Key>
-          <Property Name="cid" Type="Int32" Nullable="false" />
-          <Property Name="pid" Type="Int32" Nullable="false" />
-          <Property Name="cname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="productname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-        </EntityType>
-        <EntityType Name="v_taskorderIsEditableCRM">
+        <EntityType Name="v_taskorderIsEditableCRM1">
           <Key>
             <PropertyRef Name="taskorderno" />
           </Key>
           <Property Name="taskorderno" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="editable" Type="Int32" />
         </EntityType>
-        <ComplexType Name="getPersonelStockFiber_Result">
+        <ComplexType Name="getPersonelStockFiber_Result1">
           <Property Type="Int32" Name="stockid" Nullable="false" />
           <Property Type="String" Name="productname" Nullable="true" MaxLength="255" />
           <Property Type="String" Name="category" Nullable="true" MaxLength="255" />
@@ -2384,15 +2410,6 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="TurkcellTVStatus">
-            <EntityTypeMapping TypeName="CRMModel.TurkcellTVStatus">
-              <MappingFragment StoreEntitySet="TurkcellTVStatus">
-                <ScalarProperty Name="deleted" ColumnName="deleted" />
-                <ScalarProperty Name="TurkcellTvText" ColumnName="TurkcellTvText" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="vcampaignproducts">
             <EntityTypeMapping TypeName="CRMModel.vcampaignproducts">
               <MappingFragment StoreEntitySet="vcampaignproducts">
@@ -2403,18 +2420,26 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="v_taskorderIsEditableCRM">
-            <EntityTypeMapping TypeName="CRMModel.v_taskorderIsEditableCRM">
+          <EntitySetMapping Name="TurkcellTVStatus">
+            <EntityTypeMapping TypeName="CRMModel.TurkcellTVStatus">
+              <MappingFragment StoreEntitySet="TurkcellTVStatus">
+                <ScalarProperty Name="deleted" ColumnName="deleted" />
+                <ScalarProperty Name="TurkcellTvText" ColumnName="TurkcellTvText" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="v_taskorderIsEditableCRM1Set">
+            <EntityTypeMapping TypeName="CRMModel.v_taskorderIsEditableCRM1">
               <MappingFragment StoreEntitySet="v_taskorderIsEditableCRM">
                 <ScalarProperty Name="editable" ColumnName="editable" />
                 <ScalarProperty Name="taskorderno" ColumnName="taskorderno" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="getSerialsOnPersonelFiber" FunctionName="CRMModel.Store.getSerialsOnPersonelFiber" />
           <FunctionImportMapping FunctionImportName="getPersonelStockFiber" FunctionName="CRMModel.Store.getPersonelStockFiber">
             <ResultMapping>
-              <ComplexTypeMapping TypeName="CRMModel.getPersonelStockFiber_Result">
+              <ComplexTypeMapping TypeName="CRMModel.getPersonelStockFiber_Result1">
                 <ScalarProperty Name="stockid" ColumnName="stockid" />
                 <ScalarProperty Name="productname" ColumnName="productname" />
                 <ScalarProperty Name="category" ColumnName="category" />
@@ -2429,6 +2454,7 @@ warning 6002: The table/view 'KOCSAMCRMTest.dbo.vcampaignproducts' does not have
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="getSerialsOnPersonelFiber" FunctionName="CRMModel.Store.getSerialsOnPersonelFiber" />
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

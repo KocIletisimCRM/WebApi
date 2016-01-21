@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="74">
+      <Diagram DiagramId="fafa5941e2df4376bb46248c7e1241fd" Name="Diagram1" ZoomLevel="106">
         <EntityTypeShape EntityType="CRMModel.task" Width="1.5" PointX="11" PointY="0.5" />
         <EntityTypeShape EntityType="CRMModel.block" Width="1.5" PointX="6.625" PointY="8.625" />
         <EntityTypeShape EntityType="CRMModel.site" Width="1.5" PointX="4" PointY="8.625" />
@@ -15,19 +15,18 @@
         <EntityTypeShape EntityType="CRMModel.customer_status" Width="1.5" PointX="0.5" PointY="0.5" />
         <AssociationConnector Association="CRMModel.customer_statuscustomer1" />
         <AssociationConnector Association="CRMModel.customertaskqueue1" ManuallyRouted="true" >
-          <ConnectorPoint PointX="4.625" PointY="8.691630859375" />
-          <ConnectorPoint PointX="10.75" PointY="451.36778572677929" />
+          <ConnectorPoint PointX="4.625" PointY="4.729994477557085" />
+          <ConnectorPoint PointX="7.0416815066817975" PointY="4.7756086943053759" />
+          <ConnectorPoint PointX="7.2083184933182025" PointY="4.7787539228370219" />
+          <ConnectorPoint PointX="9.0416815066817975" PointY="4.8133581591166674" />
+          <ConnectorPoint PointX="9.2083184933182025" PointY="4.8165033876483134" />
           <ConnectorPoint PointX="10.75" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="10.940104166666666" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="10.947916666666666" PointY="4.8456022135416639" />
-          <ConnectorPoint PointX="11.114583333333334" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="11.126302083333334" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="12.197919166666667" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="12.364585833333335" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="10.947916666666666" PointY="4.8456022135416648" />
+          <ConnectorPoint PointX="11.130208333333334" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="12.166666666666666" PointY="4.8456022135416648" />
+          <ConnectorPoint PointX="12.333333333333334" PointY="4.8456022135416656" />
           <ConnectorPoint PointX="13.104166666666666" PointY="4.8456022135416648" />
           <ConnectorPoint PointX="13.270833333333334" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="14.979166666666666" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="15.145833333333334" PointY="4.8456022135416656" />
           <ConnectorPoint PointX="15.25" PointY="4.8456022135416656" />
           <ConnectorPoint PointX="15.25" PointY="2.75" />
           <ConnectorPoint PointX="15.905296614659708" PointY="2.75" />
@@ -92,10 +91,10 @@
         <EntityTypeShape EntityType="CRMModel.customerinfo" Width="1.5" PointX="5.375" PointY="0.75" />
         <EntityTypeShape EntityType="CRMModel.product_service" Width="1.5" PointX="7.375" PointY="4" />
         <AssociationConnector Association="CRMModel.FK_customerproduct_product_service" />
-        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="1.125" PointY="9" />
-        <AssociationConnector Association="CRMModel.customerTurkcellTVStatus" />
         <EntityTypeShape EntityType="CRMModel.vcampaignproducts" Width="1.5" PointX="13.375" PointY="16.75" />
-        <EntityTypeShape EntityType="CRMModel.v_taskorderIsEditableCRM" Width="1.5" PointX="0.75" PointY="18.75" />
+        <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="0.5" PointY="8.875" />
+        <AssociationConnector Association="CRMModel.customerTurkcellTVStatus" />
+        <EntityTypeShape EntityType="CRMModel.v_taskorderIsEditableCRM1" Width="1.5" PointX="18.375" PointY="5.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

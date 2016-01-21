@@ -199,7 +199,7 @@ namespace CRMWebApi.Models.Fiber
     }
     public partial class stockmovement : EntityBase
     {
-        public virtual getPersonelStockFiber_Result stockStatus { get; set; }
+        public virtual getPersonelStockFiber_Result1 stockStatus { get; set; }
         public override object toDTO()
         {
             return toDTO<DTOstockmovement>();
@@ -256,7 +256,7 @@ namespace CRMWebApi.Models.Fiber
             return toDTO<DTOcustomerdocument>();
         }
     }
-    public partial class getPersonelStockFiber_Result : EntityBase
+    public partial class getPersonelStockFiber_Result1 : EntityBase
     {
         public virtual List<string> serials { get; set; }
         public override object toDTO()

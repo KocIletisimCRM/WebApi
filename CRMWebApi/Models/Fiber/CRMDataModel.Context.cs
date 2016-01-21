@@ -53,9 +53,9 @@ namespace CRMWebApi.Models.Fiber
         public virtual DbSet<TvKullanımıStatus> TvKullanımıStatus { get; set; }
         public virtual DbSet<customerinfo> customerinfo { get; set; }
         public virtual DbSet<product_service> product_service { get; set; }
-        public virtual DbSet<TurkcellTVStatus> TurkcellTVStatus { get; set; }
         public virtual DbSet<vcampaignproducts> vcampaignproducts { get; set; }
-        public virtual DbSet<v_taskorderIsEditableCRM> v_taskorderIsEditableCRM { get; set; }
+        public virtual DbSet<TurkcellTVStatus> TurkcellTVStatus { get; set; }
+        public virtual DbSet<v_taskorderIsEditableCRM1> v_taskorderIsEditableCRM1Set { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)
@@ -117,6 +117,16 @@ namespace CRMWebApi.Models.Fiber
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<task>("[CRMEntities].[sf_task](@pageNo, @rowsPerPage, @taskFilter)", pageNoParameter, rowsPerPageParameter, taskFilterParameter);
         }
     
+        [DbFunction("CRMEntities", "getPersonelStockFiber")]
+        public virtual IQueryable<getPersonelStockFiber_Result1> getPersonelStockFiber(Nullable<int> pERSONELID)
+        {
+            var pERSONELIDParameter = pERSONELID.HasValue ?
+                new ObjectParameter("PERSONELID", pERSONELID) :
+                new ObjectParameter("PERSONELID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getPersonelStockFiber_Result1>("[CRMEntities].[getPersonelStockFiber](@PERSONELID)", pERSONELIDParameter);
+        }
+    
         [DbFunction("CRMEntities", "getSerialsOnPersonelFiber")]
         public virtual IQueryable<string> getSerialsOnPersonelFiber(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)
         {
@@ -129,16 +139,6 @@ namespace CRMWebApi.Models.Fiber
                 new ObjectParameter("STOCKCARDID", typeof(int));
     
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[CRMEntities].[getSerialsOnPersonelFiber](@PERSONELID, @STOCKCARDID)", pERSONELIDParameter, sTOCKCARDIDParameter);
-        }
-    
-        [DbFunction("CRMEntities", "getPersonelStockFiber")]
-        public virtual IQueryable<getPersonelStockFiber_Result> getPersonelStockFiber(Nullable<int> pERSONELID)
-        {
-            var pERSONELIDParameter = pERSONELID.HasValue ?
-                new ObjectParameter("PERSONELID", pERSONELID) :
-                new ObjectParameter("PERSONELID", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getPersonelStockFiber_Result>("[CRMEntities].[getPersonelStockFiber](@PERSONELID)", pERSONELIDParameter);
         }
     }
 }

@@ -436,6 +436,12 @@
     <Compile Include="Models\Fiber\getPersonelStockFiber_Result.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Fiber\getPersonelStockFiber_Result1.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\getPersonelStock_Result.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Fiber\gsmKullanımıStatus.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
@@ -494,7 +500,7 @@
     <Compile Include="Models\Fiber\vcampaignproducts.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\Fiber\v_taskorderIsEditableCRM.cs">
+    <Compile Include="Models\Fiber\v_taskorderIsEditableCRM1.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
