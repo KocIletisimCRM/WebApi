@@ -583,7 +583,7 @@ namespace CRMWebApi.Controllers
                 var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
                 var il = request.Form["il"].ToString();
                 var ilce = request.Form["ilce"].ToString();
-                string subPath = "\\192.168.1.202\\A:\\Ediski\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
+                string subPath = "C:\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
                 System.IO.Directory.CreateDirectory(subPath);
                 //var filePath = subPath + ((request.Files["file_data"])).FileName;
                 for (int i = 0; i < request.Files.Count; i++)
