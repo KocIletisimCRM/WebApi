@@ -89,6 +89,60 @@ namespace CRMWebApi.Controllers
 
         }
 
+        [Route("insertBlock")]
+        [HttpPost]
+        public HttpResponseMessage insertBlock(DTOblock requst) {
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError();
+                var user = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser();
+                var block = new block
+                {
+                    blockname = requst.blockname,
+                    siteid = requst.site.siteid,
+                    hp = requst.hp,
+                    telocadia = requst.telocadia,
+                    projectno = requst.projectno,
+                    readytosaledate = requst.readytosaledate,
+                    sosaledate = requst.sosaledate,
+                    kocsaledate = requst.kocsaledate,
+                    salesrepresentative = requst.salespersonel.personelid,
+                    superintendent = requst.superintendent,
+                    superintendentcontact = requst.superintendentcontact,
+                    cocierge = requst.cocierge,
+                    cociergecontact = requst.cociergecontact,
+                    verticalproductionline = requst.verticalproductionline,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    updatedby = user.userId,
+                    deleted = false,
+                    binakodu = requst.binakodu,
+                    locationid = requst.locationid,
+                    objid = requst.objid
+
+                };
+                db.block.Add(block);
+                for (int i = 0; i < (block.hp ?? 0); i++)
+                {
+                    var hp = new customer
+                    {
+                        blockid = block.blockid,
+                        creationdate = DateTime.Now,
+                        lastupdated = DateTime.Now,
+                        updatedby =user.userId,
+                        deleted = false,
+                        flat = (i + 1).ToString()
+                    };
+                    db.customer.Add(hp);
+                }
+                db.SaveChanges();
+                errormessage.errorMessage = "İşlem Başarılı";
+                errormessage.errorCode = 1;
+
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+        }
+
         [Route("getSites")]
         [HttpPost]
         public HttpResponseMessage getSites(DTOGetSiteFilter request)
