@@ -197,5 +197,36 @@ namespace CRMWebApi.Controllers
             }
 
         }
+
+        [Route("insertSite")]
+        [HttpPost]
+        public HttpResponseMessage insertSite(DTOsite request)
+        {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new CRMEntities())
+            {
+                var errormessage = new DTOResponseError();
+                var dsite = new site
+                {
+                    sitename = request.sitename,
+                    sitedistrict= request.sitedistrict,
+                    siteaddress = request.siteaddress,
+                    description = request.description,
+                    creationdate = DateTime.Now,
+                    lastupdated = DateTime.Now,
+                    deleted = false,
+                    updatedby = user.userId,
+                    siteregioncode = request.siteregioncode,
+                    region = request.region
+                };
+                db.site.Add(dsite);
+                db.SaveChanges();
+                errormessage.errorMessage = "İşlem Başarılı";
+                errormessage.errorCode = 1;
+
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+            }
+
+        }
     }
 }
