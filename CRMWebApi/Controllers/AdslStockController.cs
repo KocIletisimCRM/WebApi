@@ -165,13 +165,16 @@ namespace CRMWebApi.Controllers
                 {
                     foreach (var seri in serials)
                     {
+                        
                         //serino kontrolü yap. varsa ekleme.
-                        var userControl = db.stockmovement.Where(s => s.serialno == seri && s.deleted==false).OrderByDescending(s => s.movementid).Select(s => s.toobject).FirstOrDefault();
-                        if ((userControl != userID) && ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) != (int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
-                        {
-                            errormessage.errorCode = -1;
-                            errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
-                        }
+                         var userControl = db.stockmovement.Where(s => s.serialno == seri && s.deleted == false).OrderByDescending(s => s.movementid).Select(s => s.toobject).FirstOrDefault();
+                         if (seri!=null&&(userControl != userID) && ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) != (int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
+                         {
+                                errormessage.errorCode = -1;
+                                errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
+                         }
+                     
+                        #region hareket uygunsa
                         else
                         {
                             var count = db.stockmovement.Where(s => s.serialno == seri).Count();
@@ -222,6 +225,7 @@ namespace CRMWebApi.Controllers
                                 db.SaveChanges();
                             }
                         }
+                        #endregion 
                     }
 
                 }

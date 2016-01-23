@@ -14,6 +14,10 @@ using Newtonsoft.Json;
 using System.Web;
 using Newtonsoft.Json.Linq;
 using System.Net.Mail;
+using System.IO;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace CRMWebApi.Controllers
 {
@@ -301,7 +305,7 @@ namespace CRMWebApi.Controllers
                                 taskid = dtq.taskorderno,
                                 updatedby = user.userId
                             });
-
+                            db.SaveChanges();
 
                             //foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                             //{
@@ -339,6 +343,7 @@ namespace CRMWebApi.Controllers
                                 taskqueueid = dtq.taskorderno,
                                 updatedby = user.userId
                             }));
+                            db.SaveChanges();
                         }
                         #endregion
                         #region stok hareketleri kaydediliyor
@@ -399,6 +404,7 @@ namespace CRMWebApi.Controllers
                             toobject = dtq.attachedobjectid,
                             updatedby = user.userId
                         }));
+                        db.SaveChanges();
                         #endregion
                     }
                     #endregion
@@ -605,6 +611,18 @@ namespace CRMWebApi.Controllers
             }
         }
 
+        [HttpPost, Route("download")]
+        public HttpResponseMessage Post()
+        {
+            var path = @"C:\\CRMADSLWEB\\Files\\TRABZON\\ORTAHİSAR\\5562-ŞEREF BEKTAŞOĞLU\\deneme.jpeg";
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            var stream = new FileStream(path, FileMode.Open);
+            result.Content = new StreamContent(stream);
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "deneme.jpeg" };
+            return result;
+
+        }
 
         [Route("closeTaskQueues")]
         [HttpPost]

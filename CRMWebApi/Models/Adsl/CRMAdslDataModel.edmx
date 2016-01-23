@@ -311,7 +311,7 @@
           <Property Name="appointmentdate" Type="datetime2" Precision="7" />
           <Property Name="status" Type="int" />
           <Property Name="consummationdate" Type="datetime2" Precision="7" />
-          <Property Name="description" Type="nvarchar" MaxLength="511" />
+          <Property Name="description" Type="nvarchar(max)" />
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
@@ -722,7 +722,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="appointmentdate" Type="DateTime" Precision="7" />
           <Property Name="status" Type="Int32" />
           <Property Name="consummationdate" Type="DateTime" Precision="7" />
-          <Property Name="description" Type="String" MaxLength="511" FixedLength="false" Unicode="true" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="lastupdated" Type="DateTime" Precision="7" />
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
