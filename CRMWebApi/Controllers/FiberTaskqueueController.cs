@@ -941,12 +941,12 @@ namespace CRMWebApi.Controllers
                 var stockStatus = db.getPersonelStockFiber(tq.attachedpersonelid).Where(ss => scIds.Contains(ss.stockid)).ToList();
 
                 // stok kartı seri numaralı ürün ise task personelinin elindeki ürün seri noları alınıyor.
-                stockmovement.AsParallel().ForAll((sm) =>
-                {
+
+                stockmovement.ForEach(sm=> {
                     sm.stockStatus = stockStatus.FirstOrDefault(ss => ss.stockid == sm.stockcardid);
                     if (sm.stockStatus != null)
                     {
-                        if (sm.stockStatus.hasserial!=false)
+                        if (sm.stockStatus.hasserial != false)
                         {
                             sm.stockStatus.serials = db.getSerialsOnPersonelFiber(tq.attachedpersonelid, sm.stockcardid).ToList();
 
@@ -961,6 +961,26 @@ namespace CRMWebApi.Controllers
                     sm.toobjecttype = (int)FiberKocUserTypes.Customer;
                     sm.tocustomer = tq.attachedcustomer;
                 });
+                //stockmovement.AsParallel().ForAll((sm) =>
+                //{
+                //    sm.stockStatus = stockStatus.FirstOrDefault(ss => ss.stockid == sm.stockcardid);
+                //    if (sm.stockStatus != null)
+                //    {
+                //        if (sm.stockStatus.hasserial!=false)
+                //        {
+                //            sm.stockStatus.serials = db.getSerialsOnPersonelFiber(tq.attachedpersonelid, sm.stockcardid).ToList();
+
+                //        }
+                //        // seçili seri no listede olmayacağı için listeye ekleniyor
+                //        if (!string.IsNullOrWhiteSpace(sm.serialno))
+                //            sm.stockStatus.serials.Insert(0, sm.serialno);
+                //    }
+                //    sm.stockcard = stockCards.First(sc => sc.stockid == sm.stockcardid);
+                //    sm.fromobjecttype = (int)FiberKocUserTypes.TechnicalStuff;
+                //    sm.frompersonel = tq.attachedpersonel;
+                //    sm.toobjecttype = (int)FiberKocUserTypes.Customer;
+                //    sm.tocustomer = tq.attachedcustomer;
+                //});
                 return Request.CreateResponse(HttpStatusCode.OK, stockmovement.Select(sm => sm.toDTO()), "application/json");
                 //}
                 //else
