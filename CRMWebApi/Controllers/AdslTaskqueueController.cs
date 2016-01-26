@@ -619,11 +619,34 @@ namespace CRMWebApi.Controllers
             var stream = new FileStream(path, FileMode.Open);
             result.Content = new StreamContent(stream);
             result.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "deneme.jpeg" };
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            {
+                FileName = "deneme.jpeg"
+            };
             return result;
 
         }
+        //[HttpPost, Route("download")]
+        //public HttpResponseMessage GetFile()
+        //{
+        //    HttpResponseMessage result = null;
+        //    var localFilePath = @"C:\\CRMADSLWEB\\Files\\TRABZON\\ORTAHİSAR\\5562-ŞEREF BEKTAŞOĞLU\\deneme.jpeg";
 
+        //    if (!File.Exists(localFilePath))
+        //    {
+        //        result = Request.CreateResponse(HttpStatusCode.Gone);
+        //    }
+        //    else
+        //    {
+        //        // Serve the file to the client
+        //        result = Request.CreateResponse(HttpStatusCode.OK);
+        //        result.Content = new StreamContent(new FileStream(localFilePath, FileMode.Open, FileAccess.Read));
+        //        result.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+        //        result.Content.Headers.ContentDisposition.FileName = "deneme.jpeg";
+        //    }
+
+        //    return result;
+        //}
         [Route("closeTaskQueues")]
         [HttpPost]
         public HttpResponseMessage closeTaskQueues(DTORequestCloseTaskqueue request)
