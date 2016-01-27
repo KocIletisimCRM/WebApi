@@ -9,6 +9,8 @@ namespace CRMWebApi.DTOs.Fiber
         public Nullable<double> performancescore { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
         public Nullable<System.DateTime> lastupdated { get; set; }
+        public int? attachableobjecttype { get; set; }
+        public int ? attachablepersoneltype { get; set; }
         public DTOpersonel updatedpersonel { get; set; }
         public Nullable<bool> deleted { get; set; }
 

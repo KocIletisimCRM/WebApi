@@ -23,6 +23,7 @@ namespace CRMWebApi.Controllers
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
                 var rowCount = db.Database.SqlQuery<int>(countSQL).First();
@@ -153,6 +154,7 @@ namespace CRMWebApi.Controllers
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
                 var rowCount = db.Database.SqlQuery<int>(countSQL).First();

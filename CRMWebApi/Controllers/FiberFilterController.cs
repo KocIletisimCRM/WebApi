@@ -29,14 +29,19 @@ namespace CRMWebApi.Controllers
              {
                  var filter = request.getFilter();
                  if (request.isTaskFilter())
-                     return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(filter.subTables["taskid"].getFilterSQL())
-                             .OrderBy(t => t.taskname)
-                             .Select(t => new
-                                     {
-                                         t.taskid,
-                                         t.taskname,
-                                         t.attachableobjecttype
-                                     }).ToList(), "application/json");
+                {
+                    filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                    return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(
+                       filter.subTables["taskid"].getFilterSQL())
+                           .OrderBy(t => t.taskname)
+                           .Select(t => new
+                           {
+                               t.taskid,
+                               t.taskname,
+                               t.attachableobjecttype
+                           }).ToList(), "application/json");
+                }
+                    
                  if (request.isTaskstateFilter())
                  {
                      var acik = new taskstatepool { taskstate = "AÇIK", taskstateid = 0 };
@@ -44,7 +49,7 @@ namespace CRMWebApi.Controllers
                     var tspIds =  db.taskstatematches.SqlQuery(query)
                          .Select(t => t.stateid).ToList();
 
-                     var res = db.taskstatepool.Where(tsp => tspIds.Contains(tsp.taskstateid)).OrderBy(tsp => tsp.taskstate).ToList();
+                     var res = db.taskstatepool.Where(tsp => tspIds.Contains(tsp.taskstateid) && tsp.deleted==false).OrderBy(tsp => tsp.taskstate).ToList();
                      res.Insert(0, acik);
                      return Request.CreateResponse(HttpStatusCode.OK, res.Select(r=>r.toDTO()).ToList(), "application/json");
                  }

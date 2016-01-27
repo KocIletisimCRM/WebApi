@@ -119,7 +119,7 @@ namespace CRMWebApi.Controllers
                                      if (request.taskOrderNo != null)
                                      {
                                          var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
-                                         var salestaskorderno = db.taskqueue.Where(t => t.taskid == 3 && t.attachedobjectid == customerid)
+                                         var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
                                              .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
 
                                          //taska bağlı müşteri kampanyası ve bilgileri
@@ -240,6 +240,7 @@ namespace CRMWebApi.Controllers
                                 if (db.taskqueue.Where(r => r.deleted == false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
                                 var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
+
                                 var amtq = new taskqueue
                                 {
                                     appointmentdate = (dtq.task.tasktype == 2) ? (tq.appointmentdate) : (null),
@@ -260,7 +261,7 @@ namespace CRMWebApi.Controllers
 
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if (tq.task.taskid == 5 && tq.taskstatepool.statetype ==1)
+                        if ((tq.task.taskid == 5 ||tq.task.taskid==69) && tq.taskstatepool.statetype ==1)
                         {
                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
                             var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s => s.automandatorytasks).ToList();

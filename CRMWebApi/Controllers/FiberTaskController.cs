@@ -24,10 +24,12 @@ namespace CRMWebApi.Controllers
             using (var db = new CRMEntities())
             {
                 var filter = request.getFilter();
+                filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+
                 var querySql = filter.subTables["taskid"].getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.task.SqlQuery(querySql).ToList();
-                var ptypeids = res.Select(r => r.attachablepersoneltype).Distinct().ToList();
-                var personels = db.objecttypes.Where(p => ptypeids.Contains(p.typeid)).ToList();
+                //var ptypeids = res.Select(r => r.attachablepersoneltype).Distinct().ToList();
+                //var personels = db.objecttypes.Where(p => ptypeids.Contains(p.typeid)).ToList();
 
                 var obtpyeids = res.Select(r => r.attachableobjecttype).Distinct().ToList();
                 var objects = db.objecttypes.Where(o => obtpyeids.Contains(o.typeid)).ToList();
@@ -37,7 +39,6 @@ namespace CRMWebApi.Controllers
                 res.ForEach(r =>
                 {
                     r.objecttypes = objects.Where(t => t.typeid == r.attachableobjecttype).FirstOrDefault();
-                    r.personeltypes = personels.Where(p => p.typeid == r.attachablepersoneltype).FirstOrDefault();
                     r.tasktypes = tasktypess.Where(t => t.TaskTypeId == r.tasktype).FirstOrDefault();
                 });
 
