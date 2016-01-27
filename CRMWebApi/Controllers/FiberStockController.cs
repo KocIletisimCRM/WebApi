@@ -174,7 +174,7 @@ namespace CRMWebApi.Controllers
                         {
                             var count = db.stockmovement.Where(s => s.serialno == seri).Count();
                             //satınalmadan depoya ürün girerken seri numarası kontrolü yap
-                            if ((r.toobjecttype & (int)FiberKocUserTypes.StockRoomStuff) == (int)FiberKocUserTypes.StockRoomStuff && (int)count > 0)
+                            if (r.fromobjecttype== 33554433&&(r.toobjecttype & (int)FiberKocUserTypes.StockRoomStuff) == (int)FiberKocUserTypes.StockRoomStuff && (int)count > 0)
                             {
                                 errormessage.errorCode = -1;
                                 errormessage.errorMessage = seri + " Seri numarası daha önce girilmiş! Lütfen Kontrol Ediniz!";

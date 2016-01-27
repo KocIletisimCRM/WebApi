@@ -260,7 +260,7 @@ namespace CRMWebApi.Controllers
 
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if (tq.task.tasktypes.TaskTypeId == 3 && tq.taskstatepool.statetype ==1)
+                        if (tq.task.taskid == 5 && tq.taskstatepool.statetype ==1)
                         {
                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
                             var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s => s.automandatorytasks).ToList();
