@@ -184,6 +184,7 @@ namespace CRMWebApi.Controllers
                 var errormessage = new DTOResponseError();
                 dsite.sitename = request.sitename;
                 dsite.siteaddress = request.siteaddress;
+                dsite.sitedistrict = request.sitedistrict;
                 dsite.description = request.description;
                 dsite.lastupdated = DateTime.Now;
                 dsite.updatedby = user.userId;
