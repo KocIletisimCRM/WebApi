@@ -11,7 +11,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
        public int ? customerid { get; set; }
        public int ? attachedpersonelid { get; set; }
        public int ? blockid { get; set; }
-       public DateTime creationdate { get; set; }
+       public Nullable<System.DateTime> creationdate { get; set; }
        public int taskid { get; set; }
        public string description { get; set; }
        public string fault { get; set; }

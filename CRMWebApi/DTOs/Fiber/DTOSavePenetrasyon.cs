@@ -10,6 +10,6 @@ namespace CRMWebApi.DTOs.Fiber
     {
       public  int blockid { get; set; }
       public int attachedpersonelid { get; set; }
-      public DateTime date { get; set; }
+      public Nullable<System.DateTime> date { get; set; }
     }
 }
