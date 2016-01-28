@@ -261,23 +261,25 @@ namespace CRMWebApi.Controllers
 
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if ((tq.task.taskid == 5 ||tq.task.taskid==69) && tq.taskstatepool.statetype ==1)
+                        var automandatoryTask = new List<int>();
+                        if (tq.task.tasktypes.TaskTypeId == 3 && tq.taskstatepool.statetype ==1)
                         {
                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
-                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s => s.automandatorytasks).ToList();
-                            if (autotasks.Count > 0)
+                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
+                            if (autotasks.Count()>0)
                             {
-                                foreach (var item in (autotasks.First() ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                                foreach (var item in autotasks)
                                 {
                                     //eğer oluşacak task müşteri üzeirnde varsa ve durumu null ise yeniden oluşturmasına izin verme.
-                                    var autotaskcontrol = db.taskqueue.Where(t => t.taskid==item && t.status == null && t.attachedobjectid==dtq.attachedobjectid && t.deleted==false).Count();
-                                    if (autotaskcontrol > 0) continue;
+                                    //var autotaskcontrol = db.taskqueue.Where(t => t.taskid==item && t.status == null && t.attachedobjectid==dtq.attachedobjectid && t.deleted==false).Count();
+                                    //if (autotaskcontrol > 0) continue;
                                     db.taskqueue.Add(new taskqueue
                                     {
                                         appointmentdate = null,
                                         attachmentdate = null,
                                         attachedobjectid = dtq.attachedobjectid,
-                                        taskid = item,
+                                        attachedpersonelid=dtq.attachedpersonelid,
+                                        taskid = Convert.ToInt32(item),
                                         creationdate = DateTime.Now,
                                         deleted = false,
                                         lastupdated = DateTime.Now,
@@ -285,6 +287,7 @@ namespace CRMWebApi.Controllers
                                         updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
                                         relatedtaskorderid = tq.relatedtaskorderid
                                     });
+                                    db.SaveChanges();
                                 }
                             }
                         }
@@ -362,11 +365,8 @@ namespace CRMWebApi.Controllers
                                     var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
                                     db.taskqueue.Add(new taskqueue
                                     {
-
                                         appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
-
                                         attachmentdate = (item == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((tq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : tq.attachmentdate),
-
                                         attachedobjectid = dtq.attachedobjectid,
                                         taskid = item,
                                         creationdate = DateTime.Now,
@@ -374,9 +374,7 @@ namespace CRMWebApi.Controllers
                                         lastupdated = DateTime.Now,
                                         previoustaskorderid = tq.taskorderno,
                                         updatedby = user.userId,
-                                        /*25.10.2014 17:33 OZAL  Önceki kod kısmında alttaki satır kapalıydı ve task oluşurken ilişkilendirme yapılamıyordu*/
                                         relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
-                                        /*25.10.2014 17:33 */
                                     });
                                 }
                             }
@@ -908,7 +906,7 @@ namespace CRMWebApi.Controllers
                     var item = db.customer.Where(c => c.customerid == ct.customerid).First();
 
                     item.customername = ct.customername;
-                    item.customersurname = ct.customersurname;
+                   // item.customersurname = ct.customersurname;
                     item.gsm = ct.gsm;
                     item.tckimlikno = ct.tckimlikno;
                     if (ct.netStatus.id != 0)

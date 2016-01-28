@@ -95,7 +95,7 @@ namespace CRMWebApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.OK,
                                 db.customer.SqlQuery(filter.getFilterSQL())
                                     .Where(r => r.deleted == false)
-                                    .Select(r => new {r.customerid, r.customername, r.customersurname,r.flat})
+                                    .Select(r => new {r.customerid, r.customername,r.flat})
                                     .ToList(),
                                 "application/json");
 
@@ -336,7 +336,7 @@ namespace CRMWebApi.Controllers
                 else if (filter.tableName == "site")
                     res.AddRange(db.site.SqlQuery(querySql).Select(s => new idName { id = s.siteid, name = s.sitename }));
                 else if (filter.tableName == "customer")
-                    res.AddRange(db.customer.SqlQuery(querySql).Select(c => new idName { id = c.customerid, name = $"{c.customername} {c.customersurname}" }).Take(10));
+                    res.AddRange(db.customer.SqlQuery(querySql).Select(c => new idName { id = c.customerid, name = $"{c.customername}" }).Take(10));
                 else
                     res.AddRange(db.personel.SqlQuery(querySql).Select(p => new idName { id = p.personelid, name = p.personelname }));
                 return Request.CreateResponse(HttpStatusCode.OK,res.Select(r=>r.toDTO()),"application/json");

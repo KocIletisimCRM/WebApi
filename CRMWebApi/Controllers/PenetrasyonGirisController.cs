@@ -205,7 +205,7 @@ namespace CRMWebApi.Controllers
                      var item = db.customer.Where(c => c.customerid == ct.customerid).First();
 
                      item.customername = ct.customername;
-                     item.customersurname = ct.customersurname;
+                     //item.customersurname = ct.customersurname;
                      item.gsm = ct.gsm;
                      item.netstatu = ct.netStatus.id;
                      item.telstatu = ct.telStatus.id;

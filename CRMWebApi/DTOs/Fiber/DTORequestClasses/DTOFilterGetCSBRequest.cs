@@ -97,21 +97,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
                 if (customer != null)
                 {
                     //new DTOFieldFilter { fieldName = "category", op = 2, value = objecttype.value }
-                    if (customer.fieldName == "customername")
-                    {
-                        if (customer.value.ToString().IndexOf(' ') > -1)
-                        {
-                            string name = customer.value.ToString().Split(' ')[0];
-                            string sname = customer.value.ToString().Split(' ')[1];
-                            filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "customername", op = 6, value = name });
-                            filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "customersurname", op = 6, value = sname });
-                        }
-                        else
-                            filter.fieldFilters.Add(customer);
-                    }
-                    else
                         filter.fieldFilters.Add(customer);
-
                 }
 
                 if (hasIssFilter())

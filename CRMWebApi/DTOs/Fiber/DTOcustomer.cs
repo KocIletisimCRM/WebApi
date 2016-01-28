@@ -8,7 +8,7 @@ namespace CRMWebApi.DTOs.Fiber
         public DTOblock block { get; set; }
         public string tckimlikno { get; set; }
         public string customername { get; set; }
-        public string customersurname { get; set; }
+       // public string customersurname { get; set; }
         public string flat { get; set; }
         public string gsm { get; set; }
         public string phone { get; set; }
