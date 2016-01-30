@@ -124,7 +124,7 @@ namespace CRMWebApi.Controllers
                                          var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
                                           .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
                                          //herhangi bir taskın satış taskını bulup o satış taskı ile ilgili ürünleri taska gömmek için yazıldı.
-                                         while (r.previousTaskQueue!=null)
+                                         while (ptq!=null)
                                          {
                                              ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
                                              var test = ptq.task.tasktype;
