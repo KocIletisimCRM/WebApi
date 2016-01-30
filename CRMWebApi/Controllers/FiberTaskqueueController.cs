@@ -119,11 +119,29 @@ namespace CRMWebApi.Controllers
                                      if (request.taskOrderNo != null)
                                      {
                                          var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
+                                         r.previousTaskQueue = db.taskqueue.Where(t => t.taskorderno == r.previoustaskorderid).FirstOrDefault();
+                                         var ptq = r.previousTaskQueue;
                                          var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
-                                             .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                          .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                         //herhangi bir taskın satış taskını bulup o satış taskı ile ilgili ürünleri taska gömmek için yazıldı.
+                                         while (r.previousTaskQueue!=null)
+                                         {
+                                             ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                             var test = ptq.task.tasktype;
+                                             if (test == 1) {
+                                                  salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid && t.taskorderno==ptq.taskorderno)
+                                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                                 break;
+                                             }
+                                             else
+                                             {
+                                                 ptq.previousTaskQueue = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                                 ptq = ptq.previousTaskQueue;
+                                             }
+                                         }
 
                                          //taska bağlı müşteri kampanyası ve bilgileri
-                                         r.customerproduct = db.customerproduct.Include(c => c.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
+                                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno && c.deleted == false).ToList();
                                          //taska bağlı stock hareketleri
                                          r.stockmovement = db.stockmovement.Include(s => s.stockcard).Where(s => s.relatedtaskqueue == r.taskorderno).ToList();
                                          var stockcardids = db.taskstatematches.Where(tsm => tsm.taskid == r.taskid && tsm.stateid == r.status && tsm.stockcards != null).ToList()
@@ -170,6 +188,7 @@ namespace CRMWebApi.Controllers
         {
 
             var user = KOCAuthorizeAttribute.getCurrentUser();
+            
             var customerdocuments = tq.customerdocument != null ? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList() : null;
             var customerproducts = tq.customerproduct != null ? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : null;
             var stockmovements = tq.stockmovement != null ? tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList() : null;
@@ -229,6 +248,7 @@ namespace CRMWebApi.Controllers
                         #endregion
 
                         var docs = new List<int>();
+                        
                         var mailInfo = new List<object>();
                         #region Otomatik zorunlu taklar
                         if (tsm != null)
@@ -264,7 +284,22 @@ namespace CRMWebApi.Controllers
                         var automandatoryTask = new List<int>();
                         if (tq.task.tasktypes.TaskTypeId == 3 && tq.taskstatepool.statetype ==1)
                         {
-                            var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
+                            var ptq = dtq.previousTaskQueue;
+                            int saletask=tq.taskorderno;
+                            while (ptq!=null)
+                            {
+                                ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                if (ptq.task.tasktype == 1)
+                                {
+                                    saletask = ptq.taskorderno;break;
+                                }
+                                else
+                                {
+                                    ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault() ;
+
+                                }
+                            }
+                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid&&c.taskid==saletask && c.deleted == false).Select(s => s.productid).ToList();
                             var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
                             if (autotasks.Count()>0)
                             {

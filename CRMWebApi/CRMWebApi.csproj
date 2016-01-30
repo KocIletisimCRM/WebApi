@@ -116,6 +116,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ADSLAddressController.cs" />
     <Compile Include="Controllers\AdslCampaignController.cs" />
+    <Compile Include="Controllers\AdslCariController.cs" />
     <Compile Include="Controllers\AdslCustomerController.cs" />
     <Compile Include="Controllers\AdslDocumentController.cs" />
     <Compile Include="Controllers\AdslFilterController.cs" />

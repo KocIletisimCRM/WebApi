@@ -183,10 +183,8 @@ namespace CRMWebApi.Controllers
                                           .Include(pt => pt.previousTaskQueue)
                                           .Where(r => r.taskorderno == tq.taskorderno).First();
 
-
-
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
-                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != "AÇIK"))
+                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid == 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
                         if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
                         else dtq.status = tq.taskstatepool.taskstateid;
