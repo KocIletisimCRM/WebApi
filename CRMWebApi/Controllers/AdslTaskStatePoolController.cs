@@ -48,7 +48,7 @@ namespace CRMWebApi.Controllers
                 dtsp.taskstate = request.taskstate;
                 dtsp.statetype = request.statetype;
                 dtsp.lastupdated = DateTime.Now;
-                dtsp.updatedby = 7;
+                dtsp.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();
                 var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
@@ -67,7 +67,7 @@ namespace CRMWebApi.Controllers
                     statetype = request.statetype,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
-                    updatedby = 7,
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId,
                     deleted = false
                 };
                 db.taskstatepool.Add(tsp);

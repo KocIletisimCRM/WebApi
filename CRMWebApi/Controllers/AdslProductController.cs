@@ -56,7 +56,7 @@ namespace CRMWebApi.Controllers
                 dpro.automandatorytasks = request.automandatorytasks;
                 dpro.documents = request.documents;
                 dpro.lastupdated = DateTime.Now;
-                dpro.updatedby = 7;
+                dpro.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
@@ -79,7 +79,8 @@ namespace CRMWebApi.Controllers
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
-                    updatedby = 7
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId,
+
                 };
                 db.product_service.Add(p);
                 db.SaveChanges();

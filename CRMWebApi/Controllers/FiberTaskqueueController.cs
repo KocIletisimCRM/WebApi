@@ -336,7 +336,11 @@ namespace CRMWebApi.Controllers
                         //    ttqretek = ttqretek.relatedTaskQueue;
                         //if (ttqretek != null)
                         //{
-                        //    if (ttqretek.taskid == 6117 || ttqretek.taskid == 6115)
+                        //    if (ttqretek.taskid == 611
+                        
+                        
+                        
+                      //  || ttqretek.taskid == 6115)
                         //        test = true;
                         //}
                         //if (!test)//Ek ürün veya retention değilse

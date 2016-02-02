@@ -56,7 +56,7 @@ namespace CRMWebApi.Controllers
                 ds.unit = request.unit;
                 ds.description = request.description;
                 ds.lastupdated = DateTime.Now;
-                ds.updatedby = 7;
+                ds.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
@@ -80,7 +80,8 @@ namespace CRMWebApi.Controllers
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
-                    updatedby = 7
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId
+
                 };
                 db.stockcard.Add(s);
                 db.SaveChanges();
