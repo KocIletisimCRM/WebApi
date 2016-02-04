@@ -616,14 +616,15 @@ namespace CRMWebApi.Controllers
             HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
             var stream = new FileStream(path, FileMode.Open);
             result.Content = new StreamContent(stream);
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-            {
-                FileName = "deneme.jpeg"
-            };
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            result.Content.Headers.ContentDisposition
+                = new ContentDispositionHeaderValue("attachment");
+            result.Content.Headers.ContentDisposition.FileName = "deneme.jpeg";
+            result.Content.Headers.ContentLength = stream.Length;
             return result;
 
         }
+
         //[HttpPost, Route("download")]
         //public HttpResponseMessage GetFile()
         //{
@@ -685,7 +686,7 @@ namespace CRMWebApi.Controllers
                 #endregion
                 var tsm = db.taskstatematches.Where(r => r.taskid == tq.taskid && r.stateid == tq.status).FirstOrDefault();
                 #region Eski ürünler siliniyor
-                db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where taskid={1}", new object[] { 7, tq.taskorderno });
+                db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where taskid={1}", new object[] { user.userId, tq.taskorderno });
                 #endregion
                 #region  Yeni ürün ekleniyor
                 foreach (var p in request.selectedProductsIds.Where(s => s != 0))
@@ -834,7 +835,7 @@ namespace CRMWebApi.Controllers
                     lastupdated = DateTime.Now,
                     status = null,
                     taskid = 66,
-                    updatedby = 7,//User.Identity.PersonelID
+                    updatedby = KOCAuthorizeAttribute.getCurrentUser().userId
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();
@@ -931,7 +932,7 @@ namespace CRMWebApi.Controllers
                                 tq.attachedpersonelid = apid;
                                 tq.attachmentdate = DateTime.Now;
                                 tq.lastupdated = DateTime.Now;
-                                tq.updatedby = 7;
+                                tq.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId;
                                 db.SaveChanges();
                             }
                             DTOResponseError re = new DTOResponseError

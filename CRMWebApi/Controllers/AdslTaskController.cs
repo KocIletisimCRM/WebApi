@@ -62,7 +62,7 @@ namespace CRMWebApi.Controllers
                 dt.tasktype = request.tasktypes.TaskTypeId;
                 dt.attachableobjecttype = request.objecttypes.typeid;
                 dt.attachablepersoneltype = request.personeltypes.typeid;
-                dt.updatedby = 7;
+                dt.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 dt.lastupdated = DateTime.Now;
                 db.SaveChanges();
                 errormessage.errorCode = 1;
@@ -88,7 +88,8 @@ namespace CRMWebApi.Controllers
                     deleted = false,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
-                    updatedby = 7
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId
+
 
                 };
                 db.task.Add(t);

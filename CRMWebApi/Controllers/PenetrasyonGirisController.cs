@@ -60,17 +60,7 @@ namespace CRMWebApi.Controllers
                          (param.sitename==null || c.block.site.sitename.Contains(param.sitename)
                            )
                      ).ToList();
-                
-//                 string sqlcommand = @"select s.sitename,b.blockname, c.* from taskqueue tq left join customer c on tq.attachedobjectid=c.customerid
-//							left join block b on c.blockid=b.blockid
-//							left join site s on b.siteid=s.siteid
-//                            where taskid=86 and status is null and tq.creationdate >'2015-01-01 13:32:20.3594437'
-//                            and c.deleted=0 and tq.deleted=0 
-//                            and (s.siteid=@siteid or @siteid is null) 
-//                            and (b.blockid=@blockid or @blockid is null)
-//                            and (c.customername like CONCAT('%',@name,'%') or @name is null) ";
-                 
-                 //var res=db.customer.SqlQuery(sqlcommand, new object[]{siteid, blockid, name}).ToList();
+
                  
                  
                  return Request.CreateResponse(HttpStatusCode.OK, res.Select(s=>s.toDTO()), "application/json");

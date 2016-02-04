@@ -56,7 +56,7 @@ namespace CRMWebApi.Controllers
                 dcamp.products = request.products;
                 dcamp.documents = request.documents;
                 dcamp.lastupdated = DateTime.Now;
-                dcamp.updatedby = 7;
+                dcamp.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
@@ -79,7 +79,7 @@ namespace CRMWebApi.Controllers
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
-                    updatedby = 7
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId
                 };
                 db.campaigns.Add(c);
                 db.SaveChanges();

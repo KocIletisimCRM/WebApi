@@ -50,7 +50,7 @@ namespace CRMWebApi.Controllers
                 ddoc.documentname = request.documentname;
                 ddoc.documentdescription = request.documentdescription;
                 ddoc.lastupdated = DateTime.Now;
-                ddoc.updatedby = 7;
+                ddoc.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();
 
                 return Request.CreateResponse(HttpStatusCode.OK, DTOResponseError.NoError(), "application/json");
@@ -70,7 +70,7 @@ namespace CRMWebApi.Controllers
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
                     deleted = false,
-                    updatedby = 7
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId
                 };
                 db.document.Add(d);
                 db.SaveChanges();

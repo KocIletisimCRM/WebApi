@@ -296,7 +296,6 @@ namespace CRMWebApi.Controllers
                                 else
                                 {
                                     ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault() ;
-
                                 }
                             }
                              var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid&&c.taskid==saletask && c.deleted == false).Select(s => s.productid).ToList();
@@ -337,7 +336,11 @@ namespace CRMWebApi.Controllers
                         //    ttqretek = ttqretek.relatedTaskQueue;
                         //if (ttqretek != null)
                         //{
-                        //    if (ttqretek.taskid == 6117 || ttqretek.taskid == 6115)
+                        //    if (ttqretek.taskid == 611
+                        
+                        
+                        
+                      //  || ttqretek.taskid == 6115)
                         //        test = true;
                         //}
                         //if (!test)//Ek ürün veya retention değilse
@@ -941,6 +944,8 @@ namespace CRMWebApi.Controllers
                     var item = db.customer.Where(c => c.customerid == ct.customerid).First();
 
                     item.customername = ct.customername;
+                    item.gsm = ct.gsm;
+                    item.phone = ct.phone;
                    // item.customersurname = ct.customersurname;
                     item.gsm = ct.gsm;
                     item.tckimlikno = ct.tckimlikno;
