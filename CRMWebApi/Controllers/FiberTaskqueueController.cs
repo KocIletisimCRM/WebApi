@@ -271,6 +271,7 @@ namespace CRMWebApi.Controllers
                                     creationdate = DateTime.Now,
                                     deleted = false,
                                     lastupdated = DateTime.Now,
+                                   // description = dtq.taskstatepool.statetype == 2 ? tq.description : null,
                                     previoustaskorderid = dtq.taskorderno,
                                     updatedby = user.userId, //User.Identity.PersonelID,
                                     relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
