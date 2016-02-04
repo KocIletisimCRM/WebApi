@@ -307,7 +307,7 @@ namespace CRMWebApi.Controllers
                                 {
                                     //eğer oluşacak task müşteri üzeirnde varsa ve durumu null ise yeniden oluşturmasına izin verme.
                                     //var autotaskcontrol = db.taskqueue.Where(t => t.taskid==item && t.status == null && t.attachedobjectid==dtq.attachedobjectid && t.deleted==false).Count();
-                                    //if (autotaskcontrol > 0) continue;
+                                    if (Convert.ToInt32(item) == 6125) continue;
                                     db.taskqueue.Add(new taskqueue
                                     {
                                         appointmentdate = null,
