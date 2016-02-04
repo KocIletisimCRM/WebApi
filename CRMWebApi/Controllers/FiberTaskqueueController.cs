@@ -299,21 +299,27 @@ namespace CRMWebApi.Controllers
                                     ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault() ;
                                 }
                             }
-                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid&&c.taskid==saletask && c.deleted == false).Select(s => s.productid).ToList();
-                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
+                            var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.taskid == saletask && c.deleted == false).Select(s => s.productid).ToList();
+
+                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).ToList();
+                            var tasks = new List<int>();
+                            autotasks.ForEach(t=> {
+                                tasks.AddRange((t.automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)));
+                            });
                             if (autotasks.Count()>0)
                             {
-                                foreach (var item in autotasks)
+                                foreach (var item in tasks)
                                 {
                                     //eğer oluşacak task müşteri üzeirnde varsa ve durumu null ise yeniden oluşturmasına izin verme.
                                     //var autotaskcontrol = db.taskqueue.Where(t => t.taskid==item && t.status == null && t.attachedobjectid==dtq.attachedobjectid && t.deleted==false).Count();
                                     if (Convert.ToInt32(item) == 6125) continue;
+                                    var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
                                     db.taskqueue.Add(new taskqueue
                                     {
                                         appointmentdate = null,
                                         attachmentdate = null,
                                         attachedobjectid = dtq.attachedobjectid,
-                                        attachedpersonelid=dtq.attachedpersonelid,
+                                        attachedpersonelid= (personel_id ? dtq.attachedpersonelid : (null)),
                                         taskid = Convert.ToInt32(item),
                                         creationdate = DateTime.Now,
                                         deleted = false,
