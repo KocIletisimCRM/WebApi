@@ -216,6 +216,7 @@
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Fiber\DTOcustomerdocument.cs" />
     <Compile Include="DTOs\Fiber\DTOgetPersonelStockFiber_Result.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestKatZiyareti.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueDocuments.cs" />

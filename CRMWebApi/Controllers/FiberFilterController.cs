@@ -364,5 +364,18 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
             }
         }
+
+        //Herhangi bir task ile ilişkilendirilmiş durumları getir
+        [Route("getTaskMatchesStatus")]
+        [HttpPost]
+        public HttpResponseMessage getTaskMatchesStatus(DTOtask request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var stateids = db.taskstatematches.Where(t => t.taskid == request.taskid).Select(s => s.stateid).ToList();
+                var res = db.taskstatepool.Where(s => stateids.Contains(s.taskstateid)).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
+            }
+        }
     }
 }

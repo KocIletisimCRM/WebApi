@@ -860,6 +860,26 @@ namespace CRMWebApi.Controllers
             }
         }
 
+        [Route("saveZiyaretTask")]
+        [HttpPost]
+        public HttpResponseMessage saveZiyaretTask(DTORequestKatZiyareti request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var user = KOCAuthorizeAttribute.getCurrentUser();
+                foreach (var item in request.tasks)
+                {
+                    var tq = db.taskqueue.Where(t => t.taskorderno == item).FirstOrDefault();
+                    tq.lastupdated = DateTime.Now;
+                    tq.consummationdate = DateTime.Now;
+                    tq.status = request.status;
+                    tq.updatedby = user.userId;
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK,"İşlem Başarılı", "application/json");
+            }
+        }
+
         [Route("personelattachment")]
         [HttpPost]
         public HttpResponseMessage personelattachment(DTORequestAttachmentPersonel request)
