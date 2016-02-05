@@ -665,6 +665,7 @@ namespace CRMWebApi.Controllers
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
+
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
@@ -879,6 +880,25 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK,"İşlem Başarılı", "application/json");
             }
         }
+        [Route("saveCTStatusWithKatZiyaret")]
+        [HttpPost]
+        public HttpResponseMessage saveCTStatusWithKatZiyaret(DTORequestKatZiyareti request)
+        {
+            using (var db = new CRMEntities())
+            {
+                var user = KOCAuthorizeAttribute.getCurrentUser();
+                foreach (var item in request.tasks)
+                {
+                    var tq = db.taskqueue.Where(t => t.taskorderno == item).FirstOrDefault();
+                    var ct = db.customer.Where(c => c.customerid == tq.attachedobjectid).FirstOrDefault();
+                    ct.customerstatus = request.cstatus;
+                    ct.lastupdated = DateTime.Now;
+                    ct.updatedby = user.userId;
+                    db.SaveChanges();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, "İşlem Başarılı", "application/json");
+            }
+        }
 
         [Route("personelattachment")]
         [HttpPost]
@@ -976,6 +996,21 @@ namespace CRMWebApi.Controllers
                    // item.customersurname = ct.customersurname;
                     item.gsm = ct.gsm;
                     item.tckimlikno = ct.tckimlikno;
+                    if (ct.customer_status.ID != 0)
+                    {
+                        if (item.customerstatus!=ct.customer_status.ID)
+                        {
+                            var ziyaretTQ = db.taskqueue.Where(t => t.taskid == 86 && t.attachedobjectid == item.customerid).ToList();
+                            foreach (var tq in ziyaretTQ)
+                            {
+                                tq.status = Convert.ToInt32(ct.customer_status.ID);
+                                tq.description = "Kimlik Kartı Güncellemesi ile Otomatik Kapatıldı";
+                                tq.updatedby = user.userId;
+                                tq.lastupdated = DateTime.Now;
+                            }
+                        }
+                    }
+                        item.customerstatus = ct.customer_status.ID;
                     if (ct.netStatus.id != 0)
                         item.netstatu = ct.netStatus.id;
                     if (ct.telStatus.id!=0)
