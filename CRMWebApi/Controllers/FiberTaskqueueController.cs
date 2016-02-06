@@ -98,6 +98,21 @@ namespace CRMWebApi.Controllers
                 var cststatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.customerstatus != null).Select(c => c.attachedcustomer.customerstatus).Distinct().ToList();
                 var cststatus = db.customer_status.Where(c => cststatusIds.Contains(c.ID)).ToList();
 
+                var netstatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.netstatu != null).Select(c => c.attachedcustomer.netstatu).Distinct().ToList();
+                var netstatus = db.netStatus.Where(c => netstatusIds.Contains(c.id)).ToList();
+
+                var tvStatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.tvstatu != null).Select(c => c.attachedcustomer.tvstatu).Distinct().ToList();
+                var tvstatus = db.TvKullanımıStatus.Where(c => tvStatusIds.Contains(c.id)).ToList();
+
+                var telStatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.telstatu != null).Select(c => c.attachedcustomer.telstatu).Distinct().ToList();
+                var telstatus = db.telStatus.Where(c => telStatusIds.Contains(c.id)).ToList();
+
+                var ttvStatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.turkcellTv != null).Select(c => c.attachedcustomer.turkcellTv).Distinct().ToList();
+                var ttvstatus = db.TurkcellTVStatus.Where(c => ttvStatusIds.Contains(c.id)).ToList();
+
+                var gsmStatusIds = res.Where(c => c.attachedcustomer != null && c.attachedcustomer.gsmstatu != null).Select(c => c.attachedcustomer.gsmstatu).Distinct().ToList();
+                var gsmstatus = db.gsmKullanımıStatus.Where(c => gsmStatusIds.Contains(c.id)).ToList();
+
                 var taskorderIds = res.Select(r => r.taskorderno).ToList();
                 var editables = db.v_taskorderIsEditableCRM1Set.Where(r => taskorderIds.Contains(r.taskorderno)).ToList();
                 res.ForEach(r =>
@@ -112,7 +127,16 @@ namespace CRMWebApi.Controllers
                                          r.attachedblock = blocks.Where(b => b.blockid == r.attachedobjectid).FirstOrDefault();
                                      }
                                      if (r.attachedcustomer != null) r.attachedcustomer.issStatus = isss.Where(i => i.id == (r.attachedcustomer.iss ?? 0)).FirstOrDefault();
-                                     if (r.attachedcustomer != null) r.attachedcustomer.customer_status = cststatus.Where(c => c.ID == (r.attachedcustomer.customerstatus ?? 0)).FirstOrDefault();
+                                     if (r.attachedcustomer != null)
+                                     {
+                                         r.attachedcustomer.customer_status = cststatus.Where(c => c.ID == (r.attachedcustomer.customerstatus ?? 0)).FirstOrDefault();
+                                         r.attachedcustomer.netStatus = netstatus.Where(c => c.id == (r.attachedcustomer.netstatu ?? 0)).FirstOrDefault();
+                                         r.attachedcustomer.telStatus = telstatus.Where(c => c.id == (r.attachedcustomer.telstatu ?? 0)).FirstOrDefault();
+                                         r.attachedcustomer.TvKullanımıStatus = tvstatus.Where(c => c.id == (r.attachedcustomer.tvstatu ?? 0)).FirstOrDefault();
+                                         r.attachedcustomer.TurkcellTVStatus = ttvstatus.Where(c => c.id == (r.attachedcustomer.turkcellTv ?? 0)).FirstOrDefault();
+                                         r.attachedcustomer.gsmKullanımıStatus = gsmstatus.Where(c => c.id == (r.attachedcustomer.gsmstatu ?? 0)).FirstOrDefault();
+                                     }
+
                                      r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
                                      r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
                                      r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
@@ -1023,6 +1047,8 @@ namespace CRMWebApi.Controllers
                          item.tvstatu = ct.TvKullanımıStatus.id;
                     if (ct.telStatus.id != 0)
                         item.telstatu = ct.telStatus.id;
+                    if (ct.TurkcellTVStatus.id != 0)
+                        item.turkcellTv = ct.TurkcellTVStatus.id;
                     item.description = ct.description;
                     item.lastupdated = DateTime.Now;
                     item.updatedby = user.userId;
@@ -1031,7 +1057,10 @@ namespace CRMWebApi.Controllers
                 if (ct.closedKatZiyareti == true)
                 {
                     var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
-                    res.status = 1079;
+                    if (res!=null)
+                    {
+                        res.status = 1079;
+                    }
                 }
 
                 db.SaveChanges();

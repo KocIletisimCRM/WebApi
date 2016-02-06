@@ -19,7 +19,7 @@ namespace CRMWebApi.DTOs.Fiber
         public Nullable<bool> deleted { get; set; }
         public DTOcustomer_status customer_status { get; set; }
         public DTOtelStatus telStatus { get; set; }
-        public int turkcellTv { get; set; }
+        public DTOturkcelltvstatus TurkcellTVStatus { get; set; }
         public DTOnetStatus netStatus { get; set; }
         public string description { get; set; }
         public DTOissStatus issStatus { get; set; }

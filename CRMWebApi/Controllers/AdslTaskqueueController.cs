@@ -303,25 +303,29 @@ namespace CRMWebApi.Controllers
                                 taskid = dtq.taskorderno,
                                 updatedby = user.userId
                             });
+                           
+
+                            if (tq.task.taskid == 88)
+                            {
+                                foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                                {
+                                    var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
+                                    db.taskqueue.Add(new adsl_taskqueue
+                                    {
+                                        appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
+                                        attachmentdate = (item == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((tq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : tq.attachmentdate),
+                                        attachedobjectid = dtq.attachedobjectid,
+                                        taskid = item,
+                                        creationdate = DateTime.Now,
+                                        deleted = false,
+                                        lastupdated = DateTime.Now,
+                                        previoustaskorderid = tq.taskorderno,
+                                        updatedby = user.userId,
+                                        relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                    });
+                                }
+                            }
                             db.SaveChanges();
-
-                            //foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
-                            //{
-                            //    db.taskqueue.Add(new adsl_taskqueue
-                            //    {
-
-                            //        appointmentdate = null,
-                            //        attachmentdate = null,
-                            //        attachedobjectid = dtq.attachedobjectid,
-                            //        taskid = item,
-                            //        creationdate = DateTime.Now,
-                            //        deleted = false,
-                            //        lastupdated = DateTime.Now,
-                            //        previoustaskorderid = tq.taskorderno,
-                            //        updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
-                            //        relatedtaskorderid = tq.relatedtaskorderid
-                            //    });
-                            //}
                         }
                         #endregion
                         #region belgeler kaydediliyor
