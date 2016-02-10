@@ -63,7 +63,10 @@ namespace CRMWebApi.Controllers
                         var rolelist = Enum.GetValues(typeof(FiberKocUserTypes)).OfType<FiberKocUserTypes>().Where(r => user.hasRoleFiber(r)).Select(r => (int)r).ToList();
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
                     }
-                    else whereClauses.Add($"(fromobject = {user.userId} or toobject = {user.userId})");
+                    else if (user.userRole!=2)
+                    {
+                        whereClauses.Add($"(fromobject = {user.userId} or toobject = {user.userId})");
+                    }
                     var whereClause = string.Join(" AND ", whereClauses);
                     querySql = $"{sqlPartitions[0]}paging as ({pagingWhereClauses[0]}stockmovement WHERE{whereClause}) SELECT *{sqlPartitions[2]} ";
 
