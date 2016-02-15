@@ -135,6 +135,7 @@
     <Compile Include="Controllers\FiberDocumentController.cs" />
     <Compile Include="Controllers\FiberPersonelController.cs" />
     <Compile Include="Controllers\FiberProductController.cs" />
+    <Compile Include="Controllers\FiberReportController.cs" />
     <Compile Include="Controllers\FiberSaveTasksController.cs" />
     <Compile Include="Controllers\FiberStockCardController.cs" />
     <Compile Include="Controllers\FiberTaskController.cs" />
@@ -211,6 +212,7 @@
     <Compile Include="DTOs\Adsl\DTOturkcelltvstatus.cs" />
     <Compile Include="DTOs\Adsl\DTOtvStatus.cs" />
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
+    <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueDocuments.cs" />
     <Compile Include="DTOs\Fiber\DTOSavePenetrasyon.cs" />
     <Compile Include="DTOs\Fiber\DTOTest.cs" />
+    <Compile Include="DTOs\Fiber\KocFiberProccess.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizedUser.cs" />
     <Compile Include="KOCAuthorization\KOCUserTypes.cs" />
