@@ -214,6 +214,7 @@
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
+    <Compile Include="DTOs\DTOBasvuru.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Fiber\DTOcustomerdocument.cs" />

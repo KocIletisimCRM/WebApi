@@ -305,7 +305,7 @@ namespace CRMWebApi.Controllers
                             });
                            
 
-                            if (tq.task.taskid == 88)
+                            if (tq.task.taskid == 88 && tq.taskstatepool.taskstateid != 9116)
                             {
                                 foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                                 {
