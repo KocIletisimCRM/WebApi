@@ -14,6 +14,6 @@ namespace CRMWebApi.DTOs
         public string adres { get; set; }
         public bool called { get; set; }
         public DateTime createtime { get; set; }
-        public DateTime calledtime { get; set; }
+        public Nullable<System.DateTime> calledtime { get; set; }
     }
 }
