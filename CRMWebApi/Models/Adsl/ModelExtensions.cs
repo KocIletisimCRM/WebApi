@@ -270,4 +270,11 @@ namespace CRMWebApi.Models.Adsl
             return toDTO<DTOgetPersonelStockAdsl_Result>();
         }
     }
+    public partial class atama : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOatama>();
+        }
+    }
 }

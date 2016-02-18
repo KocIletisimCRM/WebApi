@@ -18,6 +18,8 @@ namespace CRMWebApi.Models.Adsl
         public adsl_tasktypes()
         {
             this.adsl_task = new HashSet<adsl_task>();
+            this.atama = new HashSet<atama>();
+            this.atama1 = new HashSet<atama>();
         }
     
         public int TaskTypeId { get; set; }
@@ -25,5 +27,9 @@ namespace CRMWebApi.Models.Adsl
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_task> adsl_task { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<atama> atama { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<atama> atama1 { get; set; }
     }
 }

@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ADSLAddressController.cs" />
+    <Compile Include="Controllers\AdslAtamaController.cs" />
     <Compile Include="Controllers\AdslCampaignController.cs" />
     <Compile Include="Controllers\AdslCariController.cs" />
     <Compile Include="Controllers\AdslCustomerController.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="DTOs\Adsl\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Adsl\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Adsl\CustomerTransferObject.cs" />
+    <Compile Include="DTOs\Adsl\DTOatama.cs" />
     <Compile Include="DTOs\Adsl\DTObucak.cs" />
     <Compile Include="DTOs\Adsl\DTOcustomerdocument.cs" />
     <Compile Include="DTOs\Adsl\DTOgetPersonelStockAdsl_Result.cs" />
@@ -288,6 +290,9 @@
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\adsl_vcampaignproducts.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\atama.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\bina.cs">

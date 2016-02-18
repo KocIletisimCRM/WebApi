@@ -5,6 +5,18 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="KOCSAMADLSModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="atama">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="closedtasktype" Type="int" />
+          <Property Name="closedtask" Type="int" />
+          <Property Name="offpersonel" Type="int" />
+          <Property Name="formedtasktype" Type="int" />
+          <Property Name="formedtask" Type="int" />
+          <Property Name="appointedpersonel" Type="int" />
+        </EntityType>
         <EntityType Name="bina">
           <Key>
             <PropertyRef Name="kimlikNo" />
@@ -409,6 +421,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Parameter Name="taskorderno" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="KOCSAMADLSModelStoreContainer">
+          <EntitySet Name="atama" EntityType="Self.atama" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="bina" EntityType="Self.bina" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="bucak" EntityType="Self.bucak" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="cadde" EntityType="Self.cadde" Schema="dbo" store:Type="Tables" />
@@ -629,6 +642,8 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="relatedpersonelid" Type="Int32" />
           <NavigationProperty Name="relatedpersonel2" Relationship="KOCSAMADLSModel.adsl_personeladsl_personel" FromRole="adsl_personel" ToRole="adsl_personel1" />
           <NavigationProperty Name="relatedpersonel" Relationship="KOCSAMADLSModel.adsl_personeladsl_personel" FromRole="adsl_personel1" ToRole="adsl_personel" />
+          <NavigationProperty Name="atama" Relationship="KOCSAMADLSModel.atamaadsl_personel" FromRole="adsl_personel" ToRole="atama" />
+          <NavigationProperty Name="atamaoff" Relationship="KOCSAMADLSModel.atamaadsl_personeloff" FromRole="adsl_personel" ToRole="atama" />
         </EntityType>
         <EntityType Name="adsl_product_service">
           <Key>
@@ -706,6 +721,8 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <NavigationProperty Name="objecttypes" Relationship="KOCSAMADLSModel.adsl_objecttypesadsl_task" FromRole="adsl_task" ToRole="adsl_objecttypes" />
           <NavigationProperty Name="tasktypes" Relationship="KOCSAMADLSModel.adsl_tasktypesadsl_task" FromRole="adsl_task" ToRole="adsl_tasktypes" />
           <NavigationProperty Name="taskstatematches" Relationship="KOCSAMADLSModel.adsl_taskadsl_taskstatematches" FromRole="adsl_task" ToRole="adsl_taskstatematches" />
+          <NavigationProperty Name="atama" Relationship="KOCSAMADLSModel.atamaadsl_task" FromRole="adsl_task" ToRole="atama" />
+          <NavigationProperty Name="atama1" Relationship="KOCSAMADLSModel.atamaadsl_task1" FromRole="adsl_task" ToRole="atama" />
         </EntityType>
         <EntityType Name="adsl_taskqueue">
           <Key>
@@ -781,6 +798,8 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="adsl_task" Relationship="KOCSAMADLSModel.adsl_tasktypesadsl_task" FromRole="adsl_tasktypes" ToRole="adsl_task" />
+          <NavigationProperty Name="atama" Relationship="KOCSAMADLSModel.atamaadsl_tasktypes" FromRole="adsl_tasktypes" ToRole="atama" />
+          <NavigationProperty Name="atama1" Relationship="KOCSAMADLSModel.adsl_tasktypesatama" FromRole="adsl_tasktypes" ToRole="atama" />
         </EntityType>
         <EntityContainer Name="KOCSAMADLSEntities" annotation:LazyLoadingEnabled="false">
           <EntitySet Name="campaigns" EntityType="KOCSAMADLSModel.adsl_campaigns" />
@@ -930,6 +949,31 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <AssociationSet Name="adsl_personeladsl_personel" Association="KOCSAMADLSModel.adsl_personeladsl_personel">
             <End Role="adsl_personel" EntitySet="personel" />
             <End Role="adsl_personel1" EntitySet="personel" />
+          </AssociationSet>
+          <EntitySet Name="atama" EntityType="KOCSAMADLSModel.atama" />
+          <AssociationSet Name="atamaadsl_tasktypes" Association="KOCSAMADLSModel.atamaadsl_tasktypes">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="adsl_tasktypes" EntitySet="tasktypes" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_tasktypesatama" Association="KOCSAMADLSModel.adsl_tasktypesatama">
+            <End Role="adsl_tasktypes" EntitySet="tasktypes" />
+            <End Role="atama" EntitySet="atama" />
+          </AssociationSet>
+          <AssociationSet Name="atamaadsl_task" Association="KOCSAMADLSModel.atamaadsl_task">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="adsl_task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="atamaadsl_task1" Association="KOCSAMADLSModel.atamaadsl_task1">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="adsl_task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="atamaadsl_personel" Association="KOCSAMADLSModel.atamaadsl_personel">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="adsl_personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="atamaadsl_personeloff" Association="KOCSAMADLSModel.atamaadsl_personeloff">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="adsl_personel" EntitySet="personel" />
           </AssociationSet>
         </EntityContainer>
         <Association Name="personeltaskqueue">
@@ -1375,6 +1419,96 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="atama">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="closedtasktype" Type="Int32" />
+          <Property Name="closedtask" Type="Int32" />
+          <Property Name="offpersonel" Type="Int32" />
+          <Property Name="formedtasktype" Type="Int32" />
+          <Property Name="formedtask" Type="Int32" />
+          <Property Name="appointedpersonel" Type="Int32" />
+          <NavigationProperty Name="adsl_tasktypes" Relationship="KOCSAMADLSModel.atamaadsl_tasktypes" FromRole="atama" ToRole="adsl_tasktypes" />
+          <NavigationProperty Name="adsl_tasktypesformed" Relationship="KOCSAMADLSModel.adsl_tasktypesatama" FromRole="atama" ToRole="adsl_tasktypes" />
+          <NavigationProperty Name="adsl_task" Relationship="KOCSAMADLSModel.atamaadsl_task" FromRole="atama" ToRole="adsl_task" />
+          <NavigationProperty Name="adsl_task1" Relationship="KOCSAMADLSModel.atamaadsl_task1" FromRole="atama" ToRole="adsl_task" />
+          <NavigationProperty Name="adsl_personel" Relationship="KOCSAMADLSModel.atamaadsl_personel" FromRole="atama" ToRole="adsl_personel" />
+          <NavigationProperty Name="adsl_personeloff" Relationship="KOCSAMADLSModel.atamaadsl_personeloff" FromRole="atama" ToRole="adsl_personel" />
+        </EntityType>
+        <Association Name="atamaadsl_tasktypes">
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_tasktypes" Role="adsl_tasktypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="closedtasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="adsl_tasktypesatama">
+          <End Type="KOCSAMADLSModel.adsl_tasktypes" Role="adsl_tasktypes" Multiplicity="0..1" />
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="formedtasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamaadsl_task">
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="closedtask" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamaadsl_task1">
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_task" Role="adsl_task" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="formedtask" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamaadsl_personel">
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="appointedpersonel" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamaadsl_personeloff">
+          <End Type="KOCSAMADLSModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="offpersonel" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1789,6 +1923,19 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
                 <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />
                 <ScalarProperty Name="ad" ColumnName="ad" />
                 <ScalarProperty Name="kimlikNo" ColumnName="kimlikNo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="atama">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.atama">
+              <MappingFragment StoreEntitySet="atama">
+                <ScalarProperty Name="appointedpersonel" ColumnName="appointedpersonel" />
+                <ScalarProperty Name="formedtask" ColumnName="formedtask" />
+                <ScalarProperty Name="formedtasktype" ColumnName="formedtasktype" />
+                <ScalarProperty Name="offpersonel" ColumnName="offpersonel" />
+                <ScalarProperty Name="closedtask" ColumnName="closedtask" />
+                <ScalarProperty Name="closedtasktype" ColumnName="closedtasktype" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
