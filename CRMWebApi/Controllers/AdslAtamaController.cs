@@ -12,9 +12,9 @@ namespace CRMWebApi.Controllers
     [RoutePrefix("api/Adsl/Atama")]
     public class AdslAtamaController : ApiController
     {
-        [Route("insertAtama")]
+        [Route("insertPersonelAtama")]
         [HttpPost]
-        public HttpResponseMessage insertPersonel(DTOatama request)
+        public HttpResponseMessage insertPersonelAtama(DTOatama request)
         {
             using (var db = new KOCSAMADLSEntities())
             using (var tran = db.Database.BeginTransaction())
@@ -40,6 +40,33 @@ namespace CRMWebApi.Controllers
                     tran.Rollback();
                     var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Hata" };
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+                }
+        }
+        [Route("updatePersonelAtama")]
+        [HttpPost]
+        public HttpResponseMessage updatePersonelAtama(DTOatama request)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            using (var tran = db.Database.BeginTransaction())
+                try
+                {
+                    var upa = db.atama.Where(r => r.id == request.id).FirstOrDefault();
+                    upa.closedtasktype = request.closedtasktype;
+                    upa.closedtask = request.closedtask;
+                    upa.offpersonel = request.offpersonel;
+                    upa.formedtasktype = request.formedtasktaype;
+                    upa.formedtask = request.formedtask;
+                    upa.appointedpersonel = request.appointedpersonel;
+                    db.SaveChanges();
+                    tran.Commit();
+                    var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "Atama Gerçekleştirildi." };
+                    return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+                }
+                catch (Exception e)
+                {
+                    tran.Rollback();
+                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Atama Tamamlanamadı!" };
+                    return Request.CreateResponse(HttpStatusCode.NotModified, errormessage, "application/json");
                 }
         }
     }
