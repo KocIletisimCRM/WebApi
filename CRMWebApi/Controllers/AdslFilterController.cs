@@ -204,7 +204,7 @@ namespace CRMWebApi.Controllers
             {
                 var task = db.taskqueue.Where(t => t.taskorderno == request.taskorderno).Select(s => s.taskid).FirstOrDefault();
                 var objects = db.task.Where(s => s.taskid == task).Select(s => s.attachablepersoneltype).FirstOrDefault() ;
-                var res = db.personel.Include(s=>s.il).Include(i=>i.ilce).Where(p => (p.roles & objects)==objects).OrderBy(o=>o.personelname).ToList();
+                var res = db.personel.Include(s=>s.il).Include(i=>i.ilce).Where(p => ((p.roles & objects)==objects) && (p.deleted == false)).OrderBy(o=>o.personelname).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }
