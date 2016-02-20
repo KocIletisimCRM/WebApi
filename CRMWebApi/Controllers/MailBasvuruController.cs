@@ -14,7 +14,7 @@ namespace CRMWebApi.Controllers
     {
         [Route("insertBasvuru")]
         [HttpPost]
-        public HttpResponseMessage insertTaskqueue(DTOBasvuru basvuru)
+        public HttpResponseMessage insertBasvuru(DTOBasvuru basvuru)
         {
             /*var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities(false))
@@ -33,11 +33,14 @@ namespace CRMWebApi.Controllers
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();*/
 
-            sendemail(basvuru);
-            return Request.CreateResponse(HttpStatusCode.OK, basvuru.adsoyad, "application/json");//databaseden gelen basvuruid olacak
+            var end = sendemail(basvuru);
+            if (end)
+                return Request.CreateResponse(HttpStatusCode.OK, basvuru.adsoyad, "application/json");//databaseden gelen basvuruid olacak
+            else
+                return Request.CreateResponse(HttpStatusCode.NotFound, basvuru.adsoyad, "application/json");
         }
 
-        public void sendemail(DTOBasvuru info)
+        public bool sendemail(DTOBasvuru info)
         {
 
             MailMessage mail = new MailMessage();
@@ -61,9 +64,11 @@ namespace CRMWebApi.Controllers
             try
             {
                 smtp.Send(mail); // mail gönderilir.
+                return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
+                return false;
             }
         }
     }

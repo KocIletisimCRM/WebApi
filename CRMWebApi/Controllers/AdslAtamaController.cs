@@ -69,5 +69,27 @@ namespace CRMWebApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.NotModified, errormessage, "application/json");
                 }
         }
+        [Route("deletePersonelAtama")]
+        [HttpPost]
+        public HttpResponseMessage deletePersonelAtama(int id)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            using (var tran = db.Database.BeginTransaction())
+                try
+                {
+                    var upa = db.atama.Where(r => r.id == id).FirstOrDefault();
+                    //delete
+                    db.SaveChanges();
+                    tran.Commit();
+                    var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "işlem Gerçekleştirildi." };
+                    return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+                }
+                catch (Exception e)
+                {
+                    tran.Rollback();
+                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "işlem Tamamlanamadı!" };
+                    return Request.CreateResponse(HttpStatusCode.NotModified, errormessage, "application/json");
+                }
+        }
     }
 }
