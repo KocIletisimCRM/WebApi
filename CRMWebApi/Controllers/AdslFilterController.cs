@@ -267,7 +267,16 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
             }
         }
-
+        [Route("getTaskType")]
+        [HttpPost]
+        public HttpResponseMessage getTaskType()
+        {
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var res = db.tasktypes.Select(p => new { p.TaskTypeId, p.TaskTypeName }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
+            }
+        }
         [Route("getObject")]
         [HttpPost]
         public HttpResponseMessage getObject(DTOGetObjectRequest request)
