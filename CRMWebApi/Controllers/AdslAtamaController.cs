@@ -12,6 +12,23 @@ namespace CRMWebApi.Controllers
     [RoutePrefix("api/Adsl/Atama")]
     public class AdslAtamaController : ApiController
     {
+        [Route("getTaskPersonelAtama")]
+        [HttpPost]
+        public HttpResponseMessage getTaskPersonelAtama(DTOatama request)
+        {
+            using (var db = new KOCSAMADLSEntities())
+            {
+                //var filter = request.getFilter();
+                //filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                //var user = KOCAuthorizeAttribute.getCurrentUser();
+                // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
+                //if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
+
+
+
+                return Request.CreateResponse(HttpStatusCode.OK, "", "application/json");
+            }
+        }
         [Route("insertPersonelAtama")]
         [HttpPost]
         public HttpResponseMessage insertPersonelAtama(DTOatama request)
@@ -26,7 +43,7 @@ namespace CRMWebApi.Controllers
                         closedtasktype = request.closedtasktype,
                         closedtask = request.closedtask,
                         offpersonel = request.offpersonel,
-                        formedtasktype = request.formedtasktaype,
+                        formedtasktype = request.formedtasktype,
                         formedtask = request.formedtask,
                         appointedpersonel = request.appointedpersonel,
                     };
@@ -38,7 +55,7 @@ namespace CRMWebApi.Controllers
                 catch (Exception e)
                 {
                     tran.Rollback();
-                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Hata" };
+                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Hata Oluştu" };
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
                 }
         }
@@ -54,7 +71,7 @@ namespace CRMWebApi.Controllers
                     upa.closedtasktype = request.closedtasktype;
                     upa.closedtask = request.closedtask;
                     upa.offpersonel = request.offpersonel;
-                    upa.formedtasktype = request.formedtasktaype;
+                    upa.formedtasktype = request.formedtasktype;
                     upa.formedtask = request.formedtask;
                     upa.appointedpersonel = request.appointedpersonel;
                     db.SaveChanges();
