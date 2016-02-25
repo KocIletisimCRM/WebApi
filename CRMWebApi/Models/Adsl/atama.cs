@@ -22,11 +22,11 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<int> formedtask { get; set; }
         public Nullable<int> appointedpersonel { get; set; }
     
-        public virtual adsl_tasktypes adsl_tasktypes { get; set; }
+        public virtual adsl_tasktypes adsl_tasktypesclosed { get; set; }
         public virtual adsl_tasktypes adsl_tasktypesformed { get; set; }
-        public virtual adsl_task adsl_task { get; set; }
-        public virtual adsl_task adsl_task1 { get; set; }
-        public virtual adsl_personel adsl_personel { get; set; }
+        public virtual adsl_task adsl_taskclosed { get; set; }
+        public virtual adsl_task adsl_taskformed { get; set; }
+        public virtual adsl_personel adsl_personelappoint { get; set; }
         public virtual adsl_personel adsl_personeloff { get; set; }
     }
 }

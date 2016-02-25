@@ -1,4 +1,6 @@
 ﻿using CRMWebApi.DTOs.Adsl;
+using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
 using System.Collections.Generic;
@@ -14,19 +16,54 @@ namespace CRMWebApi.Controllers
     {
         [Route("getTaskPersonelAtama")]
         [HttpPost]
-        public HttpResponseMessage getTaskPersonelAtama(DTOatama request)
+        public HttpResponseMessage getTaskPersonelAtama(DTOFilterGetAtamaRequest request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
-                //var filter = request.getFilter();
+                var filter = request.getFilter();
                 //filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
-                //var user = KOCAuthorizeAttribute.getCurrentUser();
-                // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
-                //if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
+                var countSql = filter.getCountSQL();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var res = db.atama.SqlQuery(querySql).ToList();
 
+                var offpersonelcall = res.Select(s => s.offpersonel).Distinct().ToList();
+                var offpersonels = db.personel.Where(s => offpersonelcall.Contains(s.personelid)).ToList();
 
+                var appointpersonelcall = res.Select(s => s.appointedpersonel).Distinct().ToList();
+                var appointpersonels = db.personel.Where(s => appointpersonelcall.Contains(s.personelid)).ToList();
 
-                return Request.CreateResponse(HttpStatusCode.OK, "", "application/json");
+                var closedtaskcall = res.Select(s => s.closedtask).Distinct().ToList();
+                var closedtasks = db.task.Where(s => closedtaskcall.Contains(s.taskid)).ToList();
+
+                var formedtaskcall = res.Select(s => s.formedtask).Distinct().ToList();
+                var formedtasks = db.task.Where(s => formedtaskcall.Contains(s.taskid)).ToList();
+
+                var closedtasktypecall = res.Select(s => s.closedtasktype).Distinct().ToList();
+                var closedtasktypes = db.tasktypes.Where(s => closedtasktypecall.Contains(s.TaskTypeId)).ToList();
+
+                var formedtasktypecall = res.Select(s => s.formedtasktype).Distinct().ToList();
+                var formedtasktypes = db.tasktypes.Where(s => formedtasktypecall.Contains(s.TaskTypeId)).ToList();
+
+                res.ForEach(s =>
+                {
+                    s.adsl_personeloff = offpersonels.Where(i => i.personelid == s.offpersonel).FirstOrDefault();
+                    s.adsl_personelappoint = appointpersonels.Where(i => i.personelid == s.appointedpersonel).FirstOrDefault();
+                    s.adsl_taskclosed = closedtasks.Where(p => p.taskid == s.closedtask).FirstOrDefault();
+                    s.adsl_taskformed = formedtasks.Where(p => p.taskid == s.formedtask).FirstOrDefault();
+                    s.adsl_tasktypesclosed = closedtasktypes.Where(p => p.TaskTypeId == s.closedtasktype).FirstOrDefault();
+                    s.adsl_tasktypesformed = formedtasktypes.Where(p => p.TaskTypeId == s.formedtasktype).FirstOrDefault();
+                });
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Select(r => r.toDTO()).ToList(), paginginfo, querySql)
+                    , "application/json"); //denenecek
             }
         }
         [Route("insertPersonelAtama")]
@@ -76,13 +113,13 @@ namespace CRMWebApi.Controllers
                     upa.appointedpersonel = request.appointedpersonel;
                     db.SaveChanges();
                     tran.Commit();
-                    var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "Atama Gerçekleştirildi." };
+                    var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "Atama Düzenleme Tamamlandı." };
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
                 }
                 catch (Exception e)
                 {
                     tran.Rollback();
-                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Atama Tamamlanamadı!" };
+                    var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Atama Düzenleme Tamamlanamadı!" };
                     return Request.CreateResponse(HttpStatusCode.NotModified, errormessage, "application/json");
                 }
         }

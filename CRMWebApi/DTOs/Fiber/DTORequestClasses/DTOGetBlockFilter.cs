@@ -8,6 +8,7 @@
         public DTOFieldFilter region { get; set; }
         public DTOFieldFilter telocadia { get; set; }
         public DTOFieldFilter locationid { get; set; }
+        public DTOFieldFilter SO { get; set; }
         public DTOFilter getFilter()
         {
             var filter = new DTOFilter("block", "blockid");
@@ -28,6 +29,7 @@
             }
             if (telocadia != null) filter.fieldFilters.Add(telocadia);
             if (locationid != null) filter.fieldFilters.Add(locationid);
+            if (SO != null) filter.fieldFilters.Add(SO);
             return filter;
         }
     }

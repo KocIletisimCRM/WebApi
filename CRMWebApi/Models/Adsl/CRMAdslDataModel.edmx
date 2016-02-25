@@ -1430,11 +1430,11 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="formedtasktype" Type="Int32" />
           <Property Name="formedtask" Type="Int32" />
           <Property Name="appointedpersonel" Type="Int32" />
-          <NavigationProperty Name="adsl_tasktypes" Relationship="KOCSAMADLSModel.atamaadsl_tasktypes" FromRole="atama" ToRole="adsl_tasktypes" />
+          <NavigationProperty Name="adsl_tasktypesclosed" Relationship="KOCSAMADLSModel.atamaadsl_tasktypes" FromRole="atama" ToRole="adsl_tasktypes" />
           <NavigationProperty Name="adsl_tasktypesformed" Relationship="KOCSAMADLSModel.adsl_tasktypesatama" FromRole="atama" ToRole="adsl_tasktypes" />
-          <NavigationProperty Name="adsl_task" Relationship="KOCSAMADLSModel.atamaadsl_task" FromRole="atama" ToRole="adsl_task" />
-          <NavigationProperty Name="adsl_task1" Relationship="KOCSAMADLSModel.atamaadsl_task1" FromRole="atama" ToRole="adsl_task" />
-          <NavigationProperty Name="adsl_personel" Relationship="KOCSAMADLSModel.atamaadsl_personel" FromRole="atama" ToRole="adsl_personel" />
+          <NavigationProperty Name="adsl_taskclosed" Relationship="KOCSAMADLSModel.atamaadsl_task" FromRole="atama" ToRole="adsl_task" />
+          <NavigationProperty Name="adsl_taskformed" Relationship="KOCSAMADLSModel.atamaadsl_task1" FromRole="atama" ToRole="adsl_task" />
+          <NavigationProperty Name="adsl_personelappoint" Relationship="KOCSAMADLSModel.atamaadsl_personel" FromRole="atama" ToRole="adsl_personel" />
           <NavigationProperty Name="adsl_personeloff" Relationship="KOCSAMADLSModel.atamaadsl_personeloff" FromRole="atama" ToRole="adsl_personel" />
         </EntityType>
         <Association Name="atamaadsl_tasktypes">
