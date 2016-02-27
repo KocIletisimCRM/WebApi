@@ -25,6 +25,7 @@ namespace CRMWebApi.Models.Adsl
             this.relatedpersonel2 = new HashSet<adsl_personel>();
             this.atama = new HashSet<atama>();
             this.atamaoff = new HashSet<atama>();
+            this.kurulumpersonel2 = new HashSet<adsl_personel>();
         }
     
         public int personelid { get; set; }
@@ -42,6 +43,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<int> ilKimlikNo { get; set; }
         public Nullable<int> ilceKimlikNo { get; set; }
         public Nullable<int> relatedpersonelid { get; set; }
+        public Nullable<int> kurulumpersonelid { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> attachedTaskqueue { get; set; }
@@ -62,5 +64,8 @@ namespace CRMWebApi.Models.Adsl
         public virtual ICollection<atama> atama { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<atama> atamaoff { get; set; }
+        public virtual adsl_personel kurulumpersonel { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<adsl_personel> kurulumpersonel2 { get; set; }
     }
 }

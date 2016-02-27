@@ -69,6 +69,7 @@
         <AssociationConnector Association="KOCSAMADLSModel.atamaadsl_task1" />
         <AssociationConnector Association="KOCSAMADLSModel.atamaadsl_personel" />
         <AssociationConnector Association="KOCSAMADLSModel.atamaadsl_personeloff" />
+        <AssociationConnector Association="KOCSAMADLSModel.adsl_kurulumpesonelaso" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

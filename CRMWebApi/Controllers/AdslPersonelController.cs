@@ -36,10 +36,14 @@ namespace CRMWebApi.Controllers
                 var relatedPersonelIds = res.Select(s => s.relatedpersonelid).Distinct().ToList();
                 var relatedPersonels = db.personel.Where(s => relatedPersonelIds.Contains(s.personelid)).ToList();
 
+                var kurulumPersonelIds = res.Select(s => s.kurulumpersonelid).Distinct().ToList();
+                var kurulumPersonels = db.personel.Where(s => kurulumPersonelIds.Contains(s.personelid)).ToList();
+
                 res.ForEach(s=> {
                     s.ilce = ilces.Where(i => i.kimlikNo == s.ilceKimlikNo).FirstOrDefault();
                     s.il = ils.Where(i=>i.kimlikNo==s.ilKimlikNo).FirstOrDefault();
                     s.relatedpersonel =relatedPersonels.Where(p => p.personelid == s.relatedpersonelid).FirstOrDefault();
+                    s.kurulumpersonel = kurulumPersonels.Where(p => p.personelid == s.kurulumpersonelid).FirstOrDefault();
                 });
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
                 {
@@ -68,6 +72,7 @@ namespace CRMWebApi.Controllers
                 dp.category = (int)request.category;
                 dp.roles= dp.category = (int)request.category;
                 dp.relatedpersonelid = request.relatedpersonelid;
+                dp.kurulumpersonelid = request.kurulumpersonelid;
                 dp.ilceKimlikNo = request.ilceKimlikNo;
                 dp.ilKimlikNo = request.ilKimlikNo;
                 dp.mobile = request.mobile;
@@ -98,7 +103,8 @@ namespace CRMWebApi.Controllers
                     password = request.password,
                     notes = request.notes,
                     roles = (int)request.category,
-                    relatedpersonelid=request.relatedpersonelid!=0?request.relatedpersonelid:null,
+                    relatedpersonelid = request.relatedpersonelid != 0 ? request.relatedpersonelid : null,
+                    kurulumpersonelid = request.kurulumpersonelid,
                     ilceKimlikNo=request.ilceKimlikNo,
                     ilKimlikNo=request.ilKimlikNo,
                     creationdate = DateTime.Now,

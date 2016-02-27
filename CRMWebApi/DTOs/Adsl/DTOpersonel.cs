@@ -14,6 +14,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string password { get; set; }
         public string notes { get; set; }
         public int ? relatedpersonelid { get; set; }
+        public int? kurulumpersonelid { get; set; }
         public int roles { get; set; }
         public int ilKimlikNo { get; set; }
         public int ilceKimlikNo { get; set; }
@@ -25,5 +26,6 @@ namespace CRMWebApi.DTOs.Adsl
         public DTOil il { get; set; }
         public DTOilce ilce { get; set; }
         public DTOpersonel relatedpersonel { get; set; }
+        //public DTOpersonel kurulumpersonel { get; set; }
     }
 }

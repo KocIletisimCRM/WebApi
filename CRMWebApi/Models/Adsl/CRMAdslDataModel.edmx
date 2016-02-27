@@ -242,6 +242,7 @@
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" Nullable="false" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="kurulumpersonelid" Type="int" />
         </EntityType>
         <EntityType Name="product_service">
           <Key>
@@ -644,6 +645,9 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <NavigationProperty Name="relatedpersonel" Relationship="KOCSAMADLSModel.adsl_personeladsl_personel" FromRole="adsl_personel1" ToRole="adsl_personel" />
           <NavigationProperty Name="atama" Relationship="KOCSAMADLSModel.atamaadsl_personel" FromRole="adsl_personel" ToRole="atama" />
           <NavigationProperty Name="atamaoff" Relationship="KOCSAMADLSModel.atamaadsl_personeloff" FromRole="adsl_personel" ToRole="atama" />
+          <Property Name="kurulumpersonelid" Type="Int32" />
+          <NavigationProperty Name="kurulumpersonel" Relationship="KOCSAMADLSModel.adsl_kurulumpesonelaso" FromRole="adsl_personel" ToRole="adsl_personel1" />
+          <NavigationProperty Name="kurulumpersonel2" Relationship="KOCSAMADLSModel.adsl_kurulumpesonelaso" FromRole="adsl_personel1" ToRole="adsl_personel" />
         </EntityType>
         <EntityType Name="adsl_product_service">
           <Key>
@@ -974,6 +978,10 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <AssociationSet Name="atamaadsl_personeloff" Association="KOCSAMADLSModel.atamaadsl_personeloff">
             <End Role="atama" EntitySet="atama" />
             <End Role="adsl_personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="adsl_kurulumpesonelaso" Association="KOCSAMADLSModel.adsl_kurulumpesonelaso">
+            <End Role="adsl_personel" EntitySet="personel" />
+            <End Role="adsl_personel1" EntitySet="personel" />
           </AssociationSet>
         </EntityContainer>
         <Association Name="personeltaskqueue">
@@ -1509,6 +1517,18 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="adsl_kurulumpesonelaso">
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel1" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="adsl_personel1">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="adsl_personel">
+              <PropertyRef Name="kurulumpersonelid" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1665,6 +1685,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="personel">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_personel">
               <MappingFragment StoreEntitySet="personel">
+                <ScalarProperty Name="kurulumpersonelid" ColumnName="kurulumpersonelid" />
                 <ScalarProperty Name="relatedpersonelid" ColumnName="relatedpersonelid" />
                 <ScalarProperty Name="ilceKimlikNo" ColumnName="ilceKimlikNo" />
                 <ScalarProperty Name="ilKimlikNo" ColumnName="ilKimlikNo" />
