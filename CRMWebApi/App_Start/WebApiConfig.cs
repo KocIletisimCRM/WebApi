@@ -459,7 +459,7 @@ namespace CRMWebApi
                 defaults: new { id = RouteParameter.Optional }
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { updateAdslData(), updateFiberData() });
+            //Task.WaitAll(new Task[] { updateAdslData(), updateFiberData() });
         }
     }
 }

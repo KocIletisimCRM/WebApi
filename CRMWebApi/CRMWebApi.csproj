@@ -133,6 +133,7 @@
     <Compile Include="Controllers\FiberAuthorizeController.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
     <Compile Include="Controllers\FiberCampaignController.cs" />
+    <Compile Include="Controllers\FiberCustomerController.cs" />
     <Compile Include="Controllers\FiberDocumentController.cs" />
     <Compile Include="Controllers\FiberPersonelController.cs" />
     <Compile Include="Controllers\FiberProductController.cs" />
@@ -223,6 +224,7 @@
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Fiber\DTOcustomerdocument.cs" />
     <Compile Include="DTOs\Fiber\DTOgetPersonelStockFiber_Result.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetCustomerRequest.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestKatZiyareti.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
