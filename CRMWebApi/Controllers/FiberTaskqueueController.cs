@@ -1010,54 +1010,54 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
             {
-                if (db.customer.Any(c => c.customerid == ct.customerid))
+                var item = new customer
                 {
-                    var item = db.customer.Where(c => c.customerid == ct.customerid).First();
+                    blockid = ct.block.blockid,
+                    customerid = ct.customerid,
+                    customername = ct.customername,
+                    gsm = ct.gsm,
+                    phone = ct.phone,
+                    tckimlikno = ct.tckimlikno,
+                    lastupdated = DateTime.Now,
+                    updatedby = user.userId,
+                    deleted = false,
+                    flat = ct.flat,
+                    description = ct.description,
+                    customerstatus = ct.customer_status.ID,
+                    netstatu = (ct.netStatus.id != 0) ? (int?)ct.netStatus.id : null,
+                    telstatu = (ct.telStatus.id != 0) ? (int?)ct.telStatus.id : null,
+                    gsmstatu = (ct.gsmKullanımıStatus.id != 0) ? (int?)ct.gsmKullanımıStatus.id : null,
+                    iss = (ct.issStatus.id != 0) ? (int?)ct.issStatus.id : null,
+                    tvstatu = (ct.TvKullanımıStatus.id != 0) ? (int?)ct.TvKullanımıStatus.id : null,
+                    turkcellTv = (ct.TurkcellTVStatus.id != 0) ? (int?)ct.TurkcellTVStatus.id : null
+                };
 
-                    item.customername = ct.customername;
-                    item.gsm = ct.gsm;
-                    item.phone = ct.phone;
-                   // item.customersurname = ct.customersurname;
-                    item.gsm = ct.gsm;
-                    item.tckimlikno = ct.tckimlikno;
-                    if (ct.customer_status.ID != 0)
+                if (item.customerid == 0)
+                {
+                    foreach (var cst in db.customer.Where(c => c.blockid == item.blockid && c.flat == item.flat && c.deleted != true))
+                        cst.deleted = null;
+                    db.Entry(item).State = EntityState.Added;
+                }
+                else db.Entry(item).State = EntityState.Modified;
+
+                if (ct.customer_status.ID != 0)
+                {
+                    if (item.customerstatus != ct.customer_status.ID)
                     {
-                        if (item.customerstatus!=ct.customer_status.ID)
+                        var ziyaretTQ = db.taskqueue.Where(t => t.taskid == 86 && t.attachedobjectid == item.customerid).ToList();
+                        foreach (var tq in ziyaretTQ)
                         {
-                            var ziyaretTQ = db.taskqueue.Where(t => t.taskid == 86 && t.attachedobjectid == item.customerid).ToList();
-                            foreach (var tq in ziyaretTQ)
-                            {
-                                tq.status = Convert.ToInt32(ct.customer_status.ID);
-                                tq.description = "Kimlik Kartı Güncellemesi ile Otomatik Kapatıldı";
-                                tq.updatedby = user.userId;
-                                tq.lastupdated = DateTime.Now;
-                            }
+                            tq.status = Convert.ToInt32(ct.customer_status.ID);
+                            tq.description = "Kimlik Kartı Güncellemesi ile Otomatik Kapatıldı";
+                            tq.updatedby = user.userId;
+                            tq.lastupdated = DateTime.Now;
                         }
                     }
-                        item.customerstatus = ct.customer_status.ID;
-                    if (ct.netStatus.id != 0)
-                        item.netstatu = ct.netStatus.id;
-                    if (ct.telStatus.id!=0)
-                        item.telstatu = ct.telStatus.id;
-                    if (ct.gsmKullanımıStatus.id!=0)
-                        item.gsmstatu = ct.gsmKullanımıStatus.id;
-                    if (ct.issStatus.id!=0)
-                        item.iss = ct.issStatus.id;
-                    if(ct.TvKullanımıStatus.id!=0)
-                         item.tvstatu = ct.TvKullanımıStatus.id;
-                    if (ct.telStatus.id != 0)
-                        item.telstatu = ct.telStatus.id;
-                    if (ct.TurkcellTVStatus.id != 0)
-                        item.turkcellTv = ct.TurkcellTVStatus.id;
-                    item.description = ct.description;
-                    item.lastupdated = DateTime.Now;
-                    item.updatedby = user.userId;
-
                 }
                 if (ct.closedKatZiyareti == true)
                 {
                     var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
-                    if (res!=null)
+                    if (res != null)
                     {
                         res.status = 1079;
                     }

@@ -227,7 +227,7 @@ namespace CRMWebApi.Controllers
 
                         var docs = new List<int>();
                         var mailInfo = new List<object>();
-                        #region Otomatik zorunlu taklar
+                        #region Otomatik zorunlu tasklar
                         if (tsm != null)
                         {
                             docs.AddRange((tsm.documents ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)));
@@ -236,12 +236,44 @@ namespace CRMWebApi.Controllers
                             {
                                 if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
-                                var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
+                                int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
+                                //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
+                                var oot = db.task.FirstOrDefault(t => t.taskid == item);
+                                if (oot == null) continue;
+                                if (oot.tasktype == 3)
+                                {
+                                    var ptq = dtq;
+                                    int? saletask = null;
+                                    while (ptq != null)
+                                    {
+                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                        if (ptq.task.tasktype == 1)
+                                        {
+                                            saletask = ptq.taskorderno; break;
+                                        }
+                                        else
+                                        {
+                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                        }
+                                    }
+                                    if (saletask != null)
+                                    {
+
+                                    }
+                                    //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
+                                    var satbayi = db.taskqueue.First(r=>r.taskorderno==saletask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
+                                }
+                                //Diğer otomatik personel atamaları ()
+                                if (personel_id == null)
+                                {
+                                    //Task atama kuralları işlesin.
+                                }
                                 var amtq = new adsl_taskqueue
                                 {
                                     appointmentdate = (dtq.task.tasktype == 2) ? (tq.appointmentdate) : (null),
-                                    attachedpersonelid = (personel_id ? dtq.attachedpersonelid : (null)),
-                                    attachmentdate = personel_id ? ((dtq.taskstatepool != null ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (DateTime?)DateTime.Now)) : (null),
+                                    attachedpersonelid = personel_id,
+                                    attachmentdate = personel_id != null? ((dtq.taskstatepool != null ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (DateTime?)DateTime.Now)) : (null),
                                     attachedobjectid = dtq.attachedobjectid,
                                     taskid = item,
                                     creationdate = DateTime.Now,

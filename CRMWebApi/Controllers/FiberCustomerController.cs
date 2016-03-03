@@ -63,7 +63,7 @@ namespace CRMWebApi.Controllers
                 });
 
                 return Request.CreateResponse(HttpStatusCode.OK,
-                new DTOResponse(DTOResponseError.NoError(), res.Select(r => r.toDTO()).ToList())
+                new DTOResponse(DTOResponseError.NoError(), res.Where(r => r.deleted != true).OrderByDescending(r => r.deleted).Select(r => r.toDTO()).ToList())
                 , "application/json");
             }
         }
