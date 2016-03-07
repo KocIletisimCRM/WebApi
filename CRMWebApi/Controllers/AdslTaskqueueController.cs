@@ -249,7 +249,8 @@ namespace CRMWebApi.Controllers
                                         ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
                                         if (ptq.task.tasktype == 1)
                                         {
-                                            saletask = ptq.taskorderno; break;
+                                            saletask = ptq.taskorderno;
+                                            break;
                                         }
                                         else
                                         {
@@ -258,11 +259,10 @@ namespace CRMWebApi.Controllers
                                     }
                                     if (saletask != null)
                                     {
-
+                                        var satbayi = db.taskqueue.First(r=>r.taskorderno==saletask).attachedpersonelid;
+                                        personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                     }
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
-                                    var satbayi = db.taskqueue.First(r=>r.taskorderno==saletask).attachedpersonelid;
-                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 if (personel_id == null)
