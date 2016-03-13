@@ -25,16 +25,6 @@ namespace CRMWebApi
         public static Dictionary<int, DTOs.Fiber.DTOpersonel> FiberPersonels = new Dictionary<int, DTOs.Fiber.DTOpersonel>();
         public static Dictionary<int, DTOs.Fiber.DTOtaskstatepool> FiberStatus = new Dictionary<int, DTOs.Fiber.DTOtaskstatepool>();
 
-        public static SemaphoreSlim aLockObject = new SemaphoreSlim(1);
-        public static DateTime AdslLastUpdated = new DateTime(1900, 1, 1);
-        public static Dictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new Dictionary<int, DTOs.Adsl.KocAdslProccess>();
-        public static Dictionary<int, int> AdslProccessIndexes = new Dictionary<int, int>();
-        public static Dictionary<int, DTOs.Adsl.DTOtaskqueue> AdslTaskQueues = new Dictionary<int, DTOs.Adsl.DTOtaskqueue>();
-        public static Dictionary<int, DTOs.Adsl.DTOcustomer> AdslCustomers = new Dictionary<int, DTOs.Adsl.DTOcustomer>();
-        public static Dictionary<int, DTOs.Adsl.DTOtask> AdslTasks = new Dictionary<int, DTOs.Adsl.DTOtask>();
-        public static Dictionary<int, DTOs.Adsl.DTOpersonel> AdslPersonels = new Dictionary<int, DTOs.Adsl.DTOpersonel>();
-        public static Dictionary<int, DTOs.Adsl.DTOtaskstatepool> AdslStatus = new Dictionary<int, DTOs.Adsl.DTOtaskstatepool>();
-
         public static async Task loadFiberTaskQueues(DateTime lastUpdated)
         {
             try
@@ -227,6 +217,33 @@ namespace CRMWebApi
             }
         }
 
+        public static async Task updateFiberData()
+        {
+            await fLockObject.WaitAsync().ConfigureAwait(false);
+            var lastUpdated = DateTime.Now;
+            await Task.WhenAll(new Task[] {
+                loadFiberCustomers(FiberLastUpdated),
+                loadFiberPersonels(FiberLastUpdated),
+                loadFiberTasks(FiberLastUpdated),
+                loadFiberStatus(FiberLastUpdated)
+            }).ContinueWith(async (t) => {
+                await loadFiberTaskQueues(FiberLastUpdated).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+            FiberLastUpdated = lastUpdated;
+            fLockObject.Release();
+        }
+
+        public static SemaphoreSlim aLockObject = new SemaphoreSlim(1);
+        public static DateTime AdslLastUpdated = new DateTime(1900, 1, 1);
+        public static int[] ADSLProccessStarterTaskTypes = new int[] { 1, 6 };
+        public static Dictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new Dictionary<int, DTOs.Adsl.KocAdslProccess>();
+        public static Dictionary<int, int> AdslProccessIndexes = new Dictionary<int, int>();
+        public static Dictionary<int, DTOs.Adsl.DTOtaskqueue> AdslTaskQueues = new Dictionary<int, DTOs.Adsl.DTOtaskqueue>();
+        public static Dictionary<int, DTOs.Adsl.DTOcustomer> AdslCustomers = new Dictionary<int, DTOs.Adsl.DTOcustomer>();
+        public static Dictionary<int, DTOs.Adsl.DTOtask> AdslTasks = new Dictionary<int, DTOs.Adsl.DTOtask>();
+        public static Dictionary<int, DTOs.Adsl.DTOpersonel> AdslPersonels = new Dictionary<int, DTOs.Adsl.DTOpersonel>();
+        public static Dictionary<int, DTOs.Adsl.DTOtaskstatepool> AdslStatus = new Dictionary<int, DTOs.Adsl.DTOtaskstatepool>();
+
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -237,7 +254,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select * from taskqueue where deleted = 0 and lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -280,7 +297,8 @@ namespace CRMWebApi
                                         tDTO.taskstatepool = AdslStatus[t.status.Value];
                                     if (t.previoustaskorderid == null)
                                     {
-                                        if (tDTO.task.tasktypes.TaskTypeId == 1)
+                                        //Süreç Başlangıç Taskları
+                                        if (ADSLProccessStarterTaskTypes.Contains(tDTO.task.tasktypes.TaskTypeId))
                                         {
                                             AdslProccesses.Add(t.taskorderno, new DTOs.Adsl.KocAdslProccess { S_TON = t.taskorderno });
                                         }
@@ -431,21 +449,6 @@ namespace CRMWebApi
             }).ConfigureAwait(false);
             AdslLastUpdated = lastUpdated;
             aLockObject.Release();
-        }
-        public static async Task updateFiberData()
-        {
-            await fLockObject.WaitAsync().ConfigureAwait(false);
-            var lastUpdated = DateTime.Now;
-            await Task.WhenAll(new Task[] {
-                loadFiberCustomers(FiberLastUpdated),
-                loadFiberPersonels(FiberLastUpdated),
-                loadFiberTasks(FiberLastUpdated),
-                loadFiberStatus(FiberLastUpdated)
-            }).ContinueWith(async (t)=> {
-                await loadFiberTaskQueues(FiberLastUpdated).ConfigureAwait(false);
-            }).ConfigureAwait(false);
-            FiberLastUpdated = lastUpdated;
-            fLockObject.Release();
         }
         public static void Register(HttpConfiguration config)
         {

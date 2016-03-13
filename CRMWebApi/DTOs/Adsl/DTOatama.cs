@@ -14,6 +14,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int? formedtask { get; set; }
         public int? offpersonel { get; set; }
         public int? appointedpersonel { get; set; }
+        public int?[] formedtaskarray { get; set; }
 
         public DTOtask adsl_taskclosed { get; set; }
         public DTOtask adsl_taskformed { get; set; }

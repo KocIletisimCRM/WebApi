@@ -75,16 +75,24 @@ namespace CRMWebApi.Controllers
                 try
                 {
                     var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
-                    var p = new atama
+                    int arrayLenght;
+                    if (request.formedtaskarray != null)
+                        arrayLenght = request.formedtaskarray.Length;
+                    else
+                        arrayLenght = 1;
+                    for (int i = 0; i < arrayLenght; i++)
                     {
-                        closedtasktype = request.closedtasktype,
-                        closedtask = request.closedtask,
-                        offpersonel = request.offpersonel,
-                        formedtasktype = request.formedtasktype,
-                        formedtask = request.formedtask,
-                        appointedpersonel = request.appointedpersonel,
-                    };
-                    db.atama.Add(p);
+                        var p = new atama
+                        {
+                            closedtasktype = request.closedtasktype,
+                            closedtask = request.closedtask,
+                            offpersonel = request.offpersonel,
+                            formedtasktype = request.formedtasktype,
+                            formedtask = request.formedtaskarray != null ? request.formedtaskarray[i] : null,
+                            appointedpersonel = request.appointedpersonel,
+                        };
+                        db.atama.Add(p);
+                    }
                     db.SaveChanges();
                     tran.Commit();
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
