@@ -265,15 +265,15 @@ namespace CRMWebApi.Controllers
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
                                 //Diğer otomatik personel atamaları ()
-                                var oott = db.atama.FirstOrDefault(r => r.formedtasktype == oot.tasktype); // atama satırı (oluşan task type tanımlamalarda varsa)
-                                if (personel_id == null && oott != null)
+                                var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
+                                if (oott != null)
                                 {
+                                    var task = oott.FirstOrDefault(r => r.formedtask == item);
                                     //Task atama kuralları işlesin.
-                                    if (oott.formedtask == null)
-                                        personel_id = oott.appointedpersonel;
+                                    if (task != null)
+                                        personel_id = task.appointedpersonel;
                                     else
-                                        if (oott.formedtask == item)
-                                            personel_id = oott.appointedpersonel;
+                                        personel_id = oott.Select(r=>r.appointedpersonel).First();
                                 }
                                 var amtq = new adsl_taskqueue
                                 {
