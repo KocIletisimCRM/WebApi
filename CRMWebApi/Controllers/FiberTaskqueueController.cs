@@ -737,8 +737,6 @@ namespace CRMWebApi.Controllers
             }
         }
 
-      
-
         [Route("closeTaskQueues")]
         [HttpPost]
         public HttpResponseMessage closeTaskQueues(DTORequestCloseTaskqueue request)
@@ -1010,6 +1008,7 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
             {
+                taskqueue katziyareti = null; // çoklu müşterilerde eski müşterinin kat ziyaretini alıp yeni oluşturulan müşteriye sıfır şekilde verilmek için tanımlandı
                 var item = new customer
                 {
                     blockid = ct.block.blockid,
@@ -1031,11 +1030,15 @@ namespace CRMWebApi.Controllers
                     tvstatu = (ct.TvKullanımıStatus.id != 0) ? (int?)ct.TvKullanımıStatus.id : null,
                     turkcellTv = (ct.TurkcellTVStatus.id != 0) ? (int?)ct.TurkcellTVStatus.id : null
                 };
-
                 if (item.customerid == 0)
                 {
                     foreach (var cst in db.customer.Where(c => c.blockid == item.blockid && c.flat == item.flat && c.deleted != true))
+                    {
+                        var kat = db.taskqueue.Where(r => r.attachedobjectid == cst.customerid && r.taskid == 86).OrderByDescending(r=>r.taskorderno).FirstOrDefault();
+                        if (kat != null)
+                            katziyareti = kat; // en son oluşturulan kat ziyareti yakalanmaya çalışıldı yakaladığına ataması yeterli aslında
                         cst.deleted = null;
+                    }
                     db.Entry(item).State = EntityState.Added;
                 }
                 else db.Entry(item).State = EntityState.Modified;
@@ -1062,8 +1065,25 @@ namespace CRMWebApi.Controllers
                         res.status = 1079;
                     }
                 }
-
                 db.SaveChanges();
+                var custid = item.customerid;
+                if (katziyareti != null) //kat ziyareti varsa güncelle (sıfır yap)
+                {
+                    katziyareti.creationdate = DateTime.Now;
+                    katziyareti.attachedobjectid = custid;
+                    katziyareti.attachmentdate = DateTime.Now;
+                    katziyareti.attachedpersonelid = user.userId;
+                    katziyareti.appointmentdate = null;
+                    katziyareti.status = null;
+                    katziyareti.consummationdate = null;
+                    katziyareti.description = null;
+                    katziyareti.lastupdated = null;
+                    katziyareti.updatedby = user.userId;
+                    katziyareti.deleted = false;
+                    katziyareti.assistant_personel = null;
+                    katziyareti.fault = null;
+                    db.SaveChanges();
+                }
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             }
         }
