@@ -266,14 +266,15 @@ namespace CRMWebApi.Controllers
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
-                                if (oott != null)
+                                if (oott.Count > 0)
                                 {
-                                    var task = oott.FirstOrDefault(r => r.formedtask == item);
+                                    var turAtama = oott.FirstOrDefault(t=> t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
+                                    var task = oott.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
                                     //Task atama kuralları işlesin.
-                                    if (task != null)
+                                    if (turAtama != null)
+                                        personel_id = turAtama.appointedpersonel;
+                                    else if (task != null)
                                         personel_id = task.appointedpersonel;
-                                    else
-                                        personel_id = oott.Select(r=>r.appointedpersonel).First();
                                 }
                                 var amtq = new adsl_taskqueue
                                 {
@@ -797,16 +798,17 @@ namespace CRMWebApi.Controllers
                         phone = request.phone,
                         ilKimlikNo = request.ilKimlikNo,
                         ilceKimlikNo = request.ilceKimlikNo,
-                        bucakKimlikNo=request.bucakKimlikNo,
+                        bucakKimlikNo = request.bucakKimlikNo,
                         mahalleKimlikNo = request.mahalleKimlikNo,
                         yolKimlikNo = request.yolKimlikNo,
                         binaKimlikNo = request.binaKimlikNo,
                         daire = request.daire,
                         updatedby = user.userId,
-                        description=request.description,
+                        description = request.description,
                         lastupdated = DateTime.Now,
                         creationdate = DateTime.Now,
-                        deleted = false
+                        deleted = false,
+                        email = request.email,
                     };
                     db.customer.Add(customer);
                     db.SaveChanges();

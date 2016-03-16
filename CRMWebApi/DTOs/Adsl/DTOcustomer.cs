@@ -9,6 +9,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string tc { get; set; }
         public string gsm { get; set; }
         public string phone { get; set; }
+        public string email { get; set; }
         public Nullable<int> ilKimlikNo { get; set; }
         public Nullable<int> ilceKimlikNo { get; set; }
         public Nullable<int> bucakKimlikNo { get; set; }

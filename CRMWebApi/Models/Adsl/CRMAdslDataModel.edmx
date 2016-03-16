@@ -95,6 +95,7 @@
           <Property Name="lastupdated" Type="datetime" />
           <Property Name="description" Type="nvarchar(max)" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="email" Type="nchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="customer_status">
           <Key>
@@ -1192,6 +1193,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <NavigationProperty Name="adsl_stockmovement" Relationship="KOCSAMADLSModel.customeradsl_stockmovement" FromRole="customer" ToRole="adsl_stockmovement" />
           <NavigationProperty Name="adsl_stockmovement1" Relationship="KOCSAMADLSModel.customeradsl_stockmovement1" FromRole="customer" ToRole="adsl_stockmovement" />
           <Property Name="bucakKimlikNo" Type="Int32" />
+          <Property Name="email" Type="String" MaxLength="100" FixedLength="true" Unicode="true" />
         </EntityType>
         <Association Name="customeradsl_taskqueue">
           <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
@@ -1837,6 +1839,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="customer">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.customer">
               <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="email" ColumnName="email" />
                 <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />
                 <ScalarProperty Name="customerstatus" ColumnName="customerstatus" />
                 <ScalarProperty Name="birthdate" ColumnName="birthdate" />

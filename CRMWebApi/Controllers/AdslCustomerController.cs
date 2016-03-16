@@ -60,7 +60,7 @@ namespace CRMWebApi.Controllers
                     item.birthdate = ct.birthdate;
                     item.lastupdated = DateTime.Now;
                     item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId ;
-
+                    item.email = ct.email;
                 }
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
