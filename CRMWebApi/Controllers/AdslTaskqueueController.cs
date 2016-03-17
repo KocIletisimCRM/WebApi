@@ -264,6 +264,30 @@ namespace CRMWebApi.Controllers
                                     }
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
+                                if (item == 45)  // Evrak Onayı Saha Taskı oluşuyorsa satış yapan bayinin kanal yöneticisine ata
+                                {
+                                    var ptq = dtq;
+                                    int? saletask = null;
+                                    while (ptq != null)
+                                    {
+                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                        if (ptq.task.tasktype == 1)
+                                        {
+                                            saletask = ptq.taskorderno;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                        }
+                                    }
+                                    if (saletask != null)
+                                    {
+                                        var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
+                                        personel_id = db.personel.First(p => p.personelid == satbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
+                                    }
+                                    //Satış taskını bul. Satış yapanın kanal yöneticisini al. Evrak alma onayı saha taskını bu personele ata
+                                }
                                 //Diğer otomatik personel atamaları ()
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
                                 if (oott.Count > 0)

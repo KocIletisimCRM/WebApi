@@ -25,6 +25,7 @@ namespace CRMWebApi.Controllers
             using (var db = new KOCSAMADLSEntities())
             {
                 var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 var querySql = filter.subTables["taskid"].getPagingSQL(request.pageNo, request.rowsPerPage);
                 var res = db.task.SqlQuery(querySql).ToList();
                 var ptypeids = res.Select(r => r.attachablepersoneltype).Distinct().ToList();
