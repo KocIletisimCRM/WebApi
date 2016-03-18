@@ -1043,28 +1043,6 @@ namespace CRMWebApi.Controllers
                 }
                 else db.Entry(item).State = EntityState.Modified;
 
-                if (ct.customer_status.ID != 0)
-                {
-                    if (item.customerstatus != ct.customer_status.ID)
-                    {
-                        var ziyaretTQ = db.taskqueue.Where(t => t.taskid == 86 && t.attachedobjectid == item.customerid).ToList();
-                        foreach (var tq in ziyaretTQ)
-                        {
-                            tq.status = Convert.ToInt32(ct.customer_status.ID);
-                            tq.description = "Kimlik Kartı Güncellemesi ile Otomatik Kapatıldı";
-                            tq.updatedby = user.userId;
-                            tq.lastupdated = DateTime.Now;
-                        }
-                    }
-                }
-                if (ct.closedKatZiyareti == true)
-                {
-                    var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
-                    if (res != null)
-                    {
-                        res.status = 1079;
-                    }
-                }
                 db.SaveChanges();
                 var custid = item.customerid;
                 if (katziyareti != null) //kat ziyareti varsa güncelle (sıfır yap)
@@ -1084,6 +1062,28 @@ namespace CRMWebApi.Controllers
                     katziyareti.fault = null;
                     db.SaveChanges();
                 }
+                if (ct.customer_status.ID != 0)
+                {
+                    var ziyaretTQ = db.taskqueue.Where(t => t.taskid == 86 && t.attachedobjectid == item.customerid).ToList();
+                    if (ziyaretTQ.Count > 0)
+                    {
+                        foreach (var tq in ziyaretTQ)
+                        {
+                            tq.status = Convert.ToInt32(ct.customer_status.ID);
+                            tq.updatedby = user.userId;
+                            tq.lastupdated = DateTime.Now;
+                        }
+                    }
+                }
+                if (ct.closedKatZiyareti == true)
+                {
+                    var res = db.taskqueue.Where(tq => tq.attachedobjectid == ct.customerid && tq.taskid == 86 && tq.status == null).FirstOrDefault();
+                    if (res != null)
+                    {
+                        res.status = ct.customer_status.ID;
+                    }
+                }
+                db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             }
         }
@@ -1213,8 +1213,5 @@ namespace CRMWebApi.Controllers
                 taskqueueid = taskorderno
             }).ToList();
         }
-
-
-
     }
 }
