@@ -314,7 +314,7 @@ namespace CRMWebApi.Controllers
                                     updatedby = user.userId, //User.Identity.PersonelID,
                                     relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
                                 };
-                                if(automandatoryTasks.Contains(38)&&dtq.attachedpersonelid!=1016)
+                                if((automandatoryTasks.Contains(38) || automandatoryTasks.Contains(60)) && dtq.attachedpersonelid!=1016)
                                 {
                                     mailInfo.Add(dtq.attachedobjectid);
                                     mailInfo.Add(dtq.attachedpersonelid);

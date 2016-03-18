@@ -22,7 +22,7 @@ namespace CRMWebApi.Controllers
                 var res = db.taskqueue.Include(s=>s.attachedcustomer).Include(c=>c.attachedcustomer.il).Include(c => c.attachedcustomer.il).
                     Include(t=>t.task).Include(d=>d.customerdocument).Include(c=>c.customerproduct).
                     Where(p=>p.attachedpersonelid==request.personelid&& p.deleted==false &&(p.task.taskid==32|| p.task.taskid==33|| p.task.taskid==38 ||
-                    p.task.taskid == 39|| p.task.taskid == 40 || p.task.taskid== 59 || p.task.taskid == 60 || p.task.taskid==62 || p.task.taskid == 63 || p.task.taskid == 64 || p.task.taskid == 65 || p.task.taskid == 79 || p.task.taskid == 72 || p.task.taskid == 80 || p.task.taskid == 75 || p.task.taskid == 76 || p.task.taskid == 82 || p.task.taskid == 86 || p.task.taskid == 85 || p.task.taskid == 55 || p.task.taskid == 54
+                    p.task.taskid == 39|| p.task.taskid == 40 || p.task.taskid== 59 || p.task.taskid == 60 || p.task.taskid==62 || p.task.taskid == 63 || p.task.taskid == 64 || p.task.taskid == 65 || p.task.taskid == 79 || p.task.taskid == 72 || p.task.taskid == 80 || p.task.taskid == 75 || p.task.taskid == 76 || p.task.taskid == 82 || p.task.taskid == 86 || p.task.taskid == 85 || p.task.taskid == 55 || p.task.taskid == 54 || p.task.taskid == 102
                     || p.task.taskid == 41 || p.task.taskid == 49 || p.task.taskid == 51) && p.status==null).OrderBy(s=>s.attachedcustomer.customername).ToList();
                 res.ForEach(r=> {
                     var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid==r.attachedobjectid)
