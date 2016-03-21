@@ -58,6 +58,7 @@ namespace CRMWebApi.Models.Adsl
         public virtual DbSet<bucak> bucak { get; set; }
         public virtual DbSet<mahalleKoy> mahalleKoy { get; set; }
         public virtual DbSet<atama> atama { get; set; }
+        public virtual DbSet<SL> SL { get; set; }
     
         [DbFunction("KOCSAMADLSEntities", "getSerialsOnPersonelAdsl")]
         public virtual IQueryable<string> getSerialsOnPersonelAdsl(Nullable<int> pERSONELID, Nullable<int> sTOCKCARDID)

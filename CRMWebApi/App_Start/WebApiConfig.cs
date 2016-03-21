@@ -243,6 +243,9 @@ namespace CRMWebApi
         public static Dictionary<int, DTOs.Adsl.DTOtask> AdslTasks = new Dictionary<int, DTOs.Adsl.DTOtask>();
         public static Dictionary<int, DTOs.Adsl.DTOpersonel> AdslPersonels = new Dictionary<int, DTOs.Adsl.DTOpersonel>();
         public static Dictionary<int, DTOs.Adsl.DTOtaskstatepool> AdslStatus = new Dictionary<int, DTOs.Adsl.DTOtaskstatepool>();
+        public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
+        //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
+        public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
@@ -434,6 +437,108 @@ namespace CRMWebApi
                 }
             }
         }
+        public static async Task loadAdslSl(DateTime lastUpdated)
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = $"select * from SL where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.SL
+                            {
+                                SLID = (int)sqlreader[0],
+                                SLName = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
+                                KocSTask = sqlreader.IsDBNull(2) ? null : (string)sqlreader[2],
+                                KocETask = sqlreader.IsDBNull(3) ? null : (string)sqlreader[3],
+                                BayiSTask = sqlreader.IsDBNull(4) ? null : (string)sqlreader[4],
+                                BayiETask = sqlreader.IsDBNull(5) ? null : (string)sqlreader[5],
+                                lastupdated = (DateTime)sqlreader[6],
+                                updatedby = (int)sqlreader[7],
+                                deleted = sqlreader.IsDBNull(8) ? null : (bool?)sqlreader[8],
+                            });
+                            var tDTO = t.toDTO<DTOs.Adsl.DTOSL>();
+                            AdslSl[t.SLID] = tDTO;
+                            if (!string.IsNullOrWhiteSpace(t.BayiSTask))
+                            {
+                                foreach (var tid in t.BayiSTask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r=>int.Parse(r)))
+                                {
+                                    if (!AdslTaskSl.ContainsKey(tid))
+                                    {
+                                        AdslTaskSl[tid] = (new KeyValuePair<int, List<int>>[]
+                                                {
+                                                new KeyValuePair<int, List<int>>(0, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(1, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(2, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(3, new List<int>())
+                                                }).ToDictionary(r => r.Key, r => r.Value);
+                                    }
+                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                }
+                            }
+                            if (!string.IsNullOrWhiteSpace(t.BayiETask))
+                            {
+                                foreach (var tid in t.BayiETask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)))
+                                {
+                                    if (!AdslTaskSl.ContainsKey(tid))
+                                    {
+                                        AdslTaskSl[tid] = (new KeyValuePair<int, List<int>>[]
+                                                {
+                                                new KeyValuePair<int, List<int>>(0, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(1, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(2, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(3, new List<int>())
+                                                }).ToDictionary(r => r.Key, r => r.Value);
+                                    }
+                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                }
+                            }
+                            if (!string.IsNullOrWhiteSpace(t.KocSTask))
+                            {
+                                foreach (var tid in t.KocSTask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)))
+                                {
+                                    if (!AdslTaskSl.ContainsKey(tid))
+                                    {
+                                        AdslTaskSl[tid] = (new KeyValuePair<int, List<int>>[]
+                                                {
+                                                new KeyValuePair<int, List<int>>(0, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(1, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(2, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(3, new List<int>())
+                                                }).ToDictionary(r => r.Key, r => r.Value);
+                                    }
+                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                }
+                            }
+                            if (!string.IsNullOrWhiteSpace(t.KocETask))
+                            {
+                                foreach (var tid in t.KocETask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)))
+                                {
+                                    if (!AdslTaskSl.ContainsKey(tid))
+                                    {
+                                        AdslTaskSl[tid] = (new KeyValuePair<int, List<int>>[]
+                                                {
+                                                new KeyValuePair<int, List<int>>(0, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(1, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(2, new List<int>()),
+                                                new KeyValuePair<int, List<int>>(3, new List<int>())
+                                                }).ToDictionary(r => r.Key, r => r.Value);
+                                    }
+                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         public static async Task updateAdslData()
         {
@@ -443,7 +548,8 @@ namespace CRMWebApi
                 loadAdslCustomers(AdslLastUpdated),
                 loadAdslPersonels(AdslLastUpdated),
                 loadAdslTasks(AdslLastUpdated),
-                loadAdslStatus(AdslLastUpdated)
+                loadAdslStatus(AdslLastUpdated),
+                loadAdslSl(AdslLastUpdated)
             }).ContinueWith( async (t)=> {
                 await loadAdslTaskQueues(AdslLastUpdated).ConfigureAwait(false);
             }).ConfigureAwait(false);

@@ -28,6 +28,8 @@ namespace CRMWebApi.Models.Fiber
             this.stockmovement = new HashSet<stockmovement>();
             this.stockmovement1 = new HashSet<stockmovement>();
             this.stockstatus = new HashSet<stockstatus>();
+            this.atamaoffpersonel = new HashSet<atama>();
+            this.appointedpersonelatama = new HashSet<atama>();
         }
     
         public int personelid { get; set; }
@@ -55,5 +57,7 @@ namespace CRMWebApi.Models.Fiber
         public virtual ICollection<stockmovement> stockmovement { get; set; }
         public virtual ICollection<stockmovement> stockmovement1 { get; set; }
         public virtual ICollection<stockstatus> stockstatus { get; set; }
+        public virtual ICollection<atama> atamaoffpersonel { get; set; }
+        public virtual ICollection<atama> appointedpersonelatama { get; set; }
     }
 }

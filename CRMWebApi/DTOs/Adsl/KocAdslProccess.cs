@@ -15,15 +15,8 @@ namespace CRMWebApi.DTOs.Adsl
         public int? K_TON { get; set; }
         //Kurulum Task Kapama Task Order No
         public int? Ktk_TON { get; set; }
-        //Koç SL Başlangıç
-        public DateTime KSL_S { get; set; }
-        //Koç SL Bitiş
-        public DateTime KSL_E { get; set; }
-        //Bayi SL Başlangıç 
-        public DateTime BSL_S { get; set; }
-        //Bayi SL Bitiş 
-        public DateTime BSL_E { get; set; }
-        
+        //Bu sürecin SL süreleri
+        public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();        
         public void Update(DTOtaskqueue tq)
         {
             var taskType = WebApiConfig.AdslTasks[tq.task.taskid].tasktypes.TaskTypeId;
@@ -54,15 +47,30 @@ namespace CRMWebApi.DTOs.Adsl
             {
                 Ktk_TON = tq.taskorderno;
             }
-            //Evrak Alma Taskı ise
-            else if (taskType == 7)
-            {
 
-            }
-            //Teslimat Taskı ise
-            else if(taskType == 8)
+            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.task.taskid))
             {
-
+                //Bayi SL Başlangıç
+                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][0])
+                {
+                    if (!SLs[sl].BStart.HasValue)
+                    {
+                        SLs[sl].BStart = tq.attachmentdate;
+                        SLs[sl].BayiID = tq.attachedpersonel.personelid;
+                    }
+                }
+                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][1])
+                {
+                    if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
+                }
+                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][2])
+                {
+                    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate;
+                }
+                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][3])
+                {
+                    if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
+                }
             }
         }
     }

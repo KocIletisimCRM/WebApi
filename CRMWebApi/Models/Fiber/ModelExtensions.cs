@@ -264,4 +264,11 @@ namespace CRMWebApi.Models.Fiber
             return toDTO<DTOgetPersonelStockFiber_Result>();
         }
     }
+    public partial class atama : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOAtama>();
+        }
+    }
 }

@@ -130,6 +130,7 @@
     <Compile Include="Controllers\AdslTaskStateMatchesController.cs" />
     <Compile Include="Controllers\AdslTaskStatePoolController.cs" />
     <Compile Include="Controllers\AdslTaskqueueController.cs" />
+    <Compile Include="Controllers\FiberAtamaController.cs" />
     <Compile Include="Controllers\FiberAuthorizeController.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
     <Compile Include="Controllers\FiberCampaignController.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="DTOs\Adsl\DTOobjecttypes.cs" />
     <Compile Include="DTOs\Adsl\DTOpersonel.cs" />
     <Compile Include="DTOs\Adsl\DTOProduct_service.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DateTimeRange.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetAtamaRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
@@ -204,6 +206,7 @@
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOSaveFiberSalesTask.cs" />
     <Compile Include="DTOs\Adsl\DTOResponseClasses.cs" />
     <Compile Include="DTOs\Adsl\DTOil.cs" />
+    <Compile Include="DTOs\Adsl\DTOSL.cs" />
     <Compile Include="DTOs\Adsl\DTOstockcard.cs" />
     <Compile Include="DTOs\Adsl\DTOstockmovement.cs" />
     <Compile Include="DTOs\Adsl\DTOstockstatus.cs" />
@@ -218,13 +221,17 @@
     <Compile Include="DTOs\Adsl\DTOtvStatus.cs" />
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
+    <Compile Include="DTOs\Adsl\SLTime.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\DTOBasvuru.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Fiber\BaseAttachedObject.cs" />
+    <Compile Include="DTOs\Fiber\DTOAtama.cs" />
     <Compile Include="DTOs\Fiber\DTOcustomerdocument.cs" />
     <Compile Include="DTOs\Fiber\DTOgetPersonelStockFiber_Result.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DateTimeRange.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetCustomerRequest.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetAtamaRequest.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestKatZiyareti.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
@@ -396,8 +403,14 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Adsl\SL.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Adsl\v_taskorderIsEditable.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Fiber\atama.cs">
+      <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Fiber\block.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>

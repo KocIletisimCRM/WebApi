@@ -17,11 +17,15 @@ namespace CRMWebApi.Models.Fiber
         public tasktypes()
         {
             this.task = new HashSet<task>();
+            this.atamaclosedtasktype = new HashSet<atama>();
+            this.atamatasktypeformed = new HashSet<atama>();
         }
     
         public int TaskTypeId { get; set; }
         public string TaskTypeName { get; set; }
     
         public virtual ICollection<task> task { get; set; }
+        public virtual ICollection<atama> atamaclosedtasktype { get; set; }
+        public virtual ICollection<atama> atamatasktypeformed { get; set; }
     }
 }

@@ -56,6 +56,7 @@ namespace CRMWebApi.Models.Fiber
         public virtual DbSet<vcampaignproducts> vcampaignproducts { get; set; }
         public virtual DbSet<TurkcellTVStatus> TurkcellTVStatus { get; set; }
         public virtual DbSet<v_taskorderIsEditableCRM1> v_taskorderIsEditableCRM1Set { get; set; }
+        public virtual DbSet<atama> atama { get; set; }
     
         [DbFunction("CRMEntities", "sf_taskqueue")]
         public virtual IQueryable<taskqueue> sf_taskqueue(Nullable<int> pageNo, Nullable<int> rowsPerPage, string taskFilter, string attachedobjectFilter, string personelFilter, string taskstateFilter, Nullable<System.DateTime> attachmentdate, Nullable<System.DateTime> creationdate, Nullable<System.DateTime> consummationdate)

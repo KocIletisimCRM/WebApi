@@ -311,6 +311,17 @@ namespace CRMWebApi.Controllers
             }
         }
 
+        [Route("getTaskType")]
+        [HttpPost]
+        public HttpResponseMessage getTaskType()
+        {
+            using (var db = new CRMEntities())
+            {
+                var res = db.tasktypes.Select(p => new { p.TaskTypeId, p.TaskTypeName }).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
+            }
+        }
+
         [Route("getObjectType")]
         [HttpPost]
         public HttpResponseMessage getObjectType()

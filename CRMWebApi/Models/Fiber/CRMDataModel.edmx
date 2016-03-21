@@ -5,6 +5,18 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="CRMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="atama">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="closedtasktype" Type="int" />
+          <Property Name="closedtask" Type="int" />
+          <Property Name="offpersonel" Type="int" />
+          <Property Name="formedtasktype" Type="int" />
+          <Property Name="formedtask" Type="int" />
+          <Property Name="appointedpersonel" Type="int" />
+        </EntityType>
         <EntityType Name="block">
           <Key>
             <PropertyRef Name="blockid" />
@@ -55,8 +67,8 @@
           <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="blockid" Type="int" />
           <Property Name="tckimlikno" Type="nvarchar" MaxLength="255" />
-          <Property Name="customername" Type="nvarchar" MaxLength="45" />
-          <Property Name="customersurname" Type="nvarchar" MaxLength="45" />
+          <Property Name="customername" Type="nvarchar" MaxLength="255" />
+          <Property Name="customersurname" Type="nvarchar" MaxLength="255" />
           <Property Name="flat" Type="nvarchar" MaxLength="45" />
           <Property Name="gsm" Type="nvarchar" MaxLength="15" />
           <Property Name="phone" Type="nvarchar" MaxLength="15" />
@@ -391,42 +403,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="cname" Type="nvarchar" MaxLength="255" />
           <Property Name="productname" Type="nvarchar" MaxLength="255" />
         </EntityType>
-        <Association Name="FK_block_site">
-          <End Role="site" Type="Self.site" Multiplicity="1" />
-          <End Role="block" Type="Self.block" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="site">
-              <PropertyRef Name="siteid" />
-            </Principal>
-            <Dependent Role="block">
-              <PropertyRef Name="siteid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_customer_block">
-          <End Role="block" Type="Self.block" Multiplicity="0..1" />
-          <End Role="customer" Type="Self.customer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="block">
-              <PropertyRef Name="blockid" />
-            </Principal>
-            <Dependent Role="customer">
-              <PropertyRef Name="blockid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_stockmovement_stockcard">
-          <End Role="stockcard" Type="Self.stockcard" Multiplicity="0..1" />
-          <End Role="stockmovement" Type="Self.stockmovement" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="stockcard">
-              <PropertyRef Name="stockid" />
-            </Principal>
-            <Dependent Role="stockmovement">
-              <PropertyRef Name="stockcardid" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_taskqueue_task">
           <End Role="task" Type="Self.task" Multiplicity="1" />
           <End Role="taskqueue" Type="Self.taskqueue" Multiplicity="*" />
@@ -498,6 +474,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Parameter Name="taskorderno" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="CRMModelStoreContainer">
+          <EntitySet Name="atama" EntityType="Self.atama" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="block" EntityType="Self.block" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="campaigns" EntityType="Self.campaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="customer" EntityType="Self.customer" Schema="dbo" store:Type="Tables" />
@@ -560,18 +537,6 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
     [vcampaignproducts].[productname] AS [productname]
     FROM [dbo].[vcampaignproducts] AS [vcampaignproducts]</DefiningQuery>
           </EntitySet>
-          <AssociationSet Name="FK_block_site" Association="Self.FK_block_site">
-            <End Role="site" EntitySet="site" />
-            <End Role="block" EntitySet="block" />
-          </AssociationSet>
-          <AssociationSet Name="FK_customer_block" Association="Self.FK_customer_block">
-            <End Role="block" EntitySet="block" />
-            <End Role="customer" EntitySet="customer" />
-          </AssociationSet>
-          <AssociationSet Name="FK_stockmovement_stockcard" Association="Self.FK_stockmovement_stockcard">
-            <End Role="stockcard" EntitySet="stockcard" />
-            <End Role="stockmovement" EntitySet="stockmovement" />
-          </AssociationSet>
           <AssociationSet Name="FK_taskqueue_task" Association="Self.FK_taskqueue_task">
             <End Role="task" EntitySet="task" />
             <End Role="taskqueue" EntitySet="taskqueue" />
@@ -849,6 +814,31 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
             <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
           </FunctionImport>
+          <EntitySet Name="atama" EntityType="CRMModel.atama" />
+          <AssociationSet Name="atamataskformed" Association="CRMModel.atamataskformed">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="atamataskclosed" Association="CRMModel.atamataskclosed">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="task" EntitySet="task" />
+          </AssociationSet>
+          <AssociationSet Name="atamapersoneloff" Association="CRMModel.atamapersoneloff">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="atamapersonelappointed" Association="CRMModel.atamapersonelappointed">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="personel" EntitySet="personel" />
+          </AssociationSet>
+          <AssociationSet Name="atamatasktypesclosed" Association="CRMModel.atamatasktypesclosed">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="tasktypes" EntitySet="tasktypes" />
+          </AssociationSet>
+          <AssociationSet Name="atamatasktypesformed" Association="CRMModel.atamatasktypesformed">
+            <End Role="atama" EntitySet="atama" />
+            <End Role="tasktypes" EntitySet="tasktypes" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="task">
           <Key>
@@ -870,6 +860,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <NavigationProperty Name="objecttypes" Relationship="CRMModel.taskobjecttypes" FromRole="task" ToRole="objecttypes" />
           <NavigationProperty Name="personeltypes" Relationship="CRMModel.taskobjecttypes1" FromRole="task" ToRole="objecttypes" />
           <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktasktypes" FromRole="task" ToRole="tasktypes" />
+          <NavigationProperty Name="atamaformedtask" Relationship="CRMModel.atamataskformed" FromRole="task" ToRole="atama" />
+          <NavigationProperty Name="atamaclosedtask" Relationship="CRMModel.atamataskclosed" FromRole="task" ToRole="atama" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -1005,8 +997,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="customerid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="blockid" Type="Int32" />
           <Property Name="tckimlikno" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="customername" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
-          <Property Name="customersurname" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="customername" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="customersurname" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="flat" Type="String" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="gsm" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="phone" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
@@ -1067,6 +1059,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <NavigationProperty Name="stockmovement" Relationship="CRMModel.personelstockmovement" FromRole="personel" ToRole="stockmovement" />
           <NavigationProperty Name="stockmovement1" Relationship="CRMModel.personelstockmovement1" FromRole="personel" ToRole="stockmovement" />
           <NavigationProperty Name="stockstatus" Relationship="CRMModel.personelstockstatus" FromRole="personel" ToRole="stockstatus" />
+          <NavigationProperty Name="atamaoffpersonel" Relationship="CRMModel.atamapersoneloff" FromRole="personel" ToRole="atama" />
+          <NavigationProperty Name="appointedpersonelatama" Relationship="CRMModel.atamapersonelappointed" FromRole="personel" ToRole="atama" />
           </EntityType>
         <Association Name="customertaskqueue">
           <End Type="CRMModel.customer" Role="customer" Multiplicity="0..1" />
@@ -1744,6 +1738,8 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Name="TaskTypeId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="TaskTypeName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="task" Relationship="CRMModel.tasktasktypes" FromRole="tasktypes" ToRole="task" />
+          <NavigationProperty Name="atamaclosedtasktype" Relationship="CRMModel.atamatasktypesclosed" FromRole="tasktypes" ToRole="atama" />
+          <NavigationProperty Name="atamatasktypeformed" Relationship="CRMModel.atamatasktypesformed" FromRole="tasktypes" ToRole="atama" />
         </EntityType>
         <Association Name="tasktasktypes">
           <End Type="CRMModel.task" Role="task" Multiplicity="*" />
@@ -1982,6 +1978,96 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <Property Type="Boolean" Name="deleted" Nullable="true" />
           <Property Type="Int32" Name="amount" Nullable="true" />
         </ComplexType>
+        <EntityType Name="atama">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="closedtasktype" Type="Int32" />
+          <Property Name="closedtask" Type="Int32" />
+          <Property Name="offpersonel" Type="Int32" />
+          <Property Name="formedtasktype" Type="Int32" />
+          <Property Name="formedtask" Type="Int32" />
+          <Property Name="appointedpersonel" Type="Int32" />
+          <NavigationProperty Name="taskformed" Relationship="CRMModel.atamataskformed" FromRole="atama" ToRole="task" />
+          <NavigationProperty Name="taskclosed" Relationship="CRMModel.atamataskclosed" FromRole="atama" ToRole="task" />
+          <NavigationProperty Name="personeloff" Relationship="CRMModel.atamapersoneloff" FromRole="atama" ToRole="personel" />
+          <NavigationProperty Name="personelappointed" Relationship="CRMModel.atamapersonelappointed" FromRole="atama" ToRole="personel" />
+          <NavigationProperty Name="tasktypesclosed" Relationship="CRMModel.atamatasktypesclosed" FromRole="atama" ToRole="tasktypes" />
+          <NavigationProperty Name="tasktypesformed" Relationship="CRMModel.atamatasktypesformed" FromRole="atama" ToRole="tasktypes" />
+        </EntityType>
+        <Association Name="atamataskformed">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.task" Role="task" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="formedtask" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamataskclosed">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.task" Role="task" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="task">
+              <PropertyRef Name="taskid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="closedtask" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamapersoneloff">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="offpersonel" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamapersonelappointed">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.personel" Role="personel" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="personel">
+              <PropertyRef Name="personelid" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="appointedpersonel" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamatasktypesclosed">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.tasktypes" Role="tasktypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="closedtasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="atamatasktypesformed">
+          <End Type="CRMModel.atama" Role="atama" Multiplicity="*" />
+          <End Type="CRMModel.tasktypes" Role="tasktypes" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="tasktypes">
+              <PropertyRef Name="TaskTypeId" />
+            </Principal>
+            <Dependent Role="atama">
+              <PropertyRef Name="formedtasktype" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2407,6 +2493,19 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
             </ResultMapping>
           </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="getSerialsOnPersonelFiber" FunctionName="CRMModel.Store.getSerialsOnPersonelFiber" />
+          <EntitySetMapping Name="atama">
+            <EntityTypeMapping TypeName="CRMModel.atama">
+              <MappingFragment StoreEntitySet="atama">
+                <ScalarProperty Name="appointedpersonel" ColumnName="appointedpersonel" />
+                <ScalarProperty Name="formedtask" ColumnName="formedtask" />
+                <ScalarProperty Name="formedtasktype" ColumnName="formedtasktype" />
+                <ScalarProperty Name="offpersonel" ColumnName="offpersonel" />
+                <ScalarProperty Name="closedtask" ColumnName="closedtask" />
+                <ScalarProperty Name="closedtasktype" ColumnName="closedtasktype" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

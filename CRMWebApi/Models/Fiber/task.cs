@@ -18,6 +18,8 @@ namespace CRMWebApi.Models.Fiber
         {
             this.taskqueues = new HashSet<taskqueue>();
             this.taskstatematches = new HashSet<taskstatematches>();
+            this.atamaformedtask = new HashSet<atama>();
+            this.atamaclosedtask = new HashSet<atama>();
         }
     
         public int taskid { get; set; }
@@ -37,5 +39,7 @@ namespace CRMWebApi.Models.Fiber
         public virtual objecttypes objecttypes { get; set; }
         public virtual objecttypes personeltypes { get; set; }
         public virtual tasktypes tasktypes { get; set; }
+        public virtual ICollection<atama> atamaformedtask { get; set; }
+        public virtual ICollection<atama> atamaclosedtask { get; set; }
     }
 }

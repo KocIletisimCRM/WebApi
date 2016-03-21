@@ -277,4 +277,11 @@ namespace CRMWebApi.Models.Adsl
             return toDTO<DTOatama>();
         }
     }
+    public partial class SL : EntityBase
+    {
+        public override object toDTO()
+        {
+            return toDTO<DTOSL>();
+        }
+    }
 }

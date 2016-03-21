@@ -11,22 +11,21 @@
         <EntityTypeShape EntityType="CRMModel.taskqueue" Width="1.5" PointX="15.5" PointY="3" />
         <EntityTypeShape EntityType="CRMModel.taskstatepool" Width="1.5" PointX="12.875" PointY="1.5" />
         <EntityTypeShape EntityType="CRMModel.customer" Width="1.5" PointX="3.125" PointY="0.75" />
-        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="12" PointY="5.625" />
+        <EntityTypeShape EntityType="CRMModel.personel" Width="1.5" PointX="10.375" PointY="5.625" />
         <EntityTypeShape EntityType="CRMModel.customer_status" Width="1.5" PointX="0.5" PointY="0.5" />
         <AssociationConnector Association="CRMModel.customer_statuscustomer1" />
         <AssociationConnector Association="CRMModel.customertaskqueue1" ManuallyRouted="true" >
-          <ConnectorPoint PointX="4.625" PointY="4.729994477557085" />
-          <ConnectorPoint PointX="7.0416815066817975" PointY="4.7756086943053759" />
-          <ConnectorPoint PointX="7.2083184933182025" PointY="4.7787539228370219" />
-          <ConnectorPoint PointX="9.0416815066817975" PointY="4.8133581591166674" />
-          <ConnectorPoint PointX="9.2083184933182025" PointY="4.8165033876483134" />
-          <ConnectorPoint PointX="10.75" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="10.947916666666666" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="11.130208333333334" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="12.166666666666666" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="12.333333333333334" PointY="4.8456022135416656" />
-          <ConnectorPoint PointX="13.104166666666666" PointY="4.8456022135416648" />
-          <ConnectorPoint PointX="13.270833333333334" PointY="4.8456022135416656" />
+          <ConnectorPoint PointX="4.625" PointY="4.7528486000661871" />
+          <ConnectorPoint PointX="7.0416698418421646" PointY="4.7739455281045933" />
+          <ConnectorPoint PointX="7.2083301581578354" PointY="4.7754004313103575" />
+          <ConnectorPoint PointX="9.0416698418421646" PointY="4.7914050318176251" />
+          <ConnectorPoint PointX="9.2083301581578354" PointY="4.7928599350233894" />
+          <ConnectorPoint PointX="10.166669841842165" PointY="4.8012260026562048" />
+          <ConnectorPoint PointX="10.333330158157835" PointY="4.8026809058619691" />
+          <ConnectorPoint PointX="10.541669841842165" PointY="4.8044996596023983" />
+          <ConnectorPoint PointX="10.708330158157835" PointY="4.8059545628081626" />
+          <ConnectorPoint PointX="14.135419841842165" PointY="4.8358722053367513" />
+          <ConnectorPoint PointX="14.302080158157835" PointY="4.8373271085425156" />
           <ConnectorPoint PointX="15.25" PointY="4.8456022135416656" />
           <ConnectorPoint PointX="15.25" PointY="2.75" />
           <ConnectorPoint PointX="15.905296614659708" PointY="2.75" />
@@ -95,6 +94,13 @@
         <EntityTypeShape EntityType="CRMModel.TurkcellTVStatus" Width="1.5" PointX="0.5" PointY="8.875" />
         <AssociationConnector Association="CRMModel.customerTurkcellTVStatus" />
         <EntityTypeShape EntityType="CRMModel.v_taskorderIsEditableCRM1" Width="1.5" PointX="18.375" PointY="5.75" />
+        <EntityTypeShape EntityType="CRMModel.atama" Width="1.5" PointX="12.5" PointY="5.625" />
+        <AssociationConnector Association="CRMModel.atamataskformed" />
+        <AssociationConnector Association="CRMModel.atamataskclosed" />
+        <AssociationConnector Association="CRMModel.atamapersoneloff" />
+        <AssociationConnector Association="CRMModel.atamapersonelappointed" />
+        <AssociationConnector Association="CRMModel.atamatasktypesclosed" />
+        <AssociationConnector Association="CRMModel.atamatasktypesformed" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
