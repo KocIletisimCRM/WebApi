@@ -15,12 +15,15 @@ namespace CRMWebApi.DTOs.Adsl
         public int? K_TON { get; set; }
         //Kurulum Task Kapama Task Order No
         public int? Ktk_TON { get; set; }
+        //Son Task Order No (Process'de dallanma oluşturup task kapamaya ulaşmayan tasklar alınmayacak)
+        public int Last_TON { get; set; }
         //Bu sürecin SL süreleri
         public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();        
         public void Update(DTOtaskqueue tq)
         {
             var taskType = WebApiConfig.AdslTasks[tq.task.taskid].tasktypes.TaskTypeId;
-
+            if (tq.task.taskid != 104 && tq.task.taskid != 43 && tq.task.taskid != 45 && tq.task.taskid != 44 && tq.task.taskid != 46 && tq.task.taskid != 98 && tq.task.taskid != 48 && tq.task.taskid != 71 && tq.task.taskid != 37 && tq.task.taskid != 68 && tq.task.taskid != 69 && tq.task.taskid != 70)
+                Last_TON = tq.taskorderno;
             //Başlangıç Taskı ise
             if (WebApiConfig.ADSLProccessStarterTaskTypes.Contains(taskType))
             {
@@ -49,28 +52,28 @@ namespace CRMWebApi.DTOs.Adsl
             }
 
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.task.taskid))
-            {
+            { ////!SLs[sl].BStart.HasValue hatalı
                 //Bayi SL Başlangıç
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][0])
-                {
-                    if (!SLs[sl].BStart.HasValue)
-                    {
-                        SLs[sl].BStart = tq.attachmentdate;
-                        SLs[sl].BayiID = tq.attachedpersonel.personelid;
-                    }
-                }
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][1])
-                {
-                    if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
-                }
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][2])
-                {
-                    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate;
-                }
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][3])
-                {
-                    if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
-                }
+                //foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][0])
+                //{
+                //    if (!SLs[sl].BStart.HasValue)
+                //    {
+                //        SLs[sl].BStart = tq.attachmentdate;
+                //        SLs[sl].BayiID = tq.attachedpersonel.personelid;
+                //    }
+                //}
+                //foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][1])
+                //{
+                //    if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
+                //}
+                //foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][2])
+                //{
+                //    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate;
+                //}
+                //foreach (var sl in WebApiConfig.AdslTaskSl[tq.task.taskid][3])
+                //{
+                //    if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
+                //}
             }
         }
     }

@@ -221,6 +221,7 @@
     <Compile Include="DTOs\Adsl\DTOtvStatus.cs" />
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
+    <Compile Include="DTOs\Adsl\SLReport.cs" />
     <Compile Include="DTOs\Adsl\SLTime.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\DTOBasvuru.cs" />

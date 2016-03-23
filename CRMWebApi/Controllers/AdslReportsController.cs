@@ -1,4 +1,5 @@
 ﻿using CRMWebApi.Models.Adsl;
+using CRMWebApi.DTOs.Adsl;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -31,37 +32,50 @@ namespace CRMWebApi.Controllers
                     r.customerproduct= db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
                     r.description = db.taskqueue.Where(s => s.taskorderno == salestaskorderno).Select(s=>s.description).FirstOrDefault();
                 });
-
-
-
                 return Request.CreateResponse(HttpStatusCode.OK,res.Select(s=>s.toDTO()), "application/json");
             }
         }
         // Satış kurulum raporu
         [Route("SKR")]
         [HttpPost]
-        public HttpResponseMessage SKR (DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public HttpResponseMessage SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
-            return Request.CreateResponse(WebApiConfig.AdslProccesses.Values.Where(r=> {
-                if (!r.Ktk_TON.HasValue) return true;
+            var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };
+            var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+            return Request.CreateResponse(HttpStatusCode.OK, WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                if (!r.Ktk_TON.HasValue)
+                {
+                    //DateTime sTime = request.start.AddMonths(-2);
+                    //var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                    //return stq.creationdate >= sTime && stq.consummationdate <= request.end;
+                    return false;
+                }
                 var ktk_tq = WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value];
                 return ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
-            }).Select(r=> {
+            }).Select(r =>
+            {
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
                 var kr_tq = (r.Kr_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.Kr_TON.Value] : null;
                 var k_tq = (r.K_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.K_TON.Value] : null;
                 var ktk_tq = (r.Ktk_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
-                var taskType = s_tq.task.tasktypes.TaskTypeName;
-                var TaskName = s_tq.task.taskname;
-                var lasttq = (ktk_tq ?? k_tq ?? kr_tq ?? s_tq);
+                var sTaskName = s_tq.task.taskname;
+                var lasttq = r.Last_TON != 0 ? WebApiConfig.AdslTaskQueues[r.Last_TON] : (ktk_tq ?? k_tq ?? kr_tq ?? s_tq);
+                var taskType = TaskTypeText[lasttq.task.tasktypes.TaskTypeId];
                 var lastTaskName = lasttq.task.taskname;
-                var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
-                var lastTaskStatus = lasttq.taskstatepool != null ? StateTypeText[lasttq.taskstatepool.statetype.Value] : "Bekleyen";
-                return new
+                string lastTaskStatus = lasttq.taskstatepool != null ? StateTypeText[lasttq.taskstatepool.statetype.Value] : "Bekleyen";
+                return new SLReport
                 {
                     //Satış kurulum view sonucuna göre class tanımı yap ve o class türünde bir nesne oluşturup döndür...
+                    s_tq = s_tq,
+                    kr_tq = kr_tq,
+                    k_tq = k_tq,
+                    ktk_tq = ktk_tq,
+                    lasttq = lasttq,
+                    lastTaskStatus = lastTaskStatus,
+                    lastTaskTypeName = taskType,
                 };
-            }));
+            }), "application/json");
         }
     }
 }

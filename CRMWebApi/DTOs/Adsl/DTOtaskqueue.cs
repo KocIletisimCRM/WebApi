@@ -22,8 +22,6 @@ namespace CRMWebApi.DTOs.Adsl
         public DTOpersonel Updatedpersonel { get; set; }
         public DTOpersonel attachedpersonel { get; set; }
 
-
-
         public DTOcustomer attachedcustomer { get; set; }
         public DTOtaskstatepool taskstatepool { get; set; }
         public List<object> customerproduct { get; set; }

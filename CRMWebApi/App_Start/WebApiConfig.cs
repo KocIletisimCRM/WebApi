@@ -292,12 +292,15 @@ namespace CRMWebApi
                             {
                                 tDTO.task = AdslTasks[t.taskid];
                                 if (t.status != null) tDTO.taskstatepool = AdslStatus[t.status.Value];
+                                if (t.attachedobjectid != null)
+                                    tDTO.attachedcustomer = AdslCustomers[t.attachedobjectid.Value];
+                                if (t.attachedpersonelid != null)
+                                    tDTO.attachedpersonel = AdslPersonels[t.attachedpersonelid.Value];
+                                if (t.assistant_personel != null)
+                                    tDTO.asistanPersonel = AdslPersonels[t.assistant_personel.Value];
                                 AdslTaskQueues[t.taskorderno] = tDTO;
                                 try
                                 {
-                                    tDTO.task = AdslTasks[t.taskid];
-                                    if (t.status != null)
-                                        tDTO.taskstatepool = AdslStatus[t.status.Value];
                                     if (t.previoustaskorderid == null)
                                     {
                                         //Süreç Başlangıç Taskları
@@ -419,7 +422,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select taskstateid,taskstate,lastupdated from taskstatepool where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select taskstateid,taskstate,lastupdated,statetype from taskstatepool where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -429,6 +432,7 @@ namespace CRMWebApi
                                 taskstateid = (int)sqlreader[0],
                                 taskstate = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
+                                statetype = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
                             });
                             var tDTO = t.toDTO<DTOs.Adsl.DTOtaskstatepool>();
                             AdslStatus[t.taskstateid] = tDTO;
@@ -497,7 +501,7 @@ namespace CRMWebApi
                                                 new KeyValuePair<int, List<int>>(3, new List<int>())
                                                 }).ToDictionary(r => r.Key, r => r.Value);
                                     }
-                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                    AdslTaskSl[tid][1].Add(t.SLID);
                                 }
                             }
                             if (!string.IsNullOrWhiteSpace(t.KocSTask))
@@ -514,7 +518,7 @@ namespace CRMWebApi
                                                 new KeyValuePair<int, List<int>>(3, new List<int>())
                                                 }).ToDictionary(r => r.Key, r => r.Value);
                                     }
-                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                    AdslTaskSl[tid][2].Add(t.SLID);
                                 }
                             }
                             if (!string.IsNullOrWhiteSpace(t.KocETask))
@@ -531,7 +535,7 @@ namespace CRMWebApi
                                                 new KeyValuePair<int, List<int>>(3, new List<int>())
                                                 }).ToDictionary(r => r.Key, r => r.Value);
                                     }
-                                    AdslTaskSl[tid][0].Add(t.SLID);
+                                    AdslTaskSl[tid][3].Add(t.SLID);
                                 }
                             }
                         }

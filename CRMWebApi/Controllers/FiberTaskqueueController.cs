@@ -284,6 +284,44 @@ namespace CRMWebApi.Controllers
                                 if (db.taskqueue.Where(r => r.deleted == false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
+                                var oot = db.task.FirstOrDefault(t => t.taskid == item);
+                                if (oot == null) continue;
+
+                                var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
+                                if (oott.Count > 0)
+                                {
+                                    var turAtama = oott.Where(t => t.formedtask == null).ToList(); //bir türdeki bütün oluşacak taskların bir personele atanması
+                                    var task = oott.Where(r => r.formedtask == item).ToList();  //tür ve task seçilerek kural oluşturulmuşsa
+                                    //Task atama kuralları işlesin.
+                                    if (task.Count > 0)
+                                    {
+                                        var kPersonelandTasks = task.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid && r.closedtask == dtq.task.taskid); //kurallarda hem kapatılan task hemde kapatan personel kuralı varsa
+                                        var kTask = task.FirstOrDefault(r => r.closedtask == dtq.task.taskid);  // kapatılan task var kapatan personel olmayan kural varsa
+                                        var kPersonel = task.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid);  // kapatan personel var kapatılan task null kuralı varsa
+                                        if (kPersonelandTasks != null)
+                                            personel_id = kPersonelandTasks.appointedpersonel;
+                                        else if (kTask != null)
+                                            personel_id = kTask.appointedpersonel;
+                                        else if (kPersonel != null)
+                                            personel_id = kPersonel.appointedpersonel;
+                                        else
+                                            personel_id = task[0].appointedpersonel;
+                                    }
+                                    else if (turAtama.Count > 0)
+                                    {
+                                        var kPersonelandTasks = turAtama.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid && r.closedtask == dtq.task.taskid); //kurallarda hem kapatılan task hemde kapatan personel kuralı varsa
+                                        var kTask = turAtama.FirstOrDefault(r => r.closedtask == dtq.task.taskid);  // kapatılan task var kapatan personel olmayan kural varsa
+                                        var kPersonel = turAtama.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid);  // kapatan personel var kapatılan task null kuralı varsa
+                                        if (kPersonelandTasks != null)
+                                            personel_id = kPersonelandTasks.appointedpersonel;
+                                        else if (kTask != null)
+                                            personel_id = kTask.appointedpersonel;
+                                        else if (kPersonel != null)
+                                            personel_id = kPersonel.appointedpersonel;
+                                        else
+                                            personel_id = turAtama[0].appointedpersonel;
+                                    }
+                                }
 
                                 var amtq = new taskqueue
                                 {
@@ -336,13 +374,51 @@ namespace CRMWebApi.Controllers
                                     //eğer oluşacak task müşteri üzeirnde varsa ve durumu null ise yeniden oluşturmasına izin verme.
                                     //var autotaskcontrol = db.taskqueue.Where(t => t.taskid==item && t.status == null && t.attachedobjectid==dtq.attachedobjectid && t.deleted==false).Count();
                                     if (Convert.ToInt32(item) == 6125) continue;
-                                    var personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any());
+                                    int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
+                                    var oot = db.task.FirstOrDefault(t => t.taskid == item);
+                                    if (oot == null) continue;
+
+                                    var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
+                                    if (oott.Count > 0)
+                                    {
+                                        var turAtama = oott.Where(t => t.formedtask == null).ToList(); //bir türdeki bütün oluşacak taskların bir personele atanması
+                                        var task = oott.Where(r => r.formedtask == item).ToList();  //tür ve task seçilerek kural oluşturulmuşsa
+                                                                                                    //Task atama kuralları işlesin.
+                                        if (task.Count > 0)
+                                        {
+                                            var kPersonelandTasks = task.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid && r.closedtask == dtq.task.taskid); //kurallarda hem kapatılan task hemde kapatan personel kuralı varsa
+                                            var kTask = task.FirstOrDefault(r => r.closedtask == dtq.task.taskid);  // kapatılan task var kapatan personel olmayan kural varsa
+                                            var kPersonel = task.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid);  // kapatan personel var kapatılan task null kuralı varsa
+                                            if (kPersonelandTasks != null)
+                                                personel_id = kPersonelandTasks.appointedpersonel;
+                                            else if (kTask != null)
+                                                personel_id = kTask.appointedpersonel;
+                                            else if (kPersonel != null)
+                                                personel_id = kPersonel.appointedpersonel;
+                                            else
+                                                personel_id = task[0].appointedpersonel;
+                                        }
+                                        else if (turAtama.Count > 0)
+                                        {
+                                            var kPersonelandTasks = turAtama.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid && r.closedtask == dtq.task.taskid); //kurallarda hem kapatılan task hemde kapatan personel kuralı varsa
+                                            var kTask = turAtama.FirstOrDefault(r => r.closedtask == dtq.task.taskid);  // kapatılan task var kapatan personel olmayan kural varsa
+                                            var kPersonel = turAtama.FirstOrDefault(r => r.offpersonel == dtq.attachedpersonelid);  // kapatan personel var kapatılan task null kuralı varsa
+                                            if (kPersonelandTasks != null)
+                                                personel_id = kPersonelandTasks.appointedpersonel;
+                                            else if (kTask != null)
+                                                personel_id = kTask.appointedpersonel;
+                                            else if (kPersonel != null)
+                                                personel_id = kPersonel.appointedpersonel;
+                                            else
+                                                personel_id = turAtama[0].appointedpersonel;
+                                        }
+                                    }
                                     db.taskqueue.Add(new taskqueue
                                     {
                                         appointmentdate = null,
                                         attachmentdate = null,
                                         attachedobjectid = dtq.attachedobjectid,
-                                        attachedpersonelid= (personel_id ? dtq.attachedpersonelid : (null)),
+                                        attachedpersonelid= personel_id,
                                         taskid = Convert.ToInt32(item),
                                         creationdate = DateTime.Now,
                                         deleted = false,
