@@ -290,15 +290,21 @@ namespace CRMWebApi
                             }
                             else
                             {
-                                tDTO.task = AdslTasks[t.taskid];
-                                if (t.status != null) tDTO.taskstatepool = AdslStatus[t.status.Value];
-                                if (t.attachedobjectid != null)
-                                    tDTO.attachedcustomer = AdslCustomers[t.attachedobjectid.Value];
-                                if (t.attachedpersonelid != null)
-                                    tDTO.attachedpersonel = AdslPersonels[t.attachedpersonelid.Value];
-                                if (t.assistant_personel != null)
-                                    tDTO.asistanPersonel = AdslPersonels[t.assistant_personel.Value];
-                                AdslTaskQueues[t.taskorderno] = tDTO;
+                                try
+                                {
+                                    tDTO.task = AdslTasks[t.taskid];
+                                    if (t.status != null) tDTO.taskstatepool = AdslStatus[t.status.Value];
+                                    if (t.attachedobjectid != null && AdslCustomers.ContainsKey(t.attachedobjectid.Value))
+                                        tDTO.attachedcustomer = AdslCustomers[t.attachedobjectid.Value];
+                                    if (t.attachedpersonelid != null)
+                                        tDTO.attachedpersonel = AdslPersonels[t.attachedpersonelid.Value];
+                                    if (t.assistant_personel != null)
+                                        tDTO.asistanPersonel = AdslPersonels[t.assistant_personel.Value];
+                                    AdslTaskQueues[t.taskorderno] = tDTO;
+                                }
+                                catch (Exception ee)
+                                {
+                                }
                                 try
                                 {
                                     if (t.previoustaskorderid == null)

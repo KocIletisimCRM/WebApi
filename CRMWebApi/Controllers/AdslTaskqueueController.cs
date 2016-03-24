@@ -186,7 +186,11 @@ namespace CRMWebApi.Controllers
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
                     if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid == 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
-                        if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
+                        if (tq.taskstatepool.taskstateid == 0)
+                        {
+                            dtq.consummationdate = null;
+                            dtq.status = null;
+                        }// taskın durumunu açığa alma
                         else dtq.status = tq.taskstatepool.taskstateid;
 
                         #region Değiştirilen taska bağlı taskların hiyerarşik iptali. Bu kod taskın zorunlu task atamalarından önce çalışmalıdır.

@@ -38,18 +38,19 @@ namespace CRMWebApi.Controllers
         // Satış kurulum raporu
         [Route("SKR")]
         [HttpPost]
-        public HttpResponseMessage SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public async System.Threading.Tasks.Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
+            await WebApiConfig.updateAdslData();
             var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return Request.CreateResponse(HttpStatusCode.OK, WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 if (!r.Ktk_TON.HasValue)
                 {
-                    //DateTime sTime = request.start.AddMonths(-2);
-                    //var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
-                    //return stq.creationdate >= sTime && stq.consummationdate <= request.end;
-                    return false;
+                    DateTime sTime = request.start.AddMonths(-2);
+                    var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                    return stq.creationdate >= sTime && stq.consummationdate <= request.end;
+                    //return true;
                 }
                 var ktk_tq = WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value];
                 return ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
@@ -76,6 +77,14 @@ namespace CRMWebApi.Controllers
                     lastTaskTypeName = taskType,
                 };
             }), "application/json");
+        }
+        [Route("Taskqueues")]
+        [HttpPost]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> Taskqueues(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData();
+            var list = WebApiConfig.AdslTaskQueues.Count;
+            return Request.CreateResponse(HttpStatusCode.OK, list, "application/json");
         }
     }
 }
