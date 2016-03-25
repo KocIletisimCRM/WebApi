@@ -286,47 +286,33 @@ namespace CRMWebApi
                             if (t.deleted == true)
                             {
                                 if (AdslTaskQueues.ContainsKey(t.taskorderno))
+                                {
                                     AdslTaskQueues.Remove(t.taskorderno);
+                                    if (AdslProccesses.ContainsKey(t.taskorderno))
+                                        AdslProccesses.Remove(t.taskorderno);
+                                    if (AdslProccessIndexes.ContainsKey(t.taskorderno))
+                                        AdslProccessIndexes.Remove(t.taskorderno);
+                                }
                             }
                             else
                             {
-                                try
+                                tDTO.task = AdslTasks[t.taskid];
+                                AdslTaskQueues[t.taskorderno] = tDTO;
+                                if (t.previoustaskorderid == null)
                                 {
-                                    tDTO.task = AdslTasks[t.taskid];
-                                    if (t.status != null) tDTO.taskstatepool = AdslStatus[t.status.Value];
-                                    if (t.attachedobjectid != null && AdslCustomers.ContainsKey(t.attachedobjectid.Value))
-                                        tDTO.attachedcustomer = AdslCustomers[t.attachedobjectid.Value];
-                                    if (t.attachedpersonelid != null)
-                                        tDTO.attachedpersonel = AdslPersonels[t.attachedpersonelid.Value];
-                                    if (t.assistant_personel != null)
-                                        tDTO.asistanPersonel = AdslPersonels[t.assistant_personel.Value];
-                                    AdslTaskQueues[t.taskorderno] = tDTO;
-                                }
-                                catch (Exception ee)
-                                {
-                                }
-                                try
-                                {
-                                    if (t.previoustaskorderid == null)
+                                    //Süreç Başlangıç Taskları
+                                    if (ADSLProccessStarterTaskTypes.Contains(tDTO.task.tasktypes.TaskTypeId))
                                     {
-                                        //Süreç Başlangıç Taskları
-                                        if (ADSLProccessStarterTaskTypes.Contains(tDTO.task.tasktypes.TaskTypeId))
-                                        {
-                                            AdslProccesses.Add(t.taskorderno, new DTOs.Adsl.KocAdslProccess { S_TON = t.taskorderno });
-                                        }
-                                        AdslProccessIndexes[t.taskorderno] = t.taskorderno;
+                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess { S_TON = t.taskorderno };
                                     }
-                                    else {
-                                        var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
-                                        AdslProccessIndexes[t.taskorderno] = proccessNo;
-                                        if (AdslProccesses.ContainsKey(proccessNo))
-                                            AdslProccesses[proccessNo].Update(tDTO);
-                                    }
+                                    AdslProccessIndexes[t.taskorderno] = t.taskorderno;
                                 }
-                                catch (Exception exx)
-                                {
+                                else {
+                                    var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
+                                    AdslProccessIndexes[t.taskorderno] = proccessNo;
+                                    if (AdslProccesses.ContainsKey(proccessNo))
+                                        AdslProccesses[proccessNo].Update(tDTO);
                                 }
-
                             }
                         }
                     }

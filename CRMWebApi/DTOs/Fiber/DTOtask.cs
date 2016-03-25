@@ -13,6 +13,7 @@ namespace CRMWebApi.DTOs.Fiber
         public int ? attachablepersoneltype { get; set; }
         public DTOpersonel updatedpersonel { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public string description { get; set; }
 
         public DTOTaskTypes tasktypes { get; set; }
         public DTOobjecttypes objecttypes { get; set; }

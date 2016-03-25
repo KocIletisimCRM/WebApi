@@ -32,6 +32,7 @@ namespace CRMWebApi.Models.Fiber
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public string description { get; set; }
     
         public virtual ICollection<taskqueue> taskqueues { get; set; }
         public virtual personel updatedpersonel { get; set; }

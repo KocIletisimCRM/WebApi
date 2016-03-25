@@ -58,6 +58,7 @@ namespace CRMWebApi.Controllers
                 var dt = db.task.Where(t => t.taskid == request.taskid).FirstOrDefault();
                 var errormessage = new DTOResponseError();
 
+                dt.description = request.description;
                 dt.taskname = request.taskname;
                 dt.performancescore = request.performancescore;
                 dt.tasktype = request.tasktypes.TaskTypeId;
@@ -89,9 +90,8 @@ namespace CRMWebApi.Controllers
                     deleted = false,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
-                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId
-
-
+                    updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId,
+                    description = request.description,
                 };
                 db.task.Add(t);
                 db.SaveChanges();

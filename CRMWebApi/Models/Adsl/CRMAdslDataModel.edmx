@@ -323,6 +323,7 @@
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="description" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="taskqueue">
           <Key>
@@ -743,6 +744,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <NavigationProperty Name="taskstatematches" Relationship="KOCSAMADLSModel.adsl_taskadsl_taskstatematches" FromRole="adsl_task" ToRole="adsl_taskstatematches" />
           <NavigationProperty Name="atama" Relationship="KOCSAMADLSModel.atamaadsl_task" FromRole="adsl_task" ToRole="atama" />
           <NavigationProperty Name="atama1" Relationship="KOCSAMADLSModel.atamaadsl_task1" FromRole="adsl_task" ToRole="atama" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           </EntityType>
         <EntityType Name="adsl_taskqueue">
           <Key>
@@ -1792,6 +1794,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="task">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_task">
               <MappingFragment StoreEntitySet="task">
+                <ScalarProperty Name="description" ColumnName="description" />
                 <ScalarProperty Name="taskid" ColumnName="taskid" />
                 <ScalarProperty Name="taskname" ColumnName="taskname" />
                 <ScalarProperty Name="tasktype" ColumnName="tasktype" />

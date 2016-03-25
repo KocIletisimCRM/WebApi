@@ -266,6 +266,7 @@
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="description" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="taskqueue">
           <Key>
@@ -862,6 +863,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <NavigationProperty Name="tasktypes" Relationship="CRMModel.tasktasktypes" FromRole="task" ToRole="tasktypes" />
           <NavigationProperty Name="atamaformedtask" Relationship="CRMModel.atamataskformed" FromRole="task" ToRole="atama" />
           <NavigationProperty Name="atamaclosedtask" Relationship="CRMModel.atamataskclosed" FromRole="task" ToRole="atama" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="block">
           <Key>
@@ -2077,6 +2079,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <EntitySetMapping Name="task">
             <EntityTypeMapping TypeName="CRMModel.task">
               <MappingFragment StoreEntitySet="task">
+                <ScalarProperty Name="description" ColumnName="description" />
                 <ScalarProperty Name="deleted" ColumnName="deleted" />
                 <ScalarProperty Name="updatedby" ColumnName="updatedby" />
                 <ScalarProperty Name="lastupdated" ColumnName="lastupdated" />

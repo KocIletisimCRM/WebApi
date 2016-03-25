@@ -57,7 +57,7 @@ namespace CRMWebApi.Controllers
             {
                 var dt = db.task.Where(t => t.taskid == request.taskid).FirstOrDefault();
                 var errormessage = new DTOResponseError();
-
+                dt.description = request.description;
                 dt.taskname = request.taskname;
                 dt.performancescore = request.performancescore;
                 dt.tasktype = request.tasktypes.TaskTypeId;
@@ -69,7 +69,6 @@ namespace CRMWebApi.Controllers
                 errormessage.errorCode = 1;
                 errormessage.errorMessage = "İşlem Başarılı";
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
-
             }
         }
         [Route("insertTask")]
@@ -90,8 +89,8 @@ namespace CRMWebApi.Controllers
                     deleted = false,
                     creationdate = DateTime.Now,
                     lastupdated = DateTime.Now,
-                    updatedby = user.userId
-
+                    updatedby = user.userId,
+                    description = request.description,
                 };
                 db.task.Add(t);
                 db.SaveChanges();

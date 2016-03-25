@@ -33,6 +33,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<System.DateTime> lastupdated { get; set; }
         public Nullable<int> updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public string description { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }
