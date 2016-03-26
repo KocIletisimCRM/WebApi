@@ -1,49 +1,16 @@
-﻿using CRMWebApi.Models.Adsl;
-using CRMWebApi.DTOs.Adsl;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Data.Entity;
-using System.Linq;
+﻿using CRMWebApi.DTOs.Adsl;
+using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
-using System.Net.Http.Headers;
+using System.Web;
+using System.Web.OData;
 
-namespace CRMWebApi.Controllers
+namespace CRMWebApi.Controllers.OData
 {
-    [RoutePrefix("api/Adsl/Reports")]
-    public class AdslReportsController : ApiController
+    public class SLReportsController: ODataController
     {
-        [Route("getPersonelWorks")]
-        [HttpPost]
-        public HttpResponseMessage getPersonelWorks(DTOs.Adsl.DTOpersonel request)
-        {
-
-            using (var db = new KOCSAMADLSEntities(false))
-            {
-
-                var res = db.taskqueue.Include(s => s.attachedcustomer).Include(c => c.attachedcustomer.il).Include(c => c.attachedcustomer.ilce).
-                    Include(t => t.task).Include(d => d.customerdocument).Include(c => c.customerproduct).
-                    Where(p => p.attachedpersonelid == request.personelid && p.deleted == false && (p.task.taskid == 32 || p.task.taskid == 33 || p.task.taskid == 38 ||
-                    p.task.taskid == 39 || p.task.taskid == 40 || p.task.taskid == 59 || p.task.taskid == 60 || p.task.taskid == 62 || p.task.taskid == 63 || p.task.taskid == 64 || p.task.taskid == 65 || p.task.taskid == 79 || p.task.taskid == 72 || p.task.taskid == 80 || p.task.taskid == 75 || p.task.taskid == 76 || p.task.taskid == 82 || p.task.taskid == 86 || p.task.taskid == 85 || p.task.taskid == 55 || p.task.taskid == 54 || p.task.taskid == 102
-                    || p.task.taskid == 41 || p.task.taskid == 49 || p.task.taskid == 51) && p.status == null).OrderBy(s => s.attachedcustomer.customername).ToList();
-                res.ForEach(r =>
-                {
-                    var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == r.attachedobjectid)
-                           .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
-
-                    r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
-                    r.description = db.taskqueue.Where(s => s.taskorderno == salestaskorderno).Select(s => s.description).FirstOrDefault();
-                });
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()), "application/json");
-            }
-        }
-
-        // Satış kurulum raporu
-
         private async Task<List<SLReport>> getReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
@@ -222,54 +189,13 @@ namespace CRMWebApi.Controllers
 
         }
 
-        [Route("SKR")]
-        [HttpPost]
-        public async Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        [EnableQuery]
+        public async Task<IQueryable<SLReport>> get()
         {
-            var stw = Stopwatch.StartNew();
-            var report = await getReport(request).ConfigureAwait(false);
-            stw.Stop();
-            return Request.CreateResponse(HttpStatusCode.OK, new
-            {
-                data = report,
-                count = report.Count,
-                timming = stw.Elapsed
-            }, "application/json");
-        }
-
-        [Route("SKRGet")]
-        [HttpGet]
-        public async Task<HttpResponseMessage> SKR([FromUri] string start, [FromUri] string end )
-        {
-            var request = new DTOs.Adsl.DTORequestClasses.DateTimeRange {
-                start = DateTime.ParseExact(start, "d", System.Globalization.CultureInfo.InvariantCulture),
-                end = DateTime.ParseExact(end,  "d", System.Globalization.CultureInfo.InvariantCulture),
-            };
-            var report = await getReport(request).ConfigureAwait(false);
-            var dataString = new List<string>();
-            dataString.Add(SLReport.GetHeadhers());
-            dataString.AddRange(report.Select(r => r.ToString()));
-                var result = new HttpResponseMessage(HttpStatusCode.OK);
-                result.Content = new StringContent(string.Join("\r\n", dataString));
-                result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "SKReport.csv" };
-                return result;
-        }
-
-        [Route("Taskqueues")]
-        [HttpPost]
-        public async Task<HttpResponseMessage> Taskqueues(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
-        {
-            await WebApiConfig.updateAdslData();
-            var list = WebApiConfig.AdslTaskQueues.Count;
-            return Request.CreateResponse(HttpStatusCode.OK, list, "application/json");
-        }
-
-        [Route("Test")]
-        [HttpGet]
-        public HttpResponseMessage Test()
-        {
-            return Request.CreateResponse(HttpStatusCode.OK, new { count = WebApiConfig.AdslTaskQueues.Count }, "application/json");
+            var d = DateTime.Now;
+            var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1) };
+            var report = (await getReport(dtr));
+            return report.AsQueryable();
         }
     }
 }

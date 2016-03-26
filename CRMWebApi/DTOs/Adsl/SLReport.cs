@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web;
 
 namespace CRMWebApi.DTOs.Adsl
 {
     public class SLReport
     {
+        [Key]
+        [Display(Name ="Satış Kayıt Numarası")]
+        public int s_ton { get; set; } // satış taskoerder no
         public int? custid { get; set; }  // customerid
         public string custname { get; set; }
         public string custphone { get; set; }
@@ -16,7 +18,6 @@ namespace CRMWebApi.DTOs.Adsl
         public int? s_perid { get; set; } // satış personelid
         public string s_pername { get; set; }
         public string s_perky { get; set; } // satış personeli kanal yöneticisi
-        public int s_ton { get; set; } // satış taskoerder no
         public string s_tqname { get; set; } // satış task name
         public string campaign { get; set; } // customer campaign
         public string kaynak { get; set; }
@@ -75,5 +76,16 @@ namespace CRMWebApi.DTOs.Adsl
         public DateTime? bayislstartdateadd { get; set; }
         public DateTime? bayislenddateadd { get; set; }
         public int? fark { get; set; } // bayislenddate - bayislstartdate
+
+        public static string GetHeadhers()
+        {
+            return (new SLReport()).GetType().GetProperties().Select(p => p.Name).Aggregate((p, c) => $"{p};{c}");
+        }
+
+        public override string ToString()
+        {
+            return this.GetType().GetProperties().Select(p => (p.GetValue(this) ?? "").ToString().Replace("\r\n", " ")).Aggregate((p, c) => $"{p};{c}");
+        }
     }
+
 }

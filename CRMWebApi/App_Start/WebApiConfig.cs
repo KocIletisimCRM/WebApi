@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using CRMWebApi.DTOs.Adsl;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using Teknar_Proxy_Lib;
 
 namespace CRMWebApi
@@ -226,9 +227,8 @@ namespace CRMWebApi
                 loadFiberPersonels(FiberLastUpdated),
                 loadFiberTasks(FiberLastUpdated),
                 loadFiberStatus(FiberLastUpdated)
-            }).ContinueWith(async (t) => {
-                await loadFiberTaskQueues(FiberLastUpdated).ConfigureAwait(false);
             }).ConfigureAwait(false);
+            await loadFiberTaskQueues(FiberLastUpdated).ConfigureAwait(false);
             FiberLastUpdated = lastUpdated;
             fLockObject.Release();
         }
@@ -464,7 +464,7 @@ namespace CRMWebApi
                             AdslSl[t.SLID] = tDTO;
                             if (!string.IsNullOrWhiteSpace(t.BayiSTask))
                             {
-                                foreach (var tid in t.BayiSTask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r=>int.Parse(r)))
+                                foreach (var tid in t.BayiSTask.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)))
                                 {
                                     if (!AdslTaskSl.ContainsKey(tid))
                                     {
@@ -598,25 +598,31 @@ namespace CRMWebApi
                 loadAdslTasks(AdslLastUpdated),
                 loadAdslStatus(AdslLastUpdated),
                 loadAdslSl(AdslLastUpdated)
-            }).ContinueWith( async (t)=> {
-                await loadAdslTaskQueues(AdslLastUpdated).ConfigureAwait(false);
             }).ConfigureAwait(false);
+            await loadAdslTaskQueues(AdslLastUpdated).ConfigureAwait(false);
             AdslLastUpdated = lastUpdated;
             aLockObject.Release();
         }
+
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
             // Web API routes
             config.MapHttpAttributeRoutes();
-            config.EnableCors(new EnableCorsAttribute("*", "*", "*","X-KOC-Token"));
+            config.EnableCors(new EnableCorsAttribute("*", "*", "*", "X-KOC-Token"));
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<SLReport>("SLReports");
+            config.MapODataServiceRoute(
+                routeName: "ODataRoute",
+                routePrefix: null,
+                model: builder.GetEdmModel());
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslIlces(), updateAdslData(), updateFiberData()});
+            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
         }
     }
 }
