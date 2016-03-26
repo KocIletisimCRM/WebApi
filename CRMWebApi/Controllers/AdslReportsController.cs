@@ -40,9 +40,9 @@ namespace CRMWebApi.Controllers
         // Satış kurulum raporu
         [Route("SKR")]
         [HttpPost]
-        public async System.Threading.Tasks.Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public HttpResponseMessage SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
-            await WebApiConfig.updateAdslData();
+            //await WebApiConfig.updateAdslData();
             var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return Request.CreateResponse(HttpStatusCode.OK, WebApiConfig.AdslProccesses.Values.Where(r =>
@@ -59,23 +59,26 @@ namespace CRMWebApi.Controllers
                 var lasttq = WebApiConfig.AdslTaskQueues[r.Last_TON];
                 var res = new SLReport();
                 //Satış kurulum view sonucuna göre class tanımı yap ve o class türünde bir nesne oluşturup döndür...
-                if (WebApiConfig.AdslCustomers.ContainsKey(s_tq.attachedobjectid.Value))
+                if (s_tq.attachedobjectid != null && WebApiConfig.AdslCustomers.ContainsKey(s_tq.attachedobjectid.Value))
                 {
                     var customerInfo = WebApiConfig.AdslCustomers[s_tq.attachedobjectid.Value];
                     res.custid = customerInfo.customerid;
                     res.custname = customerInfo.customername;
                     res.custphone = customerInfo.phone;
-                    res.il = null; // il dictionary olması gerek
-                    res.ilce = null; // ilce dictionary olması gerek
+                    if (customerInfo.ilKimlikNo != null && WebApiConfig.AdslIls.ContainsKey(customerInfo.ilKimlikNo.Value))
+                        res.il = WebApiConfig.AdslIls[customerInfo.ilKimlikNo.Value].ad;
+                    if (customerInfo.ilceKimlikNo != null && WebApiConfig.AdslIlces.ContainsKey(customerInfo.ilceKimlikNo.Value))
+                        res.ilce = WebApiConfig.AdslIlces[customerInfo.ilceKimlikNo.Value].ad;
                     res.gsm = customerInfo.gsm;
 
                 }
-                if (WebApiConfig.AdslPersonels.ContainsKey(s_tq.attachedpersonelid.Value))
+                if (s_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(s_tq.attachedpersonelid.Value))
                 {
                     var sPersonelInfo = WebApiConfig.AdslPersonels[s_tq.attachedpersonelid.Value];
                     res.s_perid = sPersonelInfo.personelid;
                     res.s_pername = sPersonelInfo.personelname;
-                    res.s_perky = null;
+                    if (sPersonelInfo.relatedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(sPersonelInfo.relatedpersonelid.Value))
+                        res.s_perky = WebApiConfig.AdslPersonels[sPersonelInfo.relatedpersonelid.Value].personelname;
                 }
                 res.s_ton = s_tq.taskorderno;
                 if (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid))

@@ -243,6 +243,8 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_task> AdslTasks = new Dictionary<int, Models.Adsl.adsl_task>();
         public static Dictionary<int, Models.Adsl.adsl_personel> AdslPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
         public static Dictionary<int, Models.Adsl.adsl_taskstatepool> AdslStatus = new Dictionary<int, Models.Adsl.adsl_taskstatepool>();
+        public static Dictionary<int, Models.Adsl.il> AdslIls = new Dictionary<int, Models.Adsl.il>(); // Raporda müşterinin ilini göstermek için
+        public static Dictionary<int, Models.Adsl.ilce> AdslIlces = new Dictionary<int, Models.Adsl.ilce>(); // Raporda müşterinin ilcesini göstermek için
         public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -317,7 +319,6 @@ namespace CRMWebApi
                 }
             }
         }
-
         public static async Task loadAdslCustomers(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -328,7 +329,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated,ilKimlikNo,ilceKimlikNo from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -339,6 +340,8 @@ namespace CRMWebApi
                                 tc = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 customername = sqlreader.IsDBNull(2) ? null : (string)sqlreader[2],
                                 lastupdated = sqlreader.IsDBNull(3) ? null : (DateTime?)sqlreader[3],
+                                ilKimlikNo = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
+                                ilceKimlikNo = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
                             });
                             AdslCustomers[t.customerid] = t;
                         }
@@ -384,7 +387,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -394,6 +397,7 @@ namespace CRMWebApi
                                 personelid = (int)sqlreader[0],
                                 personelname = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
+                                relatedpersonelid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
                             });
                             AdslPersonels[t.personelid] = t;
                         }
@@ -531,6 +535,58 @@ namespace CRMWebApi
                 }
             }
         }
+        public static async Task loadAdslIls()
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from il";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.il
+                            {
+                                kimlikNo = (int)sqlreader[0],
+                                ad = (string)sqlreader[1],
+                            });
+                            AdslIls[t.kimlikNo] = t;
+                        }
+                    }
+                }
+            }
+        }
+        public static async Task loadAdslIlces()
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select kimlikNo,ad from ilce";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.ilce
+                            {
+                                kimlikNo = (int)sqlreader[0],
+                                ad = (string)sqlreader[1],
+                            });
+                            AdslIlces[t.kimlikNo] = t;
+                        }
+                    }
+                }
+            }
+        }
 
         public static async Task updateAdslData()
         {
@@ -560,7 +616,7 @@ namespace CRMWebApi
                 defaults: new { id = RouteParameter.Optional }
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { updateAdslData(), updateFiberData() });
+            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslIlces(), updateAdslData(), updateFiberData()});
         }
     }
 }
