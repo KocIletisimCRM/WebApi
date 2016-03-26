@@ -36,6 +36,7 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()), "application/json");
             }
         }
+
         // Satış kurulum raporu
         [Route("SKR")]
         [HttpPost]
@@ -46,15 +47,9 @@ namespace CRMWebApi.Controllers
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return Request.CreateResponse(HttpStatusCode.OK, WebApiConfig.AdslProccesses.Values.Where(r =>
             {
-                if (!r.Ktk_TON.HasValue)
-                {
-                    DateTime sTime = request.start.AddMonths(-2);
-                    var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
-                    return stq.creationdate >= sTime && stq.consummationdate <= request.end;
-                    //return true;
-                }
-                var ktk_tq = WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value];
-                return ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
+                return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).Select(r =>
             {
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
@@ -65,15 +60,24 @@ namespace CRMWebApi.Controllers
                 var taskType = TaskTypeText[lasttq.task.tasktypes.TaskTypeId];
                 var res = new SLReport();
                 //Satış kurulum view sonucuna göre class tanımı yap ve o class türünde bir nesne oluşturup döndür...
-                res.custid = s_tq.attachedcustomer.customerid;
-                res.custname = s_tq.attachedcustomer.customername;
-                res.custphone = s_tq.attachedcustomer.phone;
-                res.il = s_tq.attachedcustomer.il.ad; // il dictionary olması gerek
-                res.ilce = s_tq.attachedcustomer.ilce.ad; // ilce dictionary olması gerek
-                res.gsm = s_tq.attachedcustomer.gsm;
-                res.s_perid = s_tq.attachedpersonel.personelid;
-                res.s_pername = s_tq.attachedpersonel.personelname;
-                res.s_perky = s_tq.attachedpersonel.relatedpersonel.personelname;
+                if (WebApiConfig.AdslCustomers.ContainsKey(s_tq.attachedobjectid.Value))
+                {
+                    var customerInfo = WebApiConfig.AdslCustomers[s_tq.attachedobjectid.Value];
+                    res.custid = customerInfo.customerid;
+                    res.custname = customerInfo.customername;
+                    res.custphone = customerInfo.phone;
+                    res.il = null; // il dictionary olması gerek
+                    res.ilce = null; // ilce dictionary olması gerek
+                    res.gsm = customerInfo.gsm;
+
+                }
+                if (WebApiConfig.AdslPersonels.ContainsKey(s_tq.attachedpersonelid.Value))
+                {
+                    var sPersonelInfo = WebApiConfig.AdslPersonels[s_tq.attachedpersonelid.Value];
+                    res.s_perid = sPersonelInfo.personelid;
+                    res.s_pername = sPersonelInfo.personelname;
+                    res.s_perky = null;
+                }
                 res.s_ton = s_tq.taskorderno;
                 res.s_tqname = s_tq.task.taskname;
                 res.campaign = null; // campaign ve customerproduct dictionary olması gerek

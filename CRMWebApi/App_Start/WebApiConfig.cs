@@ -238,11 +238,11 @@ namespace CRMWebApi
         public static int[] ADSLProccessStarterTaskTypes = new int[] { 1, 6 };
         public static Dictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new Dictionary<int, DTOs.Adsl.KocAdslProccess>();
         public static Dictionary<int, int> AdslProccessIndexes = new Dictionary<int, int>();
-        public static Dictionary<int, DTOs.Adsl.DTOtaskqueue> AdslTaskQueues = new Dictionary<int, DTOs.Adsl.DTOtaskqueue>();
-        public static Dictionary<int, DTOs.Adsl.DTOcustomer> AdslCustomers = new Dictionary<int, DTOs.Adsl.DTOcustomer>();
-        public static Dictionary<int, DTOs.Adsl.DTOtask> AdslTasks = new Dictionary<int, DTOs.Adsl.DTOtask>();
-        public static Dictionary<int, DTOs.Adsl.DTOpersonel> AdslPersonels = new Dictionary<int, DTOs.Adsl.DTOpersonel>();
-        public static Dictionary<int, DTOs.Adsl.DTOtaskstatepool> AdslStatus = new Dictionary<int, DTOs.Adsl.DTOtaskstatepool>();
+        public static Dictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new Dictionary<int, Models.Adsl.adsl_taskqueue>();
+        public static Dictionary<int, Models.Adsl.customer> AdslCustomers = new Dictionary<int, Models.Adsl.customer>();
+        public static Dictionary<int, Models.Adsl.adsl_task> AdslTasks = new Dictionary<int, Models.Adsl.adsl_task>();
+        public static Dictionary<int, Models.Adsl.adsl_personel> AdslPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
+        public static Dictionary<int, Models.Adsl.adsl_taskstatepool> AdslStatus = new Dictionary<int, Models.Adsl.adsl_taskstatepool>();
         public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -282,7 +282,6 @@ namespace CRMWebApi
                                 assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
                                 fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
                             });
-                            var tDTO = t.toDTO<DTOs.Adsl.DTOtaskqueue>();
                             if (t.deleted == true)
                             {
                                 if (AdslTaskQueues.ContainsKey(t.taskorderno))
@@ -296,29 +295,29 @@ namespace CRMWebApi
                             }
                             else
                             {
-                                tDTO.task = AdslTasks[t.taskid];
-                                AdslTaskQueues[t.taskorderno] = tDTO;
+                                AdslTaskQueues[t.taskorderno] = t;
                                 if (t.previoustaskorderid == null)
                                 {
                                     //Süreç Başlangıç Taskları
-                                    if (ADSLProccessStarterTaskTypes.Contains(tDTO.task.tasktypes.TaskTypeId))
+                                    if (ADSLProccessStarterTaskTypes.Contains(AdslTasks[t.taskid].tasktype))
                                     {
-                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess { S_TON = t.taskorderno };
+                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
                                     AdslProccessIndexes[t.taskorderno] = t.taskorderno;
                                 }
                                 else {
                                     var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
                                     AdslProccessIndexes[t.taskorderno] = proccessNo;
-                                    if (AdslProccesses.ContainsKey(proccessNo))
-                                        AdslProccesses[proccessNo].Update(tDTO);
                                 }
+                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
+                                    AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                             }
                         }
                     }
                 }
             }
         }
+
         public static async Task loadAdslCustomers(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -340,7 +339,7 @@ namespace CRMWebApi
                                 tc = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 customername = sqlreader.IsDBNull(2) ? null : (string)sqlreader[2],
                                 lastupdated = sqlreader.IsDBNull(3) ? null : (DateTime?)sqlreader[3],
-                            }).toDTO<DTOs.Adsl.DTOcustomer>();
+                            });
                             AdslCustomers[t.customerid] = t;
                         }
                     }
@@ -369,9 +368,7 @@ namespace CRMWebApi
                                 tasktype = (int)sqlreader[2],
                                 lastupdated = sqlreader.IsDBNull(3) ? null : (DateTime?)sqlreader[3],
                             });
-                            var tDTO = t.toDTO<DTOs.Adsl.DTOtask>();
-                            tDTO.tasktypes = new DTOs.Adsl.DTOTaskTypes { TaskTypeId = t.tasktype };
-                            AdslTasks[t.taskid] = tDTO;
+                            AdslTasks[t.taskid] = t;
                         }
                     }
                 }
@@ -397,7 +394,7 @@ namespace CRMWebApi
                                 personelid = (int)sqlreader[0],
                                 personelname = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
-                            }).toDTO<DTOs.Adsl.DTOpersonel>();
+                            });
                             AdslPersonels[t.personelid] = t;
                         }
                     }
@@ -426,8 +423,7 @@ namespace CRMWebApi
                                 lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
                                 statetype = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
                             });
-                            var tDTO = t.toDTO<DTOs.Adsl.DTOtaskstatepool>();
-                            AdslStatus[t.taskstateid] = tDTO;
+                            AdslStatus[t.taskstateid] = t;
                         }
                     }
                 }
