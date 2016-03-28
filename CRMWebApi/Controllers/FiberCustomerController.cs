@@ -100,6 +100,7 @@ namespace CRMWebApi.Controllers
                         gsmstatu = request.gsmKullanımıStatus.id,
                         iss = request.issStatus.id,
                         emptorcustomernum = request.emptorcustomernum,
+                        superonlineCustNo = request.superonlineCustNo,
                     };
                     db.customer.Add(p);
                     db.SaveChanges();

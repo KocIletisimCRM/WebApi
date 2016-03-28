@@ -91,26 +91,6 @@ namespace CRMWebApi.Controllers
                                     .Select(r => new { r.customerid, r.customername })
                                     .ToList(),
                                 "application/json");
-
-                //else if (request.isBlockFilter())
-                //    return Request.CreateResponse(HttpStatusCode.OK,
-                //               db.block.SqlQuery(filter.subTables["blockid"].getFilterSQL())
-                //                   .Where(r => r.deleted == false)
-                //                   .Select(r => new { r.blockid, r.blockname })
-                //                   .OrderBy(r => r.blockname).ToList(),
-                //               "application/json");
-                //else if (request.isSiteFilter())
-                //    return Request.CreateResponse(HttpStatusCode.OK,
-                //               db.site.SqlQuery(filter.subTables["blockid"].subTables["siteid"].getFilterSQL())
-                //                    .Where(r => r.deleted == false)
-                //                    .Select(r => new { r.siteid, r.sitename }).OrderBy(r => r.sitename).ToList()
-                //                      , "application/json");
-
-                //return Request.CreateResponse(HttpStatusCode.OK,
-                //             db.site.SqlQuery(filter.subTables["blockid"].subTables["siteid"].getFilterSQL())
-                //                     .Where(r => r.deleted == false)
-                //                     .Select(r => new { r.region }).Distinct().OrderBy(r => r.region).ToList()
-                //              , "application/json");
             }
         }
 
@@ -286,13 +266,6 @@ namespace CRMWebApi.Controllers
                 var filter = request.getFilter();
                 var querySql = filter.getFilterSQL();
                 var res = new List<idName>();
-                //if (filter.tableName == "block")
-                //    res.AddRange(db.block.SqlQuery(querySql).Select(b => new idName { id = b.blockid, name = b.blockname }));
-                //else if (filter.tableName == "site")
-                //    res.AddRange(db.site.SqlQuery(querySql).Select(s => new idName { id = s.siteid, name = s.sitename }));
-                //else if (filter.tableName == "customer")
-                //    res.AddRange(db.customer.SqlQuery(querySql).Select(c => new idName { id = c.customerid, name = $"{c.customername} {c.customersurname}" }).Take(10));
-                //else
                     res.AddRange(db.personel.SqlQuery(querySql).Select(p => new idName { id = p.personelid, name = p.personelname }));
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }

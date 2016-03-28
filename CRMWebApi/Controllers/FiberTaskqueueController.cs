@@ -1103,7 +1103,8 @@ namespace CRMWebApi.Controllers
                     gsmstatu = (ct.gsmKullanımıStatus.id != 0) ? (int?)ct.gsmKullanımıStatus.id : null,
                     iss = (ct.issStatus.id != 0) ? (int?)ct.issStatus.id : null,
                     tvstatu = (ct.TvKullanımıStatus.id != 0) ? (int?)ct.TvKullanımıStatus.id : null,
-                    turkcellTv = (ct.TurkcellTVStatus.id != 0) ? (int?)ct.TurkcellTVStatus.id : null
+                    turkcellTv = (ct.TurkcellTVStatus.id != 0) ? (int?)ct.TurkcellTVStatus.id : null,
+                    superonlineCustNo = ct.superonlineCustNo,
                 };
                 if (item.customerid == 0)
                 {

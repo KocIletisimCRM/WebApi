@@ -61,6 +61,7 @@ namespace CRMWebApi.Controllers
                     item.lastupdated = DateTime.Now;
                     item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId ;
                     item.email = ct.email;
+                    item.superonlineCustNo = ct.superonlineCustNo;
                 }
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");

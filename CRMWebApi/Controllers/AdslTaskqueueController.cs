@@ -804,6 +804,7 @@ namespace CRMWebApi.Controllers
                         creationdate = DateTime.Now,
                         deleted = false,
                         email = request.email,
+                        superonlineCustNo = request.superonlineCustNo,
                     };
                     db.customer.Add(customer);
                     db.SaveChanges();

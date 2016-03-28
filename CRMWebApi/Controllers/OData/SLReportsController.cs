@@ -11,7 +11,7 @@ namespace CRMWebApi.Controllers.OData
 {
     public class SLReportsController: ODataController
     {
-        private async Task<List<SLReport>> getReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private async Task<List<SLReport>> getReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };

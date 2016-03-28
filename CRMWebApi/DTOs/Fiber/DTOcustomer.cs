@@ -5,6 +5,7 @@ namespace CRMWebApi.DTOs.Fiber
     public class DTOcustomer :BaseAttachedObject
     {
         public int customerid { get; set; }
+        public string superonlineCustNo { get; set; }
         public DTOblock block { get; set; }
         public string tckimlikno { get; set; }
         public string customername { get; set; }

@@ -42,6 +42,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<int> customerstatus { get; set; }
         public Nullable<int> bucakKimlikNo { get; set; }
         public string email { get; set; }
+        public string superonlineCustNo { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }

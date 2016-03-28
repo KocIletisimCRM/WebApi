@@ -66,6 +66,7 @@
           </Key>
           <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="blockid" Type="int" />
+          <Property Name="superonlineCustNo" Type="nvarchar" MaxLength="15" />
           <Property Name="tckimlikno" Type="nvarchar" MaxLength="255" />
           <Property Name="customername" Type="nvarchar" MaxLength="255" />
           <Property Name="customersurname" Type="nvarchar" MaxLength="255" />
@@ -1032,6 +1033,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <NavigationProperty Name="telStatus" Relationship="CRMModel.customertelStatus" FromRole="customer" ToRole="telStatus" />
           <NavigationProperty Name="TvKullanımıStatus" Relationship="CRMModel.customerTvKullanımıStatus" FromRole="customer" ToRole="TvKullanımıStatus" />
           <NavigationProperty Name="TurkcellTVStatus" Relationship="CRMModel.customerTurkcellTVStatus" FromRole="customer" ToRole="TurkcellTVStatus" />
+          <Property Name="superonlineCustNo" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="personel">
           <Key>
@@ -2178,6 +2180,7 @@ warning 6002: The table/view 'KOCSAMCRM.dbo.vcampaignproducts' does not have a p
           <EntitySetMapping Name="customer">
             <EntityTypeMapping TypeName="CRMModel.customer">
               <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="superonlineCustNo" ColumnName="superonlineCustNo" />
                 <ScalarProperty Name="emptorcustomernum" ColumnName="emptorcustomernum" />
                 <ScalarProperty Name="iss" ColumnName="iss" />
                 <ScalarProperty Name="gsmstatu" ColumnName="gsmstatu" />
