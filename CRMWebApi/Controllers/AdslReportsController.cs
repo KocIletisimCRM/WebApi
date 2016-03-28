@@ -122,7 +122,7 @@ namespace CRMWebApi.Controllers
                     res.kr_ton = kr_tq.taskorderno;
                     if (WebApiConfig.AdslTasks.ContainsKey(kr_tq.taskid))
                         res.kr_tqname = WebApiConfig.AdslTasks[kr_tq.taskid].taskname;
-                    if (WebApiConfig.AdslPersonels.ContainsKey(kr_tq.attachedpersonelid.Value))
+                    if (kr_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(kr_tq.attachedpersonelid.Value))
                     {
                         var kPersonelInfo = WebApiConfig.AdslPersonels[kr_tq.attachedpersonelid.Value];
                         res.kr_perid = kPersonelInfo.personelid;
@@ -175,7 +175,7 @@ namespace CRMWebApi.Controllers
                     res.ktk_ton = ktk_tq.taskorderno;
                     if (WebApiConfig.AdslTasks.ContainsKey(ktk_tq.taskid))
                         res.ktk_tqname = WebApiConfig.AdslTasks[ktk_tq.taskid].taskname;
-                    if (WebApiConfig.AdslPersonels.ContainsKey(ktk_tq.attachedpersonelid.Value))
+                    if (ktk_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(ktk_tq.attachedpersonelid.Value))
                     {
                         var ktkPersonelInfo = WebApiConfig.AdslPersonels[ktk_tq.attachedpersonelid.Value];
                         res.ktk_perid = ktkPersonelInfo.personelid;
