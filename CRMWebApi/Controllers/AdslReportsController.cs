@@ -238,6 +238,35 @@ namespace CRMWebApi.Controllers
             ).ToList();
         }
 
+        public static async Task<List<SLKocReport>> getKocSLReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            return WebApiConfig.AdslProccesses.Values.SelectMany(
+                p => p.SLs.Where(sl => sl.Value.KStart >= request.start && sl.Value.KEnd <= request.end).Select(ksl => {
+                    try
+                    {
+                        var r = new SLKocReport();
+                        r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
+                        r.CustomerId = ksl.Value.CustomerId;
+                        r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
+                            WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                        r.BayiSLMaxTime = 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
+                        r.BayiSLTaskStart = ksl.Value.BStart;
+                        r.BayiSLEnd = ksl.Value.BEnd;
+                        r.KocSLStart = ksl.Value.KStart.Value;
+                        r.KocSLEnd = ksl.Value.KEnd;
+                        r.KocSLMaxTime = 0;
+                        return r;
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
+                })
+            ).ToList();
+        }
+
+
         [Route("SKR")]
         [HttpPost]
         public async Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)

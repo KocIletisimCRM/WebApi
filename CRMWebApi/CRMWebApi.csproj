@@ -162,6 +162,7 @@
     <Compile Include="Controllers\MailBasvuruController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
+    <Compile Include="Controllers\OData\SLKocReportsController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\FiberStockController.cs" />
     <Compile Include="Controllers\FiberTaskqueueController.cs" />

@@ -618,6 +618,7 @@ namespace CRMWebApi
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<SKReport>("SKReports");
             builder.EntitySet<SLBayiReport>("SLBayiReports");
+            builder.EntitySet<SLBayiReport>("SLKocReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",
