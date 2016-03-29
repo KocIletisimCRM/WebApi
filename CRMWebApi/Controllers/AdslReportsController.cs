@@ -44,7 +44,7 @@ namespace CRMWebApi.Controllers
 
         // Satış kurulum raporu
 
-        private async Task<List<SLReport>> getReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };
@@ -61,7 +61,7 @@ namespace CRMWebApi.Controllers
                 var k_tq = (r.K_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.K_TON.Value] : null;
                 var ktk_tq = (r.Ktk_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
                 var lasttq = WebApiConfig.AdslTaskQueues[r.Last_TON];
-                var res = new SLReport();
+                var res = new SKReport();
                 //Satış kurulum view sonucuna göre class tanımı yap ve o class türünde bir nesne oluşturup döndür...
                 if (s_tq.attachedobjectid != null && WebApiConfig.AdslCustomers.ContainsKey(s_tq.attachedobjectid.Value))
                 {
@@ -208,18 +208,34 @@ namespace CRMWebApi.Controllers
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = TaskTypeText[lastTask.tasktype];
                 res.lastTaskName = lastTask.taskname;
-                res.sltime = null;
-                res.bayisltime = null;
-                res.kocslstartdate = null;
-                res.kocslenddate = null;
-                res.bayislstartdate = null;
-                res.bayislenddate = null;
-                res.bayislstartdateadd = null;
-                res.bayislenddateadd = null;
-                res.fark = null;
                 return res;
             }).ToList();
 
+        }
+
+        public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            return WebApiConfig.AdslProccesses.Values.SelectMany(
+                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId).Select(bsl => {
+                    try
+                    {
+                        var r = new SLBayiReport();
+                        r.SLName = WebApiConfig.AdslSl.ContainsKey(bsl.Key) ? WebApiConfig.AdslSl[bsl.Key].SLName : "Tanımlanmamış SL";
+                        r.CustomerId = bsl.Value.CustomerId;
+                        r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
+                            WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                        r.BayiSLMaxTime = 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
+                        r.BayiSLTaskStart = bsl.Value.BStart;
+                        r.BayiSLEnd = bsl.Value.BEnd;
+                        return r;
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
+                })
+            ).ToList();
         }
 
         [Route("SKR")]
@@ -227,7 +243,7 @@ namespace CRMWebApi.Controllers
         public async Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             var stw = Stopwatch.StartNew();
-            var report = await getReport(request).ConfigureAwait(false);
+            var report = await getSKReport(request).ConfigureAwait(false);
             stw.Stop();
             return Request.CreateResponse(HttpStatusCode.OK, new
             {
@@ -245,9 +261,9 @@ namespace CRMWebApi.Controllers
                 start = DateTime.ParseExact(start, "d", System.Globalization.CultureInfo.InvariantCulture),
                 end = DateTime.ParseExact(end,  "d", System.Globalization.CultureInfo.InvariantCulture),
             };
-            var report = await getReport(request).ConfigureAwait(false);
+            var report = await getSKReport(request).ConfigureAwait(false);
             var dataString = new List<string>();
-            dataString.Add(SLReport.GetHeadhers());
+            dataString.Add(SKReport.GetHeadhers());
             dataString.AddRange(report.Select(r => r.ToString()));
                 var result = new HttpResponseMessage(HttpStatusCode.OK);
                 result.Content = new StringContent(string.Join("\r\n", dataString));

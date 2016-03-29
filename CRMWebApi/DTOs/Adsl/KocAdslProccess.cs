@@ -17,7 +17,23 @@ namespace CRMWebApi.DTOs.Adsl
         //Kurulum Task Kapama Task Order No
         public int? Ktk_TON { get; set; }
         //Son Task Order No (Process'de dallanma oluşturup task kapamaya ulaşmayan tasklar alınmayacak)
-        public int Last_TON { get; set; }
+
+        public bool proccessCancelled = false;
+        private int last_TON = 0;
+        public int Last_TON {
+            get { return last_TON; }
+            set
+            {
+                last_TON = value;
+                var last_tq = WebApiConfig.AdslTaskQueues[last_TON];
+                var stateType = last_tq.status == null ? 0 : WebApiConfig.AdslStatus[last_tq.status.Value].statetype;
+                if (stateType == 2)
+                {
+                    proccessCancelled = true;
+                    SLs.Clear();
+                }
+            }
+        }
         //Bu sürecin SL süreleri
         public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();        
         public void Update(adsl_taskqueue tq)
@@ -53,18 +69,21 @@ namespace CRMWebApi.DTOs.Adsl
                 Last_TON = tq.taskorderno;
                 Ktk_TON = tq.taskorderno;
             }
+
+            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid)) Last_TON = tq.taskorderno;
+            if (proccessCancelled) return;
             // Task SL taskı mı ?
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid))
             { 
               //Bayi SL Başlangıç
-                Last_TON = tq.taskorderno;
                 foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][0])
                 {
                     if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
                     if (!SLs[sl].BStart.HasValue)
                     {
                         SLs[sl].BStart = tq.attachmentdate;
-                        //SLs[sl].BayiID = tq.attachedpersonel.personelid; (tq.attachedpersonel olmadıgından hata veriyordu tasklar gelmiyordu bu sebeple kapattım)
+                        SLs[sl].BayiID = tq.attachedpersonelid;
+                        SLs[sl].CustomerId = tq.attachedobjectid.Value;
                     }
                 }
                 foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
@@ -76,6 +95,7 @@ namespace CRMWebApi.DTOs.Adsl
                 {
                     if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
                     if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate;
+                    SLs[sl].CustomerId = tq.attachedobjectid.Value;
                 }
                 foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][3])
                 {

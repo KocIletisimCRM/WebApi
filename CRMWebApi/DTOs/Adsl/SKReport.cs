@@ -4,10 +4,9 @@ using System.Linq;
 
 namespace CRMWebApi.DTOs.Adsl
 {
-    public class SLReport
+    public class SKReport
     {
         [Key]
-        [Display(Name ="Satış Kayıt Numarası")]
         public int s_ton { get; set; } // satış taskoerder no
         public int? custid { get; set; }  // customerid
         public string custname { get; set; }
@@ -67,19 +66,10 @@ namespace CRMWebApi.DTOs.Adsl
         public string lastTaskStatus { get; set; }
         public string lastTaskTypeName { get; set; }
         public string lastTaskName { get; set; }
-        public int? sltime { get; set; } // koç sl süresi
-        public int? bayisltime { get; set; } //bayi sl süresi
-        public DateTime? kocslstartdate { get; set; }
-        public DateTime? kocslenddate { get; set; }
-        public DateTime? bayislstartdate { get; set; }
-        public DateTime? bayislenddate { get; set; }
-        public DateTime? bayislstartdateadd { get; set; }
-        public DateTime? bayislenddateadd { get; set; }
-        public int? fark { get; set; } // bayislenddate - bayislstartdate
 
         public static string GetHeadhers()
         {
-            return (new SLReport()).GetType().GetProperties().Select(p => p.Name).Aggregate((p, c) => $"{p};{c}");
+            return (new SKReport()).GetType().GetProperties().Select(p => p.Name).Aggregate((p, c) => $"{p};{c}");
         }
 
         public override string ToString()

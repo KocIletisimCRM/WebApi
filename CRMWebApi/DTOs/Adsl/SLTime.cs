@@ -12,5 +12,6 @@ namespace CRMWebApi.DTOs.Adsl
         public DateTime? BStart { get; set; }
         public DateTime? BEnd { get; set; }
         public int? BayiID { get; set; }
+        public int CustomerId { get; set; }
     }
 }

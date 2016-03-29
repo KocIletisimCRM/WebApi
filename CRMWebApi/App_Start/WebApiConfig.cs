@@ -311,7 +311,7 @@ namespace CRMWebApi
                                     var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
                                     AdslProccessIndexes[t.taskorderno] = proccessNo;
                                 }
-                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
+                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]) && !AdslProccesses[AdslProccessIndexes[t.taskorderno]].proccessCancelled)
                                     AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                             }
                         }
@@ -616,11 +616,13 @@ namespace CRMWebApi
                 defaults: new { id = RouteParameter.Optional }
             );
             ODataModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<SLReport>("SLReports");
+            builder.EntitySet<SKReport>("SKReports");
+            builder.EntitySet<SLBayiReport>("SLBayiReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
-                routePrefix: null,
-                model: builder.GetEdmModel());
+                routePrefix: "odata",
+                model: builder.GetEdmModel()
+            );
             TeknarProxyService.Start();
             Task.WaitAll(new Task[] { loadAdslIls(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
         }
