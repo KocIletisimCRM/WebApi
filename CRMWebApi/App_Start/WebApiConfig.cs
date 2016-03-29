@@ -91,7 +91,7 @@ namespace CRMWebApi
                                                 FiberProccesses[proccessNo].Update(tDTO);
                                         }
                                     }
-                                    catch (Exception exx)
+                                    catch (Exception)
                                     {
                                     }
                                 }
@@ -100,7 +100,7 @@ namespace CRMWebApi
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -387,7 +387,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -398,6 +398,8 @@ namespace CRMWebApi
                                 personelname = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
                                 relatedpersonelid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
+                                ilKimlikNo = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
+                                ilceKimlikNo = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
                             });
                             AdslPersonels[t.personelid] = t;
                         }
@@ -618,7 +620,7 @@ namespace CRMWebApi
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<SKReport>("SKReports");
             builder.EntitySet<SLBayiReport>("SLBayiReports");
-            builder.EntitySet<SLBayiReport>("SLKocReports");
+            builder.EntitySet<SLKocReport>("SLKocReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

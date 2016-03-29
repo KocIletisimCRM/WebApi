@@ -770,7 +770,7 @@ namespace CRMWebApi.Controllers
                     transaction.Commit();
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json");
@@ -806,7 +806,7 @@ namespace CRMWebApi.Controllers
                 }
                 return saveTaskQueues(req);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json"); ;
             }

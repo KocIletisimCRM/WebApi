@@ -12,15 +12,21 @@ namespace CRMWebApi.DTOs.Adsl
         public string SLName { get; set; }
         [Key]
         public int CustomerId { get; set; }
+        public int? BayiId { get; set; }
+        public string BayiName { get; set; }
+        public string Il { get; set; }
+        public string Ilce { get; set; }
         public string CustomerName { get; set; }
-        public DateTime? BayiSLTaskStart { get; set;}
-
+        public DateTime? BayiSLTaskStart { get; set; }
         private DateTime? bayiSLEnd = DateTime.Now;
-        public DateTime? BayiSLEnd {
-            get { return bayiSLEnd; } set { if (value != null) bayiSLEnd = value; }
+        public DateTime? BayiSLEnd
+        {
+            get { return BayiSLTaskStart.HasValue ? bayiSLEnd : null; }
+            set { if (value != null) bayiSLEnd = value; }
         }
         public int BayiSLMaxTime { get; set; } //tamamlanması gereken azami süre
-        public DateTime? BayiSLStart { // 17:00 dan sora atanan sl'ler sabah başlatılacak
+        public DateTime? BayiSLStart
+        { // 17:00 dan sora atanan sl'ler sabah başlatılacak
             get
             {
                 return BayiSLTaskStart == null ? null :
@@ -32,13 +38,13 @@ namespace CRMWebApi.DTOs.Adsl
             }
             set { }
         }
-        public TimeSpan? BayiSLTime {
+        public TimeSpan? BayiSLTime
+        {
             get
             {
                 return BayiSLTaskStart == null ? null : (TimeSpan?)(BayiSLEnd.Value - BayiSLStart.Value);
             }
         } // SLEnd - SLStart ()
-
         public string BayiSLTimeSting
         {
             get
@@ -46,18 +52,19 @@ namespace CRMWebApi.DTOs.Adsl
                 if (BayiSLTaskStart == null) return null;
                 var formatter = new List<string>();
                 if (BayiSLTime.Value.Days > 0) formatter.Add("d' gün");
-                if(BayiSLTime.Value.Hours > 0) formatter.Add("hh' saat");
+                if (BayiSLTime.Value.Hours > 0) formatter.Add("hh' saat");
                 if (BayiSLTime.Value.Minutes > 0) formatter.Add("mm' dakika");
                 try
                 {
                     return formatter.Count == 0 ? BayiSLTime.Value.ToString(@"' Waaaaws! 'ss' saniye'") :
                 (BayiSLTime.Value.ToString($@"{string.Join(" '", formatter) + " '"}"));
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
 
                     throw;
-                }            }
+                }
+            }
             set { }
         }
     }

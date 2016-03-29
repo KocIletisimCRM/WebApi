@@ -107,7 +107,7 @@ namespace CRMWebApi.Controllers
                     tran.Commit();
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     tran.Rollback();
                     var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Hata Oluştu" };
@@ -130,7 +130,7 @@ namespace CRMWebApi.Controllers
                     var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "Müşteri Düzenleme Tamamlandı." };
                     return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     tran.Rollback();
                     var errormessage = new DTOResponseError { errorCode = 2, errorMessage = "Müşteri Düzenleme Tamamlanamadı!" };

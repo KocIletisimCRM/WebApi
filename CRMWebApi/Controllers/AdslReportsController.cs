@@ -216,8 +216,16 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslProccesses.Values.SelectMany(
-                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId).Select(bsl => {
+            return WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
+                return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).SelectMany(
+                p => p.SLs
+                //.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId && sl.Value.BStart >= request.start && sl.Value.BEnd <= request.end)
+                .Select(bsl =>
+                {
                     try
                     {
                         var r = new SLBayiReport();
@@ -230,7 +238,7 @@ namespace CRMWebApi.Controllers
                         r.BayiSLEnd = bsl.Value.BEnd;
                         return r;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         throw;
                     }
@@ -241,12 +249,27 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLKocReport>> getKocSLReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslProccesses.Values.SelectMany(
-                p => p.SLs.Where(sl => sl.Value.KStart >= request.start && sl.Value.KEnd <= request.end).Select(ksl => {
+            return WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
+                return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).SelectMany(
+                p => p.SLs
+                //.Where(sl => sl.Value.KStart >= request.start && sl.Value.KEnd <= request.end)
+                .Select(ksl => {
                     try
                     {
                         var r = new SLKocReport();
                         r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
+                        if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
+                        {
+                            var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
+                            r.BayiId = Bayi.personelid;
+                            r.BayiName = Bayi.personelname;
+                            r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
+                            r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
+                        }
                         r.CustomerId = ksl.Value.CustomerId;
                         r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
                             WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
@@ -258,7 +281,7 @@ namespace CRMWebApi.Controllers
                         r.KocSLMaxTime = 0;
                         return r;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         throw;
                     }

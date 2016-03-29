@@ -125,8 +125,8 @@ namespace Teknar_Proxy_Lib
             string cacheFileFullName = Path.Combine(path, cacheFileName);
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            if (!File.Exists(cacheFileFullName))
-                using (ZipArchive za = ZipFile.Open(Path.Combine(path, cacheFileName), ZipArchiveMode.Create)) ;
+            //if (!File.Exists(cacheFileFullName))
+            //    using (ZipArchive za = ZipFile.Open(Path.Combine(path, cacheFileName), ZipArchiveMode.Create)) ;
             CacheDir = path;
         }
 

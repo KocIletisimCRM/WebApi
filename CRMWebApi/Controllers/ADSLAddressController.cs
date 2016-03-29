@@ -42,7 +42,7 @@ namespace CRMWebApi.Controllers
                             }));
                             db.SaveChanges();
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
 
                             throw;
@@ -73,7 +73,7 @@ namespace CRMWebApi.Controllers
                                 db.SaveChanges();
                                 error = 0;
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
 
                                 return Request.CreateResponse(HttpStatusCode.OK, "-1", "application/json");
@@ -107,7 +107,7 @@ namespace CRMWebApi.Controllers
                                 db.SaveChanges();
                                 error = 0;
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
 
                                 return Request.CreateResponse(HttpStatusCode.OK,"-1", "application/json");
@@ -149,7 +149,7 @@ namespace CRMWebApi.Controllers
                         {
                             db.SaveChanges();
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
 
                             throw;

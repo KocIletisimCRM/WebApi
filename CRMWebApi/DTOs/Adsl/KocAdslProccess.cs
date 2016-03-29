@@ -20,7 +20,8 @@ namespace CRMWebApi.DTOs.Adsl
 
         public bool proccessCancelled = false;
         private int last_TON = 0;
-        public int Last_TON {
+        public int Last_TON
+        {
             get { return last_TON; }
             set
             {
@@ -35,7 +36,7 @@ namespace CRMWebApi.DTOs.Adsl
             }
         }
         //Bu sürecin SL süreleri
-        public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();        
+        public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();
         public void Update(adsl_taskqueue tq)
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
@@ -74,33 +75,41 @@ namespace CRMWebApi.DTOs.Adsl
             if (proccessCancelled) return;
             // Task SL taskı mı ?
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid))
-            { 
-              //Bayi SL Başlangıç
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][0])
-                {
-                    if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                    if (!SLs[sl].BStart.HasValue)
+            {
+                //Bayi SL Başlangıç
+                if (tq.attachmentdate.HasValue)
+                    foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][0])
                     {
-                        SLs[sl].BStart = tq.attachmentdate;
-                        SLs[sl].BayiID = tq.attachedpersonelid;
-                        SLs[sl].CustomerId = tq.attachedobjectid.Value;
+                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (!SLs[sl].BStart.HasValue)
+                        {
+                            SLs[sl].BStart = tq.attachmentdate;
+                            SLs[sl].BayiID = tq.attachedpersonelid;
+                            SLs[sl].CustomerId = tq.attachedobjectid.Value;
+                        }
                     }
-                }
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
-                {
-                    if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                    if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
-                }
+                //Koç SL Başlangıç
+                if(tq.appointmentdate.HasValue || tq.consummationdate.HasValue)
                 foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][2])
                 {
                     if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate;
+                    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate ?? tq.consummationdate;
                     SLs[sl].CustomerId = tq.attachedobjectid.Value;
                 }
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][3])
+                //Bayi SL Bitiş
+                if (tq.consummationdate.HasValue)
                 {
-                    if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                    if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
+                    foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
+                    {
+                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
+                    }
+                    //Koç SL Bitiş
+                    foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][3])
+                    {
+                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
+                    }
                 }
             }
         }

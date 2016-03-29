@@ -1,15 +1,13 @@
 ﻿using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.OData;
 
 namespace CRMWebApi.Controllers.OData
 {
-    public class SLBayiReportsController: ODataController
+    public class SLBayiReportsController : ODataController
     {
         [EnableQuery]
         public async Task<IQueryable<SLBayiReport>> get(int BayiId)

@@ -58,7 +58,7 @@ namespace Teknar_Proxy_Lib
                     var s = await wbc.DownloadStringTaskAsync(FPLN_Url).ConfigureAwait(false);
                     FPLN_ParseProxies(s);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }
