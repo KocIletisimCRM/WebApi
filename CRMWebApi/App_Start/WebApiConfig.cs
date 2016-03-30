@@ -1,5 +1,4 @@
-﻿using CRMWebApi.DTOs.Adsl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -456,11 +455,13 @@ namespace CRMWebApi
                                 SLName = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
                                 KocSTask = sqlreader.IsDBNull(2) ? null : (string)sqlreader[2],
                                 KocETask = sqlreader.IsDBNull(3) ? null : (string)sqlreader[3],
-                                BayiSTask = sqlreader.IsDBNull(4) ? null : (string)sqlreader[4],
-                                BayiETask = sqlreader.IsDBNull(5) ? null : (string)sqlreader[5],
-                                lastupdated = (DateTime)sqlreader[6],
-                                updatedby = (int)sqlreader[7],
-                                deleted = sqlreader.IsDBNull(8) ? null : (bool?)sqlreader[8],
+                                KocMaxTime = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4], // koç'un sl tamamlaması gereken max süre
+                                BayiSTask = sqlreader.IsDBNull(5) ? null : (string)sqlreader[5],
+                                BayiETask = sqlreader.IsDBNull(6) ? null : (string)sqlreader[6],
+                                BayiMaxTime = sqlreader.IsDBNull(7) ? null : (int?)sqlreader[7], // Bayinin sl tamamlaması gereken max süre
+                                lastupdated = (DateTime)sqlreader[8],
+                                updatedby = (int)sqlreader[9],
+                                deleted = sqlreader.IsDBNull(10) ? null : (bool?)sqlreader[10],
                             });
                             var tDTO = t.toDTO<DTOs.Adsl.DTOSL>();
                             AdslSl[t.SLID] = tDTO;
@@ -618,9 +619,9 @@ namespace CRMWebApi
                 defaults: new { id = RouteParameter.Optional }
             );
             ODataModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<SKReport>("SKReports");
-            builder.EntitySet<SLBayiReport>("SLBayiReports");
-            builder.EntitySet<SLKocReport>("SLKocReports");
+            builder.EntitySet<DTOs.Adsl.SKReport>("SKReports");
+            builder.EntitySet<DTOs.Adsl.SLBayiReport>("SLBayiReports");
+            builder.EntitySet<DTOs.Adsl.SLKocReport>("SLKocReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

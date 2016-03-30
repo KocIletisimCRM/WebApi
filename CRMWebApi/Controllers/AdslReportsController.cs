@@ -222,18 +222,31 @@ namespace CRMWebApi.Controllers
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
                 return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
-                p => p.SLs
-                //.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId && sl.Value.BStart >= request.start && sl.Value.BEnd <= request.end)
+                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId) // where tekrar koydum bayiye göre bilgi çekmiyordu tüm bayilerin raporunu alıyordu (Hüseyin KOZ)
                 .Select(bsl =>
                 {
                     try
                     {
                         var r = new SLBayiReport();
-                        r.SLName = WebApiConfig.AdslSl.ContainsKey(bsl.Key) ? WebApiConfig.AdslSl[bsl.Key].SLName : "Tanımlanmamış SL";
+                        if (WebApiConfig.AdslSl.ContainsKey(bsl.Key)) // bayi max time eklendi fazla sart olmasın diye tek ifte toplandı
+                        {
+                            var bayiSl = WebApiConfig.AdslSl[bsl.Key];
+                            r.SLName = bayiSl.SLName;
+                            r.BayiSLMaxTime =  bayiSl.BayiMaxTime != null ? bayiSl.BayiMaxTime.Value : 0; 
+                        }
+                        else
+                            r.SLName = "Tanımlanmamış SL";
+                        if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
+                        {
+                            var Bayi = WebApiConfig.AdslPersonels[bsl.Value.BayiID.Value];
+                            r.BayiId = Bayi.personelid;
+                            r.BayiName = Bayi.personelname;
+                            r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
+                            r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
+                        }
                         r.CustomerId = bsl.Value.CustomerId;
                         r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
                             WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
-                        r.BayiSLMaxTime = 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
                         r.BayiSLTaskStart = bsl.Value.BStart;
                         r.BayiSLEnd = bsl.Value.BEnd;
                         return r;
@@ -261,6 +274,15 @@ namespace CRMWebApi.Controllers
                     try
                     {
                         var r = new SLKocReport();
+                        if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
+                        {
+                            var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                            r.SLName = kocSl.SLName;
+                            r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
+                            r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
+                        }
+                        else
+                            r.SLName = "Tanımlanmamış SL";
                         r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
                         if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
                         {
@@ -273,12 +295,10 @@ namespace CRMWebApi.Controllers
                         r.CustomerId = ksl.Value.CustomerId;
                         r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
                             WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
-                        r.BayiSLMaxTime = 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
                         r.BayiSLTaskStart = ksl.Value.BStart;
                         r.BayiSLEnd = ksl.Value.BEnd;
                         r.KocSLStart = ksl.Value.KStart.Value;
                         r.KocSLEnd = ksl.Value.KEnd;
-                        r.KocSLMaxTime = 0;
                         return r;
                     }
                     catch (Exception)

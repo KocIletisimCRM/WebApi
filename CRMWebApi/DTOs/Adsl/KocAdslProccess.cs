@@ -1,8 +1,6 @@
 ﻿using CRMWebApi.Models.Adsl;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -20,7 +18,7 @@ namespace CRMWebApi.DTOs.Adsl
 
         public bool proccessCancelled = false;
         private int last_TON = 0;
-        public int Last_TON
+        public int Last_TON // taskı yanlış sonucla ilerlerterek task türetiliyor sonra başka sonucla kapatılıp önceki türeyenler iptal edilince son yask olarak iptal alıyoruz processin devamını kacırıyoruz 
         {
             get { return last_TON; }
             set
@@ -31,7 +29,7 @@ namespace CRMWebApi.DTOs.Adsl
                 if (stateType == 2)
                 {
                     proccessCancelled = true;
-                    SLs.Clear();
+                    SLs.Clear();  
                 }
             }
         }

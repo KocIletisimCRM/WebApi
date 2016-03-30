@@ -23,5 +23,7 @@ namespace CRMWebApi.Models.Adsl
         public System.DateTime lastupdated { get; set; }
         public int updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
+        public Nullable<int> KocMaxTime { get; set; }
+        public Nullable<int> BayiMaxTime { get; set; }
     }
 }

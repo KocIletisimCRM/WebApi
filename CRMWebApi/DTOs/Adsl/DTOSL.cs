@@ -11,8 +11,10 @@ namespace CRMWebApi.DTOs.Adsl
         public string SLName { get; set; }
         public string KocSTask { get; set; }
         public string KocETask { get; set; }
+        public int? KocMaxTime { get; set; }
         public string BayiSTask { get; set; }
         public string BayiETask { get; set; }
+        public int? BayiMaxTime { get; set; }
         public DateTime lastupdated { get; set; }
         public int updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
