@@ -136,6 +136,7 @@
     <Compile Include="Controllers\AdslPersonelController.cs" />
     <Compile Include="Controllers\AdslProductController.cs" />
     <Compile Include="Controllers\AdslReportsController.cs" />
+    <Compile Include="Controllers\AdslSLController.cs" />
     <Compile Include="Controllers\AdslStockCardController.cs" />
     <Compile Include="Controllers\AdslStockController.cs" />
     <Compile Include="Controllers\AdslTaskController.cs" />
@@ -195,6 +196,7 @@
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetAtamaRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetCSBRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetPersonelRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetSLRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetStockCardRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFilterGetTasksRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOFiterGetCampaignRequst.cs" />
