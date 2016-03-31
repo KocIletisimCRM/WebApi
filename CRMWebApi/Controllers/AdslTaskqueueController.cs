@@ -242,8 +242,9 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
-                                if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
-                                    continue;
+                                // otomatik zorunlu task türerken o task daha önce türetilip iptal edilmişse tekrar türetilmeye izin veriliyordu bundan dolayı (r.status == null || r.taskstatepool.statetype != 2) devre dısı bırakıldı (Hüseyin KOZ)
+                                if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item /*&& (r.status == null || r.taskstatepool.statetype != 2)*/).Any())
+                                    continue;  
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
