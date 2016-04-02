@@ -28,8 +28,8 @@ namespace CRMWebApi.DTOs.Adsl
                 var stateType = last_tq.status == null ? 0 : WebApiConfig.AdslStatus[last_tq.status.Value].statetype;
                 if (stateType == 2)
                 {
-                    proccessCancelled = true;
-                    SLs.Clear();  
+                    //proccessCancelled = true;
+                    //SLs.Clear();  
                 }
             }
         }

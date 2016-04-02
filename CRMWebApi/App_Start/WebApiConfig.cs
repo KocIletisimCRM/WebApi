@@ -310,7 +310,7 @@ namespace CRMWebApi
                                     var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
                                     AdslProccessIndexes[t.taskorderno] = proccessNo;
                                 }
-                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]) && !AdslProccesses[AdslProccessIndexes[t.taskorderno]].proccessCancelled)
+                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
                                     AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                             }
                         }
