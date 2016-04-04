@@ -43,7 +43,6 @@ namespace CRMWebApi.Controllers
         }
 
         // Satış kurulum raporu
-
         public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
@@ -308,7 +307,6 @@ namespace CRMWebApi.Controllers
                 })
             ).ToList();
         }
-
 
         [Route("SKR")]
         [HttpPost]

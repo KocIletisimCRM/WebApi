@@ -202,15 +202,21 @@ namespace CRMWebApi.Controllers
                         if (tsm != null)
                             automandatoryTasks.AddRange((tsm.automandatorytasks ?? "")
                                 .Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)).ToList());
-                        foreach (var item in db.taskqueue.Where(r => !automandatoryTasks.Contains(r.taskid) && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)).ToList())
+                        Queue<adsl_taskqueue> delete = new Queue<adsl_taskqueue>();
+                        foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)).ToList())
+                            delete.Enqueue(item);
+                        while (delete.Count > 0)
                         {
-                            var stateid = db.taskstatematches.Include(s => s.taskstatepool).Where(r => r.taskid == item.taskid &&
-                                  r.automandatorytasks == null && r.taskstatepool.statetype == 2).First().taskstatepool.taskstateid;
-                            item.status = stateid;
-                            item.consummationdate = DateTime.Now;
-                            item.description = "Hiyerarşik Task iptali";
-                            db.SaveChanges();
+                            var t = delete.Dequeue();
+                            foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == t.taskorderno || r.previoustaskorderid == t.taskorderno) && (r.deleted == false)).ToList())
+                                delete.Enqueue(item);
+                            var edit = db.taskqueue.First(r=> r.taskorderno == t.taskorderno);
+                            edit.deleted = true;
+                            edit.description = "Hiyerarşik Olarak Silindi!";
+                            edit.lastupdated = DateTime.Now;
+                            edit.updatedby = user.userId;
                         }
+                        db.SaveChanges();
                         #endregion
 
                         #region Browser tarafından attachedobjectid gönderilemediği için taskqueue tablosundan attachedobjectid ye erişme işlemi
