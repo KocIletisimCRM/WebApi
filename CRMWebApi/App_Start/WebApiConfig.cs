@@ -252,69 +252,76 @@ namespace CRMWebApi
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
-                db.Configuration.LazyLoadingEnabled = false;
-                db.Configuration.ProxyCreationEnabled = false;
-                using (var conn = db.Database.Connection as SqlConnection)
+                try
                 {
-                    await conn.OpenAsync().ConfigureAwait(false);
-                    var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
-                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    db.Configuration.LazyLoadingEnabled = false;
+                    db.Configuration.ProxyCreationEnabled = false;
+                    using (var conn = db.Database.Connection as SqlConnection)
                     {
-                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        await conn.OpenAsync().ConfigureAwait(false);
+                        var selectCommand = conn.CreateCommand();
+                        selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                        using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                         {
-                            var t = (new Models.Adsl.adsl_taskqueue
+                            while (await sqlreader.ReadAsync().ConfigureAwait(false))
                             {
-                                taskorderno = (int)sqlreader[0],
-                                taskid = Convert.ToInt32(sqlreader[1]),
-                                previoustaskorderid = sqlreader.IsDBNull(2) ? null : (int?)sqlreader[2],
-                                relatedtaskorderid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
-                                creationdate = sqlreader.IsDBNull(4) ? null : (DateTime?)sqlreader[4],
-                                attachedobjectid = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
-                                attachmentdate = sqlreader.IsDBNull(6) ? null : (DateTime?)sqlreader[6],
-                                attachedpersonelid = sqlreader.IsDBNull(7) ? null : (int?)sqlreader[7],
-                                appointmentdate = sqlreader.IsDBNull(8) ? null : (DateTime?)sqlreader[8],
-                                status = sqlreader.IsDBNull(9) ? null : (int?)sqlreader[9],
-                                consummationdate = sqlreader.IsDBNull(10) ? null : (DateTime?)sqlreader[10],
-                                description = sqlreader.IsDBNull(11) ? null : (string)sqlreader[11],
-                                lastupdated = sqlreader.IsDBNull(12) ? null : (DateTime?)sqlreader[12],
-                                updatedby = sqlreader.IsDBNull(13) ? null : (int?)sqlreader[13],
-                                deleted = sqlreader.IsDBNull(14) ? null : (bool?)sqlreader[14],
-                                assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
-                                fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
-                            });
-                            if (t.deleted == true)
-                            {
-                                if (AdslTaskQueues.ContainsKey(t.taskorderno))
+                                var t = (new Models.Adsl.adsl_taskqueue
                                 {
-                                    AdslTaskQueues.Remove(t.taskorderno);
-                                    if (AdslProccesses.ContainsKey(t.taskorderno))
-                                        AdslProccesses.Remove(t.taskorderno);
-                                    if (AdslProccessIndexes.ContainsKey(t.taskorderno))
-                                        AdslProccessIndexes.Remove(t.taskorderno);
-                                }
-                            }
-                            else
-                            {
-                                AdslTaskQueues[t.taskorderno] = t;
-                                if (t.previoustaskorderid == null)
+                                    taskorderno = (int)sqlreader[0],
+                                    taskid = Convert.ToInt32(sqlreader[1]),
+                                    previoustaskorderid = sqlreader.IsDBNull(2) ? null : (int?)sqlreader[2],
+                                    relatedtaskorderid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
+                                    creationdate = sqlreader.IsDBNull(4) ? null : (DateTime?)sqlreader[4],
+                                    attachedobjectid = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
+                                    attachmentdate = sqlreader.IsDBNull(6) ? null : (DateTime?)sqlreader[6],
+                                    attachedpersonelid = sqlreader.IsDBNull(7) ? null : (int?)sqlreader[7],
+                                    appointmentdate = sqlreader.IsDBNull(8) ? null : (DateTime?)sqlreader[8],
+                                    status = sqlreader.IsDBNull(9) ? null : (int?)sqlreader[9],
+                                    consummationdate = sqlreader.IsDBNull(10) ? null : (DateTime?)sqlreader[10],
+                                    description = sqlreader.IsDBNull(11) ? null : (string)sqlreader[11],
+                                    lastupdated = sqlreader.IsDBNull(12) ? null : (DateTime?)sqlreader[12],
+                                    updatedby = sqlreader.IsDBNull(13) ? null : (int?)sqlreader[13],
+                                    deleted = sqlreader.IsDBNull(14) ? null : (bool?)sqlreader[14],
+                                    assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
+                                    fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
+                                });
+                                if (t.deleted == true)
                                 {
-                                    //Süreç Başlangıç Taskları
-                                    if (ADSLProccessStarterTaskTypes.Contains(AdslTasks[t.taskid].tasktype))
+                                    if (AdslTaskQueues.ContainsKey(t.taskorderno))
                                     {
-                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                        AdslTaskQueues.Remove(t.taskorderno);
+                                        if (AdslProccesses.ContainsKey(t.taskorderno))
+                                            AdslProccesses.Remove(t.taskorderno);
+                                        if (AdslProccessIndexes.ContainsKey(t.taskorderno))
+                                            AdslProccessIndexes.Remove(t.taskorderno);
                                     }
-                                    AdslProccessIndexes[t.taskorderno] = t.taskorderno;
                                 }
-                                else {
-                                    var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
-                                    AdslProccessIndexes[t.taskorderno] = proccessNo;
+                                else
+                                {
+                                    AdslTaskQueues[t.taskorderno] = t;
+                                    if (t.previoustaskorderid == null)
+                                    {
+                                        //Süreç Başlangıç Taskları
+                                        if (ADSLProccessStarterTaskTypes.Contains(AdslTasks[t.taskid].tasktype))
+                                        {
+                                            AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                        }
+                                        AdslProccessIndexes[t.taskorderno] = t.taskorderno;
+                                    }
+                                    else {
+                                        var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
+                                        AdslProccessIndexes[t.taskorderno] = proccessNo;
+                                    }
+                                    if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
+                                        AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                                 }
-                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
-                                    AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                             }
                         }
                     }
+                }
+                catch (Exception ee)
+                {
+                    
                 }
             }
         }

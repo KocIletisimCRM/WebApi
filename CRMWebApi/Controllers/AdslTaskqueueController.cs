@@ -203,18 +203,17 @@ namespace CRMWebApi.Controllers
                             automandatoryTasks.AddRange((tsm.automandatorytasks ?? "")
                                 .Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)).ToList());
                         Queue<adsl_taskqueue> delete = new Queue<adsl_taskqueue>();
-                        foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)).ToList())
+                        foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)))
                             delete.Enqueue(item);
                         while (delete.Count > 0)
                         {
                             var t = delete.Dequeue();
-                            foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == t.taskorderno || r.previoustaskorderid == t.taskorderno) && (r.deleted == false)).ToList())
+                            foreach (var item in db.taskqueue.Where(r => (r.relatedtaskorderid == t.taskorderno || r.previoustaskorderid == t.taskorderno) && (r.deleted == false)))
                                 delete.Enqueue(item);
-                            var edit = db.taskqueue.First(r=> r.taskorderno == t.taskorderno);
-                            edit.deleted = true;
-                            edit.description = "Hiyerarşik Olarak Silindi!";
-                            edit.lastupdated = DateTime.Now;
-                            edit.updatedby = user.userId;
+                            t.deleted = true;
+                            t.description += "\r\nHiyerarşik Olarak Silindi!";
+                            t.lastupdated = DateTime.Now;
+                            t.updatedby = user.userId;
                         }
                         db.SaveChanges();
                         #endregion
