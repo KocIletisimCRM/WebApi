@@ -39,7 +39,7 @@ namespace CRMWebApi.DTOs.Adsl
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
             //Başlangıç Taskı ise
-            if (WebApiConfig.ADSLProccessStarterTaskTypes.Contains(taskType))
+            if (WebApiConfig.AdslTaskTypes[taskType].startsProccess)
             {
                 Last_TON = tq.taskorderno;
                 S_TON = tq.taskorderno;

@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
-
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Task")]
@@ -98,14 +97,8 @@ namespace CRMWebApi.Controllers
                 errormessage.errorCode = 1;
                 errormessage.errorMessage = "İşlem Başarılı";
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
-
             }
         }
         #endregion
-
-
-
     }
-
-
 }

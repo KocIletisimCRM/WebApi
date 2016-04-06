@@ -234,7 +234,6 @@ namespace CRMWebApi
 
         public static SemaphoreSlim aLockObject = new SemaphoreSlim(1);
         public static DateTime AdslLastUpdated = new DateTime(1900, 1, 1);
-        public static int[] ADSLProccessStarterTaskTypes = new int[] { 1, 6 };
         public static Dictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new Dictionary<int, DTOs.Adsl.KocAdslProccess>();
         public static Dictionary<int, int> AdslProccessIndexes = new Dictionary<int, int>();
         public static Dictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new Dictionary<int, Models.Adsl.adsl_taskqueue>();
@@ -244,6 +243,7 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_taskstatepool> AdslStatus = new Dictionary<int, Models.Adsl.adsl_taskstatepool>();
         public static Dictionary<int, Models.Adsl.il> AdslIls = new Dictionary<int, Models.Adsl.il>(); // Raporda müşterinin ilini göstermek için
         public static Dictionary<int, Models.Adsl.ilce> AdslIlces = new Dictionary<int, Models.Adsl.ilce>(); // Raporda müşterinin ilcesini göstermek için
+        public static Dictionary<int, Models.Adsl.adsl_tasktypes> AdslTaskTypes = new Dictionary<int, Models.Adsl.adsl_tasktypes>(); // startsProccess almak için
         public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -300,7 +300,7 @@ namespace CRMWebApi
                                 if (t.previoustaskorderid == null)
                                 {
                                     //Süreç Başlangıç Taskları
-                                    if (ADSLProccessStarterTaskTypes.Contains(AdslTasks[t.taskid].tasktype))
+                                    if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
                                     {
                                         AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
@@ -590,6 +590,33 @@ namespace CRMWebApi
                 }
             }
         }
+        public static async Task loadAdslTaskTypes()
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from tasktypes";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.adsl_tasktypes
+                            {
+                                TaskTypeId = (int)sqlreader[0],
+                                TaskTypeName = (string)sqlreader[1],
+                                startsProccess = (bool)sqlreader[2],
+                            });
+                            AdslTaskTypes[t.TaskTypeId] = t;
+                        }
+                    }
+                }
+            }
+        }
 
         public static async Task updateAdslData()
         {
@@ -628,7 +655,7 @@ namespace CRMWebApi
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
+            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
         }
     }
 }

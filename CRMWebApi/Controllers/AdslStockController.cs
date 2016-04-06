@@ -280,7 +280,6 @@ namespace CRMWebApi.Controllers
         }
         #endregion
 
-
         [Route("confirmSM")]
         [HttpPost]
         [KOCAuthorize]

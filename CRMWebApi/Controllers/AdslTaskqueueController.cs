@@ -440,46 +440,6 @@ namespace CRMWebApi.Controllers
                         }
                         #endregion
                         #region stok hareketleri kaydediliyor
-                        //foreach (var movement in stockmovements)
-                        //{
-                        //    if (movement.movementid != 0)
-                        //    {
-                        //        var sm = db.stockmovement.FirstOrDefault(s => s.movementid == movement.movementid);
-                        //        if (sm != null)
-                        //        {
-                        //            sm.amount = movement.amount;
-                        //            sm.confirmationdate = DateTime.Now;
-                        //            sm.lastupdated = DateTime.Now;
-                        //            sm.movementdate = DateTime.Now;
-                        //            sm.serialno = movement.serialno;
-                        //            sm.updatedby = user.userId;
-                        //        }
-                        //        else
-                        //        {
-                        //            throw new Exception("Stok Hareketi Bulunamadı");
-                        //        }
-                        //    }
-                        //    else
-                        //    {
-                        //        db.stockmovement.Add(new adsl_stockmovement
-                        //        {
-                        //            amount = movement.amount,
-                        //            confirmationdate = DateTime.Now,
-                        //            creationdate = DateTime.Now,
-                        //            fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
-                        //            fromobject = dtq.attachedpersonelid,
-                        //            deleted = false,
-                        //            lastupdated = DateTime.Now,
-                        //            movementdate = DateTime.Now,
-                        //            relatedtaskqueue = dtq.taskorderno,
-                        //            serialno = movement.serialno,
-                        //            stockcardid = movement.stockcardid,
-                        //            toobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                        //            toobject = dtq.attachedobjectid,
-                        //            updatedby = user.userId
-                        //        });
-                        //    }
-                        //}
                         db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
                         {
                             amount = sm.amount,
