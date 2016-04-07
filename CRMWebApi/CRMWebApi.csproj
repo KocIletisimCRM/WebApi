@@ -238,6 +238,7 @@
     <Compile Include="DTOs\Adsl\DTOtvStatus.cs" />
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
+    <Compile Include="DTOs\Adsl\SKPayment.cs" />
     <Compile Include="DTOs\Adsl\SKReport.cs" />
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
     <Compile Include="DTOs\Adsl\SLKocReport.cs" />

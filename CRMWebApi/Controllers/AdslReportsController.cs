@@ -42,6 +42,21 @@ namespace CRMWebApi.Controllers
             }
         }
 
+        public static async Task<List<SKPayment>> getPayment (DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            return WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).Select(r =>
+            {
+                var res = new SKPayment();
+
+                return res;
+            }).ToList();
+        }
+
         // Satış kurulum raporu
         public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
