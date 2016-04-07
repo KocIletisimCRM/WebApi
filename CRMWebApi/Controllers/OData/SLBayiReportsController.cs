@@ -10,6 +10,13 @@ namespace CRMWebApi.Controllers.OData
     public class SLBayiReportsController : ODataController
     {
         [EnableQuery]
+        public async Task<IQueryable<SLBayiReport>> get(int BayiId, DateTime start, DateTime end)
+        {
+            var dtr = new DateTimeRange { start = start, end = end };
+            var report = (await AdslReportsController.getBayiSLReport(BayiId, dtr));
+            return report.AsQueryable();
+        }
+        [EnableQuery]
         public async Task<IQueryable<SLBayiReport>> get(int BayiId)
         {
             var d = DateTime.Now;

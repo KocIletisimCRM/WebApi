@@ -10,6 +10,13 @@ namespace CRMWebApi.Controllers.OData
     public class SLKocReportsController : ODataController
     {
         [EnableQuery]
+        public async Task<IQueryable<SLKocReport>> get(DateTime start, DateTime end)
+        {
+            var dtr = new DateTimeRange { start = start, end = end };
+            var report = (await AdslReportsController.getKocSLReport(dtr));
+            return report.AsQueryable();
+        }
+        [EnableQuery]
         public async Task<IQueryable<SLKocReport>> get()
         {
             var d = DateTime.Now;

@@ -67,5 +67,6 @@ namespace CRMWebApi.DTOs.Adsl
             }
             set { }
         }
+        public string status { get; set; }
     }
 }

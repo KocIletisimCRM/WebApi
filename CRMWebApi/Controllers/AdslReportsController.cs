@@ -225,7 +225,16 @@ namespace CRMWebApi.Controllers
                 {
                     try
                     {
+                        var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+                        var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
                         var r = new SLBayiReport();
+                        if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
+                        {
+                            var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                            r.status = StateTypeText[statu.statetype.Value];
+                        }
+                        else
+                            r.status = "Bekleyen";
                         if (WebApiConfig.AdslSl.ContainsKey(bsl.Key)) // bayi max time eklendi fazla sart olmasın diye tek ifte toplandı
                         {
                             var bayiSl = WebApiConfig.AdslSl[bsl.Key];
@@ -271,7 +280,16 @@ namespace CRMWebApi.Controllers
                 .Select(ksl => {
                     try
                     {
+                        var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+                        var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
                         var r = new SLKocReport();
+                        if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
+                        {
+                            var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                            r.status = StateTypeText[statu.statetype.Value];
+                        }
+                        else
+                            r.status = "Bekleyen";
                         if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
                         {
                             var kocSl = WebApiConfig.AdslSl[ksl.Key];
@@ -299,7 +317,7 @@ namespace CRMWebApi.Controllers
                         r.KocSLEnd = ksl.Value.KEnd;
                         return r;
                     }
-                    catch (Exception)
+                    catch (Exception ee)
                     {
                         throw;
                     }
