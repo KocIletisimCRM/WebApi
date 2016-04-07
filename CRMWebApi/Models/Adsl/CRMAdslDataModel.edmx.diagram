@@ -71,6 +71,9 @@
         <AssociationConnector Association="KOCSAMADLSModel.atamaadsl_personeloff" />
         <AssociationConnector Association="KOCSAMADLSModel.adsl_kurulumpesonelaso" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.SL" Width="1.5" PointX="7.75" PointY="6.25" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.paymentsystem" Width="1.5" PointX="17.5" PointY="15.375" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.paymentsystemtype" Width="1.5" PointX="17.5" PointY="19.125" />
+        <AssociationConnector Association="KOCSAMADLSModel.paymentsystempaymentsystemtype" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

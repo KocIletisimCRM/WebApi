@@ -423,6 +423,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Adsl\paymentsystem.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\paymentsystemtype.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Adsl\SL.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>

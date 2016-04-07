@@ -243,7 +243,9 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_taskstatepool> AdslStatus = new Dictionary<int, Models.Adsl.adsl_taskstatepool>();
         public static Dictionary<int, Models.Adsl.il> AdslIls = new Dictionary<int, Models.Adsl.il>(); // Raporda müşterinin ilini göstermek için
         public static Dictionary<int, Models.Adsl.ilce> AdslIlces = new Dictionary<int, Models.Adsl.ilce>(); // Raporda müşterinin ilcesini göstermek için
-        public static Dictionary<int, Models.Adsl.adsl_tasktypes> AdslTaskTypes = new Dictionary<int, Models.Adsl.adsl_tasktypes>(); // startsProccess almak için
+        public static Dictionary<int, Models.Adsl.adsl_tasktypes> AdslTaskTypes = new Dictionary<int, Models.Adsl.adsl_tasktypes>(); // startsProccess almak için (startsproccess : başlangıç taskı mı kontrolü)
+        public static Dictionary<int, Models.Adsl.paymentsystemtype> AdslPaymentSystemType = new Dictionary<int, Models.Adsl.paymentsystemtype>(); // Hakediş hesaplama için hakediş tipleri
+        public static Dictionary<int, Models.Adsl.paymentsystem> AdslPaymentSystem = new Dictionary<int, Models.Adsl.paymentsystem>(); // Hakediş hesaplama için satış prim ve servis hakedişleri
         public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
@@ -617,6 +619,61 @@ namespace CRMWebApi
                 }
             }
         }
+        public static async Task loadAdslPaymentSystemTypes()
+        { // Hakediş hesaplama için hakediş tipleri
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from paymentsystemtype";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.paymentsystemtype
+                            {
+                                id = (int)sqlreader[0],
+                                paymentType = (string)sqlreader[1],
+                            });
+                            AdslPaymentSystemType[t.id] = t;
+                        }
+                    }
+                }
+            }
+        }
+        public static async Task loadAdslPaymentSystem()
+        { // Hakediş hesaplama için satış prim ve servis hakedişleri
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from paymentsystem";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.paymentsystem
+                            {
+                                id = (int)sqlreader[0],
+                                paymentType = (int)sqlreader[1],
+                                payment = sqlreader.IsDBNull(2) ? null : (double?)sqlreader[2],
+                                upperLimitAmount = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
+                                upperLimitSL = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
+                            });
+                            AdslPaymentSystem[t.id] = t;
+                        }
+                    }
+                }
+            }
+        }
 
         public static async Task updateAdslData()
         {
@@ -655,7 +712,7 @@ namespace CRMWebApi
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { loadAdslIls(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
+            Task.WaitAll(new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
         }
     }
 }
