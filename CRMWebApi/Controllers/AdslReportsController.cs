@@ -46,7 +46,6 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            var TaskTypeText = new string[] { "Diğer", "Satış Taskı", "Randevu Taskı", "Kurulum Taskı", "Randuvusuz Kurulum Taskı", "SOL Kapama Taskı", "Arıza Taskı", "Evrak Alma Taskı", "Teslimat Taskı" };
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
@@ -205,7 +204,7 @@ namespace CRMWebApi.Controllers
                 else
                     res.lastTaskStatus = "Bekleyen";
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
-                res.lastTaskTypeName = TaskTypeText[lastTask.tasktype];
+                res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
                 return res;
             }).ToList();

@@ -97,12 +97,12 @@ namespace CRMWebApi.Controllers
                     if (request.taskOrderNo != null)
                     {
                         var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
-                        var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
+                        var salestaskorderno = db.taskqueue.Where(t => (t.task.tasktype == 1 || t.task.tasktype == 8 || t.task.tasktype == 9) && t.attachedobjectid == customerid)
                             .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
 
                         // taska bağlı müşteri kampanyası ve bilgileri
                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno && c.deleted == false).ToList();
-                        r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, r.task.tasktype == 1, r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
+                        r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
                         {
                             var dIds = r.customerdocument.Select(csd => csd.documentid).ToList();
