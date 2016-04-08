@@ -161,6 +161,7 @@
     <Compile Include="Controllers\FiberSiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\MailBasvuruController.cs" />
+    <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
     <Compile Include="Controllers\OData\SLKocReportsController.cs" />
@@ -239,6 +240,7 @@
     <Compile Include="DTOs\Adsl\FilterClasses.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
     <Compile Include="DTOs\Adsl\SKPayment.cs" />
+    <Compile Include="DTOs\Adsl\SKPaymentReport.cs" />
     <Compile Include="DTOs\Adsl\SKReport.cs" />
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
     <Compile Include="DTOs\Adsl\SLKocReport.cs" />

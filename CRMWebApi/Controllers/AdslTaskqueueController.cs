@@ -253,7 +253,7 @@ namespace CRMWebApi.Controllers
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
                                 if (oot == null) continue;
-                                if (oot.tasktype == 2)
+                                if (oot.tasktype == 2 || oot.tasktype == 3)
                                 {
                                     var ptq = dtq;
                                     int? saletask = null;

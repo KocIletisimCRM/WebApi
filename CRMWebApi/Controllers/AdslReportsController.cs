@@ -43,7 +43,7 @@ namespace CRMWebApi.Controllers
         }
 
         //bayi prim ve servis hakediş miktarları
-        public static  Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private static Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             Dictionary<int, SKPayment> total = new Dictionary<int, SKPayment>();
             WebApiConfig.AdslProccesses.Values.Where(r =>
@@ -92,7 +92,7 @@ namespace CRMWebApi.Controllers
         }
 
         // bayi id ve tarih aralığı gönderildiğinde bayinin ortalama sl hesabı
-        public static double getBayiSLOrt(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private static double getBayiSLOrt(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             List<SLBayiReport> ort = new List<SLBayiReport>();
             int sayCust = 0;
@@ -115,6 +115,26 @@ namespace CRMWebApi.Controllers
                 })
             ).ToList();
             return timeOrt / sayCust;
+        }
+
+        public static async Task<List<SKPaymentReport>> getPaymentReport (DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            var SKPay = getPayment(request);
+            return SKPay.Select(r=>
+            {
+                var res = new SKPaymentReport();
+                var bSLOrt = getBayiSLOrt(r.Key, request);
+                res.bId = r.Key;
+                res.bName = WebApiConfig.AdslPersonels.ContainsKey(r.Key) ? WebApiConfig.AdslPersonels[r.Key].personelname : "İsimsiz Personel";
+                res.sat = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat;
+                res.kur = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur;
+                res.sat_kur = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 3 && r.Value.sat_kur <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat_kur;
+                res.ariza = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 4 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.ariza;
+                res.teslimat = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat;
+                res.evrak = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak;
+                return res;
+            }).ToList();
         }
 
         // Satış kurulum raporu
