@@ -42,19 +42,79 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        public static async Task<List<SKPayment>> getPayment (DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        //bayi prim ve servis hakediş miktarları
+        public static  Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
-            await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslProccesses.Values.Where(r =>
+            Dictionary<int, SKPayment> total = new Dictionary<int, SKPayment>();
+            WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
                 return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).Select(r =>
-            {
-                var res = new SKPayment();
+             {
+                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                 var k_tq = WebApiConfig.AdslTaskQueues[r.K_TON.Value];
+                 if (k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
+                 { // satış taskı; satış ise ve satış yapan bayi kurulum yapmışsa bayinin sat-kur hakedişine 1 ekle
+                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[s_tq.attachedpersonelid.Value].sat_kur++;
+                 }
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 9)
+                 { // satış taskı; CC Satışı ise bayinin kurulum hakedişine 1 ekle
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].kur++;
+                 }
+                 else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
+                 { // satış taskı; bayi satış taskı ise satış yapan bayinin satış, kurulum yapan bayinin kurulum hakedişine 1 ekle
+                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[s_tq.attachedpersonelid.Value].sat++;
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].kur++;
+                 }
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 8)
+                 { // satış taskı; teslimat ise bayinin teslimat hakedişine 1 ekle
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].teslimat++;
+                 }
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 6)
+                 { // satış taskı; arıza ise bayinin arıza hakedişine 1 ekle
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].ariza++;
+                 }
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 7) // başlangıç task tipi ekrak alma olamaz sart değişecek !!
+                 { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].evrak++;
+                 }
+                 return true;
+             }).ToList();
+            return total;
+        }
 
-                return res;
-            }).ToList();
+        // bayi id ve tarih aralığı gönderildiğinde bayinin ortalama sl hesabı
+        public static double getBayiSLOrt(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        {
+            List<SLBayiReport> ort = new List<SLBayiReport>();
+            int sayCust = 0;
+            double timeOrt = 0;
+            WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).SelectMany(
+                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId)
+                .Select(bsl =>
+                {
+                    sayCust++;
+                    var r = new SLBayiReport();
+                    r.BayiSLTaskStart = bsl.Value.BStart;
+                    r.BayiSLEnd = bsl.Value.BEnd;
+                    timeOrt += (r.BayiSLEnd - r.BayiSLStart).Value.TotalHours;
+                    ort.Add(r);
+                    return r;
+                })
+            ).ToList();
+            return timeOrt / sayCust;
         }
 
         // Satış kurulum raporu
@@ -137,11 +197,9 @@ namespace CRMWebApi.Controllers
                         res.kr_tqname = WebApiConfig.AdslTasks[kr_tq.taskid].taskname;
                     if (kr_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(kr_tq.attachedpersonelid.Value))
                     {
-                        var kPersonelInfo = WebApiConfig.AdslPersonels[kr_tq.attachedpersonelid.Value];
-                        res.kr_perid = kPersonelInfo.personelid;
-                        res.kr_pername = kPersonelInfo.personelname;
-                        res.k_perid = kPersonelInfo.personelid;
-                        res.k_pername = kPersonelInfo.personelname;
+                        var krPersonelInfo = WebApiConfig.AdslPersonels[kr_tq.attachedpersonelid.Value];
+                        res.kr_perid = krPersonelInfo.personelid;
+                        res.kr_pername = krPersonelInfo.personelname;
                         //res.kr_perky = null;
                     }
                     if (kr_tq.consummationdate != null)
@@ -172,6 +230,13 @@ namespace CRMWebApi.Controllers
                         res.k_consummationdateyear = k_tq.consummationdate.Value.Year;
                         res.k_consummationdatemonth = k_tq.consummationdate.Value.Month;
                         res.k_consummationdateday = k_tq.consummationdate.Value.Day;
+                    }
+                    if (k_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(k_tq.attachedpersonelid.Value))
+                    {
+                        var kPersonelInfo = WebApiConfig.AdslPersonels[k_tq.attachedpersonelid.Value];
+                        res.k_perid = kPersonelInfo.personelid;
+                        res.k_pername = kPersonelInfo.personelname;
+                        //res.k_perky = null;
                     }
                     if (k_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(k_tq.status.Value))
                     {

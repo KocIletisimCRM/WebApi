@@ -6,8 +6,12 @@ using System.Web;
 namespace CRMWebApi.DTOs.Adsl
 {
     public class SKPayment
-    {
-        public int deneme { get; set; }
-        public int deneme2 { get; set; }
+    { // Hakedişler hesaplanarak döndürülecek olan class
+        public int sat { get; set; }
+        public int sat_kur { get; set; }
+        public int kur { get; set; }
+        public int ariza { get; set; }
+        public int teslimat { get; set; }
+        public int evrak { get; set; }
     }
 }
