@@ -63,6 +63,11 @@ namespace CRMWebApi.Controllers
                  { // satış taskı; CC Satışı ise bayinin kurulum hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].kur++;
+                     if (s_tq.taskid == 33 || s_tq.taskid == 64) // başlangıç task tipi ekrak alma olamaz evrak alma tasklarının idleri ile kontrol edildi (Hüseyin KOZ) !!
+                     { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
+                         if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                         total[k_tq.attachedpersonelid.Value].evrak++;
+                     }
                  }
                  else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
                  { // satış taskı; bayi satış taskı ise satış yapan bayinin satış, kurulum yapan bayinin kurulum hakedişine 1 ekle
@@ -80,11 +85,6 @@ namespace CRMWebApi.Controllers
                  { // satış taskı; arıza ise bayinin arıza hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].ariza++;
-                 }
-                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 7) // başlangıç task tipi ekrak alma olamaz sart değişecek !!
-                 { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
-                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
-                     total[k_tq.attachedpersonelid.Value].evrak++;
                  }
                  return true;
              }).ToList();
