@@ -126,6 +126,7 @@ namespace CRMWebApi.Controllers
                 var res = new SKPaymentReport();
                 var bSLOrt = getBayiSLOrt(r.Key, request);
                 res.bId = r.Key;
+                res.bSLOrt = bSLOrt;
                 res.bName = WebApiConfig.AdslPersonels.ContainsKey(r.Key) ? WebApiConfig.AdslPersonels[r.Key].personelname : "İsimsiz Personel";
                 res.sat = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat;
                 res.kur = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur;
