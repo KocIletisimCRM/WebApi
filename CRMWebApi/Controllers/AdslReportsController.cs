@@ -114,26 +114,26 @@ namespace CRMWebApi.Controllers
                     return r;
                 })
             ).ToList();
-            return timeOrt / sayCust;
+            return sayCust == 0 ? 0 : timeOrt / sayCust;
         }
 
-        public static async Task<List<SKPaymentReport>> getPaymentReport (DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public static async Task<List<SKPaymentReport>> getPaymentReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var SKPay = getPayment(request);
-            return SKPay.Select(r=>
+            return SKPay.Select(r =>
             {
-                var res = new SKPaymentReport();
                 var bSLOrt = getBayiSLOrt(r.Key, request);
+                var res = new SKPaymentReport();
                 res.bId = r.Key;
                 res.bSLOrt = bSLOrt;
                 res.bName = WebApiConfig.AdslPersonels.ContainsKey(r.Key) ? WebApiConfig.AdslPersonels[r.Key].personelname : "İsimsiz Personel";
-                res.sat = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat;
-                res.kur = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur;
-                res.sat_kur = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 3 && r.Value.sat_kur <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat_kur;
-                res.ariza = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 4 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.ariza;
-                res.teslimat = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat;
-                res.evrak = WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak;
+                res.sat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat) ?? 0;
+                res.kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur) ?? 0;
+                res.sat_kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 3 && r.Value.sat_kur <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat_kur) ?? 0;
+                res.ariza = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 4 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.ariza) ?? 0;
+                res.teslimat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat) ?? 0;
+                res.evrak = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak) ?? 0;
                 return res;
             }).ToList();
         }

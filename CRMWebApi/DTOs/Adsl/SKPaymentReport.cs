@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -12,13 +8,13 @@ namespace CRMWebApi.DTOs.Adsl
         public int bId { get; set; }
         public string bName { get; set; }
         public double bSLOrt { get; set; }
-        public double? sat { get; set; }
-        public double? sat_kur { get; set; }
-        public double? kur { get; set; }
-        public double? ariza { get; set; }
-        public double? teslimat { get; set; }
-        public double? evrak { get; set; }
-        public double? toplam
+        public double sat { get; set; }
+        public double sat_kur { get; set; }
+        public double kur { get; set; }
+        public double ariza { get; set; }
+        public double teslimat { get; set; }
+        public double evrak { get; set; }
+        public double toplam
         {
             get
             {
