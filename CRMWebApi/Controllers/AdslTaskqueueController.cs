@@ -253,7 +253,7 @@ namespace CRMWebApi.Controllers
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
                                 if (oot == null) continue;
-                                if (oot.tasktype == 2 || oot.tasktype == 3)
+                                if (oot.tasktype == 2)
                                 {
                                     var ptq = dtq;
                                     int? saletask = null;
@@ -276,6 +276,29 @@ namespace CRMWebApi.Controllers
                                         personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                     }
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
+                                }
+                                if (oot.tasktype == 3)
+                                {
+                                    var ptq = dtq;
+                                    int? krtask = null;
+                                    while (ptq != null)
+                                    {
+                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                        if (ptq.task.tasktype == 2)
+                                        {
+                                            krtask = ptq.taskorderno;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                        }
+                                    }
+                                    if (krtask != null)
+                                    {
+                                        var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
+                                        personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
+                                    }
                                 }
                                 if (item == 45)  // Evrak Onayı Saha Taskı oluşuyorsa satış yapan bayinin kanal yöneticisine ata
                                 {
