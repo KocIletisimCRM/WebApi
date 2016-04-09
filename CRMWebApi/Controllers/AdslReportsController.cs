@@ -32,7 +32,7 @@ namespace CRMWebApi.Controllers
                     || p.task.taskid == 41 || p.task.taskid == 49 || p.task.taskid == 51) && p.status == null).OrderBy(s => s.attachedcustomer.customername).ToList();
                 res.ForEach(r =>
                 {
-                    var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == r.attachedobjectid)
+                    var salestaskorderno = db.taskqueue.Where(t => (t.task.tasktype == 1 || t.task.tasktype == 8 || t.task.tasktype == 9) && t.attachedobjectid == r.attachedobjectid)
                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
 
                     r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno).ToList();
@@ -97,6 +97,7 @@ namespace CRMWebApi.Controllers
             List<SLBayiReport> ort = new List<SLBayiReport>();
             int sayCust = 0;
             double timeOrt = 0;
+            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).First(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
             WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
@@ -107,9 +108,15 @@ namespace CRMWebApi.Controllers
                 {
                     sayCust++;
                     var r = new SLBayiReport();
+                    double factor = 1; // bayi max sl süreleri eşit olmadığından ortalama alabilmek için (Tüm SL'lerin En büyüğü) (bayiMaxSL / buradaki SL) çarpan'ı sayısı kullanıldı (Hüseyin KOZ)
+                    if (WebApiConfig.AdslSl.ContainsKey(bsl.Key))
+                    {
+                        var bayiSl = WebApiConfig.AdslSl[bsl.Key];
+                        factor = (maxSL != null &&  bayiSl.BayiMaxTime != null) ? (maxSL.Value / bayiSl.BayiMaxTime.Value) : 1;
+                    }
                     r.BayiSLTaskStart = bsl.Value.BStart;
                     r.BayiSLEnd = bsl.Value.BEnd;
-                    timeOrt += (r.BayiSLEnd - r.BayiSLStart).Value.TotalHours;
+                    timeOrt += ((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * factor;
                     ort.Add(r);
                     return r;
                 })
