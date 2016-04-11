@@ -87,13 +87,13 @@ namespace CRMWebApi.DTOs.Adsl
                         }
                     }
                 //Koç SL Başlangıç
-                if(tq.appointmentdate.HasValue || tq.consummationdate.HasValue)
-                foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][2])
-                {
-                    if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                    if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate ?? tq.consummationdate;
-                    SLs[sl].CustomerId = tq.attachedobjectid.Value;
-                }
+                if (tq.appointmentdate.HasValue || tq.consummationdate.HasValue)
+                    foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][2])
+                    {
+                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate ?? tq.consummationdate;
+                        SLs[sl].CustomerId = tq.attachedobjectid.Value;
+                    }
                 //Bayi SL Bitiş
                 if (tq.consummationdate.HasValue)
                 {
@@ -108,6 +108,23 @@ namespace CRMWebApi.DTOs.Adsl
                         if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
                         if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
                     }
+                }
+            }
+        }
+
+        public static void updateProccesses(Queue<int> proccessIds)
+        {
+            while (proccessIds.Count > 0)
+            {
+                var proccessId = proccessIds.Dequeue();
+                var subTasks = new Queue<int>();
+                subTasks.Enqueue(proccessId);
+                while (subTasks.Count > 0)
+                {
+                    var taskId = subTasks.Dequeue();
+                    if (WebApiConfig.AdslTaskQueues.ContainsKey(taskId) && WebApiConfig.AdslProccessIndexes.ContainsKey(taskId) && WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[taskId]))
+                        WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[taskId]].Update(WebApiConfig.AdslTaskQueues[taskId]);
+                    foreach (var item in WebApiConfig.AdslTaskQueues.Where(r => r.Value.previoustaskorderid == taskId).OrderBy(r => r.Value.taskorderno)) subTasks.Enqueue(item.Value.taskorderno);
                 }
             }
         }

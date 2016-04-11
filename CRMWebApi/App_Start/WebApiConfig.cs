@@ -263,6 +263,7 @@ namespace CRMWebApi
                     selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
+                        var proccesIds = new HashSet<int>();
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
                         {
                             var t = (new Models.Adsl.adsl_taskqueue
@@ -289,11 +290,20 @@ namespace CRMWebApi
                             {
                                 if (AdslTaskQueues.ContainsKey(t.taskorderno))
                                 {
-                                    AdslTaskQueues.Remove(t.taskorderno);
+                                    //Derinlemesine temizlik :) Silinen task ve bu taska bağlı tüm taskları listeden çıkart
+                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(t.taskorderno);
+                                    var queue = new Queue<int>();
+                                    queue.Enqueue(t.taskorderno);
+                                    while (queue.Count > 0)
+                                    {
+                                        var ton = queue.Dequeue();
+                                        foreach (var item in AdslTaskQueues.Where(r => r.Value.previoustaskorderid == ton).Select(r => r.Value.taskorderno)) queue.Enqueue(item);
+                                        AdslTaskQueues.Remove(ton);
+                                        if (AdslProccessIndexes.ContainsKey(ton))
+                                            AdslProccessIndexes.Remove(ton);
+                                    }
                                     if (AdslProccesses.ContainsKey(t.taskorderno))
                                         AdslProccesses.Remove(t.taskorderno);
-                                    if (AdslProccessIndexes.ContainsKey(t.taskorderno))
-                                        AdslProccessIndexes.Remove(t.taskorderno);
                                 }
                             }
                             else
@@ -307,15 +317,16 @@ namespace CRMWebApi
                                         AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
                                     AdslProccessIndexes[t.taskorderno] = t.taskorderno;
+                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(t.taskorderno);
                                 }
                                 else {
                                     var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
                                     AdslProccessIndexes[t.taskorderno] = proccessNo;
+                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(proccessNo);
                                 }
-                                if (AdslProccesses.ContainsKey(AdslProccessIndexes[t.taskorderno]))
-                                    AdslProccesses[AdslProccessIndexes[t.taskorderno]].Update(t);
                             }
                         }
+                        DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccesIds));
                     }
                 }
             }
