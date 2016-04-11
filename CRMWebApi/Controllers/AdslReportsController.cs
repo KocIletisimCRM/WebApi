@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net.Http.Headers;
+using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 
 namespace CRMWebApi.Controllers
 {
@@ -41,6 +42,18 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()), "application/json");
             }
         }
+
+        //[Route("BSLOrt")]
+        //[HttpPost]
+        //public async Task<HttpResponseMessage> BSLOrt(int bid)
+        //{
+        //    await WebApiConfig.updateAdslData();
+        //    var d = DateTime.Now;
+        //    var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1) };
+        //    var dtr2 = new DateTimeRange { start = dtr.start.AddMonths(-1), end = dtr.end.AddMonths(-1) };
+        //    var slOrt = new double[] { getBayiSLOrt(bid, dtr), getBayiSLOrt(bid, dtr2) };
+        //    return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
+        //}
 
         //bayi prim ve servis hakediş miktarları
         private static Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
