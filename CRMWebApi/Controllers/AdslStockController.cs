@@ -25,7 +25,7 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
-                if(request.fromobject!=null && request.fromobject.value == null && request.toobject.value == null)
+                if (request.fromobject != null && request.fromobject.value == null && request.toobject.value == null)
                 {
                     request.fromobject.value = "";
                 }
@@ -165,15 +165,15 @@ namespace CRMWebApi.Controllers
                 {
                     foreach (var seri in serials)
                     {
-                        
+
                         //serino kontrolü yap. varsa ekleme.
-                         var userControl = db.stockmovement.Where(s => s.serialno == seri && s.deleted == false).OrderByDescending(s => s.movementid).Select(s => s.toobject).FirstOrDefault();
-                         if (seri!=null&&(userControl != userID) && ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) != (int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
-                         {
-                                errormessage.errorCode = -1;
-                                errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
-                         }
-                     
+                        var userControl = db.stockmovement.Where(s => s.serialno == seri && s.deleted == false).OrderByDescending(s => s.movementid).Select(s => s.toobject).FirstOrDefault();
+                        if (seri != null && (userControl != userID) && ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) != (int)KOCUserTypes.StockRoomStuff))//satınalmadan depoya çıkış için özel durum
+                        {
+                            errormessage.errorCode = -1;
+                            errormessage.errorMessage = "Yalnızca Kendinize Ait Ürünleri Başkasına Çıkabilirsiniz";
+                        }
+
                         #region hareket uygunsa
                         else
                         {
@@ -322,6 +322,33 @@ namespace CRMWebApi.Controllers
                 errormessage.errorCode = -1;
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
+        }
+
+        [Route("InsertStock")]
+        [HttpPost]
+        public HttpResponseMessage InsertStock (DTOstockmovement r)
+        { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi
+            var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
+            using (var db = new KOCSAMADLSEntities())
+            {
+                adsl_stockmovement sm = new adsl_stockmovement();
+                sm.serialno = r.serialno;
+                sm.lastupdated = DateTime.Now;
+                sm.updatedby = userID;
+                sm.creationdate = DateTime.Now;
+                sm.toobjecttype = r.toobjecttype;
+                sm.stockcardid = r.stockcardid;
+                sm.toobject = r.toobject;
+                sm.deleted = false;
+                sm.amount = r.amount;
+                sm.fromobjecttype = r.fromobjecttype;
+                sm.fromobject = r.fromobject;
+                sm.movementdate = DateTime.Now;
+                sm.updatedby = userID;
+                db.stockmovement.Add(sm);
+                db.SaveChanges();
+            }
+            return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
         }
     }
 }

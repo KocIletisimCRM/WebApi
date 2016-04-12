@@ -43,17 +43,17 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        //[Route("BSLOrt")]
-        //[HttpPost]
-        //public async Task<HttpResponseMessage> BSLOrt(int bid)
-        //{
-        //    await WebApiConfig.updateAdslData();
-        //    var d = DateTime.Now;
-        //    var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1) };
-        //    var dtr2 = new DateTimeRange { start = dtr.start.AddMonths(-1), end = dtr.end.AddMonths(-1) };
-        //    var slOrt = new double[] { getBayiSLOrt(bid, dtr), getBayiSLOrt(bid, dtr2) };
-        //    return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
-        //}
+        [Route("BSLOrt")]
+        [HttpPost]
+        public async Task<HttpResponseMessage> BSLOrt(SLTime bid)
+        {
+            await WebApiConfig.updateAdslData();
+            var d = DateTime.Now;
+            var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = (d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1) };
+            var dtr2 = new DateTimeRange { start = dtr.start.AddMonths(-1), end = dtr.end.AddMonths(-1) };
+            var slOrt = new double[] { getBayiSLOrt(bid.BayiID.Value, dtr), getBayiSLOrt(bid.BayiID.Value, dtr2) };
+            return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
+        }
 
         //bayi prim ve servis hakediş miktarları
         private static Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
@@ -134,7 +134,7 @@ namespace CRMWebApi.Controllers
                     return r;
                 })
             ).ToList();
-            return sayCust == 0 ? 0 : timeOrt / sayCust;
+            return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
 
         public static async Task<List<SKPaymentReport>> getPaymentReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
@@ -146,7 +146,7 @@ namespace CRMWebApi.Controllers
                 var bSLOrt = getBayiSLOrt(r.Key, request);
                 var res = new SKPaymentReport();
                 res.bId = r.Key;
-                res.bSLOrt = Math.Round(bSLOrt, 2);
+                res.bSLOrt = bSLOrt;
                 res.satAdet = r.Value.sat;
                 res.stkrAdet = r.Value.sat_kur;
                 res.kurAdet = r.Value.kur;

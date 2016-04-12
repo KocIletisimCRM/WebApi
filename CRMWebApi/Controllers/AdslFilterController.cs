@@ -247,6 +247,7 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res, "application/json");
             }
         }
+
         [Route("getTaskType")]
         [HttpPost]
         public HttpResponseMessage getTaskType()
