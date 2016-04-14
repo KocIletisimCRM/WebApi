@@ -163,6 +163,40 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
+        // Bütün bekleyen tasklar
+        public static async Task<List<SKStandbyTaskReport>> getSKStandbyTaskReport()
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            return WebApiConfig.AdslTaskQueues.Where(r=> r.Value.status == null && r.Value.deleted == false).Select(r =>
+            {
+                var res = new SKStandbyTaskReport();
+                res.taskorderno = r.Value.taskorderno;
+                res.taskid = r.Value.taskid;
+                res.taskname = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
+                res.creationdateyear = r.Value.creationdate.Value.Year;
+                res.creationdatemonth = r.Value.creationdate.Value.Month;
+                res.creationdateday = r.Value.creationdate.Value.Day;
+                res.customerid = r.Value.attachedobjectid.Value;
+                res.customername = WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername : "İsimsiz Müşteri";
+                if (r.Value.attachedpersonelid != null)
+                {
+                    var personel = (int?)r.Value.attachedpersonelid.Value;
+                    res.personelid = personel;
+                    res.personelname = WebApiConfig.AdslPersonels.ContainsKey(personel.Value) ? WebApiConfig.AdslPersonels[personel.Value].personelname : "İsimsiz Personel";
+                }
+                if (r.Value.attachmentdate != null)
+                {
+                    var adate = r.Value.attachmentdate.Value;
+                    res.attachmentdateyear = adate.Year;
+                    res.attachmentdatemonth = adate.Month;
+                    res.attachmentdateday = adate.Day;
+                }
+                res.description = r.Value.description;
+                res.fault = r.Value.fault;
+                return res;
+            }).ToList();
+        }
+
         // Satış kurulum raporu
         public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
         {
@@ -334,7 +368,6 @@ namespace CRMWebApi.Controllers
                 res.lastTaskName = lastTask.taskname;
                 return res;
             }).ToList();
-
         }
 
         public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
