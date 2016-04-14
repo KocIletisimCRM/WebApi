@@ -344,11 +344,109 @@ namespace CRMWebApi.Controllers
                 sm.fromobjecttype = r.fromobjecttype;
                 sm.fromobject = r.fromobject;
                 sm.movementdate = DateTime.Now;
+                if (r.fromobjecttype == 16777217) sm.confirmationdate = DateTime.Now; // hareket müşteridense onaylı olmalı
                 sm.updatedby = userID;
                 db.stockmovement.Add(sm);
                 db.SaveChanges();
             }
             return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
+        }
+
+        [Route("getStock")]
+        [HttpPost]
+        public HttpResponseMessage getStock(DTOGetStockMovementRequest request)
+        { // getStockMovements --> fromobject (id) ve toobject (id) olarak geldiğinde isim kontrolü ile çakışma olduğu için oluşturuldu 
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new KOCSAMADLSEntities())
+            {
+                if (request.fromobject != null && request.fromobject.value == null && request.toobject.value == null)
+                {
+                    request.fromobject.value = "";
+                }
+                var filter = request.getFilter();
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var countSql = filter.getCountSQL();
+
+                var performance = new DTOQueryPerformance();
+                var perf = Stopwatch.StartNew();
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                performance.CountSQLDuration = perf.Elapsed;
+                perf.Restart();
+                var res = db.stockmovement.SqlQuery(querySql).ToList();
+                performance.QuerSQLyDuration = perf.Elapsed;
+                perf.Restart();
+                var fromObjectIds = res.Select(s => s.fromobject).Distinct().ToList();
+                var fromPersonels = db.personel.Where(p => fromObjectIds.Contains(p.personelid)).ToList();
+                var fromCustomers = db.customer.Where(c => fromObjectIds.Contains(c.customerid)).ToList();
+
+
+                var toObjectIds = res.Select(s => s.toobject).Distinct().ToList();
+                var toPersonels = db.personel.Where(p => toObjectIds.Contains(p.personelid)).ToList();
+                var toCustomers = db.customer.Where(c => toObjectIds.Contains(c.customerid)).ToList();
+
+
+                var stockcardids = res.Select(s => s.stockcardid).Distinct().ToList();
+                var stockcards = db.stockcard.Where(s => stockcardids.Contains(s.stockid)).ToList();
+
+                res.ForEach(r =>
+                {
+                    r.frompersonel = fromPersonels.Where(p => p.personelid == r.fromobject).FirstOrDefault();
+                    if (r.frompersonel == null)
+                    {
+                        r.fromcustomer = fromCustomers.Where(c => c.customerid == r.fromobject).FirstOrDefault();
+                    }
+                    r.topersonel = toPersonels.Where(p => p.personelid == r.toobject).FirstOrDefault();
+                    if (r.topersonel == null)
+                    {
+                        r.tocustomer = toCustomers.Where(c => c.customerid == r.toobject).FirstOrDefault();
+                    }
+                    r.stockcard = stockcards.Where(s => s.stockid == r.stockcardid).FirstOrDefault();
+
+                });
+                performance.LookupDuration = perf.Elapsed;
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+                return Request.CreateResponse(HttpStatusCode.OK,
+                     new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(s => s.toDTO()).ToList(), paginginfo, querySql, performance)
+                     , "application/json");
+            }
+        }
+
+        [Route("getSerialOnCustomer")]
+        [HttpPost]
+        public HttpResponseMessage getSerialOnCustomer(DTOGetStockMovementRequest request)
+        { // gönderilen filtre sorgusu sonucu bulunan müşteriye stok hareketlerinden halen müşteride bulunan stoklardan movemenid'si küçük olanı döndürür (lazım olursa liste yapılıp döndürülebilir)
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new KOCSAMADLSEntities())
+            {
+                if (request.fromobject != null && request.fromobject.value == null && request.toobject.value == null)
+                {
+                    request.fromobject.value = "";
+                }
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var countSql = filter.getCountSQL();
+
+                var rowCount = db.Database.SqlQuery<int>(countSql).First();
+                var res = db.stockmovement.SqlQuery(querySql).ToList();
+                int toobject = 0;
+                if (res.Count > 0)
+                    toobject = res[0].toobject.Value;
+                var ret = new adsl_stockmovement();
+
+                foreach (var item in res)
+                {
+                    if (db.stockmovement.Where(k => k.serialno == item.serialno && k.fromobject == toobject && k.deleted == false).FirstOrDefault() == null)
+                        ret = item;
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, ret, "application/json");
+            }
         }
     }
 }

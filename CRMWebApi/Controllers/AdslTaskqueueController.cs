@@ -877,7 +877,7 @@ namespace CRMWebApi.Controllers
         {
             using (var db=new KOCSAMADLSEntities(false))
             {
-                var res = db.customer.Include(i=>i.il).Include(m=>m.ilce).Where(c => c.tc == request.tc).FirstOrDefault();              
+                var res = db.customer.Include(i=>i.il).Include(m=>m.ilce).Where(c => c.tc == request.tc && c.deleted == false).FirstOrDefault();              
                 if (res !=null)
                 {
                     return Request.CreateResponse(HttpStatusCode.OK,res.toDTO(), "application/json");

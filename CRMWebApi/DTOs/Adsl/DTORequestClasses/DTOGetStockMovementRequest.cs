@@ -5,7 +5,9 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
     public  class DTOGetStockMovementRequest:DTORequestPagination
     {
         public DTOFieldFilter fromobject { get; set; }
+        public DTOFieldFilter fromobjectid { get; set; }
         public DTOFieldFilter toobject { get; set; }
+        public DTOFieldFilter toobjectid { get; set; }
         public DTOFieldFilter product { get; set; }
         public DTOFieldFilter movementdate { get; set; }
         public DTOFieldFilter serialno { get; set; }
@@ -24,7 +26,9 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 filter.subTables.Add("stockcardid", subFilter);
             }
             if (movementdate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementdate", op = 5, value = movementdate.value });
-            if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter {fieldName="serialno",op=2,value=serialno.value });
+            if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "serialno", op = 2, value = serialno.value });
+            if (fromobjectid != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobject", op = 2, value = fromobjectid.value });
+            if (toobjectid != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "toobject", op = 2, value = toobjectid.value });
             if (isconfirmed != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "confirmationdate", op = 8, value = null });
             if (movement != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementid", op = 2, value = movement.value });
             if (fromobject != null && fromobject.value!=null)
