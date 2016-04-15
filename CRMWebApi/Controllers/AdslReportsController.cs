@@ -472,7 +472,7 @@ namespace CRMWebApi.Controllers
                             WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
                         r.BayiSLTaskStart = ksl.Value.BStart;
                         r.BayiSLEnd = ksl.Value.BEnd;
-                        r.KocSLStart = ksl.Value.KStart.Value;
+                        r.KocSLStart = ksl.Value.KStart;
                         r.KocSLEnd = ksl.Value.KEnd;
                         return r;
                     }
