@@ -99,14 +99,14 @@ namespace CRMWebApi.DTOs.Adsl
                 {
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
                     {
-                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                        if (!SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
+                        //if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (SLs.ContainsKey(sl) && !SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
                     }
                     //Koç SL Bitiş
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][3])
                     {
-                        if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
-                        if (!SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
+                        //if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (SLs.ContainsKey(sl) && !SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
                     }
                 }
             }

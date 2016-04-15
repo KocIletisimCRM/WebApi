@@ -11,7 +11,7 @@ namespace CRMWebApi.DTOs.Adsl
         public DateTime? kocSLEnd = DateTime.Now;
         public DateTime? KocSLEnd
         {
-            get { return kocSLEnd; }
+            get { return KocSLStart.HasValue ? kocSLEnd : null; }
             set { if (value != null) kocSLEnd = value; }
         }
         public TimeSpan? KocSLTime { get { return (KocSLStart == null) ? null : (TimeSpan?)(KocSLEnd.Value - KocSLStart.Value); } } //SLEnd - SLStart

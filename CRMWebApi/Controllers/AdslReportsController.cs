@@ -54,8 +54,20 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
         }
 
+        [Route("KSLOrt")]
+        [HttpPost]
+        public async Task<HttpResponseMessage> KSLOrt()
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            var d = DateTime.Now;
+            var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = (d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1) };
+            var dtr2 = new DateTimeRange { start = dtr.start.AddMonths(-1), end = dtr.end.AddMonths(-1) };
+            var slOrt = new double[] { getKocSLOrt(dtr), getKocSLOrt(dtr2) };
+            return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
+        }
+
         //bayi prim ve servis hakediş miktarları
-        private static Dictionary<int, SKPayment> getPayment(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private static Dictionary<int, SKPayment> getPayment(DateTimeRange request)
         {
             Dictionary<int, SKPayment> total = new Dictionary<int, SKPayment>();
             WebApiConfig.AdslProccesses.Values.Where(r =>
@@ -104,9 +116,8 @@ namespace CRMWebApi.Controllers
         }
 
         // bayi id ve tarih aralığı gönderildiğinde bayinin ortalama sl hesabı
-        private static double getBayiSLOrt(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private static double getBayiSLOrt(int BayiId, DateTimeRange request)
         {
-            List<SLBayiReport> ort = new List<SLBayiReport>();
             int sayCust = 0;
             double timeOrt = 0;
             var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).First(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
@@ -129,14 +140,51 @@ namespace CRMWebApi.Controllers
                     r.BayiSLTaskStart = bsl.Value.BStart;
                     r.BayiSLEnd = bsl.Value.BEnd;
                     timeOrt += ((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * factor;
-                    ort.Add(r);
-                    return r;
+                    return true;
                 })
             ).ToList();
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
 
-        public static async Task<List<SKPaymentReport>> getPaymentReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        private static double getKocSLOrt(DateTimeRange request)
+        {
+            int sayCust = 0;
+            double timeOrt = 0;
+            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.KocMaxTime).Select(k => k.Value.KocMaxTime).First(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).SelectMany(
+                p => p.SLs.Select(ksl =>
+                {
+                    try
+                    {
+                        sayCust++;
+                        var ston = WebApiConfig.AdslTaskQueues[p.S_TON];
+                        var r = new SLKocReport();
+                        double factor = 1; // koc max sl süreleri eşit olmadığından ortalama alabilmek için (Tüm SL'lerin En büyüğü) (kocMaxSL / buradaki SL) çarpan'ı sayısı kullanıldı (Hüseyin KOZ)
+                        if (WebApiConfig.AdslSl.ContainsKey(ksl.Key))
+                        {
+                            var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                            var slname = kocSl.SLName;
+                            factor = (maxSL != null && kocSl.KocMaxTime != null) ? (maxSL.Value / kocSl.KocMaxTime.Value) : 1;
+                        }
+                        r.KocSLStart = ksl.Value.KStart;
+                        r.KocSLEnd = ksl.Value.KEnd;
+                        timeOrt += ((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * factor;
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
+                })
+            ).ToList();
+            return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
+        }
+
+        public static async Task<List<SKPaymentReport>> getPaymentReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var SKPay = getPayment(request);
@@ -198,7 +246,7 @@ namespace CRMWebApi.Controllers
         }
 
         // Satış kurulum raporu
-        public static async Task<List<SKReport>> getSKReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public static async Task<List<SKReport>> getSKReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
@@ -370,7 +418,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Values.Where(r =>
@@ -391,6 +439,7 @@ namespace CRMWebApi.Controllers
                         {
                             var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
                             r.status = StateTypeText[statu.statetype.Value];
+                            r.BayiSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : bsl.Value.BEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
                         }
                         else
                             r.status = "Bekleyen";
@@ -414,7 +463,7 @@ namespace CRMWebApi.Controllers
                         r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
                             WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
                         r.BayiSLTaskStart = bsl.Value.BStart;
-                        r.BayiSLEnd = bsl.Value.BEnd;
+                        //r.BayiSLEnd = bsl.Value.BEnd;
                         return r;
                     }
                     catch (Exception)
@@ -425,7 +474,7 @@ namespace CRMWebApi.Controllers
             ).ToList();
         }
 
-        public static async Task<List<SLKocReport>> getKocSLReport(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public static async Task<List<SLKocReport>> getKocSLReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Values.Where(r =>
@@ -434,59 +483,51 @@ namespace CRMWebApi.Controllers
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
                 return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
-                p => p.SLs
-                //.Where(sl => sl.Value.KStart >= request.start && sl.Value.KEnd <= request.end)
-                .Select(ksl => {
-                    try
+                p => p.SLs.Select(ksl =>
+                {
+                    var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+                    var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
+                    var r = new SLKocReport();
+                    if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                     {
-                        var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
-                        var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
-                        var r = new SLKocReport();
-                        if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
-                        {
-                            var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                            r.status = StateTypeText[statu.statetype.Value];
-                        }
-                        else
-                            r.status = "Bekleyen";
-                        if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
-                        {
-                            var kocSl = WebApiConfig.AdslSl[ksl.Key];
-                            r.SLName = kocSl.SLName;
-                            r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
-                            r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
-                        }
-                        else
-                            r.SLName = "Tanımlanmamış SL";
-                        r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
-                        if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
-                        {
-                            var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
-                            r.BayiId = Bayi.personelid;
-                            r.BayiName = Bayi.personelname;
-                            r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
-                            r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
-                        }
-                        r.CustomerId = ksl.Value.CustomerId;
-                        r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
-                            WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
-                        r.BayiSLTaskStart = ksl.Value.BStart;
-                        r.BayiSLEnd = ksl.Value.BEnd;
-                        r.KocSLStart = ksl.Value.KStart;
-                        r.KocSLEnd = ksl.Value.KEnd;
-                        return r;
+                        var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                        r.status = StateTypeText[statu.statetype.Value];
+                        r.BayiSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : ksl.Value.BEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
+                        r.KocSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : ksl.Value.KEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
                     }
-                    catch (Exception ee)
+                    else
+                        r.status = "Bekleyen";
+                    if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
                     {
-                        throw;
+                        var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                        r.SLName = kocSl.SLName;
+                        r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0; // Veritabanından Çek WebApiConfig.AdslSl[bsl.Key].MaxTime gibi
+                        r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
                     }
+                    else
+                        r.SLName = "Tanımlanmamış SL";
+                    r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
+                    if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
+                    {
+                        var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
+                        r.BayiId = Bayi.personelid;
+                        r.BayiName = Bayi.personelname;
+                        r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
+                        r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
+                    }
+                    r.CustomerId = ksl.Value.CustomerId;
+                    r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
+                        WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                    r.BayiSLTaskStart = ksl.Value.BStart;
+                    r.KocSLStart = ksl.Value.KStart;
+                    return r;
                 })
             ).ToList();
         }
 
         [Route("SKR")]
         [HttpPost]
-        public async Task<HttpResponseMessage> SKR(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public async Task<HttpResponseMessage> SKR(DateTimeRange request)
         {
             var stw = Stopwatch.StartNew();
             var report = await getSKReport(request).ConfigureAwait(false);
@@ -520,7 +561,7 @@ namespace CRMWebApi.Controllers
 
         [Route("Taskqueues")]
         [HttpPost]
-        public async Task<HttpResponseMessage> Taskqueues(DTOs.Adsl.DTORequestClasses.DateTimeRange request)
+        public async Task<HttpResponseMessage> Taskqueues(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData();
             var list = WebApiConfig.AdslTaskQueues.Count;

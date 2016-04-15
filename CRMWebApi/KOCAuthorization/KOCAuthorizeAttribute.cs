@@ -40,7 +40,7 @@ namespace CRMWebApi.KOCAuthorization
             return user;
         }
 
-        private static TimeSpan SessionTimeout = TimeSpan.FromMinutes(20);
+        private static TimeSpan SessionTimeout = TimeSpan.FromMinutes(30);
         private static string UserName { get { return HttpContext.Current.Request.Headers[userNameHeader]; } }
         private static string Password { get { return HttpContext.Current.Request.Headers[passwordHeader]; } }
         private static string UserType { get { return HttpContext.Current.Request.Headers[userTypeHeader]; } }

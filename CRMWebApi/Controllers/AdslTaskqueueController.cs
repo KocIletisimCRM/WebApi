@@ -801,7 +801,7 @@ namespace CRMWebApi.Controllers
 
                     var taskqueue = new adsl_taskqueue
                     {
-                        appointmentdate = null,
+                        appointmentdate = request.appointmentdate,
                         attachedobjectid = cust.customerid,
                         attachedpersonelid = request.salespersonel ?? user.userId,
                         attachmentdate = DateTime.Now,

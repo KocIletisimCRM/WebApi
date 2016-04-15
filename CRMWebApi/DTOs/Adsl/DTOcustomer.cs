@@ -23,6 +23,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string description { get; set; }
         public Nullable<bool> deleted { get; set; }
         public Nullable<System.DateTime> creationdate { get; set; }
+        public Nullable<System.DateTime> appointmentdate { get; set; }
         public Nullable<System.DateTime> birthdate { get; set; }
 
         public DTOil il { get; set; }
