@@ -68,5 +68,15 @@ namespace CRMWebApi.DTOs.Adsl
             set { }
         }
         public string status { get; set; }
+
+        public static string GetHeadhers()
+        {
+            return (new SLBayiReport()).GetType().GetProperties().Select(p => p.Name).Aggregate((p, c) => $"{p};{c}");
+        }
+
+        public override string ToString()
+        {
+            return this.GetType().GetProperties().Select(p => (p.GetValue(this) ?? "").ToString().Replace("\r\n", " ")).Aggregate((p, c) => $"{p};{c}");
+        }
     }
 }

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net.Http.Headers;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using System.Text;
 
 namespace CRMWebApi.Controllers
 {
@@ -423,9 +424,11 @@ namespace CRMWebApi.Controllers
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
+                var d = DateTime.Now;
+                var date = (d - d.TimeOfDay).AddDays(1 - d.Day);
                 var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                return ktk_tq.status == null && request.start >= date || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
                 p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId) // where tekrar koydum bayiye göre bilgi çekmiyordu tüm bayilerin raporunu alıyordu (Hüseyin KOZ)
                 .Select(bsl =>
@@ -479,9 +482,11 @@ namespace CRMWebApi.Controllers
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
+                var d = DateTime.Now;
+                var date = (d - d.TimeOfDay).AddDays(1 - d.Day);
                 var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                return ktk_tq.status == null && request.start >= date || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
                 p => p.SLs.Select(ksl =>
                 {
@@ -544,7 +549,7 @@ namespace CRMWebApi.Controllers
         [HttpGet]
         public async Task<HttpResponseMessage> SKR([FromUri] string start, [FromUri] string end )
         {
-            var request = new DTOs.Adsl.DTORequestClasses.DateTimeRange {
+            var request = new DateTimeRange {
                 start = DateTime.ParseExact(start, "d", System.Globalization.CultureInfo.InvariantCulture),
                 end = DateTime.ParseExact(end,  "d", System.Globalization.CultureInfo.InvariantCulture),
             };
@@ -559,20 +564,38 @@ namespace CRMWebApi.Controllers
                 return result;
         }
 
-        [Route("Taskqueues")]
-        [HttpPost]
-        public async Task<HttpResponseMessage> Taskqueues(DateTimeRange request)
-        {
-            await WebApiConfig.updateAdslData();
-            var list = WebApiConfig.AdslTaskQueues.Count;
-            return Request.CreateResponse(HttpStatusCode.OK, list, "application/json");
+        [Route("SLBayiGet")]
+        [HttpGet]
+        public async Task<HttpResponseMessage> SLBayiGet([FromUri] int BayiId)
+        { // bayi bulunduğumuz ay sl'ini indirmesi için
+            var d = DateTime.Now;
+            var request = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = (d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1) };
+            var report = await getBayiSLReport(BayiId, request).ConfigureAwait(false);
+            var dataString = new List<string>();
+            dataString.Add(SLBayiReport.GetHeadhers());
+            dataString.AddRange(report.Select(r => r.ToString()));
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new StringContent(string.Join("\r\n", dataString), Encoding.GetEncoding("ISO-8859-9"));
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "SLReport.csv" };
+            return result;
         }
 
-        [Route("Test")]
+        [Route("GSLBayiGet")]
         [HttpGet]
-        public HttpResponseMessage Test()
-        {
-            return Request.CreateResponse(HttpStatusCode.OK, new { count = WebApiConfig.AdslTaskQueues.Count }, "application/json");
+        public async Task<HttpResponseMessage> GSLBayiGet([FromUri] int BayiId)
+        { // bayi geçen ay sl'ini indirmesi için
+            var d = DateTime.Now;
+            var request = new DateTimeRange { start = ((d - d.TimeOfDay).AddDays(1 - d.Day)).AddMonths(-1), end = ((d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1)).AddMonths(-1) };
+            var report = await getBayiSLReport(BayiId, request).ConfigureAwait(false);
+            var dataString = new List<string>();
+            dataString.Add(SLBayiReport.GetHeadhers());
+            dataString.AddRange(report.Select(r => r.ToString()));
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new StringContent(string.Join("\r\n", dataString), Encoding.GetEncoding("ISO-8859-9"));
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "GSLReport.csv" };
+            return result;
         }
     }
 }
