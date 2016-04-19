@@ -415,6 +415,9 @@ namespace CRMWebApi.Controllers
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
+                res.lasttaskcretiondateyear = lasttq.creationdate.Value.Year;
+                res.lasttaskcretiondatemonth = lasttq.creationdate.Value.Month;
+                res.lasttaskcretiondateday = lasttq.creationdate.Value.Day;
                 return res;
             }).ToList();
         }

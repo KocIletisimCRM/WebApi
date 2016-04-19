@@ -344,7 +344,7 @@ namespace CRMWebApi.Controllers
                 sm.fromobjecttype = r.fromobjecttype;
                 sm.fromobject = r.fromobject;
                 sm.movementdate = DateTime.Now;
-                if (r.fromobjecttype == 16777217) sm.confirmationdate = DateTime.Now; // hareket müşteridense onaylı olmalı
+                if (r.fromobjecttype == 16777217 || r.toobjecttype == 16777217 || r.fromobjecttype == 33554433) sm.confirmationdate = DateTime.Now; // hareket müşteridense onaylı olmalı
                 sm.updatedby = userID;
                 db.stockmovement.Add(sm);
                 db.SaveChanges();

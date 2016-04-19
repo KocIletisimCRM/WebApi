@@ -63,6 +63,9 @@ namespace CRMWebApi.DTOs.Adsl
         public string ktk_tqstate { get; set; }
         public string ktk_tqstatetype { get; set; }
         public string ktk_desc { get; set; }
+        public int lasttaskcretiondateyear { get; set; }
+        public int lasttaskcretiondatemonth { get; set; }
+        public int lasttaskcretiondateday { get; set; }
         public string lastTaskStatus { get; set; }
         public string lastTaskTypeName { get; set; }
         public string lastTaskName { get; set; }

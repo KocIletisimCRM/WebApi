@@ -77,7 +77,7 @@ namespace CRMWebApi.Controllers
                 try
                 {
                     var item = new customer();
-                    item.customername = ct.customername;
+                    item.customername = ct.customername.ToUpper();
                     item.superonlineCustNo = ct.superonlineCustNo;
                     item.gsm = ct.gsm;
                     item.tc = ct.tc;
