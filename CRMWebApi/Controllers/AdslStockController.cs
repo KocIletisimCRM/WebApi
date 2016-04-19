@@ -448,5 +448,17 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, ret, "application/json");
             }
         }
+
+        [Route("getSerialOnPersonel")]
+        [HttpPost]
+        public HttpResponseMessage getSerialOnPersonel(adsl_stockmovement request)
+        { 
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var ret = db.getSerialsOnPersonelAdsl(request.fromobject, request.stockcardid).ToList();
+                return Request.CreateResponse(HttpStatusCode.OK, ret, "application/json");
+            }
+        }
     }
 }

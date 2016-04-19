@@ -1036,12 +1036,6 @@ namespace CRMWebApi.Controllers
                     sm.tocustomer = tq.attachedcustomer;
                 });
                 return Request.CreateResponse(HttpStatusCode.OK, stockmovement.Select(sm => sm.toDTO()), "application/json");
-                //}
-                //else
-                //{
-                //    errormessage.errorMessage = "Elinizde Kurulumu Kapatabilmek İçin Gerekli Donanımlar Yok";
-                //    return Request.CreateResponse(HttpStatusCode.OK,errormessage, "application/json");
-                //}
             }
         }
 
