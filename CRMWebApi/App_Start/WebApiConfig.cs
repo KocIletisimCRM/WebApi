@@ -341,7 +341,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated,ilKimlikNo,ilceKimlikNo from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated,ilKimlikNo,ilceKimlikNo,superonlineCustNo,gsm,phone from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -354,6 +354,9 @@ namespace CRMWebApi
                                 lastupdated = sqlreader.IsDBNull(3) ? null : (DateTime?)sqlreader[3],
                                 ilKimlikNo = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
                                 ilceKimlikNo = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
+                                superonlineCustNo = sqlreader.IsDBNull(6) ? null : (string)sqlreader[6],
+                                gsm = sqlreader.IsDBNull(7) ? null : (string)sqlreader[7],
+                                phone = sqlreader.IsDBNull(8) ? null : (string)sqlreader[8],
                             });
                             AdslCustomers[t.customerid] = t;
                         }

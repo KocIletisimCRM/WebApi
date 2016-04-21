@@ -276,7 +276,7 @@ namespace CRMWebApi.Controllers
                     if (customerInfo.ilceKimlikNo != null && WebApiConfig.AdslIlces.ContainsKey(customerInfo.ilceKimlikNo.Value))
                         res.ilce = WebApiConfig.AdslIlces[customerInfo.ilceKimlikNo.Value].ad;
                     res.gsm = customerInfo.gsm;
-
+                    res.superonlinecustno = customerInfo.superonlineCustNo;
                 }
                 if (s_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(s_tq.attachedpersonelid.Value))
                 {

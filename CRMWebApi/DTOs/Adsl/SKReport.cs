@@ -9,11 +9,12 @@ namespace CRMWebApi.DTOs.Adsl
         [Key]
         public int s_ton { get; set; } // satış taskoerder no
         public int? custid { get; set; }  // customerid
+        public string superonlinecustno { get; set; } // süperonline müşteri numarası
         public string custname { get; set; }
         public string custphone { get; set; }
+        public string gsm { get; set; } // customer gsm
         public string il { get; set; } // il for customer
         public string ilce { get; set; }
-        public string gsm { get; set; } // customer gsm
         public int? s_perid { get; set; } // satış personelid
         public string s_pername { get; set; }
         public string s_perky { get; set; } // satış personeli kanal yöneticisi
