@@ -248,14 +248,6 @@ namespace CRMWebApi.Controllers
                     var Records = db.stockmovement.Include(s => s.stockcard).Where(s => s.movementid == r.movementid);
                     if (Records.Count() > 0)
                     {
-                        //var confirmationroles = (new KocCRMRoles[]{
-                        //        KocCRMRoles.kscrProductionStaff,
-                        //        KocCRMRoles.kscrSalesStaff,
-                        //        KocCRMRoles.kscrStockStaff,
-                        //        KocCRMRoles.kscrTechnicalStaff,
-                        //        KocCRMRoles.kscrBackOfficeStaff,
-                        //        KocCRMRoles.kscrCallCenterStaff
-                        //    }).Select(role => (long)role).ToList();
                         var Record = Records.First();
 
                         if (r.toobject == userID && r.confirmationdate != null && Record.confirmationdate == null)  //confirmationroles.Contains(r.toobjecttype) &&  if şartlarına eklenecek yetkilendirmeden sonra
@@ -327,7 +319,48 @@ namespace CRMWebApi.Controllers
         [Route("InsertStock")]
         [HttpPost]
         public HttpResponseMessage InsertStock (DTOstockmovement r)
-        { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi
+        { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi 
+            if (r.deleted == true)
+            {
+                // *** yeni stok hareketi olacağına deleted ile karar vereceğiz (true'ysa seriyi satınalma -> depoya -> müşteriye aktar)
+                var sm = new DTOstockmovement();
+                sm.serialno = r.serialno;
+                sm.amount = 1;
+                sm.toobjecttype = 2; // depocu
+                sm.toobject = 1007; // depocu
+                sm.fromobjecttype = 33554433;
+                sm.fromobject = 33554433;
+                sm.stockcardid = 1117;
+                movement(sm);
+
+                var sm1 = new DTOstockmovement();
+                sm1.serialno = r.serialno;
+                sm1.amount = 1;
+                sm1.toobjecttype = 16777217; // müşteri
+                sm1.toobject = r.fromobject; // müşteri
+                sm1.fromobjecttype = 2;
+                sm1.fromobject = 1007;
+                sm1.stockcardid = 1117;
+                movement(sm1);
+
+                var sm2 = new DTOstockmovement();
+                sm2.serialno = r.serialno;
+                sm2.amount = 1;
+                sm2.toobjecttype = r.toobjecttype; // işlem yapan personel
+                sm2.toobject = r.toobject; // işlem yapan personel
+                sm2.fromobjecttype = 16777217;
+                sm2.fromobject = r.fromobject;
+                sm2.stockcardid = 1117;
+                movement(sm2);
+            }
+            else
+                movement(r);
+
+            return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
+        }
+
+        private void movement (DTOstockmovement r)
+        {
             var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
             using (var db = new KOCSAMADLSEntities())
             {
@@ -349,7 +382,6 @@ namespace CRMWebApi.Controllers
                 db.stockmovement.Add(sm);
                 db.SaveChanges();
             }
-            return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
         }
 
         [Route("getStock")]
