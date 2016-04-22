@@ -281,32 +281,40 @@ namespace CRMWebApi.Controllers
             DTOResponseError errormessage = new DTOResponseError();
             if (movementIds.Length > 0)
             {
-                using (var db = new KOCSAMADLSEntities(false))
-                {
-                    //yalnızca kendine çıkılan stoklar onaylanabilir
-                    if (db.stockmovement.Where(s => movementIds.Contains(s.movementid)).Any(a => a.toobject == user.userId))
+                using (var db = new KOCSAMADLSEntities())
+                using (var tran = db.Database.BeginTransaction())
+                    try
                     {
-                        foreach (var item in movementIds)
+                        //yalnızca kendine çıkılan stoklar onaylanabilir
+                        if (db.stockmovement.Where(s => movementIds.Contains(s.movementid)).Any(a => a.toobject == user.userId))
                         {
-                            var sm = db.stockmovement.Where(s => s.movementid == item && s.confirmationdate == null).FirstOrDefault();
-                            sm.confirmationdate = DateTime.Now;
-                            sm.updatedby = user.userId;
-                            sm.lastupdated = DateTime.Now;
+                            foreach (var item in movementIds)
+                            {
+                                var sm = db.stockmovement.Where(s => s.movementid == item && s.confirmationdate == null).FirstOrDefault();
+                                sm.confirmationdate = DateTime.Now;
+                                sm.updatedby = user.userId;
+                                sm.lastupdated = DateTime.Now;
+                            }
                             db.SaveChanges();
+                            tran.Commit();
+                            errormessage.errorMessage = "Onaylama işlemi başarılı";
+                            errormessage.errorCode = 1;
+                            return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
                         }
-                        errormessage.errorMessage = "Onaylama işlemi başarılı";
-                        errormessage.errorCode = 1;
-                        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+                        else
+                        {
+                            errormessage.errorMessage = "Sadece Üzerinize Atanmış Stokları Onaylayabilirsiniz";
+                            errormessage.errorCode = -1;
+                            return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
+
+                        }
                     }
-                    else
+                    catch (Exception)
                     {
-                        errormessage.errorMessage = "Sadece Üzerinize Atanmış Stokları Onaylayabilirsiniz";
-                        errormessage.errorCode = -1;
-                        return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
-
+                        tran.Rollback();
+                        errormessage = new DTOResponseError { errorCode = 2, errorMessage = "işlem Tamamlanamadı!" };
+                        return Request.CreateResponse(HttpStatusCode.NotModified, errormessage, "application/json");
                     }
-
-                }
             }
             else
             {
