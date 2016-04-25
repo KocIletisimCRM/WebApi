@@ -1059,6 +1059,14 @@ namespace CRMWebApi.Controllers
             }
         }
 
+        [Route("getSaleTask")]
+        [HttpPost]
+        public HttpResponseMessage getSaleTask(int taskorderno)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, saleTask(taskorderno), "application/json");
+        }
+
+
         private List<adsl_stockmovement> getStockmovements(KOCSAMADLSEntities db, int taskorderno, int taskid, int stateid)
         {
             var tsm = db.taskstatematches.FirstOrDefault(t => t.taskid == taskid && t.stateid == stateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty));
@@ -1141,6 +1149,32 @@ namespace CRMWebApi.Controllers
             {
                 throw ;
             }
+            }
+        }
+
+        public adsl_taskqueue saleTask(int taskorderno) 
+        { // taskorderno gönderildiginde o taskın başlangıç taskını geri döndürür
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var ptq = db.taskqueue.FirstOrDefault(r=> r.taskorderno == taskorderno && r.deleted == false);
+                var startertasks = db.tasktypes.Where(r => r.startsProccess == true).Select(r=> r.TaskTypeId).ToList();
+                int? saletask = null;
+                while (ptq != null)
+                {
+                    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                    if (startertasks.Contains(ptq.task.tasktype))
+                    {
+                        saletask = ptq.taskorderno;
+                        break;
+                    }
+                    else
+                    {
+                        ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                    }
+                }
+                if (saletask != null)
+                    return db.taskqueue.First(r => r.taskorderno == saletask);
+                return null;
             }
         }
     }
