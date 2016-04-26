@@ -30,6 +30,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
     public class DTOFilterGetCSBRequest : ICSBRequest
     {
         public DTOFieldFilter region { get; set; }
+        public DTOFieldFilter sitedistrict { get; set; }
         public DTOFieldFilter site { get; set; }
         public DTOFieldFilter block { get; set; }
         public DTOFieldFilter telocordiaid { get; set; }
@@ -40,7 +41,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
 
         public bool hasSiteFilter()
         {
-            return region != null || site != null;
+            return region != null || site != null || sitedistrict != null;
         }
         public bool hasBlockFilter()
         {
@@ -80,7 +81,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
 
         public bool isSiteFilter()
         {
-            return !isCustomerFilter() && !hasBlockFilter() && site != null;
+            return !isCustomerFilter() && !hasBlockFilter() && (site != null || sitedistrict != null);
         }
 
         public bool isRegionFilter()
@@ -125,6 +126,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
                 {
                     var subFilter = new DTOFilter("site", "siteid");
                     if (region != null) subFilter.fieldFilters.Add(region);
+                    if (sitedistrict != null) subFilter.fieldFilters.Add(sitedistrict);
                     if (site != null) subFilter.fieldFilters.Add(site);
                     filter.subTables["blockid"].subTables.Add("siteid", subFilter);
                 }
