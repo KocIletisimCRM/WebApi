@@ -110,7 +110,7 @@ namespace CRMWebApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.OK,
                                db.site.SqlQuery(filter.subTables["blockid"].subTables["siteid"].getFilterSQL())
                                     .Where(r => r.deleted == false)
-                                    .Select(r => new { r.siteid, r.sitename,r.siteaddress }).OrderBy(r => r.sitename).ToList()
+                                    .Select(r => new { r.siteid, r.sitename,r.siteaddress, r.sitedistrict }).OrderBy(r => r.sitename).ToList()
                                       , "application/json");
 
                     return Request.CreateResponse(HttpStatusCode.OK,
