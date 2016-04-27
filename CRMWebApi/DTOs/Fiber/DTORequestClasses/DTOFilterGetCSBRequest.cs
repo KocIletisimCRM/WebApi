@@ -81,7 +81,11 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
 
         public bool isSiteFilter()
         {
-            return !isCustomerFilter() && !hasBlockFilter() && (site != null || sitedistrict != null);
+            return !isCustomerFilter() && !hasBlockFilter() && site != null;
+        }
+        public bool isSitedistrictFilter()
+        {
+            return !isCustomerFilter() && !hasBlockFilter() && sitedistrict != null;
         }
 
         public bool isRegionFilter()
