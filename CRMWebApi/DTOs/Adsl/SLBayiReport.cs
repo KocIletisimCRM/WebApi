@@ -24,7 +24,6 @@ namespace CRMWebApi.DTOs.Adsl
             get { return BayiSLTaskStart.HasValue ? bayiSLEnd : null; }
             set { if (value != null) bayiSLEnd = value; }
         }
-        public int BayiSLMaxTime { get; set; } //tamamlanması gereken azami süre
         public DateTime? BayiSLStart
         { // 17:00 dan sora atanan sl'ler sabah başlatılacak
             get
@@ -45,6 +44,7 @@ namespace CRMWebApi.DTOs.Adsl
                 return BayiSLTaskStart == null ? null : (TimeSpan?)(BayiSLEnd.Value - BayiSLStart.Value);
             }
         } // SLEnd - SLStart ()
+        public int BayiSLMaxTime { get; set; } //tamamlanması gereken azami süre
         public string BayiSLTimeSting
         {
             get
@@ -67,7 +67,8 @@ namespace CRMWebApi.DTOs.Adsl
             }
             set { }
         }
-        public string status { get; set; }
+        public string slstatus { get; set; } // anlık sl durumu
+        public string status { get; set; } // process durumu
 
         public static string GetHeadhers()
         {

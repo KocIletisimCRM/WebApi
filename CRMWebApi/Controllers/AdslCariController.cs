@@ -30,7 +30,7 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => new {
                     s.personelid, 
                     s.personelname,
-                    s.il.ad
+                    ad = s.il!=null?s.il.ad:""
                 }), "application/json");
             }
         }

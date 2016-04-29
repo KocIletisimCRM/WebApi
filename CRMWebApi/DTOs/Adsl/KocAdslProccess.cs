@@ -95,7 +95,7 @@ namespace CRMWebApi.DTOs.Adsl
                         SLs[sl].CustomerId = tq.attachedobjectid.Value;
                     }
                 //Bayi SL Bitiş
-                if (tq.consummationdate.HasValue)
+                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2)
                 {
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
                     {

@@ -88,11 +88,6 @@ namespace CRMWebApi.Controllers
                  { // satış taskı; CC Satışı ise bayinin kurulum hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].kur++;
-                     if (s_tq.taskid == 33 || s_tq.taskid == 64) // başlangıç task tipi ekrak alma olamaz evrak alma tasklarının idleri ile kontrol edildi (Hüseyin KOZ) !!
-                     { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
-                         if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
-                         total[k_tq.attachedpersonelid.Value].evrak++;
-                     }
                  }
                  else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
                  { // satış taskı; bayi satış taskı ise satış yapan bayinin satış, kurulum yapan bayinin kurulum hakedişine 1 ekle
@@ -113,6 +108,20 @@ namespace CRMWebApi.Controllers
                  }
                  return true;
              }).ToList();
+            WebApiConfig.AdslTaskQueues.Where(r =>
+            {
+                var tq = r.Value;
+                return tq.taskid == 90 && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
+            }).Select(r =>
+            {
+                var s_tq = r.Value.previoustaskorderid.HasValue ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null : null;
+                if (s_tq != null && s_tq.taskid == 33 || s_tq.taskid == 64) // başlangıç task tipi ekrak alma olamaz evrak alma tasklarının idleri ile kontrol edildi (Hüseyin KOZ) !!
+                { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
+                    if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                    total[s_tq.attachedpersonelid.Value].evrak++;
+                }
+                return true;
+            });
             return total;
         }
 
@@ -122,12 +131,8 @@ namespace CRMWebApi.Controllers
             int sayCust = 0;
             double timeOrt = 0;
             var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).First(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
-            WebApiConfig.AdslProccesses.Values.Where(r =>
-            {
-                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
-                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
-            }).SelectMany(
-                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId)
+            WebApiConfig.AdslProccesses.Values.SelectMany(
+                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId && sl.Value.BEnd.HasValue && sl.Value.BEnd.Value >= request.start && sl.Value.BEnd.Value <= request.end)
                 .Select(bsl =>
                 {
                     sayCust++;
@@ -136,7 +141,7 @@ namespace CRMWebApi.Controllers
                     if (WebApiConfig.AdslSl.ContainsKey(bsl.Key))
                     {
                         var bayiSl = WebApiConfig.AdslSl[bsl.Key];
-                        factor = (maxSL != null &&  bayiSl.BayiMaxTime != null) ? (maxSL.Value / bayiSl.BayiMaxTime.Value) : 1;
+                        factor = (maxSL != null && bayiSl.BayiMaxTime != null) ? (maxSL.Value / bayiSl.BayiMaxTime.Value) : 1;
                     }
                     r.BayiSLTaskStart = bsl.Value.BStart;
                     r.BayiSLEnd = bsl.Value.BEnd;
@@ -146,7 +151,7 @@ namespace CRMWebApi.Controllers
             ).ToList();
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
-
+        
         private static double getKocSLOrt(DateTimeRange request)
         {
             int sayCust = 0;
@@ -159,27 +164,20 @@ namespace CRMWebApi.Controllers
             }).SelectMany(
                 p => p.SLs.Select(ksl =>
                 {
-                    try
+                    sayCust++;
+                    var ston = WebApiConfig.AdslTaskQueues[p.S_TON];
+                    var r = new SLKocReport();
+                    double factor = 1; // koc max sl süreleri eşit olmadığından ortalama alabilmek için (Tüm SL'lerin En büyüğü) (kocMaxSL / buradaki SL) çarpan'ı sayısı kullanıldı (Hüseyin KOZ)
+                    if (WebApiConfig.AdslSl.ContainsKey(ksl.Key))
                     {
-                        sayCust++;
-                        var ston = WebApiConfig.AdslTaskQueues[p.S_TON];
-                        var r = new SLKocReport();
-                        double factor = 1; // koc max sl süreleri eşit olmadığından ortalama alabilmek için (Tüm SL'lerin En büyüğü) (kocMaxSL / buradaki SL) çarpan'ı sayısı kullanıldı (Hüseyin KOZ)
-                        if (WebApiConfig.AdslSl.ContainsKey(ksl.Key))
-                        {
-                            var kocSl = WebApiConfig.AdslSl[ksl.Key];
-                            var slname = kocSl.SLName;
-                            factor = (maxSL != null && kocSl.KocMaxTime != null) ? (maxSL.Value / kocSl.KocMaxTime.Value) : 1;
-                        }
-                        r.KocSLStart = ksl.Value.KStart;
-                        r.KocSLEnd = ksl.Value.KEnd;
-                        timeOrt += ((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * factor;
-                        return true;
+                        var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                        var slname = kocSl.SLName;
+                        factor = (maxSL != null && kocSl.KocMaxTime != null) ? (maxSL.Value / kocSl.KocMaxTime.Value) : 1;
                     }
-                    catch (Exception e)
-                    {
-                        throw;
-                    }
+                    r.KocSLStart = ksl.Value.KStart;
+                    r.KocSLEnd = ksl.Value.KEnd;
+                    timeOrt += ((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * factor;
+                    return true;
                 })
             ).ToList();
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
@@ -425,57 +423,52 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslProccesses.Values.Where(r =>
-            {
-                var d = DateTime.Now;
-                var date = (d - d.TimeOfDay).AddDays(1 - d.Day);
-                var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
-                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return ktk_tq.status == null && request.start >= date || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
-            }).SelectMany(
-                p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId) // where tekrar koydum bayiye göre bilgi çekmiyordu tüm bayilerin raporunu alıyordu (Hüseyin KOZ)
-                .Select(bsl =>
+            return WebApiConfig.AdslProccesses.Values.SelectMany(
+                p => p.SLs.Where(sl =>
                 {
-                    try
+                    var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
+                    var date = DateTime.Now; // geçmiş aylarda bekleyen işlem gözükmemesi için oluşturuldu
+                    return sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId && ((!sl.Value.BEnd.HasValue && ((lasttq.consummationdate == null && request.start <= date && request.end >= date) || (lasttq.consummationdate != null && lasttq.consummationdate >= request.start && lasttq.consummationdate <= request.end))) || (sl.Value.BEnd.HasValue && sl.Value.BEnd.Value >= request.start && sl.Value.BEnd.Value <= request.end));
+                }).Select(bsl =>
+                {
+                    var r = new SLBayiReport();
+                    var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+                    var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
+                    if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                     {
-                        var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
-                        var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
-                        var r = new SLBayiReport();
-                        if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
-                        {
-                            var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                            r.status = StateTypeText[statu.statetype.Value];
-                            r.BayiSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : bsl.Value.BEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
-                        }
-                        else
-                            r.status = "Bekleyen";
-                        if (WebApiConfig.AdslSl.ContainsKey(bsl.Key)) // bayi max time eklendi fazla sart olmasın diye tek ifte toplandı
-                        {
-                            var bayiSl = WebApiConfig.AdslSl[bsl.Key];
-                            r.SLName = bayiSl.SLName;
-                            r.BayiSLMaxTime =  bayiSl.BayiMaxTime != null ? bayiSl.BayiMaxTime.Value : 0; 
-                        }
-                        else
-                            r.SLName = "Tanımlanmamış SL";
-                        if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
-                        {
-                            var Bayi = WebApiConfig.AdslPersonels[bsl.Value.BayiID.Value];
-                            r.BayiId = Bayi.personelid;
-                            r.BayiName = Bayi.personelname;
-                            r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
-                            r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
-                        }
-                        r.CustomerId = bsl.Value.CustomerId;
-                        r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
-                            WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
-                        r.BayiSLTaskStart = bsl.Value.BStart;
-                        //r.BayiSLEnd = bsl.Value.BEnd;
-                        return r;
+                        var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                        r.status = StateTypeText[statu.statetype.Value]; // proccess durumunu gösterir
                     }
-                    catch (Exception)
+                    else
+                        r.status = "Bekleyen";
+                    if (bsl.Value.BEnd.HasValue) // slstatus; anlık sl durumu. bayi sl end yoksa ya iptaldir yada bekleyen. bayi sl dosyasında sllerini hesaplayabilsin diye oluşturuldu
+                        r.slstatus = "Tamamlanan";
+                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
+                        r.slstatus = "İptal Edilen";
+                    else
+                        r.slstatus = "Bekleyen";
+                    if (WebApiConfig.AdslSl.ContainsKey(bsl.Key)) // bayi max time eklendi fazla sart olmasın diye tek ifte toplandı
                     {
-                        throw;
+                        var bayiSl = WebApiConfig.AdslSl[bsl.Key];
+                        r.SLName = bayiSl.SLName;
+                        r.BayiSLMaxTime = bayiSl.BayiMaxTime != null ? bayiSl.BayiMaxTime.Value : 0;
                     }
+                    else
+                        r.SLName = "Tanımlanmamış SL";
+                    if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
+                    {
+                        var Bayi = WebApiConfig.AdslPersonels[bsl.Value.BayiID.Value];
+                        r.BayiId = Bayi.personelid;
+                        r.BayiName = Bayi.personelname;
+                        r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
+                        r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
+                    }
+                    r.CustomerId = bsl.Value.CustomerId;
+                    r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
+                        WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                    r.BayiSLTaskStart = bsl.Value.BStart;
+                    r.BayiSLEnd = bsl.Value.BEnd;
+                    return r;
                 })
             ).ToList();
         }
@@ -485,11 +478,10 @@ namespace CRMWebApi.Controllers
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
-                var d = DateTime.Now;
-                var date = (d - d.TimeOfDay).AddDays(1 - d.Day);
+                var date = DateTime.Now; // geçmiş aylarda bekleyen işlem gözükmemesi için oluşturuldu
                 var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return ktk_tq.status == null && request.start >= date || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                return (ktk_tq.status == null && request.start <= date && request.end >= date) || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
                 p => p.SLs.Select(ksl =>
                 {
@@ -500,11 +492,15 @@ namespace CRMWebApi.Controllers
                     {
                         var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
                         r.status = StateTypeText[statu.statetype.Value];
-                        r.BayiSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : ksl.Value.BEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
-                        r.KocSLEnd = statu.statetype.Value == 2 ? lasttq.consummationdate : ksl.Value.KEnd; // iptaller günümüz tarihini almasın diye (Hüseyin KOZ)
                     }
                     else
                         r.status = "Bekleyen";
+                    if (ksl.Value.BEnd.HasValue) // slstatus anlık sl durumu bayi sl end yoksa ya iptaldir yada bekleyen ayırt etmek için oluşturuldu
+                        r.slstatus = "Tamamlanan";
+                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
+                        r.slstatus = "İptal Edilen";
+                    else
+                        r.slstatus = "Bekleyen";
                     if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
                     {
                         var kocSl = WebApiConfig.AdslSl[ksl.Key];
@@ -514,7 +510,6 @@ namespace CRMWebApi.Controllers
                     }
                     else
                         r.SLName = "Tanımlanmamış SL";
-                    r.SLName = WebApiConfig.AdslSl.ContainsKey(ksl.Key) ? WebApiConfig.AdslSl[ksl.Key].SLName : "Tanımlanmamış SL";
                     if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
                     {
                         var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
@@ -528,6 +523,8 @@ namespace CRMWebApi.Controllers
                         WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
                     r.BayiSLTaskStart = ksl.Value.BStart;
                     r.KocSLStart = ksl.Value.KStart;
+                    r.BayiSLEnd = ksl.Value.BEnd;
+                    r.KocSLEnd = ksl.Value.KEnd;
                     return r;
                 })
             ).ToList();
