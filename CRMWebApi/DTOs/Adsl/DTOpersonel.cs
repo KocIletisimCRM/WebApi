@@ -25,7 +25,7 @@ namespace CRMWebApi.DTOs.Adsl
         
         public DTOil il { get; set; }
         public DTOilce ilce { get; set; }
-        public DTOpersonel relatedpersonel { get; set; }
+        //public DTOpersonel relatedpersonel { get; set; }
         //public DTOpersonel kurulumpersonel { get; set; }
     }
 }

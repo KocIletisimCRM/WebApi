@@ -162,7 +162,7 @@ namespace CRMWebApi.Controllers
         /// </summary>
         /// <param name="request">personel tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getPersonel")]
-        [HttpPost]
+        [HttpPost, HttpGet]
         public HttpResponseMessage getPersonel()
         {
             using (var db = new KOCSAMADLSEntities(false))

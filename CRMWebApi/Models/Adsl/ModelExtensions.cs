@@ -21,11 +21,9 @@ namespace CRMWebApi.Models.Adsl
         public T toDTO<T>()
         {
             T dto = Activator.CreateInstance<T>();
-            Type thisType = GetType();
-            Type dtoType = dto.GetType();
             foreach (var p in dto.GetType().GetProperties())
             {
-                PropertyInfo pInfo = thisType.GetProperty(p.Name);
+                PropertyInfo pInfo = GetType().GetProperty(p.Name);
                 object propertyValue = pInfo != null ? pInfo.GetValue(this) : null;
                 if (pInfo == null || propertyValue == null) continue;
                 if (
@@ -33,8 +31,10 @@ namespace CRMWebApi.Models.Adsl
                     ((propertyValue is EntityBase) || (propertyValue.GetType().IsGenericType && propertyValue.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(EntityBase))))
                 )
                 {
-                    if (propertyValue.GetType().IsGenericType) p.SetValue(dto, (propertyValue as IEnumerable).Cast<EntityBase>().Select(s => s.toDTO()).ToList());
-                    else p.SetValue(dto, (propertyValue as EntityBase).toDTO());
+                    if (propertyValue.GetType().IsGenericType)
+                        p.SetValue(dto, (propertyValue as IEnumerable).Cast<EntityBase>().Select(s => s.toDTO()).ToList());
+                    else
+                        p.SetValue(dto, (propertyValue as EntityBase).toDTO());
                 }
                 else
                     p.SetValue(dto, propertyValue);
