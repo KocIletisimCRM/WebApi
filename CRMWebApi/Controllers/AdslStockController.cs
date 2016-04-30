@@ -198,9 +198,9 @@ namespace CRMWebApi.Controllers
                                 sm.deleted = false;
                                 sm.amount = seri == null ? r.amount : 1;
                                 sm.relatedtaskqueue = tqid;
-                                if ((KOCAuthorizeAttribute.getCurrentUser().userRole & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)// (long)KocCRMRoles.kscrStockStaff
+                                if (KOCAuthorizeAttribute.getCurrentUser().userRole == (int)KOCUserTypes.StockRoomStuff)// (long)KocCRMRoles.kscrStockStaff
                                 {
-                                    if ((r.toobjecttype & (int)KOCUserTypes.StockRoomStuff) == (int)KOCUserTypes.StockRoomStuff)// ise bu bir satınalma işlemidir.
+                                    if (r.toobjecttype == (int)KOCUserTypes.StockRoomStuff)// ise bu bir satınalma işlemidir.
                                     {
 
                                         sm.fromobjecttype = (int)KOCUserTypes.ADSLProcurementAssosiation;
@@ -209,7 +209,7 @@ namespace CRMWebApi.Controllers
                                     }
                                     else
                                     {
-                                        sm.fromobjecttype = (int)KOCUserTypes.ADSLStockRoomAssosiation;
+                                        sm.fromobjecttype = (int)KOCUserTypes.StockRoomStuff;
                                         sm.fromobject = KOCAuthorizeAttribute.getCurrentUser().userId;
                                     }
                                 }
