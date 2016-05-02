@@ -22,6 +22,7 @@ namespace CRMWebApi.DTOs.Adsl
             {
                 return KocSLStart == null ? null : (double?)Math.Round((KocSLEnd.Value - KocSLStart.Value).TotalHours, 2);
             }
+            set { }
         } // Yasin Bey; varolan bilgilerin yanında sadece saat olarak işlem süresini görmesini istediği için oluşturuldu
         public string KocSLTimeString
         {

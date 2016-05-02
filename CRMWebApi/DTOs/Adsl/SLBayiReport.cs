@@ -51,6 +51,7 @@ namespace CRMWebApi.DTOs.Adsl
             {
                 return BayiSLTaskStart == null ? null : (double?)Math.Round((BayiSLEnd.Value - BayiSLStart.Value).TotalHours, 2);
             }
+            set { }
         } // Yasin Bey; bayi varolan bilgilerin yanında sadece saat olarak işlem süresini görmesini istediği için oluşturuldu
         public string BayiSLTimeSting
         {
