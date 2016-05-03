@@ -260,7 +260,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'"; // aynı gün içerisinde yapılan değişiklikler işleme alınamadığı için HH:mm:ss eklendi (Hüseyin KOZ)
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         var proccesIds = new HashSet<int>();
@@ -341,7 +341,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated,ilKimlikNo,ilceKimlikNo,superonlineCustNo,gsm,phone from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select customerid,tc,customername,lastupdated,ilKimlikNo,ilceKimlikNo,superonlineCustNo,gsm,phone from customer where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -374,7 +374,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select taskid,taskname,tasktype,lastupdated from task where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select taskid,taskname,tasktype,lastupdated from task where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -402,7 +402,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -432,7 +432,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select taskstateid,taskstate,lastupdated,statetype from taskstatepool where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select taskstateid,taskstate,lastupdated,statetype from taskstatepool where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -460,7 +460,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select * from SL where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd")}'";
+                    selectCommand.CommandText = $"select * from SL where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
