@@ -65,7 +65,7 @@ namespace CRMWebApi.Controllers
                     }
                     else if (user.hasRole(KOCUserTypes.StockRoomStuff))
                     {
-                        user.userRole = 2147483647; // admin yetkisi tüm hareketleri görmesi için
+                        user.userRole = 2147483647; // depocuya admin yetkisi sadece tüm stok hareketlerini görmesi için
                         var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
                         user.userRole = (int)KOCUserTypes.StockRoomStuff;
@@ -85,14 +85,16 @@ namespace CRMWebApi.Controllers
                 var res = db.stockmovement.SqlQuery(querySql).ToList();
                 performance.QuerSQLyDuration = perf.Elapsed;
                 perf.Restart();
-                var fromObjectIds = res.Select(s => s.fromobject).Distinct().ToList();
-                var fromPersonels = db.personel.Where(p => fromObjectIds.Contains(p.personelid)).ToList();
-                var fromCustomers = db.customer.Where(c => fromObjectIds.Contains(c.customerid)).ToList();
+                var fromPerObjectIds = res.Where(t=> t.fromobjecttype!=(int) KOCUserTypes.ADSLCustomer).Select(s => s.fromobject).Distinct().ToList();
+                var fromCusObjectIds = res.Where(t => t.fromobjecttype == (int)KOCUserTypes.ADSLCustomer).Select(s => s.fromobject).Distinct().ToList();
+                var fromPersonels = db.personel.Where(p => fromPerObjectIds.Contains(p.personelid)).ToList();
+                var fromCustomers = db.customer.Where(c => fromCusObjectIds.Contains(c.customerid)).ToList();
 
 
-                var toObjectIds = res.Select(s => s.toobject).Distinct().ToList();
-                var toPersonels = db.personel.Where(p => toObjectIds.Contains(p.personelid)).ToList();
-                var toCustomers = db.customer.Where(c => toObjectIds.Contains(c.customerid)).ToList();
+                var toPerObjectIds = res.Where(t => t.toobjecttype != (int)KOCUserTypes.ADSLCustomer).Select(s => s.toobject).Distinct().ToList();
+                var toCusObjectIds = res.Where(t => t.toobjecttype == (int)KOCUserTypes.ADSLCustomer).Select(s => s.toobject).Distinct().ToList();
+                var toPersonels = db.personel.Where(p => toPerObjectIds.Contains(p.personelid)).ToList();
+                var toCustomers = db.customer.Where(c => toCusObjectIds.Contains(c.customerid)).ToList();
 
 
                 var stockcardids = res.Select(s => s.stockcardid).Distinct().ToList();
@@ -466,32 +468,12 @@ namespace CRMWebApi.Controllers
 
         [Route("getSerialOnCustomer")]
         [HttpPost]
-        public HttpResponseMessage getSerialOnCustomer(DTOGetStockMovementRequest request)
+        public HttpResponseMessage getSerialOnCustomer(adsl_stockmovement request)
         { // gönderilen filtre sorgusu sonucu bulunan müşteriye stok hareketlerinden halen müşteride bulunan stoklardan movemenid'si küçük olanı döndürür (lazım olursa liste yapılıp döndürülebilir)
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
-                if (request.fromobject != null && request.fromobject.value == null && request.toobject.value == null)
-                {
-                    request.fromobject.value = "";
-                }
-                var filter = request.getFilter();
-                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
-                var querySql = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
-                var countSql = filter.getCountSQL();
-
-                var rowCount = db.Database.SqlQuery<int>(countSql).First();
-                var res = db.stockmovement.SqlQuery(querySql).ToList();
-                int toobject = 0;
-                if (res.Count > 0)
-                    toobject = res[0].toobject.Value;
-                var ret = new adsl_stockmovement();
-
-                foreach (var item in res)
-                {
-                    if (db.stockmovement.Where(k => k.serialno == item.serialno && k.fromobject == toobject && k.deleted == false).FirstOrDefault() == null)
-                        ret = item;
-                }
+                var ret = db.getSerialsOnCustomerAdsl(request.fromobject, request.stockcardid).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, ret, "application/json");
             }
         }

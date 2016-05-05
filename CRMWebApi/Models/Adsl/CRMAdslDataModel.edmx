@@ -444,6 +444,17 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             </CollectionType>
           </ReturnType>
         </Function>
+        <Function Name="getSerialsOnCustomerAdsl" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CUSTOMERID" Type="int" Mode="In" />
+          <Parameter Name="STOCKCARDID" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="serialno" Type="nvarchar" MaxLength="255" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
         <Function Name="getSerialsOnPersonelAdsl" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="PERSONELID" Type="int" Mode="In" />
           <Parameter Name="STOCKCARDID" Type="int" Mode="In" />
@@ -966,7 +977,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             <End Role="adsl_stockmovement" EntitySet="stockmovement" />
           </AssociationSet>
           <FunctionImport Name="getSerialsOnPersonelAdsl" IsComposable="true" ReturnType="Collection(String)">
-          <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
+            <Parameter Name="PERSONELID" Mode="In" Type="Int32" />
             <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="getPersonelStockAdsl" IsComposable="true" ReturnType="Collection(KOCSAMADLSModel.getPersonelStockAdsl_Result)">
@@ -1032,6 +1043,10 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             <End Role="paymentsystem" EntitySet="paymentsystem" />
             <End Role="paymentsystemtype" EntitySet="paymentsystemtype" />
           </AssociationSet>
+          <FunctionImport Name="getSerialsOnCustomerAdsl" IsComposable="true" ReturnType="Collection(String)">
+            <Parameter Name="CUSTOMERID" Mode="In" Type="Int32" />
+            <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
+          </FunctionImport>
           </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -2098,6 +2113,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="getSerialsOnCustomerAdsl" FunctionName="KOCSAMADLSModel.Store.getSerialsOnCustomerAdsl" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
