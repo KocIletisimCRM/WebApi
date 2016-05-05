@@ -63,6 +63,13 @@ namespace CRMWebApi.Controllers
                         var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
                     }
+                    else if (user.hasRole(KOCUserTypes.StockRoomStuff))
+                    {
+                        user.userRole = 2147483647; // admin yetkisi tüm hareketleri görmesi için
+                        var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
+                        whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
+                        user.userRole = (int)KOCUserTypes.StockRoomStuff;
+                    }
                     else whereClauses.Add($"(fromobject = {user.userId} or toobject = {user.userId})");
                     var whereClause = string.Join(" AND ", whereClauses);
                     querySql = $"{sqlPartitions[0]}paging as ({pagingWhereClauses[0]}stockmovement WHERE{whereClause}) SELECT *{sqlPartitions[2]} ";
