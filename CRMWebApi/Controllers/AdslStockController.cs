@@ -70,7 +70,7 @@ namespace CRMWebApi.Controllers
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
                         user.userRole = (int)KOCUserTypes.StockRoomStuff;
                     }
-                    else whereClauses.Add($"(fromobject = {user.userId} or toobject = {user.userId})");
+                    else whereClauses.Add($"((fromobject = {user.userId} and fromobjecttype!= 16777217) or (toobject = {user.userId} and toobjecttype!= 16777217))"); // aynı id'ye sahip personel ve müşterilerde müşterinin hareketini personelinmiş gibi göstermesin diye type eklendi (16777217 -> müşteri type)
                     var whereClause = string.Join(" AND ", whereClauses);
                     querySql = $"{sqlPartitions[0]}paging as ({pagingWhereClauses[0]}stockmovement WHERE{whereClause}) SELECT *{sqlPartitions[2]} ";
 
