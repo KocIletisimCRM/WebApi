@@ -55,12 +55,15 @@ namespace CRMWebApi.Controllers
                     item.tc = ct.tc;
                     item.ilKimlikNo = ct.ilKimlikNo;
                     item.ilceKimlikNo = ct.ilceKimlikNo;
+                    item.bucakKimlikNo = ct.bucakKimlikNo;
+                    item.mahalleKimlikNo = ct.mahalleKimlikNo;
                     item.phone = ct.phone;
                     item.birthdate = ct.birthdate;
                     item.lastupdated = DateTime.Now;
                     item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId;
                     item.email = ct.email;
                     item.superonlineCustNo = ct.superonlineCustNo;
+                    item.description = ct.description;
                 }
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
