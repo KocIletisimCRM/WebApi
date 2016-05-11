@@ -110,8 +110,8 @@ namespace CRMWebApi.Controllers
              }).ToList();
             WebApiConfig.AdslTaskQueues.Where(r =>
             {
-                var tq = r.Value;
-                return tq.taskid == 90 && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
+                var tq = r.Value; // Sam sdm sipariş kapama taskid = 90 (process iptal dahi olsa bayi ekrakları alıp koç personel sam sdm kapatmışsa bayi hakediş alacak)
+                return tq.taskid == 90 && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
             }).Select(r =>
             {
                 var s_tq = r.Value.previoustaskorderid.HasValue ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null : null;
@@ -121,7 +121,7 @@ namespace CRMWebApi.Controllers
                     total[s_tq.attachedpersonelid.Value].evrak++;
                 }
                 return true;
-            });
+            }).ToList();
             return total;
         }
 
