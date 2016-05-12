@@ -538,20 +538,22 @@ namespace CRMWebApi.Controllers
             return WebApiConfig.AdslPersonels.Select(r =>
             {
                 var res = new PersonelsReport();
+                var a = 0;
                 res.personelid = r.Value.personelid;
                 res.personelname = r.Value.personelname;
                 res.email = r.Value.email;
-                res.il = r.Value.il != null ? WebApiConfig.AdslIls.ContainsKey(r.Value.il.kimlikNo) ? WebApiConfig.AdslIls[r.Value.il.kimlikNo].ad : null : null;
-                res.ilce = r.Value.ilce != null ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilce.kimlikNo) ? WebApiConfig.AdslIlces[r.Value.ilce.kimlikNo].ad : null : null;
+                res.il = r.Value.ilKimlikNo != null ? WebApiConfig.AdslIls.ContainsKey(r.Value.ilKimlikNo.Value) ? WebApiConfig.AdslIls[r.Value.ilKimlikNo.Value].ad : null : null;
+                res.ilce = r.Value.ilceKimlikNo != null ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilceKimlikNo.Value) ? WebApiConfig.AdslIlces[r.Value.ilceKimlikNo.Value].ad : null : null;
                 res.kanalyoneticisi = r.Value.relatedpersonelid != null ? WebApiConfig.AdslPersonels.ContainsKey(r.Value.relatedpersonelid.Value) ? WebApiConfig.AdslPersonels[r.Value.relatedpersonelid.Value].personelname : null : null;
-                for (int i = 0; i < WebApiConfig.AdslObjectTypes.Count; i++)
+                foreach (var item in WebApiConfig.AdslObjectTypes)
                 {
-                    if ((WebApiConfig.AdslObjectTypes[i].typeid & r.Value.roles) == r.Value.roles)
+                    a = item.Value.typeid & r.Value.roles;
+                    if ((item.Value.typeid & r.Value.roles) == item.Value.typeid)
                     {
                         if (res.gorev == null)
-                            res.gorev += WebApiConfig.AdslObjectTypes[i].typname;
+                            res.gorev += item.Value.typname;
                         else
-                            res.gorev += ", " + WebApiConfig.AdslObjectTypes[i].typname;
+                            res.gorev += ", " + item.Value.typname;
                     }
                 }
                 return res;

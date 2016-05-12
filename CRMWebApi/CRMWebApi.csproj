@@ -161,6 +161,7 @@
     <Compile Include="Controllers\FiberSiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\MailBasvuruController.cs" />
+    <Compile Include="Controllers\OData\PersonelsReportsController.cs" />
     <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
     <Compile Include="Controllers\OData\SKStandbyTaskReportsController.cs" />
