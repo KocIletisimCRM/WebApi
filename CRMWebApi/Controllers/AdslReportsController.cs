@@ -183,6 +183,7 @@ namespace CRMWebApi.Controllers
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
 
+        // Hakediş Raporu
         public static async Task<List<SKPaymentReport>> getPaymentReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
@@ -530,6 +531,33 @@ namespace CRMWebApi.Controllers
             ).ToList();
         }
 
+        // Personel bilgileri raporu (Anlık personel bilgilerine ulaşabilmek için)
+        public static async Task<List<PersonelsReport>> getPersonelsReport()
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            return WebApiConfig.AdslPersonels.Select(r =>
+            {
+                var res = new PersonelsReport();
+                res.personelid = r.Value.personelid;
+                res.personelname = r.Value.personelname;
+                res.email = r.Value.email;
+                res.il = r.Value.il != null ? WebApiConfig.AdslIls.ContainsKey(r.Value.il.kimlikNo) ? WebApiConfig.AdslIls[r.Value.il.kimlikNo].ad : null : null;
+                res.ilce = r.Value.ilce != null ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilce.kimlikNo) ? WebApiConfig.AdslIlces[r.Value.ilce.kimlikNo].ad : null : null;
+                res.kanalyoneticisi = r.Value.relatedpersonelid != null ? WebApiConfig.AdslPersonels.ContainsKey(r.Value.relatedpersonelid.Value) ? WebApiConfig.AdslPersonels[r.Value.relatedpersonelid.Value].personelname : null : null;
+                for (int i = 0; i < WebApiConfig.AdslObjectTypes.Count; i++)
+                {
+                    if ((WebApiConfig.AdslObjectTypes[i].typeid & r.Value.roles) == r.Value.roles)
+                    {
+                        if (res.gorev == null)
+                            res.gorev += WebApiConfig.AdslObjectTypes[i].typname;
+                        else
+                            res.gorev += ", " + WebApiConfig.AdslObjectTypes[i].typname;
+                    }
+                }
+                return res;
+            }).ToList();
+        }
+
         [Route("SKR")]
         [HttpPost]
         public async Task<HttpResponseMessage> SKR(DateTimeRange request)
@@ -567,7 +595,7 @@ namespace CRMWebApi.Controllers
         [Route("SLBayiGet")]
         [HttpGet]
         public async Task<HttpResponseMessage> SLBayiGet([FromUri] int BayiId)
-        { // bayi bulunduğumuz ay sl'ini indirmesi için
+        { // bayi bulunduğumuz ay sl detay raporunu indirmesi için
             var d = DateTime.Now;
             var request = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = (d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1) };
             var report = await getBayiSLReport(BayiId, request).ConfigureAwait(false);
@@ -584,7 +612,7 @@ namespace CRMWebApi.Controllers
         [Route("GSLBayiGet")]
         [HttpGet]
         public async Task<HttpResponseMessage> GSLBayiGet([FromUri] int BayiId)
-        { // bayi geçen ay sl'ini indirmesi için
+        { // bayi geçen ay sl detay raporunu indirmesi için
             var d = DateTime.Now;
             var request = new DateTimeRange { start = ((d - d.TimeOfDay).AddDays(1 - d.Day)).AddMonths(-1), end = ((d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1)).AddMonths(-1) };
             var report = await getBayiSLReport(BayiId, request).ConfigureAwait(false);

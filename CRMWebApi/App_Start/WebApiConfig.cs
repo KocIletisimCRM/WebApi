@@ -249,6 +249,7 @@ namespace CRMWebApi
         public static Dictionary<int, DTOs.Adsl.DTOSL> AdslSl = new Dictionary<int, DTOs.Adsl.DTOSL>();
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
+        public static Dictionary<int, Models.Adsl.adsl_objecttypes> AdslObjectTypes = new Dictionary<int, Models.Adsl.adsl_objecttypes>(); // personel görev tanımlamalrı için
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
@@ -402,7 +403,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo, roles, email from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -415,6 +416,8 @@ namespace CRMWebApi
                                 relatedpersonelid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
                                 ilKimlikNo = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
                                 ilceKimlikNo = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
+                                roles = (int)sqlreader[6],
+                                email = sqlreader.IsDBNull(7) ? null : (string)sqlreader[7],
                             });
                             AdslPersonels[t.personelid] = t;
                         }
@@ -688,6 +691,32 @@ namespace CRMWebApi
                 }
             }
         }
+        public static async Task loadAdslObjectTypes()
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from objecttypes";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.adsl_objecttypes
+                            {
+                                typeid = (int)sqlreader[0],
+                                typname = (string)sqlreader[1],
+                            });
+                            AdslObjectTypes[t.typeid] = t;
+                        }
+                    }
+                }
+            }
+        }
 
         public static async Task updateAdslData()
         {
@@ -728,7 +757,7 @@ namespace CRMWebApi
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
+            Task.WaitAll(new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
         }
     }
 }
