@@ -538,7 +538,6 @@ namespace CRMWebApi.Controllers
             return WebApiConfig.AdslPersonels.Select(r =>
             {
                 var res = new PersonelsReport();
-                var a = 0;
                 res.personelid = r.Value.personelid;
                 res.personelname = r.Value.personelname;
                 res.email = r.Value.email;
@@ -547,7 +546,6 @@ namespace CRMWebApi.Controllers
                 res.kanalyoneticisi = r.Value.relatedpersonelid != null ? WebApiConfig.AdslPersonels.ContainsKey(r.Value.relatedpersonelid.Value) ? WebApiConfig.AdslPersonels[r.Value.relatedpersonelid.Value].personelname : null : null;
                 foreach (var item in WebApiConfig.AdslObjectTypes)
                 {
-                    a = item.Value.typeid & r.Value.roles;
                     if ((item.Value.typeid & r.Value.roles) == item.Value.typeid)
                     {
                         if (res.gorev == null)
