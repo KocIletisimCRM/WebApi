@@ -18,7 +18,7 @@ namespace CRMWebApi.DTOs.Adsl
 
         public bool proccessCancelled = false;
         private int last_TON = 0;
-        public int Last_TON // taskı yanlış sonucla ilerlerterek task türetiliyor sonra başka sonucla kapatılıp önceki türeyenler iptal edilince son yask olarak iptal alıyoruz processin devamını kacırıyoruz 
+        public int Last_TON 
         {
             get { return last_TON; }
             set
