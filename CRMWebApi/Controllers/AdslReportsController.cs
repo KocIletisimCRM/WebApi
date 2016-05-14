@@ -544,6 +544,7 @@ namespace CRMWebApi.Controllers
                 res.il = r.Value.ilKimlikNo != null ? WebApiConfig.AdslIls.ContainsKey(r.Value.ilKimlikNo.Value) ? WebApiConfig.AdslIls[r.Value.ilKimlikNo.Value].ad : null : null;
                 res.ilce = r.Value.ilceKimlikNo != null ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilceKimlikNo.Value) ? WebApiConfig.AdslIlces[r.Value.ilceKimlikNo.Value].ad : null : null;
                 res.kanalyoneticisi = r.Value.relatedpersonelid != null ? WebApiConfig.AdslPersonels.ContainsKey(r.Value.relatedpersonelid.Value) ? WebApiConfig.AdslPersonels[r.Value.relatedpersonelid.Value].personelname : null : null;
+                res.kurulumbayisi = r.Value.kurulumpersonelid != null ? WebApiConfig.AdslPersonels.ContainsKey(r.Value.kurulumpersonelid.Value) ? WebApiConfig.AdslPersonels[r.Value.kurulumpersonelid.Value].personelname : null : null;
                 foreach (var item in WebApiConfig.AdslObjectTypes)
                 {
                     if ((item.Value.typeid & r.Value.roles) == item.Value.typeid)
