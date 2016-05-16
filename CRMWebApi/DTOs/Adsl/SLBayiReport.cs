@@ -46,14 +46,7 @@ namespace CRMWebApi.DTOs.Adsl
             }
         } // SLEnd - SLStart ()
         public int BayiSLMaxTime { get; set; } //tamamlanması gereken azami süre
-        public double? BayiSLSaat
-        {
-            get
-            {
-                return BayiSLTaskStart == null ? null : (double?)Math.Round((BayiSLEnd.Value - BayiSLStart.Value).TotalHours, 2);
-            }
-            set { }
-        } // Yasin Bey; bayi varolan bilgilerin yanında sadece saat olarak işlem süresini görmesini istediği için oluşturuldu
+        public double? BayiSLEtkisi { get; set; } // Yasin Bey; bayi varolan bilgilerin yanında sadece saat olarak işlem süresini görmesini istediği için oluşturuldu
         public string BayiSLTimeSting
         {
             get
