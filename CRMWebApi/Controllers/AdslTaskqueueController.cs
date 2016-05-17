@@ -260,7 +260,7 @@ namespace CRMWebApi.Controllers
                                     while (ptq != null)
                                     {
                                         ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                        if (ptq.task.tasktype == 1)
+                                        if (WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
                                         {
                                             saletask = ptq.taskorderno;
                                             break;
@@ -277,6 +277,7 @@ namespace CRMWebApi.Controllers
                                     }
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
+                                if (oot == null) continue;
                                 if (oot.tasktype == 3)
                                 {
                                     var ptq = dtq;
@@ -307,7 +308,7 @@ namespace CRMWebApi.Controllers
                                     while (ptq != null)
                                     {
                                         ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                        if (ptq.task.tasktype == 1)
+                                        if (WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
                                         {
                                             saletask = ptq.taskorderno;
                                             break;
@@ -325,8 +326,9 @@ namespace CRMWebApi.Controllers
                                     //Satış taskını bul. Satış yapanın kanal yöneticisini al. Evrak alma onayı saha taskını bu personele ata
                                 }
                                 //Diğer otomatik personel atamaları ()
+                                if (oot == null) continue;
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
-                                if (oott.Count > 0)
+                                if (oott != null && oott.Count > 0)
                                 {
                                     var turAtama = oott.FirstOrDefault(t=> t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
                                     var task = oott.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
@@ -780,7 +782,7 @@ namespace CRMWebApi.Controllers
 
                     var taskqueue = new adsl_taskqueue
                     {
-                        appointmentdate = request.appointmentdate,
+                        appointmentdate = request.appointmentdate > DateTime.Now ? DateTime.Now : request.appointmentdate, // netflow tarihi ileri tarih olamaz
                         attachedobjectid = cust.customerid,
                         attachedpersonelid = request.salespersonel ?? user.userId,
                         attachmentdate = DateTime.Now,
@@ -813,10 +815,9 @@ namespace CRMWebApi.Controllers
                                 deleted = false
                             };
                             db.customerproduct.Add(customerproducst);
-                            db.SaveChanges();
                         }
+                        db.SaveChanges();
                     }
-
                     return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
