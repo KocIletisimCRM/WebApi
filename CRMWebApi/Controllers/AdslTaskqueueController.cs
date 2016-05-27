@@ -96,12 +96,28 @@ namespace CRMWebApi.Controllers
                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
                     if (request.taskOrderNo != null)
                     {
-                        var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
+                        var ptq = r;
+                        int? saletask = null;
+                        while (ptq != null)
+                        {
+                            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                            if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
+                            {
+                                saletask = ptq.taskorderno;
+                                break;
+                            }
+                            else
+                            {
+                                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                            }
+                        }
+
+                        /*var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
                         var salestaskorderno = db.taskqueue.Where(t => (t.task.tasktype == 1 || t.task.tasktype == 8 || t.task.tasktype == 9) && t.attachedobjectid == customerid)
-                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();*/
 
                         // taska bağlı müşteri kampanyası ve bilgileri
-                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno && c.deleted == false).ToList();
+                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
                         {
