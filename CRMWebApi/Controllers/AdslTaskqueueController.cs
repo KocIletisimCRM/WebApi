@@ -111,11 +111,6 @@ namespace CRMWebApi.Controllers
                                 ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
                             }
                         }
-
-                        /*var customerid = res.Select(c => c.attachedobjectid).FirstOrDefault();
-                        var salestaskorderno = db.taskqueue.Where(t => (t.task.tasktype == 1 || t.task.tasktype == 8 || t.task.tasktype == 9) && t.attachedobjectid == customerid)
-                            .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();*/
-
                         // taska bağlı müşteri kampanyası ve bilgileri
                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());

@@ -15,6 +15,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string gsm { get; set; } // customer gsm
         public string il { get; set; } // il for customer
         public string ilce { get; set; }
+        public string customeradres { get; set; }
         public int? s_perid { get; set; } // satış personelid
         public string s_pername { get; set; }
         public string s_perky { get; set; } // satış personeli kanal yöneticisi

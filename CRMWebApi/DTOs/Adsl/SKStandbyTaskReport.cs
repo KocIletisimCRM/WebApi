@@ -13,6 +13,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int creationdateday { get; set; }
         public int customerid { get; set; }
         public string customername { get; set; }
+        public string customeradres { get; set; }
         public int? personelid { get; set; }
         public string personelname { get; set; }
         public int? attachmentdateyear { get; set; }

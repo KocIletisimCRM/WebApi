@@ -770,7 +770,7 @@ namespace CRMWebApi.Controllers
                     transaction.Commit();
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     transaction.Rollback();
                     return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json");

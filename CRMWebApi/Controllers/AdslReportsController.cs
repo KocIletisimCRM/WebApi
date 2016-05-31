@@ -225,7 +225,13 @@ namespace CRMWebApi.Controllers
                 res.creationdatemonth = r.Value.creationdate.Value.Month;
                 res.creationdateday = r.Value.creationdate.Value.Day;
                 res.customerid = r.Value.attachedobjectid.Value;
-                res.customername = WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername : "İsimsiz Müşteri";
+                if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
+                {
+                    res.customername = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername;
+                    res.customeradres = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].description;
+                }
+                else
+                    res.customername = "İsimsiz Müşteri";
                 if (r.Value.attachedpersonelid != null)
                 {
                     var personel = (int?)r.Value.attachedpersonelid.Value;
@@ -270,6 +276,7 @@ namespace CRMWebApi.Controllers
                     res.custid = customerInfo.customerid;
                     res.custname = customerInfo.customername;
                     res.custphone = customerInfo.phone;
+                    res.customeradres = customerInfo.description;
                     if (customerInfo.ilKimlikNo != null && WebApiConfig.AdslIls.ContainsKey(customerInfo.ilKimlikNo.Value))
                         res.il = WebApiConfig.AdslIls[customerInfo.ilKimlikNo.Value].ad;
                     if (customerInfo.ilceKimlikNo != null && WebApiConfig.AdslIlces.ContainsKey(customerInfo.ilceKimlikNo.Value))
