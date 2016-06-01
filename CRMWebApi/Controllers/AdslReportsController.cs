@@ -130,7 +130,7 @@ namespace CRMWebApi.Controllers
         {
             int sayCust = 0;
             double timeOrt = 0;
-            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).FirstOrDefault(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            var maxSL = 24; //WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).FirstOrDefault(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
             WebApiConfig.AdslProccesses.Values.SelectMany(
                 p => p.SLs.Where(sl => sl.Value.BayiID.HasValue && sl.Value.BayiID == BayiId && sl.Value.BEnd.HasValue && sl.Value.BEnd.Value >= request.start && sl.Value.BEnd.Value <= request.end)
                 .Select(bsl =>
@@ -141,7 +141,7 @@ namespace CRMWebApi.Controllers
                     if (WebApiConfig.AdslSl.ContainsKey(bsl.Key))
                     {
                         var bayiSl = WebApiConfig.AdslSl[bsl.Key];
-                        factor = (maxSL != null && bayiSl.BayiMaxTime != null) ? (maxSL.Value / bayiSl.BayiMaxTime.Value) : 1;
+                        factor = (bayiSl.BayiMaxTime != null) ? (maxSL / bayiSl.BayiMaxTime.Value) : 1;
                     }
                     r.BayiSLTaskStart = bsl.Value.BStart;
                     r.BayiSLEnd = bsl.Value.BEnd;
@@ -162,7 +162,7 @@ namespace CRMWebApi.Controllers
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
                 return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
-                p => p.SLs.Select(ksl =>
+                p => p.SLs.Where(s => s.Value.KEnd.HasValue && s.Value.KStart.HasValue).Select(ksl =>
                 {
                     sayCust++;
                     var ston = WebApiConfig.AdslTaskQueues[p.S_TON];
@@ -295,20 +295,18 @@ namespace CRMWebApi.Controllers
                 res.s_ton = s_tq.taskorderno;
                 if (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid))
                     res.s_tqname = WebApiConfig.AdslTasks[s_tq.taskid].taskname;
-                res.campaign = null; // campaign ve customerproduct dictionary olması gerek
+                res.campaign = WebApiConfig.AdslCustomerProducts.ContainsKey(r.S_TON) ? WebApiConfig.AdslCampaigns.ContainsKey((int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid) ? 
+                        WebApiConfig.AdslCampaigns[(int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid].name : null : null; // campaign ve customerproduct dictionary olması gerek
                 res.kaynak = s_tq.fault;
                 res.s_desc = s_tq.description;
+                res.s_createyear = s_tq.creationdate.Value.Year;
+                res.s_createmonth = s_tq.creationdate.Value.Month;
+                res.s_createday = s_tq.creationdate.Value.Day;
                 if (s_tq.appointmentdate != null)
                 {
-                    res.s_year = s_tq.appointmentdate.Value.Year;
-                    res.s_month = s_tq.appointmentdate.Value.Month;
-                    res.s_day = s_tq.appointmentdate.Value.Day;
-                }
-                else
-                {
-                    res.s_year = s_tq.creationdate.Value.Year;
-                    res.s_month = s_tq.creationdate.Value.Month;
-                    res.s_day = s_tq.creationdate.Value.Day;
+                    res.s_netflowyear = s_tq.appointmentdate.Value.Year;
+                    res.s_netflowmonth = s_tq.appointmentdate.Value.Month;
+                    res.s_netflowday = s_tq.appointmentdate.Value.Day;
                 }
                 if (s_tq.consummationdate != null)
                 {

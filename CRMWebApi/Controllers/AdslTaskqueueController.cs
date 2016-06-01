@@ -419,7 +419,7 @@ namespace CRMWebApi.Controllers
                         #region ürünler kaydediliyor
                         foreach (var p in customerproducts)
                         {
-                                db.customerproduct.Add(new adsl_customerproduct
+                            db.customerproduct.Add(new adsl_customerproduct
                             {
                                 campaignid = p.campaignid,
                                 creationdate = DateTime.Now,
@@ -431,7 +431,6 @@ namespace CRMWebApi.Controllers
                                 updatedby = user.userId
                             });
                            
-
                             if (tq.task.taskid == 88 && tq.taskstatepool.taskstateid != 9116)
                             {
                                 foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
@@ -606,7 +605,7 @@ namespace CRMWebApi.Controllers
                     transaction.Commit();
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     transaction.Rollback();
                     return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json");

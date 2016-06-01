@@ -23,9 +23,12 @@ namespace CRMWebApi.DTOs.Adsl
         public string campaign { get; set; } // customer campaign
         public string kaynak { get; set; }
         public string s_desc { get; set; } // satış description
-        public int s_year { get; set; } // satışın yapıldığı yıl
-        public int s_month { get; set; } // satışın yapıldığı ay
-        public int s_day { get; set; } // satışın yapıldığı gün
+        public int s_createyear { get; set; } // satışın girildiği yıl
+        public int s_createmonth { get; set; } // satışın girildiği ay
+        public int s_createday { get; set; } // satışın girildiği gün
+        public int s_netflowyear { get; set; } // satışın netflow yıl
+        public int s_netflowmonth { get; set; } // satışın netflow ay
+        public int s_netflowday { get; set; } // satışın netflow gün
         public DateTime? s_consummationdate { get; set; }
         public int? s_consummationdateyear { get; set; }
         public int? s_consummationdatemonth { get; set; }

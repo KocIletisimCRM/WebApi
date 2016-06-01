@@ -250,6 +250,8 @@ namespace CRMWebApi
         //Key: Taskid, <Key: 0-3 (0: bayi sl başlangıç, 1: Bayi sl bitiş, 2: Koç SL Başlangıç, 3: Koç SL Bitiş), <SL id>>
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
         public static Dictionary<int, Models.Adsl.adsl_objecttypes> AdslObjectTypes = new Dictionary<int, Models.Adsl.adsl_objecttypes>(); // personel görev tanımlamalrı için
+        public static Dictionary<int, Models.Adsl.adsl_campaigns> AdslCampaigns = new Dictionary<int, Models.Adsl.adsl_campaigns>(); // müşteri kampanyası için
+        public static Dictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new Dictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
@@ -719,7 +721,59 @@ namespace CRMWebApi
                 }
             }
         }
-
+        public static async Task loadAdslCampaigns(DateTime lastUpdated)
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = $"select id,name,lastupdated from campaigns where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.adsl_campaigns
+                            {
+                                id = (int)sqlreader[0],
+                                name = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
+                                lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
+                            });
+                            AdslCampaigns[t.id] = t;
+                        }
+                    }
+                }
+            }
+        }
+        public static async Task loadAdslCustomerProducts(DateTime lastUpdated)
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = $"select taskid,campaignid from customerproduct where deleted=0 and lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}' group by taskid, campaignid";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.adsl_customerproduct
+                            {
+                                taskid = (int)sqlreader[0],
+                                campaignid = sqlreader.IsDBNull(1) ? null : (int?)sqlreader[1],
+                            });
+                            AdslCustomerProducts[(int)t.taskid] = t;
+                        }
+                    }
+                }
+            }
+        }
         public static async Task updateAdslData()
         {
             await aLockObject.WaitAsync().ConfigureAwait(false);
@@ -729,6 +783,8 @@ namespace CRMWebApi
                 loadAdslPersonels(AdslLastUpdated),
                 loadAdslTasks(AdslLastUpdated),
                 loadAdslStatus(AdslLastUpdated),
+                loadAdslCampaigns(AdslLastUpdated),
+                loadAdslCustomerProducts(AdslLastUpdated),
                 loadAdslSl(AdslLastUpdated)
             }).ConfigureAwait(false);
             await loadAdslTaskQueues(AdslLastUpdated).ConfigureAwait(false);
