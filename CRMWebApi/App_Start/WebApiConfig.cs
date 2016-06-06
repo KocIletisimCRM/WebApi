@@ -810,6 +810,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.SKPaymentReport>("SKPaymentReports");
             builder.EntitySet<DTOs.Adsl.SKStandbyTaskReport>("SKStandbyTaskReports");
             builder.EntitySet<DTOs.Adsl.PersonelsReport>("PersonelsReports");
+            builder.EntitySet<DTOs.Adsl.ISSSuccessRate>("ISSSuccessRates");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",
