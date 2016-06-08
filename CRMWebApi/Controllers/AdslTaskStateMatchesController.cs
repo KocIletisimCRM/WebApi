@@ -12,11 +12,11 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/TaskStateMatches")]
+    [KOCAuthorize]
     public class AdslTaskStateMatchesController : ApiController
     {
         [Route("getTaskStateMatches")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage getTaskStateMatches(DTOGetTSMFilter request)
         {
             using (var db = new KOCSAMADLSEntities())
@@ -55,7 +55,6 @@ namespace CRMWebApi.Controllers
 
         [Route("saveTaskStateMatches")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage saveTaskStateMatches(DTOtaskstatematches request)
         {
             using (var db = new KOCSAMADLSEntities())
@@ -77,7 +76,6 @@ namespace CRMWebApi.Controllers
 
         [Route("insertTaskStateMatches")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage insertTaskState(DTOtaskstatematches request)
         {
             using (var db = new KOCSAMADLSEntities())

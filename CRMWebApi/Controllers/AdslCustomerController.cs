@@ -2,7 +2,6 @@
 using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,11 +10,11 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Customer")]
+    [KOCAuthorize]
     public class AdslCustomerController : ApiController
     {
         [Route("getCustomer")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage getCustomer(DTOs.Adsl.DTORequestClasses.DTOGetCustomerRequest request)
         {
             using (var db = new KOCSAMADLSEntities(false))
@@ -42,7 +41,6 @@ namespace CRMWebApi.Controllers
 
         [Route("saveCustomerCard")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage saveCustomerCard(DTOcustomer ct)
         {
             using (var db = new KOCSAMADLSEntities())
@@ -72,7 +70,6 @@ namespace CRMWebApi.Controllers
 
         [Route("insertCustomer")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage insertCustomer(customer ct)
         {
             using (var db = new KOCSAMADLSEntities())

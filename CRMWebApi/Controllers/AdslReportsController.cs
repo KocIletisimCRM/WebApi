@@ -9,10 +9,10 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.IO;
 using System.Net.Http.Headers;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using System.Text;
+using CRMWebApi.KOCAuthorization;
 
 namespace CRMWebApi.Controllers
 {
@@ -21,6 +21,7 @@ namespace CRMWebApi.Controllers
     {
         [Route("getPersonelWorks")]
         [HttpPost]
+        [KOCAuthorize]
         public HttpResponseMessage getPersonelWorks(DTOs.Adsl.DTOpersonel request)
         {
 
@@ -588,9 +589,10 @@ namespace CRMWebApi.Controllers
             return WebApiConfig.AdslTaskQueues.Where(r =>
                 {
                     int taskid = r.Value.taskid;
-                    var previous = r.Value.previoustaskorderid != null && WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null;
+                    var previous = (r.Value.previoustaskorderid != null && WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value)) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null;
                     int? statetype = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? (int?)WebApiConfig.AdslStatus[r.Value.status.Value].statetype.Value : null : null;
-                    return r.Value.deleted == false && ((taskid == 47 && previous != null && previous.taskid != 113) || taskid == 90 ||
+                    return r.Value.deleted == false && ((taskid == 47 && previous != null && previous.taskid != 113) || 
+                                   (taskid == 90 && previous != null && previous.taskid != 114) ||
                                     ((taskid == 31 || taskid == 63 || taskid == 33 || taskid == 64) && (statetype == null || statetype.Value != 1)));
                 }).Select(r =>
                 {

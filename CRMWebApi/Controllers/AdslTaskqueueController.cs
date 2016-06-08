@@ -22,7 +22,6 @@ using System.Threading;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/TaskQueues")]
-
     [KOCAuthorize]
     public class AdslTaskqueueController : ApiController
     {
@@ -233,9 +232,6 @@ namespace CRMWebApi.Controllers
                         var tqAttachedobjectid = dtq.attachedobjectid;
                         #endregion
 
-                        #region zaten var olan müşteri ürünlerini silme(ilgili taskla ilişkili olanları)...
-                        db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where deleted=0 and taskid={1} and customerid={2}", new object[] { user.userId, tq.taskorderno, tqAttachedobjectid });
-                        #endregion
                         #region zaten var olan müşteri dökümanlarını silme(ilgili taskla ilişkili olanları)...
                         db.Database.ExecuteSqlCommand("update customerdocument set deleted=1, lastupdated=GetDate(), updatedby={0} where deleted=0 and taskqueueid={1} and customerid={2}", new object[] { user.userId, tq.taskorderno, tqAttachedobjectid });
                         #endregion
@@ -258,52 +254,49 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
+                                var ptq = dtq;
+                                int? saletask = null;
+                                while (ptq != null)
+                                {
+                                    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                    if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                                    {
+                                        saletask = ptq.taskorderno;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                    }
+                                }
                                 if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;  
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
                                 if (oot == null) continue;
-                                if (oot.tasktype == 2)
+                                if (oot.tasktype == 2 && saletask != null)
                                 {
-                                    var ptq = dtq;
-                                    int? saletask = null;
-                                    while (ptq != null)
-                                    {
-                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                        if (WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
-                                        {
-                                            saletask = ptq.taskorderno;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                        }
-                                    }
-                                    if (saletask != null)
-                                    {
-                                        var satbayi = db.taskqueue.First(r=>r.taskorderno==saletask).attachedpersonelid;
-                                        personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
-                                    }
+                                    var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
                                 if (oot == null) continue;
                                 if (oot.tasktype == 3)
                                 {
-                                    var ptq = dtq;
+                                    var pptq = dtq;
                                     int? krtask = null;
-                                    while (ptq != null)
+                                    while (pptq != null)
                                     {
-                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                        if (ptq.task.tasktype == 2)
+                                        pptq.task = db.task.Where(t => t.taskid == pptq.taskid).FirstOrDefault();
+                                        if (pptq.task.tasktype == 2)
                                         {
-                                            krtask = ptq.taskorderno;
+                                            krtask = pptq.taskorderno;
                                             break;
                                         }
                                         else
                                         {
-                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                            pptq = db.taskqueue.Where(t => t.taskorderno == pptq.previoustaskorderid).FirstOrDefault();
                                         }
                                     }
                                     if (krtask != null)
@@ -312,29 +305,10 @@ namespace CRMWebApi.Controllers
                                         personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                     }
                                 }
-                                if (item == 45)  // Evrak Onayı Saha Taskı oluşuyorsa satış yapan bayinin kanal yöneticisine ata
+                                if (item == 45 && saletask != null)  // Evrak Onayı Saha Taskı oluşuyorsa satış yapan bayinin kanal yöneticisine ata
                                 {
-                                    var ptq = dtq;
-                                    int? saletask = null;
-                                    while (ptq != null)
-                                    {
-                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                        if (WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
-                                        {
-                                            saletask = ptq.taskorderno;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                        }
-                                    }
-                                    if (saletask != null)
-                                    {
-                                        var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
-                                        personel_id = db.personel.First(p => p.personelid == satbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
-                                    }
-                                    //Satış taskını bul. Satış yapanın kanal yöneticisini al. Evrak alma onayı saha taskını bu personele ata
+                                    var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == satbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 if (oot == null) continue;
@@ -361,7 +335,7 @@ namespace CRMWebApi.Controllers
                                     lastupdated = DateTime.Now,
                                     previoustaskorderid = dtq.taskorderno,
                                     updatedby = user.userId, //User.Identity.PersonelID,
-                                    relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                                    relatedtaskorderid = saletask
                                 };
                                 if((automandatoryTasks.Contains(38) || automandatoryTasks.Contains(60)) && dtq.attachedpersonelid!=1016)
                                 {
@@ -369,7 +343,6 @@ namespace CRMWebApi.Controllers
                                     mailInfo.Add(dtq.attachedpersonelid);
                                     sendemail(mailInfo);
                                 }
-
                                 db.taskqueue.Add(amtq);
                             }
                         }
@@ -382,6 +355,21 @@ namespace CRMWebApi.Controllers
                             var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
                             if (autotasks.Count>0)
                             {
+                                var ptq = dtq;
+                                int? saletask = null;
+                                while (ptq != null)
+                                {
+                                    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                    if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                                    {
+                                        saletask = ptq.taskorderno;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                    }
+                                }
                                 foreach (var item in (autotasks.First() ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                                 {
                                     var oot = db.task.FirstOrDefault(t => t.taskid == item);
@@ -410,48 +398,70 @@ namespace CRMWebApi.Controllers
                                         lastupdated = DateTime.Now,
                                         previoustaskorderid = tq.taskorderno,
                                         updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
-                                        relatedtaskorderid = tq.relatedtaskorderid
+                                        relatedtaskorderid = saletask //tq.relatedtaskorderid
                                     });
                                 }
                             }                            
                         }
                         #endregion
                         #region ürünler kaydediliyor
-                        foreach (var p in customerproducts)
+                        if (customerproducts != null)
                         {
-                            db.customerproduct.Add(new adsl_customerproduct
+                            #region zaten var olan müşteri ürünlerini silme(ilgili taskla ilişkili olanları)...
+                            db.Database.ExecuteSqlCommand("update customerproduct set deleted=1, lastupdated=GetDate(), updatedby={0} where deleted=0 and taskid={1} and customerid={2}", new object[] { user.userId, tq.taskorderno, tqAttachedobjectid });
+                            #endregion
+                            foreach (var p in customerproducts)
                             {
-                                campaignid = p.campaignid,
-                                creationdate = DateTime.Now,
-                                customerid = dtq.attachedobjectid,
-                                deleted = false,
-                                lastupdated = DateTime.Now,
-                                productid = p.productid,
-                                taskid = dtq.taskorderno,
-                                updatedby = user.userId
-                            });
-                           
-                            if (tq.task.taskid == 88 && tq.taskstatepool.taskstateid != 9116)
-                            {
-                                foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                                db.customerproduct.Add(new adsl_customerproduct
                                 {
-                                    var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
-                                    db.taskqueue.Add(new adsl_taskqueue
+                                    campaignid = p.campaignid,
+                                    creationdate = DateTime.Now,
+                                    customerid = dtq.attachedobjectid,
+                                    deleted = false,
+                                    lastupdated = DateTime.Now,
+                                    productid = p.productid,
+                                    taskid = dtq.taskorderno,
+                                    updatedby = user.userId
+                                });
+
+                                if (tq.task.taskid == 88 && tq.taskstatepool.taskstateid != 9116)
+                                {
+                                    var ptq = dtq;
+                                    int? saletask = null;
+                                    while (ptq != null)
                                     {
-                                        appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
-                                        attachmentdate = (item == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((tq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : tq.attachmentdate),
-                                        attachedobjectid = dtq.attachedobjectid,
-                                        taskid = item,
-                                        creationdate = DateTime.Now,
-                                        deleted = false,
-                                        lastupdated = DateTime.Now,
-                                        previoustaskorderid = tq.taskorderno,
-                                        updatedby = user.userId,
-                                        relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
-                                    });
+                                        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                        if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                                        {
+                                            saletask = ptq.taskorderno;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                        }
+                                    } // taskqueue'nin başlangıç taskını bul
+
+                                    foreach (var item in (db.product_service.Where(r => r.productid == p.productid).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
+                                    {
+                                        var personel_id = (db.task.Where(t => t.attachablepersoneltype == dtq.attachedpersonel.category && t.taskid == item).Any());
+                                        db.taskqueue.Add(new adsl_taskqueue
+                                        {
+                                            appointmentdate = ((item == 4 || item == 55 || item == 72 || item == 68) && (item == 5 || item == 18 || item == 73 || item == 69 || item == 55)) ? (tq.appointmentdate) : (null),
+                                            attachmentdate = (item == 73) ? (DateTime?)DateTime.Now : (personel_id ? ((tq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : tq.attachmentdate),
+                                            attachedobjectid = dtq.attachedobjectid,
+                                            taskid = item,
+                                            creationdate = DateTime.Now,
+                                            deleted = false,
+                                            lastupdated = DateTime.Now,
+                                            previoustaskorderid = tq.taskorderno,
+                                            updatedby = user.userId,
+                                            relatedtaskorderid = saletask //tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                        });
+                                    }
                                 }
+                                db.SaveChanges();
                             }
-                            db.SaveChanges();
                         }
                         #endregion
                         #region belgeler kaydediliyor
@@ -723,6 +733,21 @@ namespace CRMWebApi.Controllers
                     #region Ek ürün için otomatik zorunlu taskların türetilmesi-- OZAL 10.10.2014 17:45 ve Retention
                     if (tq.taskid == 6115 || tq.taskid == 6117)
                     {
+                        var ptq = tq;
+                        int? saletask = null;
+                        while (ptq != null)
+                        {
+                            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                            if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                            {
+                                saletask = ptq.taskorderno;
+                                break;
+                            }
+                            else
+                            {
+                                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                            }
+                        }
                         foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                         {
                             var personel_id = (db.task.Where(t => t.attachablepersoneltype == tq.attachedpersonel.category && t.taskid == item).Any());
@@ -741,7 +766,7 @@ namespace CRMWebApi.Controllers
                                 previoustaskorderid = tq.taskorderno,
                                 updatedby = KOCAuthorizeAttribute.getCurrentUser().userId, //User.Identity.PersonelID,
                                 /*25.10.2014 17:33 OZAL  Önceki kod kısmında alttaki satır kapalıydı ve task oluşurken ilişkilendirme yapılamıyordu*/
-                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                relatedtaskorderid = saletask//tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
                                 /*25.10.2014 17:33 */
                             });
                         }

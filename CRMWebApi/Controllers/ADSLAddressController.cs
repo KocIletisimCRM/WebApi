@@ -1,8 +1,8 @@
 ﻿using CRMWebApi.DTOs;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -13,6 +13,7 @@ using Teknar_Proxy_Lib;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Address")]
+    [KOCAuthorize]
     public class ADSLAddressController : ApiController
     {
         [Route("getAdress")]

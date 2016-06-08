@@ -3,8 +3,6 @@ using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,6 +10,7 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Campaign")]
+    [KOCAuthorize]
     public class AdslCampaignController : ApiController
     {
         #region Kampanya Sayfası 

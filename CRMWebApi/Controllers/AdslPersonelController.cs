@@ -1,5 +1,6 @@
 ﻿using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
 using System.Linq;
@@ -10,13 +11,13 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Personel")]
+    [KOCAuthorize]
     public class AdslPersonelController : ApiController
     {
         #region Personel Tanımlama Sayfası
 
         [Route("getPersonels")]
         [HttpPost]
-        //[KOCAuthorize]
         public HttpResponseMessage getPersonels(DTOFilterGetPersonelRequest request)
         {
             using (var db = new KOCSAMADLSEntities())

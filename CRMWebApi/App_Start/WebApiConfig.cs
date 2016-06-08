@@ -792,7 +792,12 @@ namespace CRMWebApi
             aLockObject.Release();
         }
 
-        public static void Register(HttpConfiguration config)
+        //NetFlow Tracker
+        static Timer nfT = new Timer((o) => {
+            // Bu kod 5 dakikada bir çalışacak
+
+        }, null, 0, 1000 * 60 * 5);
+        public async static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
             // Web API routes
@@ -817,7 +822,7 @@ namespace CRMWebApi
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            Task.WaitAll(new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/});
+            await Task.WhenAll((new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/})).ConfigureAwait(false);
         }
     }
 }

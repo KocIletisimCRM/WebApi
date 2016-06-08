@@ -1,8 +1,8 @@
 ﻿using CRMWebApi.DTOs.Adsl;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using CRMWebApi.KOCAuthorization;
 using CRMWebApi.Models.Adsl;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,6 +11,7 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/StockCard")]
+    [KOCAuthorize]
     public class AdslStockCardController : ApiController
     {
         #region Depo Kart Tanımlamaları Sayfası
@@ -61,7 +62,6 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
-
 
         [Route("insertStockCard")]
         [HttpPost]

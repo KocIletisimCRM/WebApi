@@ -14,12 +14,12 @@ using CRMWebApi.KOCAuthorization;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Stock")]
+    [KOCAuthorize]
     public class AdslStockController : ApiController
     {
         #region Stok Hareketleri Sayfası
         [Route("getStockMovements")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage getStockMovements(DTOGetStockMovementRequest request)
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();
@@ -131,7 +131,6 @@ namespace CRMWebApi.Controllers
 
         [Route("SaveStockMovementMultiple")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage SaveStockMovementMultiple(adsl_stockmovement[] sms)
         {
             var errormessage = new DTOResponseError { errorCode = 1, errorMessage = "İşlem Başarılı" };
@@ -159,7 +158,6 @@ namespace CRMWebApi.Controllers
 
         [Route("InsertStockMovement")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage InsertStockMovement(adsl_stockmovement r, int? tqid, string serinos)
         {
             //  var serinos = Request.Params.AllKeys;
@@ -245,7 +243,6 @@ namespace CRMWebApi.Controllers
 
         [Route("SaveStockMovement")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage SaveStockMovement(adsl_stockmovement r, int? tqid, string serinos)
         {
             var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
@@ -283,7 +280,6 @@ namespace CRMWebApi.Controllers
 
         [Route("confirmSM")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage confirmSM(int[] movementIds)
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();

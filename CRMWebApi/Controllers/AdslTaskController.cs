@@ -14,6 +14,7 @@ using System.Web.Http;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Task")]
+    [KOCAuthorize]
     public class AdslTaskController : ApiController
     {
         #region Task Tanımlamaları Sayfası
@@ -72,6 +73,7 @@ namespace CRMWebApi.Controllers
 
             }
         }
+
         [Route("insertTask")]
         [HttpPost]
         public HttpResponseMessage insertTask(DTOtask request)

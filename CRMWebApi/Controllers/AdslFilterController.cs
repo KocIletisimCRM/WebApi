@@ -13,6 +13,7 @@ using CRMWebApi.KOCAuthorization;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Adsl/Filter")]
+    [KOCAuthorize]
     public class AdslFilterController : ApiController
     {
         /// <summary> 
@@ -21,7 +22,6 @@ namespace CRMWebApi.Controllers
         /// <param name="request">Task tablosu satırlarının hangilerinin Web filtre bileşeninde görüneceğni belirler</param>
         [Route("getTasks")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage getTasks(DTOFilterGetTasksRequest request)
         {
             using (var db = new KOCSAMADLSEntities(false))
@@ -177,7 +177,6 @@ namespace CRMWebApi.Controllers
 
         [Route("getAttacheablePersonel")]
         [HttpPost]
-        [KOCAuthorize]
         public HttpResponseMessage getPersonel(DTOTest request)
         {
             using (var db = new KOCSAMADLSEntities())
