@@ -327,6 +327,9 @@ namespace CRMWebApi.Controllers
                 if (kr_tq != null)
                 {
                     res.kr_ton = kr_tq.taskorderno;
+                    res.kr_creationdateyear = kr_tq.creationdate.Value.Year;
+                    res.kr_creationdatemonth = kr_tq.creationdate.Value.Month;
+                    res.kr_creationdateday = kr_tq.creationdate.Value.Day;
                     if (WebApiConfig.AdslTasks.ContainsKey(kr_tq.taskid))
                         res.kr_tqname = WebApiConfig.AdslTasks[kr_tq.taskid].taskname;
                     if (kr_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(kr_tq.attachedpersonelid.Value))
@@ -420,9 +423,15 @@ namespace CRMWebApi.Controllers
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
-                res.lasttaskcretiondateyear = lasttq.creationdate.Value.Year;
-                res.lasttaskcretiondatemonth = lasttq.creationdate.Value.Month;
-                res.lasttaskcretiondateday = lasttq.creationdate.Value.Day;
+                res.lasttaskcreationdateyear = lasttq.creationdate.Value.Year;
+                res.lasttaskcreationdatemonth = lasttq.creationdate.Value.Month;
+                res.lasttaskcreationdateday = lasttq.creationdate.Value.Day;
+                if (lasttq.consummationdate != null)
+                {
+                    res.lasttaskconsummationdateyear = lasttq.consummationdate.Value.Year;
+                    res.lasttaskconsummationdatemonth = lasttq.consummationdate.Value.Month;
+                    res.lasttaskconsummationdateday = lasttq.consummationdate.Value.Day;
+                }
                 return res;
             }).ToList();
         }

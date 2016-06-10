@@ -40,6 +40,9 @@ namespace CRMWebApi.DTOs.Adsl
         public int? kr_perid { get; set; }
         public string kr_pername { get; set; }
         public DateTime? kr_consummationdate { get; set; }
+        public int? kr_creationdateyear { get; set; }
+        public int? kr_creationdatemonth { get; set; }
+        public int? kr_creationdateday { get; set; }
         public int? kr_consummationdateyear { get; set; }
         public int? kr_consummationdatemonth { get; set; }
         public int? kr_consummationdateday { get; set; }
@@ -68,9 +71,12 @@ namespace CRMWebApi.DTOs.Adsl
         public string ktk_tqstate { get; set; }
         public string ktk_tqstatetype { get; set; }
         public string ktk_desc { get; set; }
-        public int lasttaskcretiondateyear { get; set; }
-        public int lasttaskcretiondatemonth { get; set; }
-        public int lasttaskcretiondateday { get; set; }
+        public int lasttaskcreationdateyear { get; set; }
+        public int lasttaskcreationdatemonth { get; set; }
+        public int lasttaskcreationdateday { get; set; }
+        public int? lasttaskconsummationdateyear { get; set; }
+        public int? lasttaskconsummationdatemonth { get; set; }
+        public int? lasttaskconsummationdateday { get; set; }
         public string lastTaskStatus { get; set; }
         public string lastTaskTypeName { get; set; }
         public string lastTaskName { get; set; }
