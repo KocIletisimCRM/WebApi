@@ -37,10 +37,10 @@ namespace CRMWebApi.Controllers
                 // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
 
-                if ((user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin)
+                if ((user != null && (user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin))
                     filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { op = 9, value = $"(attachablepersoneltype = (attachablepersoneltype & {user.userRole}))" });
 
-                if ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader)
+                if (user != null && ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader))
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 2, value = user.userId });
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
@@ -179,7 +179,6 @@ namespace CRMWebApi.Controllers
             var customerdocuments =tq.customerdocument!=null? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList():null;
             var customerproducts =tq.customerproduct!=null? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList():null;
             var stockmovements =tq.stockmovement!=null ?tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList():null;
-            //return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             using (var db = new KOCSAMADLSEntities())
             using (var transaction = db.Database.BeginTransaction())
                 try
@@ -278,10 +277,14 @@ namespace CRMWebApi.Controllers
                                 if (oot.tasktype == 2 && saletask != null)
                                 {
                                     var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
-                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid;//Kurulum bayisi idsi
+                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
-                                if (oot == null) continue;
+                                if (item == 115 && saletask != null)
+                                { // Oluşan task evrak tedarik taskıysa kurulum yapacak bayiye ata
+                                    var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
+                                }
                                 if (oot.tasktype == 3)
                                 {
                                     var pptq = dtq;
@@ -311,7 +314,6 @@ namespace CRMWebApi.Controllers
                                     personel_id = db.personel.First(p => p.personelid == satbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
                                 //Diğer otomatik personel atamaları ()
-                                if (oot == null) continue;
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
                                 if (oott != null && oott.Count > 0)
                                 {
@@ -390,7 +392,7 @@ namespace CRMWebApi.Controllers
                                     {
                                         attachedpersonelid = personel_id,
                                         appointmentdate = null,
-                                        attachmentdate = null,
+                                        attachmentdate = DateTime.Now,
                                         attachedobjectid = dtq.attachedobjectid,
                                         taskid = item,
                                         creationdate = DateTime.Now,
@@ -610,6 +612,7 @@ namespace CRMWebApi.Controllers
                     dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
+                    dtq.fault = tq.fault != null ? tq.fault : dtq.fault;
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
@@ -651,7 +654,7 @@ namespace CRMWebApi.Controllers
                 }
                 return saveTaskQueues(req);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json"); ;
             }
@@ -786,7 +789,7 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
-                var oldCust = db.customer.Where(c => c.tc == request.tc).ToList();
+                var oldCust = db.customer.Where(c => c.tc == request.tc && c.deleted == false).ToList();
                 if (oldCust.Count == 0)
                 {
                     var customer = new customer
@@ -931,6 +934,7 @@ namespace CRMWebApi.Controllers
             }
 
         }
+
         [Route("personelattachment")]
         [HttpPost]
         public HttpResponseMessage personelattachment(DTORequestAttachmentPersonel request)

@@ -44,28 +44,41 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage saveCustomerCard(DTOcustomer ct)
         {
             using (var db = new KOCSAMADLSEntities())
-            {
-                if (db.customer.Any(c => c.customerid == ct.customerid))
+            using (var transaction = db.Database.BeginTransaction())
+                try
                 {
-                    var item = db.customer.Where(c => c.customerid == ct.customerid).First();
-                    item.customername = ct.customername;
-                    item.gsm = ct.gsm;
-                    item.tc = ct.tc;
-                    item.ilKimlikNo = ct.ilKimlikNo;
-                    item.ilceKimlikNo = ct.ilceKimlikNo;
-                    item.bucakKimlikNo = ct.bucakKimlikNo;
-                    item.mahalleKimlikNo = ct.mahalleKimlikNo;
-                    item.phone = ct.phone;
-                    item.birthdate = ct.birthdate;
-                    item.lastupdated = DateTime.Now;
-                    item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId;
-                    item.email = ct.email;
-                    item.superonlineCustNo = ct.superonlineCustNo;
-                    item.description = ct.description;
+                    var oldCust = db.customer.Where(c => c.tc == ct.tc && c.deleted == false).ToList();
+                    if (oldCust.Count == 0 || oldCust.Where(r => r.customerid == ct.customerid).FirstOrDefault() != null)
+                    {
+                        if (db.customer.Any(c => c.customerid == ct.customerid))
+                        {
+                            var item = db.customer.Where(c => c.customerid == ct.customerid).First();
+                            item.customername = ct.customername;
+                            item.gsm = ct.gsm;
+                            item.tc = ct.tc;
+                            item.ilKimlikNo = ct.ilKimlikNo;
+                            item.ilceKimlikNo = ct.ilceKimlikNo;
+                            item.bucakKimlikNo = ct.bucakKimlikNo;
+                            item.mahalleKimlikNo = ct.mahalleKimlikNo;
+                            item.phone = ct.phone;
+                            item.birthdate = ct.birthdate;
+                            item.lastupdated = DateTime.Now;
+                            item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId;
+                            item.email = ct.email;
+                            item.superonlineCustNo = ct.superonlineCustNo;
+                            item.description = ct.description;
+                        }
+                        db.SaveChanges();
+                        transaction.Commit();
+                        return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
+                    }
+                    return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
                 }
-                db.SaveChanges();
-                return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
-            }
+                catch
+                {
+                    transaction.Rollback();
+                    return Request.CreateResponse(HttpStatusCode.ExpectationFailed, "error", "application/json");
+                }
         }
 
         [Route("insertCustomer")]

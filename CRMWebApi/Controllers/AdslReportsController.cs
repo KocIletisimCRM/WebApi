@@ -126,6 +126,17 @@ namespace CRMWebApi.Controllers
             return total;
         }
 
+        private static Dictionary<int, adsl_taskqueue> getTaskqueues ()
+        {
+            Dictionary<int, adsl_taskqueue> tqs = new Dictionary<int, adsl_taskqueue>();
+            WebApiConfig.AdslTaskQueues.Select(r =>
+            {
+                tqs[r.Key] = r.Value;
+                return true;
+            }).ToList();
+            return tqs;
+        }
+
         // bayi id ve tarih aralığı gönderildiğinde bayinin ortalama sl hesabı
         private static double getBayiSLOrt(int BayiId, DateTimeRange request)
         {
@@ -157,7 +168,7 @@ namespace CRMWebApi.Controllers
         {
             int sayCust = 0;
             double timeOrt = 0;
-            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.KocMaxTime).Select(k => k.Value.KocMaxTime).First(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.KocMaxTime).Select(k => k.Value.KocMaxTime).First(); // sl tablosunda koc için tanımlı maxSL'lerin en büyüğü (çarpan için)
             WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
@@ -338,6 +349,13 @@ namespace CRMWebApi.Controllers
                         res.kr_perid = krPersonelInfo.personelid;
                         res.kr_pername = krPersonelInfo.personelname;
                         //res.kr_perky = null;
+                    }
+                    var kr_previous = kr_tq.previoustaskorderid != null ? (WebApiConfig.AdslTaskQueues.ContainsKey(kr_tq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[kr_tq.previoustaskorderid.Value] : null) : null;
+                    if (kr_previous != null && kr_previous.appointmentdate != null)
+                    {
+                        res.kr_netflowdateyear = kr_previous.appointmentdate.Value.Year;
+                        res.kr_netflowdatemonth = kr_previous.appointmentdate.Value.Month;
+                        res.kr_netflowdateday = kr_previous.appointmentdate.Value.Day;
                     }
                     if (kr_tq.consummationdate != null)
                     {
@@ -683,6 +701,85 @@ namespace CRMWebApi.Controllers
                     }
                     return res;
                 }).ToList();
+        }
+
+        public static async Task<List<SKRate>> getRates(DateTimeRange request)
+        {
+            var skdate = new DateTimeRange { start = request.start.AddMonths(-1), end = request.end.AddMonths(2) };
+            List<SKReport> SKReport = await getSKReport(skdate).ConfigureAwait(false);
+            var taskqueues = getTaskqueues();
+            List<DateTime> allDates = new List<DateTime>();
+            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
+                allDates.Add(date);
+            return allDates.Where(r => r <= DateTime.Now.AddDays(1)).Select(r =>
+            {
+                SKRate res = new SKRate();
+                var dtr = new DateTimeRange { start = (r - r.TimeOfDay).AddDays(1 - r.Day), end = (r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1).AddMinutes(-1) };
+                var lastDate = r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1).Date;
+
+                res.k_SLOrt = getKocSLOrt(new DateTimeRange { start = dtr.start, end = r});
+                res.date = r;
+                res.year = r.Year;
+                res.month = r.Month;
+                res.day = r.Day;
+
+                int saySL = 0;
+                double timeSL = 0;
+                int totalDoc = 0;
+                double completedDoc = 0;
+                int totalProccess = 0;
+                double completedProcess = 0;
+
+                SKReport.Where(t =>
+                {
+                    var kr_tq = t.kr_ton != null ? WebApiConfig.AdslTaskQueues[t.kr_ton.Value] : null;
+                    var appointment = kr_tq != null ? t.kr_netflowdateday != null ? (DateTime?)new DateTime(t.kr_netflowdateyear.Value, t.kr_netflowdatemonth.Value, t.kr_netflowdateday.Value) : null : null;
+                    return kr_tq != null && appointment != null && (kr_tq.taskid == 38 || kr_tq.taskid == 60) && (r >= lastDate || (r < lastDate && kr_tq.creationdate <= r)) &&
+                                appointment >= dtr.start && appointment <= dtr.end;
+                }).Select(k =>
+                {
+                    totalProccess++;
+                    var ktk_tq = k.ktk_ton != null ? WebApiConfig.AdslTaskQueues[k.ktk_ton.Value] : null;
+                    if (ktk_tq != null && ktk_tq.consummationdate != null && ((r >= lastDate && ktk_tq.consummationdate < request.start.AddMonths(1).AddDays(7)) || (r < lastDate && ktk_tq.consummationdate <= r)) && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype == 1)
+                        completedProcess++; // ktk olumlu kapatılmışsa tamamlanan miktar bir artar.
+                    return res;
+                }).ToList();
+
+                // Churn evrak alma miktarları ve Evrak alma sl
+                SKReport.Where(t => 
+                { // 31, 33, 63, 64 taskidleri evrak alma gerektiren tasklar
+                    var s_tq = WebApiConfig.AdslTaskQueues[t.s_ton];
+                    return (r.Date >= lastDate || s_tq.creationdate <= r) && s_tq.appointmentdate != null && s_tq.appointmentdate.Value >= dtr.start && s_tq.appointmentdate.Value <= dtr.end && 
+                                (s_tq.taskid == 31 || s_tq.taskid == 63 || s_tq.taskid == 33 || s_tq.taskid == 64);
+                }).Select(k =>
+                {  // Satış taskı evrak alınması gereken task ise
+                    var s_tq = WebApiConfig.AdslTaskQueues[k.s_ton];
+                    totalDoc++;
+                    if (s_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(s_tq.status.Value) && WebApiConfig.AdslStatus[s_tq.status.Value].statetype == 1)
+                    {
+                        var tq = taskqueues.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
+                        // Churn evrağı emtor sisteme yükleme ara taskı olumlu kapatılmış mı ?
+                        if (tq != null)
+                        {
+                            completedDoc++;
+                            if (tq.taskid == 90)
+                            {
+                                saySL++;
+                                timeSL += (tq.consummationdate - s_tq.appointmentdate).Value.TotalHours;
+                            }
+                        }
+                    }
+                    return res;
+                }).ToList();
+
+                res.k_completed = (int?)completedProcess;
+                res.k_total = totalProccess;
+                res.e_SuccesRate = completedDoc != 0 ? (double?)Math.Round(100 * (completedDoc / totalDoc), 2) : null;
+                res.k_SuccesRate = completedProcess != 0 ? (double?)Math.Round(100 * (completedProcess / totalProccess), 2) : null;
+                res.e_SLOrt = saySL != 0 ? (double?)Math.Round(timeSL / saySL, 2) : null;
+
+                return res;
+            }).ToList();
         }
 
         [Route("SKR")]

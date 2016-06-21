@@ -43,6 +43,9 @@ namespace CRMWebApi.DTOs.Adsl
         public int? kr_creationdateyear { get; set; }
         public int? kr_creationdatemonth { get; set; }
         public int? kr_creationdateday { get; set; }
+        public int? kr_netflowdateyear { get; set; }
+        public int? kr_netflowdatemonth { get; set; }
+        public int? kr_netflowdateday { get; set; }
         public int? kr_consummationdateyear { get; set; }
         public int? kr_consummationdatemonth { get; set; }
         public int? kr_consummationdateday { get; set; }

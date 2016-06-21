@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="GetWorkflowIdListByUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:GetWorkflowListByUserRequest" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetWorkflowListByUserRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TicketingTypeCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="StatusCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SegmentCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="SearchStartDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="SearchEndDate" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetWorkflowIdListByUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetWorkflowIdListByUserResult" type="tns:ArrayOfGetWorkflowIdByUserResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGetWorkflowIdByUserResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GetWorkflowIdByUserResponse" nillable="true" type="tns:GetWorkflowIdByUserResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GetWorkflowIdByUserResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="WorkflowId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="WorkflowStartTime" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AuthHeader" type="tns:AuthHeader" />
+      <s:complexType name="AuthHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="GetWorkflowDetailByUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="workflowId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetWorkflowDetailByUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetWorkflowDetailByUserResult" type="tns:ArrayOfGetWorkflowDetailByUserResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfGetWorkflowDetailByUserResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GetWorkflowDetailByUserResponse" nillable="true" type="tns:GetWorkflowDetailByUserResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GetWorkflowDetailByUserResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="WorkflowId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CustomerId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SegmentCode" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TicketingTypeCode" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TicketingTypeDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="WorkflowStatusCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="WorkflowStatusDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="WorkflowStartTime" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerAddressCity" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerAddressDistrict" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerAddress" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerEmail" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerPhone" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="XdslType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="XdslServiceType" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ArrayOfGetWorkflowDetailByUserResponse" nillable="true" type="tns:ArrayOfGetWorkflowDetailByUserResponse" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetWorkflowIdListByUserSoapIn">
+    <wsdl:part name="parameters" element="tns:GetWorkflowIdListByUser" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowIdListByUserSoapOut">
+    <wsdl:part name="parameters" element="tns:GetWorkflowIdListByUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowIdListByUserAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserSoapIn">
+    <wsdl:part name="parameters" element="tns:GetWorkflowDetailByUser" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserSoapOut">
+    <wsdl:part name="parameters" element="tns:GetWorkflowDetailByUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserAuthHeader">
+    <wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserHttpGetIn">
+    <wsdl:part name="workflowId" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGetWorkflowDetailByUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserHttpPostIn">
+    <wsdl:part name="workflowId" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetWorkflowDetailByUserHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfGetWorkflowDetailByUserResponse" />
+  </wsdl:message>
+  <wsdl:portType name="NetflowTellcomWSSoap">
+    <wsdl:operation name="GetWorkflowIdListByUser">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Kullanıcı, pozisyon, organizasyon bilgisine göre akış id listesini döner. Authentication gereklidir.</wsdl:documentation>
+      <wsdl:input message="tns:GetWorkflowIdListByUserSoapIn" />
+      <wsdl:output message="tns:GetWorkflowIdListByUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Akışın detayı döner. Authentication gereklidir.</wsdl:documentation>
+      <wsdl:input message="tns:GetWorkflowDetailByUserSoapIn" />
+      <wsdl:output message="tns:GetWorkflowDetailByUserSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="NetflowTellcomWSHttpGet">
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Akışın detayı döner. Authentication gereklidir.</wsdl:documentation>
+      <wsdl:input message="tns:GetWorkflowDetailByUserHttpGetIn" />
+      <wsdl:output message="tns:GetWorkflowDetailByUserHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="NetflowTellcomWSHttpPost">
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Akışın detayı döner. Authentication gereklidir.</wsdl:documentation>
+      <wsdl:input message="tns:GetWorkflowDetailByUserHttpPostIn" />
+      <wsdl:output message="tns:GetWorkflowDetailByUserHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NetflowTellcomWSSoap" type="tns:NetflowTellcomWSSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetWorkflowIdListByUser">
+      <soap:operation soapAction="http://tempuri.org/GetWorkflowIdListByUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetWorkflowIdListByUserAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <soap:operation soapAction="http://tempuri.org/GetWorkflowDetailByUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetWorkflowDetailByUserAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NetflowTellcomWSSoap12" type="tns:NetflowTellcomWSSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetWorkflowIdListByUser">
+      <soap12:operation soapAction="http://tempuri.org/GetWorkflowIdListByUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetWorkflowIdListByUserAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <soap12:operation soapAction="http://tempuri.org/GetWorkflowDetailByUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetWorkflowDetailByUserAuthHeader" part="AuthHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NetflowTellcomWSHttpGet" type="tns:NetflowTellcomWSHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <http:operation location="/GetWorkflowDetailByUser" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="NetflowTellcomWSHttpPost" type="tns:NetflowTellcomWSHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetWorkflowDetailByUser">
+      <http:operation location="/GetWorkflowDetailByUser" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="NetflowTellcomWS">
+    <wsdl:port name="NetflowTellcomWSSoap" binding="tns:NetflowTellcomWSSoap">
+      <soap:address location="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NetflowTellcomWSSoap12" binding="tns:NetflowTellcomWSSoap12">
+      <soap12:address location="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NetflowTellcomWSHttpGet" binding="tns:NetflowTellcomWSHttpGet">
+      <http:address location="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" />
+    </wsdl:port>
+    <wsdl:port name="NetflowTellcomWSHttpPost" binding="tns:NetflowTellcomWSHttpPost">
+      <http:address location="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

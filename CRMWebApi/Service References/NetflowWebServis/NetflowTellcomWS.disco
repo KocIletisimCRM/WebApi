@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<discovery xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/disco/">
+  <contractRef ref="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx?wsdl" docRef="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" xmlns="http://schemas.xmlsoap.org/disco/scl/" />
+  <soap address="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" xmlns:q1="http://tempuri.org/" binding="q1:NetflowTellcomWSSoap" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+  <soap address="http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx" xmlns:q2="http://tempuri.org/" binding="q2:NetflowTellcomWSSoap12" xmlns="http://schemas.xmlsoap.org/disco/soap/" />
+</discovery>

@@ -73,6 +73,7 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
       <Private>True</Private>
@@ -120,6 +121,25 @@
       <LastGenOutput>CRMAdslDataModel.cs</LastGenOutput>
     </Content>
     <Content Include="Global.asax" />
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowDetailByUserResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowDetailByUserResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowIdByUserResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowIdListByUserResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <None Include="Service References\NetflowWebServis\NetflowTellcomWS.disco" />
+    <None Include="Service References\NetflowWebServis\configuration91.svcinfo" />
+    <None Include="Service References\NetflowWebServis\configuration.svcinfo" />
+    <None Include="Service References\NetflowWebServis\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -164,6 +184,7 @@
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />
     <Compile Include="Controllers\OData\PersonelsReportsController.cs" />
     <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
+    <Compile Include="Controllers\OData\SKRatesController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
     <Compile Include="Controllers\OData\SKStandbyTaskReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
@@ -246,6 +267,7 @@
     <Compile Include="DTOs\Adsl\PersonelsReport.cs" />
     <Compile Include="DTOs\Adsl\SKPayment.cs" />
     <Compile Include="DTOs\Adsl\SKPaymentReport.cs" />
+    <Compile Include="DTOs\Adsl\SKRate.cs" />
     <Compile Include="DTOs\Adsl\SKReport.cs" />
     <Compile Include="DTOs\Adsl\SKStandbyTaskReport.cs" />
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
@@ -567,6 +589,11 @@
       <DependentUpon>CRMDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service References\NetflowWebServis\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -603,6 +630,7 @@
       <DependentUpon>CRMAdslDataModel.edmx</DependentUpon>
     </Content>
     <None Include="Properties\PublishProfiles\CrmApi.pubxml" />
+    <None Include="Service References\NetflowWebServis\NetflowTellcomWS.wsdl" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -615,6 +643,12 @@
       <Project>{a0a08875-af07-4752-82ff-4bd053e9b4a2}</Project>
       <Name>Teknar_Proxy_Lib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\NetflowWebServis\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
