@@ -271,6 +271,12 @@ namespace CRMWebApi.Controllers
                                 if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;  
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
+                                // Bayi Şatışlarının Randevu tarihi Emptor Sisteme Giriş Yalın/Churn (35/47) tasklarının kapanma tarihi olacak (Yasin Bey'in isteği)
+                                if (saletask != null && (dtq.taskid == 35 || dtq.taskid == 47))
+                                {
+                                    var sTask = db.taskqueue.First(t => t.taskorderno == saletask);
+                                    sTask.appointmentdate = dtq.consummationdate != null ? dtq.consummationdate : DateTime.Now;
+                                }
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
                                 if (oot == null) continue;
