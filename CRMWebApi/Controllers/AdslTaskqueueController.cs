@@ -318,7 +318,7 @@ namespace CRMWebApi.Controllers
                                 if (oott != null && oott.Count > 0)
                                 {
                                     var turAtama = oott.FirstOrDefault(t=> t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
-                                    var task = oott.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
+                                    var task = db.atama.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
                                     //Task atama kuralları işlesin.
                                     if (task != null)
                                         personel_id = task.appointedpersonel;
