@@ -335,7 +335,7 @@ namespace CRMWebApi.Controllers
         { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi 
             if (r.deleted == true)
             {
-                // *** yeni stok hareketi olacağına deleted ile karar vereceğiz (true'ysa seriyi satınalma -> depoya -> müşteriye aktar)
+                // *** yeni stok hareketi olacağına deleted ile karar vereceğiz (true'ysa seriyi satınalma -> depoya -> müşteriye -> personele aktar)
                 var sm = new DTOstockmovement();
                 sm.serialno = r.serialno;
                 sm.amount = 1;
@@ -365,6 +365,29 @@ namespace CRMWebApi.Controllers
                 sm2.fromobject = r.fromobject;
                 sm2.stockcardid = 1117;
                 movement(sm2);
+            }
+            else if (r.movementid == -1)
+            {
+                // *** yeni stok hareketi olacağına movementid ile karar vereceğiz (-1'se seriyi satınalma -> depoya -> müşteriye aktar)
+                var sm = new DTOstockmovement();
+                sm.serialno = r.serialno;
+                sm.amount = 1;
+                sm.toobjecttype = 2; // depocu
+                sm.toobject = 1007; // depocu
+                sm.fromobjecttype = 33554433;
+                sm.fromobject = 33554433;
+                sm.stockcardid = 1117;
+                movement(sm);
+
+                var sm1 = new DTOstockmovement();
+                sm1.serialno = r.serialno;
+                sm1.amount = 1;
+                sm1.toobjecttype = 16777217; // müşteri
+                sm1.toobject = r.toobject; // müşteri
+                sm1.fromobjecttype = 2;
+                sm1.fromobject = 1007;
+                sm1.stockcardid = 1117;
+                movement(sm1);
             }
             else
                 movement(r);

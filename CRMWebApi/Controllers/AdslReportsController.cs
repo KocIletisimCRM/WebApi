@@ -127,7 +127,7 @@ namespace CRMWebApi.Controllers
         }
 
         private static Dictionary<int, adsl_taskqueue> getTaskqueues ()
-        {
+        { // Başarı oranları hesaplanırken bütün tasklar içerisinde arama yapıldığı anda adsltaskqueues değişince hata alındığı için yedek alınarak işlem yapıldı
             Dictionary<int, adsl_taskqueue> tqs = new Dictionary<int, adsl_taskqueue>();
             WebApiConfig.AdslTaskQueues.Select(r =>
             {

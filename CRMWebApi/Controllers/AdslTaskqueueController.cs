@@ -1091,7 +1091,6 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, saleTask(taskorderno), "application/json");
         }
 
-
         private List<adsl_stockmovement> getStockmovements(KOCSAMADLSEntities db, int taskorderno, int taskid, int stateid)
         {
             var tsm = db.taskstatematches.FirstOrDefault(t => t.taskid == taskid && t.stateid == stateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty));
