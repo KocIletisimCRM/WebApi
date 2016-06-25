@@ -827,7 +827,7 @@ namespace CRMWebApi.Controllers
                 res.email = r.Value.email;
                 res.il = r.Value.ilKimlikNo.HasValue ? WebApiConfig.AdslIls.ContainsKey(r.Value.ilKimlikNo.Value) ? WebApiConfig.AdslIls[r.Value.ilKimlikNo.Value].ad : "İl Girilmemiş" : "İl Girilmemiş";
                 res.ilce = r.Value.ilceKimlikNo.HasValue ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilceKimlikNo.Value) ? WebApiConfig.AdslIlces[r.Value.ilceKimlikNo.Value].ad : "İlce Girilmemiş" : "İlce Girilmemiş";
-                res.worksay = bekleyenTaskq.Where(t => t.personelid == r.Value.personelid && WebApiConfig.AdslTaskTypes.ContainsKey(t.taskid) && WebApiConfig.AdslTaskTypes[t.taskid].TaskTypeId != 0).ToList().Count;
+                res.worksay = bekleyenTaskq.Where(t => t.personelid == r.Value.personelid && WebApiConfig.AdslTasks.ContainsKey(t.taskid) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[t.taskid].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[t.taskid].tasktype].TaskTypeId != 0).ToList().Count;
                 using (var db = new KOCSAMADLSEntities(false))
                     res.modemsay = db.getSerialsOnPersonelAdsl(r.Value.personelid, 1117).ToList().Count;
                 return res;
