@@ -15,7 +15,6 @@ namespace CRMWebApi.Controllers
     public class AdslPersonelController : ApiController
     {
         #region Personel Tanımlama Sayfası
-
         [Route("getPersonels")]
         [HttpPost]
         public HttpResponseMessage getPersonels(DTOFilterGetPersonelRequest request)
@@ -86,7 +85,6 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
         }
-
 
         [Route("insertPersonel")]
         [HttpPost]

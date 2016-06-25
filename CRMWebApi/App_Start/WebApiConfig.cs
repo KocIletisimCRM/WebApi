@@ -1532,6 +1532,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.PersonelsReport>("PersonelsReports");
             builder.EntitySet<DTOs.Adsl.ISSSuccessRate>("ISSSuccessRates");
             builder.EntitySet<DTOs.Adsl.SKRate>("SKRates");
+            builder.EntitySet<DTOs.Adsl.InfoBayiReport>("InfoBayiReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

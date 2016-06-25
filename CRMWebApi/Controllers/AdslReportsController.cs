@@ -126,17 +126,6 @@ namespace CRMWebApi.Controllers
             return total;
         }
 
-        private static Dictionary<int, adsl_taskqueue> getTaskqueues ()
-        { // Başarı oranları hesaplanırken bütün tasklar içerisinde arama yapıldığı anda adsltaskqueues değişince hata alındığı için yedek alınarak işlem yapıldı
-            Dictionary<int, adsl_taskqueue> tqs = new Dictionary<int, adsl_taskqueue>();
-            WebApiConfig.AdslTaskQueues.Select(r =>
-            {
-                tqs[r.Key] = r.Value;
-                return true;
-            }).ToList();
-            return tqs;
-        }
-
         // bayi id ve tarih aralığı gönderildiğinde bayinin ortalama sl hesabı
         private static double getBayiSLOrt(int BayiId, DateTimeRange request)
         {
@@ -164,11 +153,12 @@ namespace CRMWebApi.Controllers
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
         
+        // Koç sl total
         private static double getKocSLOrt(DateTimeRange request)
         {
             int sayCust = 0;
             double timeOrt = 0;
-            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.KocMaxTime).Select(k => k.Value.KocMaxTime).First(); // sl tablosunda koc için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            var maxSL = 48; // koç sl 48 üzerinden değerlendirilecek
             WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
@@ -184,7 +174,7 @@ namespace CRMWebApi.Controllers
                     {
                         var kocSl = WebApiConfig.AdslSl[ksl.Key];
                         var slname = kocSl.SLName;
-                        factor = (maxSL != null && kocSl.KocMaxTime != null) ? (maxSL.Value / kocSl.KocMaxTime.Value) : 1;
+                        factor = kocSl.KocMaxTime != null ? (maxSL / kocSl.KocMaxTime.Value) : 1;
                     }
                     r.KocSLStart = ksl.Value.KStart;
                     r.KocSLEnd = ksl.Value.KEnd;
@@ -193,6 +183,45 @@ namespace CRMWebApi.Controllers
                 })
             ).ToList();
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
+        }
+
+        // Koç'un kurulum ve kurumsal kurulum sl'i 48 saat üzerinden
+        private static double getKocKurulumSLOrt(DateTimeRange request)
+        {
+            int sayCust = 0;
+            double timeOrt = 0;
+            var maxSL = 48; // koç sl 48 üzerinden değerlendirilecek
+            WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+            }).SelectMany(
+                p => p.SLs.Where(s => s.Value.KEnd.HasValue && s.Value.KStart.HasValue && WebApiConfig.AdslSl.ContainsKey(s.Key) && (WebApiConfig.AdslSl[s.Key].SLID == 1 || WebApiConfig.AdslSl[s.Key].SLID == 4)).Select(ksl =>
+                { // SLID 1/4 Kurulum/Kurumsal kurulum sl
+                    sayCust++;
+                    var r = new SLKocReport();
+                    double factor = 1; // koc max sl süreleri eşit olmadığından ortalama alabilmek için (Tüm SL'lerin En büyüğü) (kocMaxSL / buradaki SL) çarpan'ı sayısı kullanıldı (Hüseyin KOZ)
+                    var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                    var slname = kocSl.SLName;
+                    factor = kocSl.KocMaxTime != null ? (maxSL / kocSl.KocMaxTime.Value) : 1;
+                    r.KocSLStart = ksl.Value.KStart;
+                    r.KocSLEnd = ksl.Value.KEnd;
+                    timeOrt += ((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * factor;
+                    return true;
+                })
+            ).ToList();
+            return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
+        }
+
+        private static Dictionary<int, adsl_taskqueue> getTaskqueues(DateTime start)
+        { // Başarı oranları hesaplanırken bütün tasklar içerisinde arama yapıldığı anda adsltaskqueues değişince hata alındığı için yedek alınarak işlem yapıldı
+            Dictionary<int, adsl_taskqueue> tqs = new Dictionary<int, adsl_taskqueue>();
+            WebApiConfig.AdslTaskQueues.Where(r => r.Value.creationdate >= start).Select(r =>
+            {
+                tqs[r.Key] = r.Value;
+                return true;
+            }).ToList();
+            return tqs;
         }
 
         // Hakediş Raporu
@@ -602,6 +631,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
+        // Evrak başarı oranı raporu
         public static async Task<List<ISSSuccessRate>> getISSSuccessRateReport()
         {
             /* taskid = 47 => Emptor Sisteme Giriş Churn
@@ -703,11 +733,12 @@ namespace CRMWebApi.Controllers
                 }).ToList();
         }
 
+        // Başarı oranları ve sl süreleri raporu
         public static async Task<List<SKRate>> getRates(DateTimeRange request)
         {
             var skdate = new DateTimeRange { start = request.start.AddMonths(-1), end = request.end.AddMonths(2) };
+            var tqs = getTaskqueues(request.start.AddMonths(-1));
             List<SKReport> SKReport = await getSKReport(skdate).ConfigureAwait(false);
-            var taskqueues = getTaskqueues();
             List<DateTime> allDates = new List<DateTime>();
             for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
                 allDates.Add(date);
@@ -717,7 +748,7 @@ namespace CRMWebApi.Controllers
                 var dtr = new DateTimeRange { start = (r - r.TimeOfDay).AddDays(1 - r.Day), end = (r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1).AddMinutes(-1) };
                 var lastDate = r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1).Date;
 
-                res.k_SLOrt = getKocSLOrt(new DateTimeRange { start = dtr.start, end = r});
+                res.k_SLOrt = getKocKurulumSLOrt(new DateTimeRange { start = dtr.start, end = r});
                 res.date = r;
                 res.year = r.Year;
                 res.month = r.Month;
@@ -757,7 +788,7 @@ namespace CRMWebApi.Controllers
                     totalDoc++;
                     if (s_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(s_tq.status.Value) && WebApiConfig.AdslStatus[s_tq.status.Value].statetype == 1)
                     {
-                        var tq = taskqueues.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
+                        var tq = tqs.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
                         // Churn evrağı emtor sisteme yükleme ara taskı olumlu kapatılmış mı ?
                         if (tq != null)
                         {
@@ -778,6 +809,27 @@ namespace CRMWebApi.Controllers
                 res.k_SuccesRate = completedProcess != 0 ? (double?)Math.Round(100 * (completedProcess / totalProccess), 2) : null;
                 res.e_SLOrt = saySL != 0 ? (double?)Math.Round(timeSL / saySL, 2) : null;
 
+                return res;
+            }).ToList();
+        }
+
+        // Bayi bilgileri üzerindeki modem miktarları ve üzerlerindeki iş miktarları
+        public static async Task<List<InfoBayiReport>> getInfoBayi()
+        {
+            var bekleyenTaskq = await getSKStandbyTaskReport();
+            return WebApiConfig.AdslPersonels.Where(r => {
+                var mail = r.Value.email != null ? r.Value.email.Contains("@") ? r.Value.email.Split('@')[1] : null : null;
+                return mail != "kociletisim.com.tr";
+            }).Select(r => {
+                InfoBayiReport res = new InfoBayiReport();
+                res.personelid = r.Value.personelid;
+                res.personelname = r.Value.personelname;
+                res.email = r.Value.email;
+                res.il = r.Value.ilKimlikNo.HasValue ? WebApiConfig.AdslIls.ContainsKey(r.Value.ilKimlikNo.Value) ? WebApiConfig.AdslIls[r.Value.ilKimlikNo.Value].ad : "İl Girilmemiş" : "İl Girilmemiş";
+                res.ilce = r.Value.ilceKimlikNo.HasValue ? WebApiConfig.AdslIlces.ContainsKey(r.Value.ilceKimlikNo.Value) ? WebApiConfig.AdslIlces[r.Value.ilceKimlikNo.Value].ad : "İlce Girilmemiş" : "İlce Girilmemiş";
+                res.worksay = bekleyenTaskq.Where(t => t.personelid == r.Value.personelid && WebApiConfig.AdslTaskTypes.ContainsKey(t.taskid) && WebApiConfig.AdslTaskTypes[t.taskid].TaskTypeId != 0).ToList().Count;
+                using (var db = new KOCSAMADLSEntities(false))
+                    res.modemsay = db.getSerialsOnPersonelAdsl(r.Value.personelid, 1117).ToList().Count;
                 return res;
             }).ToList();
         }
