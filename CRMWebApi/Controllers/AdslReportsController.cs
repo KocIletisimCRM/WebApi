@@ -819,7 +819,7 @@ namespace CRMWebApi.Controllers
             var bekleyenTaskq = await getSKStandbyTaskReport();
             return WebApiConfig.AdslPersonels.Where(r => {
                 var mail = r.Value.email != null ? r.Value.email.Contains("@") ? r.Value.email.Split('@')[1] : null : null;
-                return mail != "kociletisim.com.tr";
+                return mail != "kociletisim.com.tr" && r.Value.deleted == false;
             }).Select(r => {
                 InfoBayiReport res = new InfoBayiReport();
                 res.personelid = r.Value.personelid;
