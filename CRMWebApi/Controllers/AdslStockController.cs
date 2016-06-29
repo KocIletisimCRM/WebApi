@@ -10,6 +10,7 @@ using System.Data.Entity;
 using System.Net.Http;
 using System.Web.Http;
 using CRMWebApi.KOCAuthorization;
+using System.Collections;
 
 namespace CRMWebApi.Controllers
 {
@@ -506,6 +507,33 @@ namespace CRMWebApi.Controllers
             {
                 var ret = db.getSerialsOnPersonelAdsl(request.fromobject, request.stockcardid).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, ret, "application/json");
+            }
+        }
+
+        [Route("getStocksOnPersonel")]
+        [HttpPost]
+        public HttpResponseMessage getStocksOnPersonel(DTOGetPersonelStock request)
+        { // Personellerin Üzerlerindeki serileri görebilmeleri için oluşturuldu (Stok-seri kontrolü)
+            ArrayList list = new ArrayList();
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            var personel = request.personelid != null ? request.personelid.Value : user.userId;
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var type = db.stockcard.ToList();
+                for (int i = 0; i < type.Count; i++)
+                {
+                    var serials = db.getSerialsOnPersonelAdsl(personel, type[i].stockid).ToList();
+                    for (int j = 0; j < serials.Count; j++)
+                    {
+                        DTOStockReturn res = new DTOStockReturn();
+                        res.stockid = type[i].stockid;
+                        res.stockname = type[i].productname;
+                        res.personelid = personel;
+                        res.serials = serials[j];
+                        list.Add(res);
+                    }
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, list, "application/json");
             }
         }
     }

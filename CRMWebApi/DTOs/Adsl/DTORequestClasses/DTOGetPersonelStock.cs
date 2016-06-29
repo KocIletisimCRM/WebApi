@@ -2,6 +2,6 @@
 {
     public class DTOGetPersonelStock
     {
-      public  int personelid { get; set; }
+      public int? personelid { get; set; }
     }
 }

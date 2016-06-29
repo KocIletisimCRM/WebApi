@@ -252,6 +252,7 @@
     <Compile Include="DTOs\Adsl\DTOSL.cs" />
     <Compile Include="DTOs\Adsl\DTOstockcard.cs" />
     <Compile Include="DTOs\Adsl\DTOstockmovement.cs" />
+    <Compile Include="DTOs\Adsl\DTOStockReturn.cs" />
     <Compile Include="DTOs\Adsl\DTOstockstatus.cs" />
     <Compile Include="DTOs\Adsl\DTOtask.cs" />
     <Compile Include="DTOs\Adsl\DTOtaskqueue.cs" />
