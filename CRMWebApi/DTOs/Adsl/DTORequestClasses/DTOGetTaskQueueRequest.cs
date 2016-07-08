@@ -326,7 +326,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         }
         public bool hasCSBFilter()
         {
-            return csbRequest.hasCustomerFilter() || csbRequest.isIlFilter() || csbRequest.hasIlceFilter() || csbRequest.hasIssFilter() || csbRequest.hasCustomerstatusFilter();
+            return csbRequest.hasSuperonlineFilter() || csbRequest.hasCustomerFilter() || csbRequest.isIlFilter() || csbRequest.hasIlceFilter() || csbRequest.hasIssFilter() || csbRequest.hasCustomerstatusFilter();
         }
         public string attachmentDate { get; set; }
         public string appointmentDate { get; set; }
