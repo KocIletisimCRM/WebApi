@@ -238,6 +238,7 @@
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetSiteFilter.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetStockMovementRequest.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTaskQueueRequest.cs" />
+    <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTaskqueuesForBayi.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTSMFilter.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTOGetTSPFilter.cs" />
     <Compile Include="DTOs\Adsl\DTORequestClasses\DTORequestCloseTaskqueue.cs" />

@@ -1,4 +1,6 @@
-﻿namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
+﻿using System;
+
+namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
 {
     public class DTOGetTaskQueueRequest : DTORequestPagination, ITaskRequest, ICSBRequest, IPersonelRequest, IAssistantPersonelRequest, IUpdatedByRequest
     {
@@ -186,7 +188,17 @@
                 csbRequest.customer = value;
             }
         }
-
+        public DTOFieldFilter superonline
+        {
+            get
+            {
+                return csbRequest.superonline;
+            }
+            set
+            {
+                csbRequest.superonline = value;
+            }
+        }
         public DTOFieldFilter iss
         {
             get
@@ -225,7 +237,10 @@
         {
             return csbRequest.hasCustomerFilter();
         }
-
+        public bool hasSuperonlineFilter()
+        {
+            return csbRequest.hasSuperonlineFilter();
+        }
         public bool hasIssFilter() 
         {
             return csbRequest.hasIssFilter();
@@ -306,9 +321,6 @@
         }
         #endregion
 
-
-
-
         public bool hasTaskFilter() {
             return taskRequest.hasTaskFilter() || taskRequest.hasTypeFilter() || taskRequest.hasTaskstateFilter();
         }
@@ -320,6 +332,7 @@
         public string appointmentDate { get; set; }
         public string consummationDate { get; set; }
         public int? taskOrderNo { get; set; }
+
         public DTOFilter getFilter()
         {
             var filter = new DTOFilter("taskqueue", "taskorderno");
@@ -355,10 +368,5 @@
             }
             return filter;
         }
-
-
-
-
-      
     }
 }

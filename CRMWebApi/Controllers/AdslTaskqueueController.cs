@@ -34,7 +34,6 @@ namespace CRMWebApi.Controllers
                 var filter = request.getFilter();
                 filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 var user = KOCAuthorizeAttribute.getCurrentUser();
-                // var user = new KOCAuthorizedUser { userId = 21204, userRole = 67108896 };
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
 
                 if ((user != null && (user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin))
@@ -627,7 +626,7 @@ namespace CRMWebApi.Controllers
                 catch (Exception e)
                 {
                     transaction.Rollback();
-                    return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json");
+                    return Request.CreateResponse(HttpStatusCode.NotModified, "error", "application/json");
                 }
         }
 
@@ -644,7 +643,7 @@ namespace CRMWebApi.Controllers
                 var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
                 var il = request.Form["il"].ToString();
                 var ilce = request.Form["ilce"].ToString();
-                string subPath = "C:\\CRMADSLWEB\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
+                string subPath = "C:\\Files\\" + il + '\\' + ilce + '\\' + request.Form["customer"] + "\\";
                 System.IO.Directory.CreateDirectory(subPath);
                 //var filePath = subPath + ((request.Files["file_data"])).FileName;
                 for (int i = 0; i < request.Files.Count; i++)
@@ -662,7 +661,7 @@ namespace CRMWebApi.Controllers
             }
             catch (Exception e)
             {
-                return Request.CreateResponse(HttpStatusCode.OK, "error", "application/json"); ;
+                return Request.CreateResponse(HttpStatusCode.NotModified, "error", "application/json"); ;
             }
         }
 
@@ -1089,6 +1088,69 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage getSaleTask(int taskorderno)
         {
             return Request.CreateResponse(HttpStatusCode.OK, saleTask(taskorderno), "application/json");
+        }
+
+        [Route("getTaskqueuesForBayi")]
+        [HttpPost]
+        public HttpResponseMessage getTaskqueuesForBayi(DTOGetTaskqueuesForBayi request)
+        {
+            using (var db = new KOCSAMADLSEntities(false))
+            {
+                var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
+                var user = KOCAuthorizeAttribute.getCurrentUser();
+
+                string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
+                var countSQL = filter.getCountSQL();
+
+                var res = db.taskqueue.SqlQuery(querySQL).ToList();
+                var rowCount = db.Database.SqlQuery<int>(countSQL).First();
+                var taskIds = res.Select(r => r.taskid).Distinct().ToList();
+                var tasks = db.task.Where(t => taskIds.Contains(t.taskid)).ToList();
+
+                var tasktypeds = res.Select(r => r.task.tasktype).Distinct().ToList();
+                var tasktypes = db.tasktypes.Where(tt => tasktypeds.Contains(tt.TaskTypeId)).ToList();
+
+                var personelIds = res.Select(r => r.attachedpersonelid).Distinct().ToList();
+                var personels = db.personel.Where(p => personelIds.Contains(p.personelid)).ToList();
+
+                var customerIds = res.Select(c => c.attachedobjectid).Distinct().ToList();
+                var customers = db.customer.Where(c => customerIds.Contains(c.customerid)).ToList();
+
+                var ilIds = res.Select(s => s.attachedcustomer.ilKimlikNo).Distinct().ToList();
+                var iller = db.il.Where(i => ilIds.Contains(i.kimlikNo)).ToList();
+
+                var ilceIds = res.Select(s => s.attachedcustomer.ilceKimlikNo).Distinct().ToList();
+                var ilceler = db.ilce.Where(i => ilceIds.Contains(i.kimlikNo)).ToList();
+
+                var taskstateIds = res.Select(tsp => tsp.status).Distinct().ToList();
+                var taskstates = db.taskstatepool.Where(tsp => taskstateIds.Contains(tsp.taskstateid)).ToList();
+
+                var taskorderIds = res.Select(r => r.taskorderno).ToList();
+
+                res.ForEach(r =>
+                {
+                    r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
+                    r.task.tasktypes = tasktypes.Where(t => t.TaskTypeId == r.task.tasktype).FirstOrDefault();
+                    r.attachedpersonel = new adsl_personel();
+                    r.attachedpersonel.personelname = personels.Where(p => p.personelid == r.attachedpersonelid).Select(t => t.personelname).FirstOrDefault();
+                    r.attachedcustomer = customers.Where(c => c.customerid == r.attachedobjectid).FirstOrDefault();
+                    r.attachedcustomer.il = iller.Where(i => i.kimlikNo == r.attachedcustomer.ilKimlikNo).FirstOrDefault();
+                    r.attachedcustomer.ilce = ilceler.Where(i => i.kimlikNo == r.attachedcustomer.ilceKimlikNo).FirstOrDefault();
+                    r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
+                });
+                DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo
+                {
+                    pageCount = (int)Math.Ceiling(rowCount * 1.0 / request.rowsPerPage),
+                    pageNo = request.pageNo,
+                    rowsPerPage = request.rowsPerPage,
+                    totalRowCount = rowCount
+                };
+                return Request.CreateResponse(HttpStatusCode.OK,
+                    new DTOPagedResponse(DTOResponseError.NoError(), res.Where(r => r.deleted == false).Select(r => r.toDTO()).ToList(), paginginfo),
+                    "application/json"
+                );
+            }
         }
 
         private List<adsl_stockmovement> getStockmovements(KOCSAMADLSEntities db, int taskorderno, int taskid, int stateid)

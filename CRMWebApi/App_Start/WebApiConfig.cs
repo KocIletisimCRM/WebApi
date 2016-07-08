@@ -1235,10 +1235,10 @@ namespace CRMWebApi
                                     }
                                 }
                                 if (newCust)
-                                    customerInfo(customer, data, 33, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                    customerInfo(customer, data, 64, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                             }
                             else
-                                customerInfo(null, data, 33, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                customerInfo(null, data, 64, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                         }
                     }
                 }

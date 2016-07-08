@@ -1,4 +1,5 @@
-﻿using CRMWebApi.Models.Adsl;
+﻿using System;
+using CRMWebApi.Models.Adsl;
 
 namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
 {
@@ -12,6 +13,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         DTOFieldFilter customer { get; set; }
         DTOFieldFilter iss { get; set; }
         DTOFieldFilter customerstatus { get; set; }
+        DTOFieldFilter superonline { get; set; }
 
         bool hasIlceFilter();
         bool hasIlFilter();
@@ -19,6 +21,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         bool hasIssFilter();
         bool hasCustomerstatusFilter();        
         bool isCustomerFilter();
+        bool hasSuperonlineFilter();
         bool isIlFilter();
         bool isIlceFilter();
         bool isRegionFilter();
@@ -35,9 +38,9 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         public DTOFieldFilter telocordiaid { get; set; }
         public DTOFieldFilter sofiberbaslangic { get; set; }
         public DTOFieldFilter customer { get; set; }
+        public DTOFieldFilter superonline { get; set; }
         public DTOFieldFilter iss { get; set; }
         public DTOFieldFilter customerstatus { get; set; }
-
         public bool hasIlceFilter()
         {
             return  ilce != null;
@@ -50,12 +53,10 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         {
             return customer != null;
         }
-
         public bool hasIssFilter() 
         {
             return iss != null;
         }
-
         public bool hasCustomerstatusFilter() 
         {
             return customerstatus != null;
@@ -72,22 +73,22 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         {
             return hasCustomerFilter() || (!hasIlFilter() && !hasIlceFilter());
         }
-
+        public bool hasSuperonlineFilter()
+        {
+            return superonline != null;
+        }
         public bool isIlFilter()
         {
             return !isCustomerFilter() && hasIlFilter();
         }
-
         public bool isIlceFilter()
         {
             return !isCustomerFilter() && !hasIlFilter() && ilce != null;
         }
-
         public bool isRegionFilter()
         {
             return !isCustomerFilter() && !hasIlFilter() && ilce == null;
         }
-
         public DTOFilter getFilter()
         {
             using (var db = new KOCSAMADLSEntities())
@@ -95,6 +96,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 DTOFilter filter = new DTOFilter("customer", "customerid");
                 // Ad Soyad Ayrımı Yapılacak 
                 if (customer != null) filter.fieldFilters.Add(customer);
+                if (superonline != null) filter.fieldFilters.Add(superonline);
                 if (hasIssFilter())
                 {
                     var subFilter = new DTOFilter("issStatus", "id");
@@ -123,6 +125,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 return filter;
             }
         }
+
     }
 
 }
