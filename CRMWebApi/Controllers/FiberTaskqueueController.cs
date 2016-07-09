@@ -238,7 +238,6 @@ namespace CRMWebApi.Controllers
                             dtq.consummationdate = null;
                         }// taskın durumunu açığa alma
                         else {
-                            dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
                             dtq.status = tq.taskstatepool.taskstateid;
                         }
 
@@ -716,6 +715,7 @@ namespace CRMWebApi.Controllers
                     dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
+                    dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
 
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
