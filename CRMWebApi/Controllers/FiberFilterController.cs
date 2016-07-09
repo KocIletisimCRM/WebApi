@@ -44,7 +44,8 @@ namespace CRMWebApi.Controllers
                     
                  if (request.isTaskstateFilter())
                  {
-                     var acik = new taskstatepool { taskstate = "AÇIK", taskstateid = 0 };
+                    var acik = new taskstatepool { taskstate = "AÇIK", taskstateid = 0 };
+                    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                     var query = filter.getFilterSQL();
                     var tspIds =  db.taskstatematches.SqlQuery(query)
                          .Select(t => t.stateid).ToList();
@@ -138,7 +139,6 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new CRMEntities())
             {
-             
                 var res = db.customer_status.Where(c => c.deleted == 0).OrderBy(c => c.Text).ToList();
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(r => r.toDTO()), "application/json");
             }

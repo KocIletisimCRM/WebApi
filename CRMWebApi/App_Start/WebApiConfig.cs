@@ -1044,7 +1044,7 @@ namespace CRMWebApi
             var request = new GetWorkflowListByUserRequest();
             request.TicketingTypeCode = "321";  
             request.SegmentCode = "Residential";
-            request.SearchStartDate = DateTime.Now.AddHours(-12);
+            request.SearchStartDate = DateTime.Now.AddHours(-3);
             //request.SearchStartDate = DateTime.Now.AddDays(-1);
             request.SearchEndDate = DateTime.Now;
             try

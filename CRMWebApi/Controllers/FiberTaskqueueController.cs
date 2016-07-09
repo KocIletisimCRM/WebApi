@@ -232,8 +232,15 @@ namespace CRMWebApi.Controllers
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
                     if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
-                        if (tq.taskstatepool.taskstateid == 0) dtq.status = null;// taskın durumunu açığa alma
-                        else dtq.status = tq.taskstatepool.taskstateid;
+                        if (tq.taskstatepool.taskstateid == 0)
+                        {
+                            dtq.status = null;
+                            dtq.consummationdate = null;
+                        }// taskın durumunu açığa alma
+                        else {
+                            dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
+                            dtq.status = tq.taskstatepool.taskstateid;
+                        }
 
                         #region Değiştirilen taska bağlı taskların hiyerarşik iptali. Bu kod taskın zorunlu task atamalarından önce çalışmalıdır.
                         var automandatoryTasks = new List<int>();
@@ -431,60 +438,6 @@ namespace CRMWebApi.Controllers
                                 }
                             }
                         }
-                        #endregion
-                        #region Kurulum randevusu kapandığında ikinci donanım tasklarının oluşturulma kodu
-                        /*25.10.2014 18:43  OZAL Ek ürün ve retention satış taskları ise yeniden
-                         * task türemesini önlemek için kontrol bloğu ekledim
-                         */
-                        //var test = false;
-                        //var ttqretek = dtq;
-                        //while (ttqretek != null && ttqretek.task.tasktype != 1 && ttqretek.taskid != 65)
-                        //    ttqretek = ttqretek.relatedTaskQueue;
-                        //if (ttqretek != null)
-                        //{
-                        //    if (ttqretek.taskid == 611
-                        
-                        
-                        
-                      //  || ttqretek.taskid == 6115)
-                        //        test = true;
-                        //}
-                        //if (!test)//Ek ürün veya retention değilse
-                        //{
-                        //    /* OZAL 25.10.2014 18:45*/
-                        //    if ((dtq.task.tasktype == 3 || dtq.task.tasktype == 4) && (dtq.status != null && dtq.taskstatepool.statetype == 1) && (dtq.task.tasktype != 0))
-                        //    {
-                        //        var ttq = dtq;
-                        //        while (ttq != null && ttq.task.tasktype != 1 && ttq.taskid != 65 && ttq.taskid != 69) /* Satış ziyareti veya Yönetim Odası Satışı--nakil taskı *///&& ttq.taskid != 53 27.12.2014 18:40 OZAL
-                        //            ttq = ttq.relatedTaskQueue;
-                        //        if (ttq == null)
-                        //            throw new Exception("Satış Taskı Bulunamadı.");
-
-                        //        var cust_pro = db.customerproduct.Where(r => r.taskid == ttq.taskorderno && r.deleted == false).ToList();
-                        //        foreach (var p in cust_pro.Select(r => r.productid))
-                        //            foreach (var item in (db.product_service.Where(r => r.productid == p).First().automandatorytasks ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
-                        //            {
-                        //                if (db.taskqueue.Where(r => (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item).Any())
-                        //                    continue;
-                        //                var personel_id = (db.task.Any(m => m.attachablepersoneltype == dtq.attachedpersonel.category && m.taskid == item));
-                        //                db.taskqueue.Add(new taskqueue
-                        //                {
-                        //                    attachedpersonelid = personel_id ? dtq.attachedpersonelid : (null),
-
-                        //                    attachmentdate = personel_id ? (DateTime?)DateTime.Now : (null),
-                        //                    attachedobjectid = dtq.attachedobjectid,
-                        //                    taskid = item,
-                        //                    creationdate = DateTime.Now,
-                        //                    deleted = false,
-                        //                    lastupdated = DateTime.Now,
-                        //                    previoustaskorderid = dtq.taskorderno,
-                        //                    updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,// User.Identity.PersonelID,
-                        //                    relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
-                        //                });
-                        //            }
-                        //        db.SaveChanges();
-                        //    }
-                        //}
                         #endregion
                         #region ürünler kaydediliyor
                         foreach (var p in customerproducts)
@@ -763,7 +716,6 @@ namespace CRMWebApi.Controllers
                     dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
-                    dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
 
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
