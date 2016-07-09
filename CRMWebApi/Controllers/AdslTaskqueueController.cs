@@ -275,6 +275,7 @@ namespace CRMWebApi.Controllers
                                 {
                                     var sTask = db.taskqueue.First(t => t.taskorderno == saletask);
                                     sTask.appointmentdate = dtq.consummationdate != null ? dtq.consummationdate : DateTime.Now;
+                                    sTask.lastupdated = DateTime.Now;
                                 }
                                 //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
@@ -875,7 +876,7 @@ namespace CRMWebApi.Controllers
             {
                 var taskqueue = new adsl_taskqueue
                 {
-                    appointmentdate = request.appointmentdate,
+                    appointmentdate = request.appointmentdate != null ? request.appointmentdate : DateTime.Now,
                     attachedobjectid = request.customerid ?? 0,
                     attachedpersonelid = request.attachedpersonelid,
                     attachmentdate = DateTime.Now,
