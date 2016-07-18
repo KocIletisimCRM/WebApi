@@ -13,5 +13,6 @@ namespace CRMWebApi.DTOs.Adsl
         public string kanalyoneticisi { get; set; }
         public string kurulumbayisi { get; set; }
         public string gorev { get; set; }
+        public string description { get; set; }
     }
 }
