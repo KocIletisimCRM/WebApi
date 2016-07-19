@@ -736,9 +736,9 @@ namespace CRMWebApi.Controllers
 
         // Başarı oranları ve sl süreleri raporu
         public static async Task<List<SKRate>> getRates(DateTimeRange request)
-        {
-            var skdate = new DateTimeRange { start = request.start.AddMonths(-1), end = request.end.AddMonths(2) };
-            var tqs = getTaskqueues(request.start.AddMonths(-1));
+        { // istenilen ay içerisinde kurulum randevusuna düşen (kr netflow tarihi o ay olan) ve bunların başarılı gerçekleşen miktarları
+            var skdate = new DateTimeRange { start = request.start.AddMonths(-4), end = request.end.AddMonths(2) };
+            var tqs = getTaskqueues(request.start.AddMonths(-4));
             List<SKReport> SKReport = await getSKReport(skdate).ConfigureAwait(false);
             List<DateTime> allDates = new List<DateTime>();
             for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
