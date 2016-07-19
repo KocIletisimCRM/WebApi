@@ -899,18 +899,64 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage confirmCustomer(DTOcustomer request)
         {
-            using (var db=new KOCSAMADLSEntities(false))
+            using (var db = new KOCSAMADLSEntities(false))
             {
-                var res = db.customer.Include(i=>i.il).Include(m=>m.ilce).Where(c => c.tc == request.tc && c.deleted == false).FirstOrDefault();              
-                if (res !=null)
+                if (request.tc != null)
                 {
-                    return Request.CreateResponse(HttpStatusCode.OK,res.toDTO(), "application/json");
+                    var res = db.customer.Include(i => i.il).Include(m => m.ilce).Where(c => c.tc == request.tc && c.deleted == false).FirstOrDefault();
+                    if (res != null)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK, res.toDTO(), "application/json");
+                    }
+                    else
+                    {
+                        DTOResponseError error = new DTOResponseError();
+                        error.errorCode = -1;
+                        return Request.CreateResponse(HttpStatusCode.OK, error.errorCode, "application/json");
+                    }
+                }
+                else if (request.superonlineCustNo != null)
+                {
+                    var res = db.customer.Include(i => i.il).Include(m => m.ilce).Where(c => c.superonlineCustNo == request.superonlineCustNo && c.deleted == false).OrderByDescending(n => n.customerid).ToList();
+                    if (res.Count > 0)
+                    {
+                        customer retCust = null;
+                        foreach (customer eleman in res)
+                        { // müşterilerin taskları kontrol edilecek ana hiyerarşi tasklarında iptal olmayan ilk müşteriyi geri döndürecem
+                            var iTask = db.taskqueue.Where(t => t.deleted == false && t.attachedobjectid == eleman.customerid && t.status == 9116).ToList();
+                            if (iTask.Count > 0)
+                            {
+                                foreach (adsl_taskqueue tt in iTask)
+                                {
+                                    if (db.task.Where(t => t.taskid == tt.taskid && (t.tasktype == 1 || t.tasktype == 2 || t.tasktype == 3 || t.tasktype == 5)).FirstOrDefault() == null)
+                                    {
+                                        retCust = eleman;
+                                        break;
+                                    }
+                                }
+                                if (retCust != null)
+                                    break;
+                            }
+                            else
+                            {
+                                retCust = eleman;
+                                break;
+                            }
+                        }
+                        return Request.CreateResponse(HttpStatusCode.OK, retCust.toDTO(), "application/json");
+                    }
+                    else
+                    {
+                        DTOResponseError error = new DTOResponseError();
+                        error.errorCode = -1;
+                        return Request.CreateResponse(HttpStatusCode.OK, error.errorCode, "application/json");
+                    }
                 }
                 else
                 {
                     DTOResponseError error = new DTOResponseError();
                     error.errorCode = -1;
-                    return Request.CreateResponse(HttpStatusCode.OK,error.errorCode, "application/json");
+                    return Request.CreateResponse(HttpStatusCode.OK, error.errorCode, "application/json");
                 }
             }
 

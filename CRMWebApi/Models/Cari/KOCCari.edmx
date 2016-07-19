@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="KOCCariModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Firmalar">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GrupId" Type="int" Nullable="false" />
+          <Property Name="Etiket" Type="varchar" MaxLength="150" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GelirGiderTurleri">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GrupId" Type="int" Nullable="false" />
+          <Property Name="Etiket" Type="varchar" MaxLength="150" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Hareketler">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BorcluFirma" Type="int" Nullable="false" />
+          <Property Name="AlacakliFirma" Type="int" Nullable="false" />
+          <Property Name="GelirGiderTuru" Type="int" Nullable="false" />
+          <Property Name="IslemTarihi" Type="date" Nullable="false" />
+          <Property Name="Donem" Type="date" Nullable="false" />
+          <Property Name="VadeTarihi" Type="date" Nullable="false" />
+          <Property Name="Tutar" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="KdvMatrah" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Aciklama" Type="varchar" MaxLength="250" />
+          <Property Name="Muavin" Type="int" />
+          <Property Name="Kaynak" Type="int" />
+          <Property Name="Odendi" Type="bit" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'KOCCari.dbo.CariHareketler' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="CariHareketler">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="IslemTarihi" />
+            <PropertyRef Name="Tutar" />
+            <PropertyRef Name="KdvMatrah" />
+            <PropertyRef Name="Donem" />
+            <PropertyRef Name="VadeTarihi" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IslemTarihi" Type="date" Nullable="false" />
+          <Property Name="İslemTarihiYıl" Type="int" />
+          <Property Name="İslemTarihiAy" Type="int" />
+          <Property Name="İslemTarihiGun" Type="int" />
+          <Property Name="AlacakliFirma" Type="nvarchar" MaxLength="255" />
+          <Property Name="BorcluFirma" Type="nvarchar" MaxLength="255" />
+          <Property Name="OdemeKalemi" Type="varchar" MaxLength="150" />
+          <Property Name="Tutar" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="KdvMatrah" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Donem" Type="date" Nullable="false" />
+          <Property Name="DonemYıl" Type="int" />
+          <Property Name="DonemAy" Type="int" />
+          <Property Name="DonemGun" Type="int" />
+          <Property Name="VadeTarihi" Type="date" Nullable="false" />
+          <Property Name="VadeYıl" Type="int" />
+          <Property Name="VadeAy" Type="int" />
+          <Property Name="VadeGun" Type="int" />
+          <Property Name="Aciklama" Type="varchar" MaxLength="250" />
+        </EntityType>
+        <EntityContainer Name="KOCCariModelStoreContainer">
+          <EntitySet Name="Firmalar" EntityType="Self.Firmalar" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GelirGiderTurleri" EntityType="Self.GelirGiderTurleri" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Hareketler" EntityType="Self.Hareketler" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CariHareketler" EntityType="Self.CariHareketler" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [CariHareketler].[Id] AS [Id], 
+    [CariHareketler].[IslemTarihi] AS [IslemTarihi], 
+    [CariHareketler].[İslemTarihiYıl] AS [İslemTarihiYıl], 
+    [CariHareketler].[İslemTarihiAy] AS [İslemTarihiAy], 
+    [CariHareketler].[İslemTarihiGun] AS [İslemTarihiGun], 
+    [CariHareketler].[AlacakliFirma] AS [AlacakliFirma], 
+    [CariHareketler].[BorcluFirma] AS [BorcluFirma], 
+    [CariHareketler].[OdemeKalemi] AS [OdemeKalemi], 
+    [CariHareketler].[Tutar] AS [Tutar], 
+    [CariHareketler].[KdvMatrah] AS [KdvMatrah], 
+    [CariHareketler].[Donem] AS [Donem], 
+    [CariHareketler].[DonemYıl] AS [DonemYıl], 
+    [CariHareketler].[DonemAy] AS [DonemAy], 
+    [CariHareketler].[DonemGun] AS [DonemGun], 
+    [CariHareketler].[VadeTarihi] AS [VadeTarihi], 
+    [CariHareketler].[VadeYıl] AS [VadeYıl], 
+    [CariHareketler].[VadeAy] AS [VadeAy], 
+    [CariHareketler].[VadeGun] AS [VadeGun], 
+    [CariHareketler].[Aciklama] AS [Aciklama]
+    FROM [dbo].[CariHareketler] AS [CariHareketler]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="KOCCariModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Firmalar">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GrupId" Type="Int32" Nullable="false" />
+          <Property Name="Etiket" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Hareketler" Relationship="KOCCariModel.FirmalarHareketler" FromRole="Firmalar" ToRole="Hareketler" />
+          <NavigationProperty Name="Hareketler1" Relationship="KOCCariModel.FirmalarHareketler1" FromRole="Firmalar" ToRole="Hareketler" />
+        </EntityType>
+        <EntityType Name="GelirGiderTurleri">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GrupId" Type="Int32" Nullable="false" />
+          <Property Name="Etiket" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Hareketler" Relationship="KOCCariModel.HareketlerGelirGiderTurleri" FromRole="GelirGiderTurleri" ToRole="Hareketler" />
+        </EntityType>
+        <EntityType Name="Hareketler">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BorcluFirma" Type="Int32" Nullable="false" />
+          <Property Name="AlacakliFirma" Type="Int32" Nullable="false" />
+          <Property Name="GelirGiderTuru" Type="Int32" Nullable="false" />
+          <Property Name="IslemTarihi" Type="DateTime" Nullable="false" />
+          <Property Name="Donem" Type="DateTime" Nullable="false" />
+          <Property Name="VadeTarihi" Type="DateTime" Nullable="false" />
+          <Property Name="Tutar" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="KdvMatrah" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Aciklama" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="Muavin" Type="Int32" />
+          <Property Name="Kaynak" Type="Int32" />
+          <Property Name="Odendi" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="GelirGiderTurleri" Relationship="KOCCariModel.HareketlerGelirGiderTurleri" FromRole="Hareketler" ToRole="GelirGiderTurleri" />
+          <NavigationProperty Name="Firmalar" Relationship="KOCCariModel.FirmalarHareketler" FromRole="Hareketler" ToRole="Firmalar" />
+          <NavigationProperty Name="Firmalar1" Relationship="KOCCariModel.FirmalarHareketler1" FromRole="Hareketler" ToRole="Firmalar" />
+        </EntityType>
+        <EntityType Name="CariHareketler">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="IslemTarihi" />
+            <PropertyRef Name="Tutar" />
+            <PropertyRef Name="KdvMatrah" />
+            <PropertyRef Name="Donem" />
+            <PropertyRef Name="VadeTarihi" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IslemTarihi" Type="DateTime" Nullable="false" />
+          <Property Name="İslemTarihiYıl" Type="Int32" />
+          <Property Name="İslemTarihiAy" Type="Int32" />
+          <Property Name="İslemTarihiGun" Type="Int32" />
+          <Property Name="AlacakliFirma" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="BorcluFirma" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="OdemeKalemi" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
+          <Property Name="Tutar" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="KdvMatrah" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="Donem" Type="DateTime" Nullable="false" />
+          <Property Name="DonemYıl" Type="Int32" />
+          <Property Name="DonemAy" Type="Int32" />
+          <Property Name="DonemGun" Type="Int32" />
+          <Property Name="VadeTarihi" Type="DateTime" Nullable="false" />
+          <Property Name="VadeYıl" Type="Int32" />
+          <Property Name="VadeAy" Type="Int32" />
+          <Property Name="VadeGun" Type="Int32" />
+          <Property Name="Aciklama" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="KOCCariEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Firmalar" EntityType="Self.Firmalar" />
+          <EntitySet Name="GelirGiderTurleri" EntityType="Self.GelirGiderTurleri" />
+          <EntitySet Name="Hareketler" EntityType="Self.Hareketler" />
+          <EntitySet Name="CariHareketler" EntityType="Self.CariHareketler" />
+          <AssociationSet Name="HareketlerGelirGiderTurleri" Association="KOCCariModel.HareketlerGelirGiderTurleri">
+            <End Role="Hareketler" EntitySet="Hareketler" />
+            <End Role="GelirGiderTurleri" EntitySet="GelirGiderTurleri" />
+          </AssociationSet>
+          <AssociationSet Name="FirmalarHareketler" Association="KOCCariModel.FirmalarHareketler">
+            <End Role="Firmalar" EntitySet="Firmalar" />
+            <End Role="Hareketler" EntitySet="Hareketler" />
+          </AssociationSet>
+          <AssociationSet Name="FirmalarHareketler1" Association="KOCCariModel.FirmalarHareketler1">
+            <End Role="Firmalar" EntitySet="Firmalar" />
+            <End Role="Hareketler" EntitySet="Hareketler" />
+          </AssociationSet>
+        </EntityContainer>
+        <Association Name="HareketlerGelirGiderTurleri">
+          <End Type="KOCCariModel.Hareketler" Role="Hareketler" Multiplicity="*" />
+          <End Type="KOCCariModel.GelirGiderTurleri" Role="GelirGiderTurleri" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="GelirGiderTurleri">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Hareketler">
+              <PropertyRef Name="GelirGiderTuru" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FirmalarHareketler">
+          <End Type="KOCCariModel.Firmalar" Role="Firmalar" Multiplicity="1" />
+          <End Type="KOCCariModel.Hareketler" Role="Hareketler" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Firmalar">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Hareketler">
+              <PropertyRef Name="BorcluFirma" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FirmalarHareketler1">
+          <End Type="KOCCariModel.Firmalar" Role="Firmalar" Multiplicity="1" />
+          <End Type="KOCCariModel.Hareketler" Role="Hareketler" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Firmalar">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Hareketler">
+              <PropertyRef Name="AlacakliFirma" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="KOCCariModelStoreContainer" CdmEntityContainer="KOCCariEntities">
+          <EntitySetMapping Name="Firmalar">
+            <EntityTypeMapping TypeName="KOCCariModel.Firmalar">
+              <MappingFragment StoreEntitySet="Firmalar">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="GrupId" ColumnName="GrupId" />
+                <ScalarProperty Name="Etiket" ColumnName="Etiket" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GelirGiderTurleri">
+            <EntityTypeMapping TypeName="KOCCariModel.GelirGiderTurleri">
+              <MappingFragment StoreEntitySet="GelirGiderTurleri">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="GrupId" ColumnName="GrupId" />
+                <ScalarProperty Name="Etiket" ColumnName="Etiket" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Hareketler">
+            <EntityTypeMapping TypeName="KOCCariModel.Hareketler">
+              <MappingFragment StoreEntitySet="Hareketler">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="BorcluFirma" ColumnName="BorcluFirma" />
+                <ScalarProperty Name="AlacakliFirma" ColumnName="AlacakliFirma" />
+                <ScalarProperty Name="GelirGiderTuru" ColumnName="GelirGiderTuru" />
+                <ScalarProperty Name="IslemTarihi" ColumnName="IslemTarihi" />
+                <ScalarProperty Name="Donem" ColumnName="Donem" />
+                <ScalarProperty Name="VadeTarihi" ColumnName="VadeTarihi" />
+                <ScalarProperty Name="Tutar" ColumnName="Tutar" />
+                <ScalarProperty Name="KdvMatrah" ColumnName="KdvMatrah" />
+                <ScalarProperty Name="Aciklama" ColumnName="Aciklama" />
+                <ScalarProperty Name="Muavin" ColumnName="Muavin" />
+                <ScalarProperty Name="Kaynak" ColumnName="Kaynak" />
+                <ScalarProperty Name="Odendi" ColumnName="Odendi" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CariHareketler">
+            <EntityTypeMapping TypeName="KOCCariModel.CariHareketler">
+              <MappingFragment StoreEntitySet="CariHareketler">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IslemTarihi" ColumnName="IslemTarihi" />
+                <ScalarProperty Name="İslemTarihiYıl" ColumnName="İslemTarihiYıl" />
+                <ScalarProperty Name="İslemTarihiAy" ColumnName="İslemTarihiAy" />
+                <ScalarProperty Name="İslemTarihiGun" ColumnName="İslemTarihiGun" />
+                <ScalarProperty Name="AlacakliFirma" ColumnName="AlacakliFirma" />
+                <ScalarProperty Name="BorcluFirma" ColumnName="BorcluFirma" />
+                <ScalarProperty Name="OdemeKalemi" ColumnName="OdemeKalemi" />
+                <ScalarProperty Name="Tutar" ColumnName="Tutar" />
+                <ScalarProperty Name="KdvMatrah" ColumnName="KdvMatrah" />
+                <ScalarProperty Name="Donem" ColumnName="Donem" />
+                <ScalarProperty Name="DonemYıl" ColumnName="DonemYıl" />
+                <ScalarProperty Name="DonemAy" ColumnName="DonemAy" />
+                <ScalarProperty Name="DonemGun" ColumnName="DonemGun" />
+                <ScalarProperty Name="VadeTarihi" ColumnName="VadeTarihi" />
+                <ScalarProperty Name="VadeYıl" ColumnName="VadeYıl" />
+                <ScalarProperty Name="VadeAy" ColumnName="VadeAy" />
+                <ScalarProperty Name="VadeGun" ColumnName="VadeGun" />
+                <ScalarProperty Name="Aciklama" ColumnName="Aciklama" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

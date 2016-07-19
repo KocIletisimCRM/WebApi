@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="03cba213345641559bb7161c2fb2a9b1" Name="Diagram1" ZoomLevel="86">
+        <EntityTypeShape EntityType="KOCCariModel.Firmalar" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCCariModel.GelirGiderTurleri" Width="1.5" PointX="5.375" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCCariModel.Hareketler" Width="1.5" PointX="3.125" PointY="3" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCCariModel.CariHareketler" Width="1.5" PointX="10.375" PointY="1.375" IsExpanded="true" />
+        <AssociationConnector Association="KOCCariModel.HareketlerGelirGiderTurleri" />
+        <AssociationConnector Association="KOCCariModel.FirmalarHareketler" />
+        <AssociationConnector Association="KOCCariModel.FirmalarHareketler1" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

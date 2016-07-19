@@ -121,6 +121,16 @@
       <LastGenOutput>CRMAdslDataModel.cs</LastGenOutput>
     </Content>
     <Content Include="Global.asax" />
+    <Content Include="Models\Cari\KOCCari.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>KOCCari.edmx</DependentUpon>
+      <LastGenOutput>KOCCari.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\Cari\KOCCari.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>KOCCari.edmx</DependentUpon>
+      <LastGenOutput>KOCCari.cs</LastGenOutput>
+    </Content>
     <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowDetailByUserResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Content>
@@ -132,6 +142,13 @@
     </Content>
     <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowIdListByUserResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <EntityDeploy Include="Models\Cari\KOCCari.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>KOCCari.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\Cari\KOCCari.edmx.diagram">
+      <DependentUpon>KOCCari.edmx</DependentUpon>
     </Content>
     <None Include="Service References\NetflowWebServis\NetflowTellcomWS.disco" />
     <None Include="Service References\NetflowWebServis\configuration91.svcinfo" />
@@ -469,6 +486,33 @@
     </Compile>
     <Compile Include="Models\Adsl\v_taskorderIsEditable.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\CariHareketler.cs">
+      <DependentUpon>KOCCari.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\Firmalar.cs">
+      <DependentUpon>KOCCari.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\GelirGiderTurleri.cs">
+      <DependentUpon>KOCCari.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\Hareketler.cs">
+      <DependentUpon>KOCCari.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\KOCCari.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>KOCCari.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\KOCCari.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>KOCCari.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Cari\KOCCari.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>KOCCari.edmx</DependentUpon>
     </Compile>
     <Compile Include="Models\Fiber\atama.cs">
       <DependentUpon>CRMDataModel.tt</DependentUpon>
