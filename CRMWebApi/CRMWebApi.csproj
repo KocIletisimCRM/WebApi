@@ -198,6 +198,7 @@
     <Compile Include="Controllers\FiberSiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\MailBasvuruController.cs" />
+    <Compile Include="Controllers\OData\CariHareketReportsController.cs" />
     <Compile Include="Controllers\OData\InfoBayiReportsController.cs" />
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />
     <Compile Include="Controllers\OData\PersonelsReportsController.cs" />
@@ -294,6 +295,7 @@
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
     <Compile Include="DTOs\Adsl\SLKocReport.cs" />
     <Compile Include="DTOs\Adsl\SLTime.cs" />
+    <Compile Include="DTOs\Cari\CariHareketReport.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\DTOBasvuru.cs" />
     <Compile Include="DTOs\Fiber\attachedObjectTypeConverter.cs" />

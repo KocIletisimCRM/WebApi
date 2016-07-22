@@ -509,6 +509,8 @@ namespace CRMWebApi.Controllers
                         r.slstatus = "Tamamlanan";
                     else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
                         r.slstatus = "İptal Edilen";
+                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 3)
+                        r.slstatus = "Ertelenen";
                     else
                         r.slstatus = "Bekleyen";
                     r.BayiSLTaskStart = bsl.Value.BStart;
@@ -564,6 +566,8 @@ namespace CRMWebApi.Controllers
                         r.slstatus = "Tamamlanan";
                     else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
                         r.slstatus = "İptal Edilen";
+                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 3)
+                        r.slstatus = "Ertelenen";
                     else
                         r.slstatus = "Bekleyen";
                     if ((ksl.Value.BEnd.HasValue && ksl.Value.BEnd.Value >= request.start && ksl.Value.BEnd.Value <= request.end ) || (!ksl.Value.BEnd.HasValue && ksl.Value.BStart.HasValue && ksl.Value.BStart.Value <= request.end))
@@ -833,6 +837,34 @@ namespace CRMWebApi.Controllers
                     res.modemsay = db.getSerialsOnPersonelAdsl(r.Value.personelid, 1117).ToList().Count;
                 return res;
             }).ToList();
+        }
+
+        // Muhasebe programı Cari Hareketler raporu
+        public static async Task<List<CRMWebApi.DTOs.Cari.CariHareketReport>> getCariHareketler ()
+        {
+            Dictionary<int, CRMWebApi.DTOs.Cari.CariHareketReport> info = new Dictionary<int, DTOs.Cari.CariHareketReport>();
+            await WebApiConfig.updateCariData().ConfigureAwait(false);
+            WebApiConfig.CariHareketler.Select(r => {
+                int periodId = Convert.ToInt32(r.Value.AlacakliFirma.ToString() + r.Value.Donem.Year.ToString() + r.Value.Donem.Month.ToString());
+                if (!info.ContainsKey(periodId)) info[periodId] = new DTOs.Cari.CariHareketReport();
+                info[periodId].personelid = r.Value.AlacakliFirma;
+                info[periodId].personelname = WebApiConfig.CariPersonels.ContainsKey(r.Value.AlacakliFirma) ? WebApiConfig.CariPersonels[r.Value.AlacakliFirma].personelname : "İsimsiz Bayi";
+                info[periodId].periodId = periodId;
+                info[periodId].alacak += r.Value.Tutar;
+                if (r.Value.Odendi) info[periodId].odenen += r.Value.Tutar;
+                info[periodId].period = r.Value.Donem.AddDays(1 - r.Value.Donem.Day).AddMonths(1).AddDays(-1).ToShortDateString();
+                return true;
+            }).ToList();
+            return info.Select(r => {
+                DTOs.Cari.CariHareketReport res = new DTOs.Cari.CariHareketReport();
+                res.periodId = r.Value.periodId;
+                res.personelid = r.Value.personelid;
+                res.personelname = r.Value.personelname;
+                res.period = r.Value.period;
+                res.alacak = r.Value.alacak;
+                res.odenen = r.Value.odenen;
+                return res;
+            }).OrderBy(r => r.personelid).ToList();
         }
 
         [Route("SKR")]

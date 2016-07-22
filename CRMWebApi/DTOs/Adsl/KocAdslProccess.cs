@@ -94,8 +94,8 @@ namespace CRMWebApi.DTOs.Adsl
                         if (!SLs[sl].KStart.HasValue) SLs[sl].KStart = tq.appointmentdate ?? tq.consummationdate;
                         SLs[sl].CustomerId = tq.attachedobjectid.Value;
                     }
-                //Bayi SL Bitiş
-                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2)
+                //Bayi SL Bitiş (9156 iptal onayı bekliyor durumu sl sonlandırmamalı geçici olarak id ekledim çözüm sorulacak)
+                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2 && tq.status != 9156) 
                 {
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
                     {

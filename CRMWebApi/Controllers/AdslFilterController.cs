@@ -197,7 +197,6 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage getCampaignInfo(DTOFiterGetCampaignRequst request)
         {
             var filter = request.getFilter();
-            filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
 
             using (var db = new KOCSAMADLSEntities(false))
             {

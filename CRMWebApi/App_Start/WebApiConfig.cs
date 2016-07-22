@@ -800,6 +800,135 @@ namespace CRMWebApi
             aLockObject.Release();
         }
 
+        // Cari işlemler raporu için cari hareket ve gerekli bilgilerin alınması işlemleri start
+        public static Dictionary<int, Models.Cari.GelirGiderTurleri> CariGelirGiderTurleri = new Dictionary<int, Models.Cari.GelirGiderTurleri>();
+        public static Dictionary<int, Models.Cari.Hareketler> CariHareketler = new Dictionary<int, Models.Cari.Hareketler>();
+        public static Dictionary<int, Models.Adsl.adsl_personel> CariPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
+        public static DateTime CariLastUpdated = new DateTime(1900, 1, 1);
+        public static SemaphoreSlim cLockObject = new SemaphoreSlim(1);
+        public static string JoinHakedis = null;
+
+        public static async Task loadCariGelirGiderTurleri ()
+        {
+            using (var db = new Models.Cari.KOCCariEntities())
+            {
+                JoinHakedis = null;
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = "select * from GelirGiderTurleri";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Cari.GelirGiderTurleri
+                            {
+                                Id = (int)sqlreader[0],
+                                GrupId = (int)sqlreader[1],
+                                Etiket = (string)sqlreader[2],
+                            });
+                            CariGelirGiderTurleri[t.Id] = t;
+                        }
+                    }
+                }
+                Queue<int> hakedis = new Queue<int>();
+                hakedis.Enqueue(6); // Bayi Hakediş Ödemesi Id'si (Genel Grup Id)
+                while (hakedis.Count > 0)
+                {
+                    var t = hakedis.Dequeue();
+                    if (JoinHakedis == null)
+                        JoinHakedis = "(" + t;
+                    else
+                        JoinHakedis += "," + t;
+                    foreach (var item in CariGelirGiderTurleri.Where(k => k.Value.GrupId == t))
+                        hakedis.Enqueue(item.Value.Id);
+                }
+                JoinHakedis += ")";
+            }
+        }
+        public static async Task loadCariHareketler ()
+        {
+            using (var db = new Models.Cari.KOCCariEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = $"select * from Hareketler where BorcluFirma=9 and GelirGiderTuru in {JoinHakedis}"; // 9 DSL Çözüm Merkezi (Hakediş Ödeyen Birim)
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Cari.Hareketler
+                            {
+                                Id = (int)sqlreader[0],
+                                BorcluFirma = (int)sqlreader[1],
+                                AlacakliFirma = (int)sqlreader[2],
+                                GelirGiderTuru = (int)sqlreader[3],
+                                IslemTarihi = (DateTime)sqlreader[4],
+                                Donem = (DateTime)sqlreader[5],
+                                VadeTarihi = (DateTime)sqlreader[6],
+                                Tutar = (decimal)sqlreader[7],
+                                KdvMatrah = (decimal)sqlreader[8],
+                                Aciklama = sqlreader.IsDBNull(9) ? null : (string)sqlreader[9],
+                                Muavin = sqlreader.IsDBNull(10) ? null : (int?)sqlreader[10],
+                                Kaynak = sqlreader.IsDBNull(11) ? null : (int?)sqlreader[11],
+                                Odendi = (bool)sqlreader[12],
+                            });
+                            CariHareketler[t.Id] = t;
+                        }
+                    }
+                }
+            }
+        }
+        public static async Task loadCariPersonels(DateTime lastUpdated)
+        {
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
+            {
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
+                {
+                    await conn.OpenAsync().ConfigureAwait(false);
+                    var selectCommand = conn.CreateCommand();
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated, ilKimlikNo, ilceKimlikNo from personel where email not like '%@kociletisim.com.tr' and lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    {
+                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        {
+                            var t = (new Models.Adsl.adsl_personel
+                            {
+                                personelid = (int)sqlreader[0],
+                                personelname = sqlreader.IsDBNull(1) ? null : (string)sqlreader[1],
+                                lastupdated = sqlreader.IsDBNull(2) ? null : (DateTime?)sqlreader[2],
+                                ilKimlikNo = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
+                                ilceKimlikNo = sqlreader.IsDBNull(4) ? null : (int?)sqlreader[4],
+                            });
+                            CariPersonels[t.personelid] = t;
+                        }
+                    }
+                }
+            }
+        }
+        public static async Task updateCariData()
+        {
+            await cLockObject.WaitAsync().ConfigureAwait(false);
+            var lastUpdated = DateTime.Now;
+            await Task.WhenAll(new Task[] {
+                loadCariGelirGiderTurleri(),
+                loadCariPersonels(CariLastUpdated),
+            }).ConfigureAwait(false);
+            await loadCariHareketler().ConfigureAwait(false);
+            CariLastUpdated = lastUpdated;
+            cLockObject.Release();
+        }
+        // Cari işlemler raporu için cari hareket ve gerekli bilgilerin alınması işlemleri end
+
         private static void insertTaskqueue(DTOs.Adsl.DTOcustomer request)
         { // yeni task oluşturma
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -1534,13 +1663,14 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.ISSSuccessRate>("ISSSuccessRates");
             builder.EntitySet<DTOs.Adsl.SKRate>("SKRates");
             builder.EntitySet<DTOs.Adsl.InfoBayiReport>("InfoBayiReports");
+            builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            await Task.WhenAll((new Task[] { loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/})).ConfigureAwait(false);
+            await Task.WhenAll((new Task[] { updateCariData() ,loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/})).ConfigureAwait(false);
         }
     }
 }

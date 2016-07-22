@@ -9,6 +9,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         public DTOFieldFilter subcategory { get; set; }
         public DTOFieldFilter campaign { get; set; }
         public DTOFieldFilter products { get; set; }
+        public DTOFieldFilter deleted { get; set; }
 
         public bool hasCategoryFilter() 
         {
@@ -60,7 +61,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 }
                 if (hasCampaignFilter())
                     filter.fieldFilters.Add(campaign);
-
+                if (deleted != null) filter.fieldFilters.Add(deleted);
                 if (hasProductsFilter())
                 {
                     var subFilter = new DTOFilter("vcampaignproducts","cid");
