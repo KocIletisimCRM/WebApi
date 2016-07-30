@@ -1310,5 +1310,18 @@ namespace CRMWebApi.Controllers
                 return null;
             }
         }
+
+        [Route("getTaskqueueInfo")]
+        [HttpPost]
+        public HttpResponseMessage getTaskqueueInfo(adsl_taskqueue request)
+        { // Tasklarda satış ve önceki task bilgilerini çekmek için oluşturuldu (Hüseyin)
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var task = db.taskqueue.Where(r => r.deleted == false && r.taskorderno == request.taskorderno).FirstOrDefault();
+                task.task = db.task.FirstOrDefault(r => r.taskid == task.taskid);
+                task.personel = db.personel.FirstOrDefault(r => r.personelid == task.attachedpersonelid);
+                return Request.CreateResponse(HttpStatusCode.OK, task.toDTO(), "application/json");
+            }
+        }
     }
 }

@@ -59,17 +59,11 @@ namespace CRMWebApi.Controllers
                     if (pagingWhereClauses.Skip(1).Any()) whereClauses.Add(string.Join(") AND", pagingWhereClauses.Skip(1)) + ")");
                     if (newClauses[0].Any()) whereClauses.Add($"({string.Join(" OR ", newClauses[0])})");
                     if (newClauses[1].Any()) whereClauses.Add($"({string.Join(" OR ", newClauses[1])})");
-                    if (user.hasRole(KOCUserTypes.TeamLeader))
+                    if (user.userRole == 2147483647 || user.hasRole(KOCUserTypes.StockRoomStuff)) { }
+                    else if (user.hasRole(KOCUserTypes.TeamLeader))
                     {
                         var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
-                    }
-                    else if (user.hasRole(KOCUserTypes.StockRoomStuff))
-                    {
-                        user.userRole = 2147483647; // depocuya admin yetkisi sadece tüm stok hareketlerini görmesi için
-                        var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
-                        whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
-                        user.userRole = (int)KOCUserTypes.StockRoomStuff;
                     }
                     else whereClauses.Add($"((fromobject = {user.userId} and fromobjecttype!= 16777217) or (toobject = {user.userId} and toobjecttype!= 16777217))"); // aynı id'ye sahip personel ve müşterilerde müşterinin hareketini personelinmiş gibi göstermesin diye type eklendi (16777217 -> müşteri type)
                     var whereClause = string.Join(" AND ", whereClauses);
@@ -86,7 +80,7 @@ namespace CRMWebApi.Controllers
                 var res = db.stockmovement.SqlQuery(querySql).ToList();
                 performance.QuerSQLyDuration = perf.Elapsed;
                 perf.Restart();
-                var fromPerObjectIds = res.Where(t=> t.fromobjecttype!=(int) KOCUserTypes.ADSLCustomer).Select(s => s.fromobject).Distinct().ToList();
+                var fromPerObjectIds = res.Where(t => t.fromobjecttype != (int)KOCUserTypes.ADSLCustomer).Select(s => s.fromobject).Distinct().ToList();
                 var fromCusObjectIds = res.Where(t => t.fromobjecttype == (int)KOCUserTypes.ADSLCustomer).Select(s => s.fromobject).Distinct().ToList();
                 var fromPersonels = db.personel.Where(p => fromPerObjectIds.Contains(p.personelid)).ToList();
                 var fromCustomers = db.customer.Where(c => fromCusObjectIds.Contains(c.customerid)).ToList();
@@ -332,7 +326,7 @@ namespace CRMWebApi.Controllers
 
         [Route("InsertStock")]
         [HttpPost]
-        public HttpResponseMessage InsertStock (DTOstockmovement r)
+        public HttpResponseMessage InsertStock(DTOstockmovement r)
         { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi 
             if (r.deleted == true)
             {
@@ -396,7 +390,7 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
         }
 
-        private void movement (DTOstockmovement r)
+        private void movement(DTOstockmovement r)
         {
             var userID = KOCAuthorizeAttribute.getCurrentUser().userId;
             using (var db = new KOCSAMADLSEntities())
@@ -501,7 +495,7 @@ namespace CRMWebApi.Controllers
         [Route("getSerialOnPersonel")]
         [HttpPost]
         public HttpResponseMessage getSerialOnPersonel(adsl_stockmovement request)
-        { 
+        {
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
