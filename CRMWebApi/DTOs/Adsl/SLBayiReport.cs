@@ -29,8 +29,8 @@ namespace CRMWebApi.DTOs.Adsl
             get
             {
                 return BayiSLTaskStart == null ? null :
-                (
-                    (BayiSLTaskStart.Value.TimeOfDay.Hours >= 17 && (BayiSLEnd.Value.Date - BayiSLTaskStart.Value.Date).Days > 0) ? (BayiSLTaskStart.Value.DayOfWeek == DayOfWeek.Saturday) ?
+                ( // Bayiye atama pazar günü yapılmışsa ve işlem pazar tamamlanmamışsa başlangıç pazartesi olacak
+                    (BayiSLTaskStart.Value.DayOfWeek == DayOfWeek.Sunday && (BayiSLEnd.Value.Date - BayiSLTaskStart.Value.Date).Days > 0) ? BayiSLTaskStart.Value.AddDays(1).AddTicks(-BayiSLTaskStart.Value.TimeOfDay.Ticks).AddHours(8) : (BayiSLTaskStart.Value.TimeOfDay.Hours >= 17 && (BayiSLEnd.Value.Date - BayiSLTaskStart.Value.Date).Days > 0) ? (BayiSLTaskStart.Value.DayOfWeek == DayOfWeek.Saturday) ?
                         BayiSLTaskStart.Value.AddDays(2).AddTicks(-BayiSLTaskStart.Value.TimeOfDay.Ticks).AddHours(8) : // bir sonraki gün 8'de başlayacak sl'ler için atama c.tesi yapılmışsa başlangıç p.tesi başlaması için yeni kural eklendi (Hüseyin KOZ)
                         BayiSLTaskStart.Value.AddDays(1).AddTicks(-BayiSLTaskStart.Value.TimeOfDay.Ticks).AddHours(8) :
                         BayiSLTaskStart
