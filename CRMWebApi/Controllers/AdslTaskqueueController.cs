@@ -619,6 +619,7 @@ namespace CRMWebApi.Controllers
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.fault = tq.fault != null ? tq.fault : dtq.fault;
+                    dtq.updatedby = user.userId;
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
