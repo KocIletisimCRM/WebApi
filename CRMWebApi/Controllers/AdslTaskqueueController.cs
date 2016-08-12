@@ -252,6 +252,7 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
+                                // satış task task orderno
                                 var ptq = dtq;
                                 int? saletask = null;
                                 while (ptq != null)
@@ -267,6 +268,23 @@ namespace CRMWebApi.Controllers
                                         ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
                                     }
                                 }
+                                // kurulum task taslorderno
+                                var pptq = dtq;
+                                int? krtask = null;
+                                while (pptq != null)
+                                {
+                                    pptq.task = db.task.Where(t => t.taskid == pptq.taskid).FirstOrDefault();
+                                    if (pptq.task.tasktype == 2)
+                                    {
+                                        krtask = pptq.taskorderno;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        pptq = db.taskqueue.Where(t => t.taskorderno == pptq.previoustaskorderid).FirstOrDefault();
+                                    }
+                                }
+
                                 if (db.taskqueue.Where(r => r.deleted==false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;  
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
@@ -291,33 +309,15 @@ namespace CRMWebApi.Controllers
                                     var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
                                 }
-                                if (oot.tasktype == 3)
+                                if (oot.tasktype == 3 && krtask != null)
                                 {
-                                    var pptq = dtq;
-                                    int? krtask = null;
-                                    while (pptq != null)
-                                    {
-                                        pptq.task = db.task.Where(t => t.taskid == pptq.taskid).FirstOrDefault();
-                                        if (pptq.task.tasktype == 2)
-                                        {
-                                            krtask = pptq.taskorderno;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            pptq = db.taskqueue.Where(t => t.taskorderno == pptq.previoustaskorderid).FirstOrDefault();
-                                        }
-                                    }
-                                    if (krtask != null)
-                                    {
-                                        var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
-                                        personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
-                                    }
+                                    var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                 }
-                                if (item == 45 && saletask != null)  // Evrak Onayı Saha Taskı oluşuyorsa satış yapan bayinin kanal yöneticisine ata
+                                if ((item == 45 || item == 118) && krtask != null)  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
-                                    var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
-                                    personel_id = db.personel.First(p => p.personelid == satbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
+                                    var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == kbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
@@ -359,25 +359,26 @@ namespace CRMWebApi.Controllers
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
                         if ((tq.task.taskid==41 && tq.taskstatepool.taskstateid==9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129))
                         {
-                            var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false).Select(s => s.productid).ToList();
+                            // satış task task orderno
+                            var ptq = dtq;
+                            int? saletask = null;
+                            while (ptq != null)
+                            {
+                                ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                                {
+                                    saletask = ptq.taskorderno;
+                                    break;
+                                }
+                                else
+                                {
+                                    ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                }
+                            }
+                            var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false && c.taskid == saletask).Select(s => s.productid).ToList();
                             var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
                             if (autotasks.Count>0)
                             {
-                                var ptq = dtq;
-                                int? saletask = null;
-                                while (ptq != null)
-                                {
-                                    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                    if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
-                                    {
-                                        saletask = ptq.taskorderno;
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                    }
-                                }
                                 foreach (var item in (autotasks.First() ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                                 {
                                     var oot = db.task.FirstOrDefault(t => t.taskid == item);

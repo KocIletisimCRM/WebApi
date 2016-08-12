@@ -64,7 +64,7 @@ namespace CRMWebApi.Controllers
             var d = DateTime.Now;
             var dtr = new DateTimeRange { start = (d - d.TimeOfDay).AddDays(1 - d.Day), end = (d.AddDays(1 - d.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1) };
             var dtr2 = new DateTimeRange { start = dtr.start.AddMonths(-1), end = dtr.end.AddMonths(-1) };
-            var slOrt = new double[] { getKocSLOrt(dtr), getKocSLOrt(dtr2) };
+            var slOrt = new double[] { getKocKurulumSLOrt(dtr), getKocKurulumSLOrt(dtr2) };
             return Request.CreateResponse(HttpStatusCode.OK, slOrt, "application/json");
         }
 
@@ -486,7 +486,7 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).FirstOrDefault(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            var maxSL = 24; // 24 saat üzerinden değerlendir (çarpan için)
             return WebApiConfig.AdslProccesses.Values.SelectMany(
                 p => p.SLs.Where(sl =>
                 {
@@ -520,7 +520,7 @@ namespace CRMWebApi.Controllers
                         var bayiSl = WebApiConfig.AdslSl[bsl.Key];
                         r.SLName = bayiSl.SLName;
                         r.BayiSLMaxTime = bayiSl.BayiMaxTime != null ? bayiSl.BayiMaxTime.Value : 0;
-                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours)*((maxSL != null && bayiSl.BayiMaxTime != null) ? (maxSL.Value / bayiSl.BayiMaxTime.Value) : 1)),2);
+                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours)*(bayiSl.BayiMaxTime != null ? (maxSL / bayiSl.BayiMaxTime.Value) : 1)),2);
                     }
                     else
                         r.SLName = "Tanımlanmamış SL";
@@ -543,8 +543,8 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLKocReport>> getKocSLReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            var maxSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.BayiMaxTime).Select(k => k.Value.BayiMaxTime).FirstOrDefault(); // sl tablosunda bayiler için tanımlı maxSL'lerin en büyüğü (çarpan için)
-            var maxKSL = WebApiConfig.AdslSl.OrderByDescending(k => k.Value.KocMaxTime).Select(k => k.Value.KocMaxTime).FirstOrDefault(); // sl tablosunda koç için tanımlı maxSL'lerin en büyüğü (çarpan için)
+            var maxSL = 24; // (çarpan için)
+            var maxKSL = 48; // (çarpan için)
             return WebApiConfig.AdslProccesses.Values.SelectMany(
                 p => p.SLs.Where(sl => {
                     var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
@@ -586,8 +586,8 @@ namespace CRMWebApi.Controllers
                         r.SLName = kocSl.SLName;
                         r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0;
                         r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
-                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * ((maxSL != null && kocSl.BayiMaxTime != null) ? (maxSL.Value / kocSl.BayiMaxTime.Value) : 1)), 2);
-                        r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * ((maxSL != null && kocSl.KocMaxTime != null) ? (maxKSL.Value / kocSl.KocMaxTime.Value) : 1)), 2);
+                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (kocSl.BayiMaxTime != null ? (maxSL / kocSl.BayiMaxTime.Value) : 1)), 2);
+                        r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * (kocSl.KocMaxTime != null ? (maxKSL / kocSl.KocMaxTime.Value) : 1)), 2);
                     }
                     else
                         r.SLName = "Tanımlanmamış SL";
