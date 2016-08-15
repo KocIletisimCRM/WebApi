@@ -39,6 +39,9 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new KOCSAMADLSEntities())
             {
+                var person = db.personel.FirstOrDefault(r => r.personelid == request.salespersonel);
+                if (person == null)
+                    request.salespersonel = 1393; // Eğer gönderilen personel database'de yoksa yazılım koç satış yapsın
                 var oldCust = db.customer.Where(c => c.tc == request.tc && c.deleted == false).ToList();
                 if (oldCust.Count == 0)
                 {
@@ -287,22 +290,6 @@ namespace CRMWebApi.Controllers
                         db.product_service.Where(pp => pids.Contains(pp.productid)).OrderBy(s => s.category).ToList().GroupBy(g => g.category, g => g.toDTO()).Select(g => new { category = g.Key, products = g })
                         , "application/json");
                 }
-            }
-        }
-
-        [Route("getPersonel")]
-        [HttpPost, HttpGet]
-        public HttpResponseMessage getPersonel()
-        {
-            using (var db = new KOCSAMADLSEntities(false))
-            {
-                var atanmamis = new adsl_personel { personelid = 0, personelname = "Atanmamış" };
-                var res = db.personel.Where(p => p.deleted == false).OrderBy(p => p.personelname).ToList();
-                res.Insert(0, atanmamis);
-                foreach (adsl_personel p in res) {
-                    p.password = null;
-                }
-                return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
             }
         }
     }
