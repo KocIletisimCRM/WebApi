@@ -474,7 +474,7 @@ namespace CRMWebApi.Controllers
                         }
                         #endregion
                         #region belgeler kaydediliyor
-                        if (customerdocuments.Any(c => c.documenturl != null))
+                        if (customerdocuments != null && customerdocuments.Any(c => c.documenturl != null))
                         {
                             db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
                             {
@@ -518,7 +518,7 @@ namespace CRMWebApi.Controllers
                     else
                     {
                         #region ürünler kaydediliyor
-                        if (customerproducts.Any(cp => cp.id != 0))
+                        if (customerproducts != null && customerproducts.Any(cp => cp.id != 0))
                         {
                             foreach (var p in customerproducts)
                             {
@@ -537,7 +537,7 @@ namespace CRMWebApi.Controllers
                         }
                         #endregion
                         #region belgeler kaydediliyor
-                        if (customerdocuments.Any(cd => cd.id != 0))
+                        if (customerdocuments != null && customerdocuments.Any(cd => cd.id != 0))
                             db.customerdocument.AddRange(customerdocuments.Select(cd => new adsl_customerdocument
                             {
                                 attachedobjecttype = (int)KOCUserTypes.ADSLCustomer,
@@ -594,24 +594,6 @@ namespace CRMWebApi.Controllers
                                 });
                             }
                         }
-                        //if (!stockmovements.Any(sm => sm.movementid != 0))
-                        //    db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
-                        //    {
-                        //        amount = sm.amount,
-                        //        confirmationdate = DateTime.Now,
-                        //        creationdate = DateTime.Now,
-                        //        fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
-                        //        fromobject = dtq.attachedpersonelid,
-                        //        deleted = false,
-                        //        lastupdated = DateTime.Now,
-                        //        movementdate = DateTime.Now,
-                        //        relatedtaskqueue = dtq.taskorderno,
-                        //        serialno = sm.serialno,
-                        //        stockcardid = sm.stockcardid,
-                        //        toobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                        //        toobject = dtq.attachedobjectid,
-                        //        updatedby=user.userId
-                        //    }));
                         #endregion
                     }
 
@@ -629,7 +611,7 @@ namespace CRMWebApi.Controllers
                 catch (Exception e)
                 {
                     transaction.Rollback();
-                    return Request.CreateResponse(HttpStatusCode.NotModified, "error", "application/json");
+                    return Request.CreateResponse(HttpStatusCode.NotModified, e.Message, "application/json");
                 }
         }
 
@@ -1314,7 +1296,7 @@ namespace CRMWebApi.Controllers
         }
 
         [Route("getTaskqueueInfo")]
-        [HttpPost]
+        [HttpPost,HttpGet]
         public HttpResponseMessage getTaskqueueInfo(adsl_taskqueue request)
         { // Tasklarda satış ve önceki task bilgilerini çekmek için oluşturuldu (Hüseyin)
             using (var db = new KOCSAMADLSEntities())
