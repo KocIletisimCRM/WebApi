@@ -302,6 +302,8 @@ namespace CRMWebApi.Controllers
             {
                 if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.14.169.225")
                     return true;
+                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.153.197.167")
+                    return true;
                 var ip = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
                 var digit = ip.Split('.');
                 if (digit != null && digit.Length > 3 && digit[0] == "192" && digit[1] == "168" && digit[2] == "1")
