@@ -1,7 +1,5 @@
 ﻿using CRMWebApi.DTOs.Adsl;
-using System.ServiceModel.Channels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -18,30 +16,28 @@ namespace CRMWebApi.Controllers
     [RoutePrefix("api/Adsl/CallCenter")]
     public class AdslCallCenterController : ApiController
     {
-        // client ip'si kontrolü yapılır. Güvenlik için localden erişim yapmalıdır.
-        [Route("ipControl")]
+        [Route("Callip")]
         [HttpPost]
-        public HttpResponseMessage ipControl(DTOCallCenter request)
+        public HttpResponseMessage Callip()
         {
-            if (request.gsm == "213.153.197.167") // koç iletişim dış ip
-            {
-                return Request.CreateResponse(HttpStatusCode.OK, true, "application/json");
-            }
-            else
-            {
-                return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
-            }
+            string ip = null;
+            if (Request.Properties.ContainsKey("MS_HttpContext"))
+                ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+            return Request.CreateResponse(HttpStatusCode.OK, new { onay = control(Request), ips = ip }, "application/json");
         }
 
         [Route("saveAdslSalesTask")]
         [HttpPost]
         public HttpResponseMessage saveSalesTask(DTOcustomer request)
         {
+            if (!control(Request)) // client ip controlü
+                return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
+
             using (var db = new KOCSAMADLSEntities())
             {
                 var person = db.personel.FirstOrDefault(r => r.personelid == request.salespersonel);
                 if (person == null)
-                    request.salespersonel = 1393; // Eğer gönderilen personel database'de yoksa yazılım koç satış yapsın
+                    request.salespersonel = 1458; // Eğer gönderilen personel database'de yoksa yazılım koç satış yapsın
                 var oldCust = db.customer.Where(c => c.tc == request.tc && c.deleted == false).ToList();
                 if (oldCust.Count == 0)
                 {
@@ -58,7 +54,7 @@ namespace CRMWebApi.Controllers
                         yolKimlikNo = request.yolKimlikNo,
                         binaKimlikNo = request.binaKimlikNo,
                         daire = request.daire,
-                        updatedby = 1393, // yazılım koç
+                        updatedby = 1458, // yazılım koç
                         description = request.description,
                         lastupdated = DateTime.Now,
                         creationdate = DateTime.Now,
@@ -75,7 +71,7 @@ namespace CRMWebApi.Controllers
                     {
                         appointmentdate = request.appointmentdate > DateTime.Now ? DateTime.Now : request.appointmentdate, // netflow tarihi ileri tarih olamaz
                         attachedobjectid = cust.customerid,
-                        attachedpersonelid = request.salespersonel ?? 1393, // yoksa yazılım koç'a ata
+                        attachedpersonelid = request.salespersonel ?? 1458, // yoksa yazılım koç'a ata
                         attachmentdate = DateTime.Now,
                         creationdate = DateTime.Now,
                         deleted = false,
@@ -83,7 +79,7 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         status = null,
                         taskid = request.taskid,
-                        updatedby = 1393,
+                        updatedby = 1458,
                         fault = request.fault
                     };
 
@@ -102,7 +98,7 @@ namespace CRMWebApi.Controllers
                                 campaignid = request.campaignid,
                                 creationdate = DateTime.Now,
                                 lastupdated = DateTime.Now,
-                                updatedby = 1393,
+                                updatedby = 1458,
                                 deleted = false
                             };
                             db.customerproduct.Add(customerproducst);
@@ -119,6 +115,9 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public async Task<HttpResponseMessage> getAdress(DTOGetAdressFilter request)
         {
+            if (!control(Request))
+                return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
+
             using (var db = new KOCSAMADLSEntities())
             {
                 //var il = TeknarProxyService.DeserializeJSON<il>();
@@ -269,6 +268,9 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage getCampaignInfo(DTOFiterGetCampaignRequst request)
         {
+            if (!control(Request))
+                return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
+
             var filter = request.getFilter();
             using (var db = new KOCSAMADLSEntities(false))
             {
@@ -290,6 +292,25 @@ namespace CRMWebApi.Controllers
                         db.product_service.Where(pp => pids.Contains(pp.productid)).OrderBy(s => s.category).ToList().GroupBy(g => g.category, g => g.toDTO()).Select(g => new { category = g.Key, products = g })
                         , "application/json");
                 }
+            }
+        }
+
+        // client ip'si kontrolü yapılır. Güvenlik için localden erişim yapmalıdır. (entegre için onların ip'si eklendi. silinecek (213.14.169.225))
+        private Boolean control (HttpRequestMessage request)
+        {
+            if (request.Properties.ContainsKey("MS_HttpContext"))
+            {
+                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.14.169.225")
+                    return true;
+                var ip = ((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+                var digit = ip.Split('.');
+                if (digit != null && digit.Length > 3 && digit[0] == "192" && digit[1] == "168" && digit[2] == "1")
+                    return true;
+                return false;
+            }
+            else
+            {
+                return false;
             }
         }
     }
