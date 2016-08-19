@@ -5,7 +5,7 @@ using System.Web.OData;
 
 namespace CRMWebApi.Controllers.OData
 {
-    public class SKStandbyTasksHoursReportsController : ODataController
+    public class SKStandbyHoursReportsController : ODataController
     {
         [EnableQuery]
         public async Task<IQueryable<SKStandbyTasksHours>> get()

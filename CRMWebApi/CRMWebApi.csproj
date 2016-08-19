@@ -206,7 +206,7 @@
     <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
     <Compile Include="Controllers\OData\SKRatesController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
-    <Compile Include="Controllers\OData\SKStandbyTasksHoursReportsController.cs" />
+    <Compile Include="Controllers\OData\SKStandbyHoursReportsController.cs" />
     <Compile Include="Controllers\OData\SKStandbyTaskReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
     <Compile Include="Controllers\OData\SLKocReportsController.cs" />

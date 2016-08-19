@@ -330,19 +330,19 @@ namespace CRMWebApi.Controllers
                 var k = tqs.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
                 if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).FirstOrDefault().Value != null)
                 {
-                    res.kconsummationtime = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;
-                    res.kyear = res.kconsummationtime.Value.Year;
-                    res.kmonth = res.kconsummationtime.Value.Month;
-                    res.kday = res.kconsummationtime.Value.Day;
-                    res.ktime = res.kconsummationtime.Value.ToString("HH:mm");
+                    var kdate = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;
+                    res.kyear = kdate.Value.Year;
+                    res.kmonth = kdate.Value.Month;
+                    res.kday = kdate.Value.Day;
+                    res.ktime = kdate.Value.ToString("HH:mm");
                 }
                 if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).FirstOrDefault().Value != null)
                 {
-                    res.ktkconsummationtime = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).Value.consummationdate;
-                    res.ktkyear = res.ktkconsummationtime.Value.Year;
-                    res.ktkmonth = res.ktkconsummationtime.Value.Month;
-                    res.ktkday = res.ktkconsummationtime.Value.Day;
-                    res.ktktime = res.ktkconsummationtime.Value.ToString("HH:mm");
+                    var ktkdate = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).Value.consummationdate;
+                    res.ktkyear = ktkdate.Value.Year;
+                    res.ktkmonth = ktkdate.Value.Month;
+                    res.ktkday = ktkdate.Value.Day;
+                    res.ktktime = ktkdate.Value.ToString("HH:mm");
                 }
                 return res;
             }).ToList();
