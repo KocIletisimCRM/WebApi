@@ -194,7 +194,9 @@ namespace CRMWebApi.Controllers
             WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
-                return ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                var stype = WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid) ? WebApiConfig.AdslTasks[s_tq.taskid].tasktype : 0;
+                return stype == 9 && ktk_tq != null && ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value) && WebApiConfig.AdslStatus[ktk_tq.status.Value].statetype.Value == 1 && ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
             }).SelectMany(
                 p => p.SLs.Where(s => s.Value.KEnd.HasValue && s.Value.KStart.HasValue && WebApiConfig.AdslSl.ContainsKey(s.Key) && (WebApiConfig.AdslSl[s.Key].SLID == 1 || WebApiConfig.AdslSl[s.Key].SLID == 4)).Select(ksl =>
                 { // SLID 1/4 Kurulum/Kurumsal kurulum sl
@@ -241,7 +243,16 @@ namespace CRMWebApi.Controllers
                 res.arzAdet = r.Value.ariza;
                 res.evrAdet = r.Value.evrak;
                 res.tesAdet = r.Value.teslimat;
-                res.bName = WebApiConfig.AdslPersonels.ContainsKey(r.Key) ? WebApiConfig.AdslPersonels[r.Key].personelname : "İsimsiz Personel";
+                if (WebApiConfig.AdslPersonels.ContainsKey(r.Key)) {
+                    var personel = WebApiConfig.AdslPersonels[r.Key];
+                    res.bName =  personel.personelname;
+                    res.il = personel.ilKimlikNo != null ? WebApiConfig.AdslIls.ContainsKey((int)personel.ilKimlikNo) ? WebApiConfig.AdslIls[(int)personel.ilKimlikNo].ad : "İl Yok" : "İl Yok";
+                }
+                else
+                {
+                    res.bName = "İsimsiz Personel";
+                    res.il = "İl Yok";
+                }
                 res.sat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat) ?? 0;
                 res.kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur) ?? 0;
                 res.sat_kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 3 && r.Value.sat_kur <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat_kur) ?? 0;
@@ -288,6 +299,50 @@ namespace CRMWebApi.Controllers
                 }
                 res.description = r.Value.description;
                 res.fault = r.Value.fault;
+                return res;
+            }).ToList();
+        }
+
+        // bekleyen tasklar kurulum ve ktk kapanma tarihleri ile birlikte
+        public static async Task<List<SKStandbyTasksHours>> getSKStandbyTasksHours ()
+        {
+            var list = getSKStandbyTaskReport();
+            return list.Result.Select(r =>
+            {
+                var res = new SKStandbyTasksHours();
+                res.attachmentdateday = r.attachmentdateday;
+                res.attachmentdatemonth = r.attachmentdatemonth;
+                res.attachmentdateyear = r.attachmentdateyear;
+                res.creationdateday = r.creationdateday;
+                res.creationdatemonth = r.creationdatemonth;
+                res.creationdateyear = r.creationdateyear;
+                res.customeradres = r.customeradres;
+                res.customerid = r.customerid;
+                res.customername = r.customername;
+                res.description = r.description;
+                res.fault = r.fault;
+                res.personelid = r.personelid;
+                res.personelname = r.personelname;
+                res.taskid = r.taskid;
+                res.taskname = r.taskname;
+                res.taskorderno = r.taskorderno;
+                var k = WebApiConfig.AdslTaskQueues.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
+                if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).FirstOrDefault().Value != null)
+                {
+                    res.kconsummationtime = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;
+                    res.kyear = res.kconsummationtime.Value.Year;
+                    res.kmonth = res.kconsummationtime.Value.Month;
+                    res.kday = res.kconsummationtime.Value.Day;
+                    res.ktime = res.kconsummationtime.Value.ToString("HH:mm");
+                }
+                if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).FirstOrDefault().Value != null)
+                {
+                    res.ktkconsummationtime = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).Value.consummationdate;
+                    res.ktkyear = res.ktkconsummationtime.Value.Year;
+                    res.ktkmonth = res.ktkconsummationtime.Value.Month;
+                    res.ktkday = res.ktkconsummationtime.Value.Day;
+                    res.ktktime = res.ktkconsummationtime.Value.ToString("HH:mm");
+                }
                 return res;
             }).ToList();
         }
@@ -540,6 +595,7 @@ namespace CRMWebApi.Controllers
             ).ToList();
         }
 
+        // KOCSL Report
         public static async Task<List<SLKocReport>> getKocSLReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
@@ -554,7 +610,9 @@ namespace CRMWebApi.Controllers
                 {
                     var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
                     var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
+                    var stq = WebApiConfig.AdslTaskQueues[p.S_TON];
                     var r = new SLKocReport();
+                    r.staskname = WebApiConfig.AdslTasks.ContainsKey(stq.taskid) ? WebApiConfig.AdslTasks[stq.taskid].taskname : "İsimsiz Task";
                     if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                     {
                         var statu = WebApiConfig.AdslStatus[lasttq.status.Value];

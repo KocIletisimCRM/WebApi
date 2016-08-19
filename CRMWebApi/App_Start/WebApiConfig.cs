@@ -1659,6 +1659,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.SLKocReport>("SLKocReports");
             builder.EntitySet<DTOs.Adsl.SKPaymentReport>("SKPaymentReports");
             builder.EntitySet<DTOs.Adsl.SKStandbyTaskReport>("SKStandbyTaskReports");
+            builder.EntitySet<DTOs.Adsl.SKStandbyTaskReport>("SKStandbyTasksHoursReports");
             builder.EntitySet<DTOs.Adsl.PersonelsReport>("PersonelsReports");
             builder.EntitySet<DTOs.Adsl.ISSSuccessRate>("ISSSuccessRates");
             builder.EntitySet<DTOs.Adsl.SKRate>("SKRates");

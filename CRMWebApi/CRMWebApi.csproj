@@ -206,6 +206,7 @@
     <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
     <Compile Include="Controllers\OData\SKRatesController.cs" />
     <Compile Include="Controllers\OData\SKReportsController.cs" />
+    <Compile Include="Controllers\OData\SKStandbyTasksHoursReportsController.cs" />
     <Compile Include="Controllers\OData\SKStandbyTaskReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
     <Compile Include="Controllers\OData\SLKocReportsController.cs" />
@@ -294,6 +295,7 @@
     <Compile Include="DTOs\Adsl\SKRate.cs" />
     <Compile Include="DTOs\Adsl\SKReport.cs" />
     <Compile Include="DTOs\Adsl\SKStandbyTaskReport.cs" />
+    <Compile Include="DTOs\Adsl\SKStandbyTasksHours.cs" />
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
     <Compile Include="DTOs\Adsl\SLKocReport.cs" />
     <Compile Include="DTOs\Adsl\SLTime.cs" />

@@ -6,6 +6,7 @@ namespace CRMWebApi.DTOs.Adsl
 {
     public class SLKocReport : SLBayiReport
     {
+        public string staskname { get; set; }
         public DateTime? KocSLStart { get; set; }
 
         public DateTime? kocSLEnd = DateTime.Now;
