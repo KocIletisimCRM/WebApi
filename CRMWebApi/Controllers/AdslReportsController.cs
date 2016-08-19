@@ -306,8 +306,9 @@ namespace CRMWebApi.Controllers
         // bekleyen tasklar kurulum ve ktk kapanma tarihleri ile birlikte
         public static async Task<List<SKStandbyTasksHours>> getSKStandbyTasksHours ()
         {
-            var list = getSKStandbyTaskReport();
-            return list.Result.Select(r =>
+            var list = await getSKStandbyTaskReport().ConfigureAwait(false);
+            var tqs = getTaskqueues(new DateTime(2016, 1, 1));
+            return list.Select(r =>
             {
                 var res = new SKStandbyTasksHours();
                 res.attachmentdateday = r.attachmentdateday;
@@ -326,7 +327,7 @@ namespace CRMWebApi.Controllers
                 res.taskid = r.taskid;
                 res.taskname = r.taskname;
                 res.taskorderno = r.taskorderno;
-                var k = WebApiConfig.AdslTaskQueues.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
+                var k = tqs.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
                 if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).FirstOrDefault().Value != null)
                 {
                     res.kconsummationtime = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;

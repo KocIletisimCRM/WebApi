@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -7,6 +8,8 @@ namespace CRMWebApi.DTOs.Adsl
 {
     public class SKStandbyTasksHours: SKStandbyTaskReport
     {
+        [Key]
+        public int taskno { get; set; }
         public int? kyear { get; set; }
         public int? kmonth { get; set; }
         public int? kday { get; set; }
