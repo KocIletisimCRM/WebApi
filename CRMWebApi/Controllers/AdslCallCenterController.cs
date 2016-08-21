@@ -33,45 +33,67 @@ namespace CRMWebApi.Controllers
             if (!control(Request)) // client ip controlü
                 return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
 
-            using (var db = new KOCSAMADLSEntities())
-            {
-                var person = db.personel.FirstOrDefault(r => r.personelid == request.salespersonel);
-                if (person == null)
-                    request.salespersonel = 1458; // Eğer gönderilen personel database'de yoksa yazılım koç satış yapsın
-                var oldCust = db.customer.Where(c => c.tc == request.tc && c.deleted == false).ToList();
-                if (oldCust.Count == 0)
+            int[] ils = { 19, 61 }; // Bölge içi iller kaydedilecek taskid'si bölge içi veya dışı olarak seçim yapılacak
+            bool inCheck = false; // Bölge içinde olan müşteri kontrolü
+            foreach (int il in ils)
+                if (request.ilKimlikNo == il)
                 {
-                    var customer = new customer
-                    {
-                        customername = request.customername.ToUpper(),
-                        tc = request.tc,
-                        gsm = request.gsm,
-                        phone = request.phone,
-                        ilKimlikNo = request.ilKimlikNo,
-                        ilceKimlikNo = request.ilceKimlikNo,
-                        bucakKimlikNo = request.bucakKimlikNo,
-                        mahalleKimlikNo = request.mahalleKimlikNo,
-                        yolKimlikNo = request.yolKimlikNo,
-                        binaKimlikNo = request.binaKimlikNo,
-                        daire = request.daire,
-                        updatedby = 1458, // yazılım koç
-                        description = request.description,
-                        lastupdated = DateTime.Now,
-                        creationdate = DateTime.Now,
-                        deleted = false,
-                        email = request.email,
-                        superonlineCustNo = request.superonlineCustNo,
-                    };
-                    db.customer.Add(customer);
-                    db.SaveChanges();
+                    inCheck = true;
+                    break;
+                }
+            if (!inCheck)
+            { // Bölge içi gibi gelen taskı aynı türden bölge dışına çevir (Çağrı Satış Yalın -> Çağrı Satış Yalın Dış vb.)
 
-                    var cust = db.customer.Where(c => c.tc == request.tc && c.customername == request.customername).FirstOrDefault();
+            }
+
+            using (var db = new KOCSAMADLSEntities())
+            using (var transaction = db.Database.BeginTransaction())
+                try
+                {
+                    var person = db.personel.FirstOrDefault(r => r.personelid == request.salespersonel);
+                    if (person == null)
+                        request.salespersonel = 1458; // Eğer gönderilen personel database'de yoksa ÇAĞRI MERKEZİ (KOÇ İLETİŞİM) satış yapsın
+
+                    if (request.customerid == 0)
+                    {
+                        var oldCust = db.customer.Where(c => c.tc == request.tc && c.deleted == false).ToList();
+                        if (oldCust.Count == 0)
+                        {
+                            var customer = new customer
+                            {
+                                customername = request.customername.ToUpper(),
+                                tc = request.tc,
+                                gsm = request.gsm,
+                                phone = request.phone,
+                                ilKimlikNo = request.ilKimlikNo,
+                                ilceKimlikNo = request.ilceKimlikNo,
+                                bucakKimlikNo = request.bucakKimlikNo,
+                                mahalleKimlikNo = request.mahalleKimlikNo,
+                                yolKimlikNo = 61,
+                                binaKimlikNo = 61,
+                                daire = 61,
+                                updatedby = 1458, // ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)
+                                description = request.description,
+                                lastupdated = DateTime.Now,
+                                creationdate = DateTime.Now,
+                                deleted = false,
+                                email = request.email,
+                                superonlineCustNo = request.superonlineCustNo,
+                            };
+                            db.customer.Add(customer);
+                            db.SaveChanges();
+
+                            request.customerid = customer.customerid;
+                        }
+                        else
+                            return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
+                    }
 
                     var taskqueue = new adsl_taskqueue
                     {
-                        appointmentdate = request.appointmentdate > DateTime.Now ? DateTime.Now : request.appointmentdate, // netflow tarihi ileri tarih olamaz
-                        attachedobjectid = cust.customerid,
-                        attachedpersonelid = request.salespersonel ?? 1458, // yoksa yazılım koç'a ata
+                        appointmentdate = DateTime.Now,
+                        attachedobjectid = request.customerid,
+                        attachedpersonelid = request.salespersonel ?? 1458, // yoksa ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)'a ata
                         attachmentdate = DateTime.Now,
                         creationdate = DateTime.Now,
                         deleted = false,
@@ -93,7 +115,7 @@ namespace CRMWebApi.Controllers
                             var customerproducst = new adsl_customerproduct
                             {
                                 taskid = taskqueue.taskorderno,
-                                customerid = customer.customerid,
+                                customerid = request.customerid,
                                 productid = item,
                                 campaignid = request.campaignid,
                                 creationdate = DateTime.Now,
@@ -105,10 +127,14 @@ namespace CRMWebApi.Controllers
                         }
                         db.SaveChanges();
                     }
-                    return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
+                    transaction.Commit();
+                    return Request.CreateResponse(HttpStatusCode.OK, "Tamamlandı", "application/json");
                 }
-                return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
-            }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    return Request.CreateResponse(HttpStatusCode.OK, e.Message, "application/json");
+                }
         }
 
         [Route("getAdress")]
@@ -370,6 +396,8 @@ namespace CRMWebApi.Controllers
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
+                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "46.2.78.85") // hüseyin ev
+                    return true;
                 if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.14.169.225")
                     return true;
                 if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.153.197.167")

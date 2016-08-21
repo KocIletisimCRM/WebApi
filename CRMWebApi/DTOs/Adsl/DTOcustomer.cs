@@ -28,7 +28,5 @@ namespace CRMWebApi.DTOs.Adsl
 
         public DTOil il { get; set; }
         public DTOilce ilce { get; set; }
-      
-
     }
 }
