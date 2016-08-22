@@ -33,7 +33,7 @@ namespace CRMWebApi.Controllers
             if (!control(Request)) // client ip controlü
                 return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
 
-            int[] ils = { 19, 61 }; // Bölge içi iller kaydedilecek taskid'si bölge içi veya dışı olarak seçim yapılacak
+            int[] ils = { 4, 5, 8, 19, 24, 25, 28, 29, 36, 52, 53, 55, 57, 60, 61, 69, 75, 76 }; // Bölge içi iller kaydedilecek taskid'si bölge içi veya dışı olarak seçim yapılacak
             bool inCheck = false; // Bölge içinde olan müşteri kontrolü
             foreach (int il in ils)
                 if (request.ilKimlikNo == il)
@@ -43,7 +43,12 @@ namespace CRMWebApi.Controllers
                 }
             if (!inCheck)
             { // Bölge içi gibi gelen taskı aynı türden bölge dışına çevir (Çağrı Satış Yalın -> Çağrı Satış Yalın Dış vb.)
-
+                if (request.taskid == 122) // churn iç churn dış 
+                    request.taskid = 121;
+                else if (request.taskid == 119)
+                    request.taskid = 120;
+                else if (request.taskid == 131)
+                    request.taskid = 133;
             }
 
             using (var db = new KOCSAMADLSEntities())
