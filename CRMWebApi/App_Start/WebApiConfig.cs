@@ -413,7 +413,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo, roles, email, kurulumpersonelid, notes from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo, roles, email, kurulumpersonelid, notes, mobile from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -430,6 +430,7 @@ namespace CRMWebApi
                                 email = sqlreader.IsDBNull(7) ? null : (string)sqlreader[7],
                                 kurulumpersonelid = sqlreader.IsDBNull(8) ? null : (int?)sqlreader[8],
                                 notes = sqlreader.IsDBNull(9) ? null : (string)sqlreader[9],
+                                mobile = sqlreader.IsDBNull(10) ? null : (string)sqlreader[10],
                             });
                             AdslPersonels[t.personelid] = t;
                         }

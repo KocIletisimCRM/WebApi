@@ -10,6 +10,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string il { get; set; }
         public string ilce { get; set; }
         public string email { get; set; }
+        public string mobile { get; set; }
         public string kanalyoneticisi { get; set; }
         public string kurulumbayisi { get; set; }
         public string gorev { get; set; }
