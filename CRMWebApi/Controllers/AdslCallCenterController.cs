@@ -91,7 +91,6 @@ namespace CRMWebApi.Controllers
 
                     var taskqueue = new adsl_taskqueue
                     {
-                        appointmentdate = DateTime.Now,
                         attachedobjectid = request.customerid,
                         attachedpersonelid = request.salespersonel ?? 1458, // yoksa ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)'a ata
                         attachmentdate = DateTime.Now,
@@ -350,8 +349,10 @@ namespace CRMWebApi.Controllers
                     if (res.Count > 0)
                     {
                         customer retCust = null;
+                        customer gecici = null;
                         foreach (customer eleman in res)
                         { // müşterilerin taskları kontrol edilecek ana hiyerarşi tasklarında iptal olmayan ilk müşteriyi geri döndürecem
+                            gecici = eleman;
                             var iTask = db.taskqueue.Where(t => t.deleted == false && t.attachedobjectid == eleman.customerid && t.status == 9116).ToList();
                             if (iTask.Count > 0)
                             {
@@ -372,6 +373,8 @@ namespace CRMWebApi.Controllers
                                 break;
                             }
                         }
+                        if (retCust == null)
+                            retCust = gecici;
                         return Request.CreateResponse(HttpStatusCode.OK, retCust.toDTO(), "application/json");
                     }
                     else
