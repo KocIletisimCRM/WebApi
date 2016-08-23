@@ -357,7 +357,7 @@ namespace CRMWebApi.Controllers
 
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if ((tq.task.taskid==41 && tq.taskstatepool.taskstateid==9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || (tq.task.taskid == 88 && tq.taskstatepool.taskstateid != 9116) || (tq.task.taskid == 132 && tq.taskstatepool.taskstateid != 9116))
+                        if ((tq.task.taskid==41 && tq.taskstatepool.taskstateid==9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115))
                         {
                             // satış task task orderno
                             var ptq = dtq;
@@ -432,8 +432,8 @@ namespace CRMWebApi.Controllers
                                     taskid = dtq.taskorderno,
                                     updatedby = user.userId
                                 });
-                                db.SaveChanges();
                             }
+                            db.SaveChanges();
                         }
                         #endregion
                         #region belgeler kaydediliyor
