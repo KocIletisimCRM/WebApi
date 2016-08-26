@@ -1045,6 +1045,7 @@ namespace CRMWebApi.Controllers
                     phone = ct.phone,
                     tckimlikno = ct.tckimlikno,
                     lastupdated = DateTime.Now,
+                    creationdate = DateTime.Now,
                     updatedby = user.userId,
                     deleted = false,
                     flat = ct.flat,
