@@ -96,6 +96,7 @@ namespace CRMWebApi.Controllers
 
                     var taskqueue = new adsl_taskqueue
                     {
+                        appointmentdate = DateTime.Now,
                         attachedobjectid = request.customerid,
                         attachedpersonelid = request.salespersonel ?? 1458, // yoksa ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)'a ata
                         attachmentdate = DateTime.Now,

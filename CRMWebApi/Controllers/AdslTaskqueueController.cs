@@ -773,7 +773,7 @@ namespace CRMWebApi.Controllers
 
                     var taskqueue = new adsl_taskqueue
                     {
-                        appointmentdate = request.appointmentdate > DateTime.Now ? DateTime.Now : request.appointmentdate, // netflow tarihi ileri tarih olamaz
+                        appointmentdate = request.appointmentdate != null ? request.appointmentdate < DateTime.Now ? request.appointmentdate : DateTime.Now : DateTime.Now, // netflow tarihi ileri tarih olamaz
                         attachedobjectid = cust.customerid,
                         attachedpersonelid = request.salespersonel ?? user.userId,
                         attachmentdate = DateTime.Now,
