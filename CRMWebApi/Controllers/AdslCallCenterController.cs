@@ -107,7 +107,7 @@ namespace CRMWebApi.Controllers
                         status = null,
                         taskid = request.taskid,
                         updatedby = 1458,
-                        fault = request.fault
+                        fault = db.task.Where(r => r.taskid == request.taskid).Select(r => r.tasktype).First() != 8 ? "Çağrı Merkezi" : null
                     };
 
                     db.taskqueue.Add(taskqueue);
