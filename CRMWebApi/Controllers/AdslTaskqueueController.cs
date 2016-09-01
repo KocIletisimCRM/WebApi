@@ -50,7 +50,7 @@ namespace CRMWebApi.Controllers
                         querySQL = querySQL.Replace("(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status))", "(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status) or taskqueue.status is null)");
                         countSQL = countSQL.Replace("(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status))", "(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status) or taskqueue.status is null)");
                     }
-                }
+                } // task state açık ile beraber durum seçildiğinde açık gelmiyor diye eklendi
 
                 var perf = Stopwatch.StartNew();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
