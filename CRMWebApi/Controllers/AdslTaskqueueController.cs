@@ -44,6 +44,13 @@ namespace CRMWebApi.Controllers
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
+                if (request.taskstate != null && request.taskstate.value != null) {
+                    JArray array = (JArray)request.taskstate.value;
+                    if (array.First.ToObject<int>() == 0) {
+                        querySQL = querySQL.Replace("(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status))", "(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status) or taskqueue.status is null)");
+                        countSQL = countSQL.Replace("(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status))", "(EXISTS (SELECT * from _status WHERE _status.taskstateid = taskqueue.status) or taskqueue.status is null)");
+                    }
+                }
 
                 var perf = Stopwatch.StartNew();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
