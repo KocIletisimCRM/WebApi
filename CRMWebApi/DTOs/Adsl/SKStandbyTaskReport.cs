@@ -8,6 +8,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int taskorderno { get; set; }
         public int taskid { get; set; }
         public string taskname { get; set; }
+        public string status { get; set; }
         public int creationdateyear { get; set; }
         public int creationdatemonth { get; set; }
         public int creationdateday { get; set; }

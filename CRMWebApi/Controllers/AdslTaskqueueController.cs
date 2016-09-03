@@ -44,7 +44,7 @@ namespace CRMWebApi.Controllers
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
-                if (request.taskstate != null && request.taskstate.value != null) {
+                if (request.taskstate != null && request.taskstate.value != null && request.taskstate.op == 7) {
                     try
                     {
                         JArray array = (JArray)request.taskstate.value;

@@ -267,7 +267,7 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKStandbyTaskReport>> getSKStandbyTaskReport()
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslTaskQueues.Where(r=> (r.Value.status == null || r.Value.status == 9159 || r.Value.status == 9165) && r.Value.deleted == false).Select(r =>
+            return WebApiConfig.AdslTaskQueues.Where(r=> (r.Value.status == null || r.Value.status.Value == 9159 || r.Value.status.Value == 9165) && r.Value.deleted == false).Select(r =>
             {
                 var res = new SKStandbyTaskReport();
                 res.taskorderno = r.Value.taskorderno;
@@ -297,6 +297,7 @@ namespace CRMWebApi.Controllers
                     res.attachmentdatemonth = adate.Month;
                     res.attachmentdateday = adate.Day;
                 }
+                res.status = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? WebApiConfig.AdslStatus[r.Value.status.Value].taskstate : null : null;
                 res.description = r.Value.description;
                 res.fault = r.Value.fault;
                 return res;
@@ -551,7 +552,7 @@ namespace CRMWebApi.Controllers
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
                 int? cs_tq = tasks.Where(z => z.Key == s_tq.taskid).Select(x => x.Value).FirstOrDefault();
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return cs_tq != null && cs_tq != 0 && ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end;
+                return cs_tq != null && cs_tq != 0 && (ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end);
             }).Select(r =>
             {
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
