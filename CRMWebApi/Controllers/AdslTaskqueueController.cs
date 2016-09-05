@@ -39,7 +39,13 @@ namespace CRMWebApi.Controllers
                 if ((user != null && (user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin))
                     filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { op = 9, value = $"(attachablepersoneltype = (attachablepersoneltype & {user.userRole}))" });
 
-                if (user != null && ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader))
+                if (user.userId == 1458) {// Cağrı Merkezi için şart koyuldu kişi bazlı şarttan kaçmak için kanal yöneticilerine bu şart yazılabilir !!!user.userId
+                    var per = db.personel.Where(p => p.relatedpersonelid == user.userId).Select(p => p.personelid).ToList();
+                    per.Add(user.userId);
+                    JArray pers = new JArray(per);
+                    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 7, value = pers });
+                }
+                else if (user != null && ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader))
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 2, value = user.userId });
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
