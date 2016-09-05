@@ -279,8 +279,13 @@ namespace CRMWebApi.Controllers
                 res.customerid = r.Value.attachedobjectid.Value;
                 if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
                 {
-                    res.customername = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername;
-                    res.customeradres = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].description;
+                    var cstmr = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
+                    res.customername = cstmr.customername;
+                    res.customeradres = cstmr.description;
+                    if (cstmr.ilKimlikNo.HasValue && WebApiConfig.AdslIls.ContainsKey(cstmr.ilKimlikNo.Value))
+                        res.il = WebApiConfig.AdslIls[cstmr.ilKimlikNo.Value].ad;
+                    if (cstmr.ilceKimlikNo.HasValue && WebApiConfig.AdslIlces.ContainsKey(cstmr.ilceKimlikNo.Value))
+                        res.ilce = WebApiConfig.AdslIlces[cstmr.ilceKimlikNo.Value].ad;
                 }
                 else
                     res.customername = "İsimsiz Müşteri";
