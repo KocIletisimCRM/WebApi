@@ -77,7 +77,7 @@ namespace CRMWebApi.Controllers
                                 yolKimlikNo = 61,
                                 binaKimlikNo = 61,
                                 daire = 61,
-                                updatedby = 1458, // ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)
+                                updatedby = request.salespersonel ?? 1458, // ÇAĞRI MERKEZİ (KOÇ İLETİŞİM)
                                 description = request.description,
                                 lastupdated = DateTime.Now,
                                 creationdate = DateTime.Now,
@@ -106,14 +106,14 @@ namespace CRMWebApi.Controllers
                         lastupdated = DateTime.Now,
                         status = null,
                         taskid = request.taskid,
-                        updatedby = 1458,
-                        fault = db.task.Where(r => r.taskid == request.taskid).Select(r => r.tasktype).First() != 8 ? "Çağrı Merkezi" : null
+                        updatedby = request.salespersonel ?? 1458,
+                        fault = request.fault
                     };
 
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
 
-                    if (request.productids != null)
+                    if (request.productids != null && request.productids.Length > 0)
                     {
                         foreach (var item in request.productids)
                         {
@@ -125,7 +125,7 @@ namespace CRMWebApi.Controllers
                                 campaignid = request.campaignid,
                                 creationdate = DateTime.Now,
                                 lastupdated = DateTime.Now,
-                                updatedby = 1458,
+                                updatedby = request.salespersonel ?? 1458,
                                 deleted = false
                             };
                             db.customerproduct.Add(customerproducst);
@@ -405,7 +405,7 @@ namespace CRMWebApi.Controllers
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
-                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "46.2.78.85") // hüseyin ev
+                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "::1") // localhost
                     return true;
                 if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.14.169.225")
                     return true;
