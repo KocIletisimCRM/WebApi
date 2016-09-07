@@ -10,6 +10,8 @@ using Teknar_Proxy_Lib;
 using CRMWebApi.DTOs;
 using System.Threading.Tasks;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
+using System.IO;
+using System.Net.Mail;
 
 namespace CRMWebApi.Controllers
 {
@@ -133,11 +135,13 @@ namespace CRMWebApi.Controllers
                         db.SaveChanges();
                     }
                     transaction.Commit();
+                    logs(request, true, "");
                     return Request.CreateResponse(HttpStatusCode.OK, "Tamamlandı", "application/json");
                 }
                 catch (Exception e)
                 {
                     transaction.Rollback();
+                    logs(request, false, e.Message);
                     return Request.CreateResponse(HttpStatusCode.OK, e.Message, "application/json");
                 }
         }
@@ -401,7 +405,7 @@ namespace CRMWebApi.Controllers
         }
 
         // client ip'si kontrolü yapılır. Güvenlik için localden erişim yapmalıdır. (entegre için onların ip'si eklendi. silinecek (213.14.169.225))
-        private Boolean control (HttpRequestMessage request)
+        private Boolean control(HttpRequestMessage request)
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
@@ -422,5 +426,74 @@ namespace CRMWebApi.Controllers
                 return false;
             }
         }
+
+        private void logs(DTOcustomer req, bool onay, string message)
+        {
+            using (var db = new KOCSAMADLSEntities())
+                try {
+                    StreamWriter log;
+
+                    //string path = @"C:\Users\LENOVO\Desktop\log.txt";
+                    string path = @"C:\Logs\Log_CallCenter.txt";
+
+                    if (!File.Exists(path))
+                        log = new StreamWriter(path);
+                    else
+                        log = File.AppendText(path);
+
+                    var time = DateTime.Now;
+                    var person = db.personel.First(r => r.personelid == req.salespersonel);
+                    var task = db.task.First(r => r.taskid == req.taskid);
+
+                    if (onay)
+                        log.Write("KAYIT BAŞARILI !!! ** ");
+                    else
+                        log.Write("KAYIT HATALI !!! ** ");
+
+                    log.Write(time);
+                    log.Write(" **  Personel -> (" + person.personelid + ") " + person.personelname);
+                    log.Write(" **  Task -> (" + task.taskid + ") " + task.taskname);
+
+                    if (req.customerid > 0) {
+                        var customer = db.customer.First(r => r.customerid == req.customerid);
+                        log.Write("  **  Müşteri -> GSM : " + customer.gsm + " TC : " + customer.tc + " Ad : " + 
+                            customer.customername + " İl/İlçe : " + customer.ilKimlikNo + "/" + customer.ilceKimlikNo);
+                    }
+                    else
+                        log.Write("  **  Müşteri -> GSM : " + req.gsm + " TC : " + req.tc + " Ad : " + 
+                            req.customername + " İl/İlçe : " + req.ilKimlikNo + "/" + req.ilceKimlikNo);
+
+                    if (req.productids.Length > 0) {
+                        log.Write("  **  Kampanya -> -" );
+                        foreach (var item in req.productids) {
+                            log.Write(item + "-");
+                        }
+                    }
+
+                    log.Write("  **  Mesaj : " + message + "\r\n");
+
+                    log.Close();
+                }
+                catch (Exception e) {
+
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress("adslbayidestek@kociletisim.com.tr"); // Mail'in kimden olduğu adresi buraya yazılır.
+                    mail.Subject = "LOG HATA"; // mail'in konusu
+
+                    mail.To.Add("huseyinkoz@kociletisim.com.tr");
+                    mail.Body = string.Format(e.Message); // mail'in ana kısmı, içeriği.. 
+                    SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
+
+                    smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
+                    smtp.EnableSsl = true;
+
+                    try {
+                        smtp.Send(mail); // mail gönderilir.
+                    }
+                    catch (Exception) {
+                        throw;
+                    }
+                }
+        } 
     }
 }
