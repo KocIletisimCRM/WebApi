@@ -790,7 +790,7 @@ namespace CRMWebApi.Controllers
                     db.customer.Add(customer);
                     db.SaveChanges();
 
-                    var cust = db.customer.Where(c => c.tc == request.tc && c.customername == request.customername).FirstOrDefault();
+                    var cust = db.customer.Where(c => c.tc == request.tc && c.customername == request.customername && c.deleted == false).FirstOrDefault();
 
                     var taskqueue = new adsl_taskqueue
                     {
