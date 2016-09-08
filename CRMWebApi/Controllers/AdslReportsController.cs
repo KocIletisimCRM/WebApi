@@ -525,11 +525,11 @@ namespace CRMWebApi.Controllers
                 if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                 {
                     var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                    res.lastTaskStatusType = StateTypeText[statu.statetype.Value];
-                    res.lastTaskStatus = statu.taskstate;
+                    res.lastTaskStatus = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatusName = statu.taskstate;
                 }
                 else
-                    res.lastTaskStatusType = "Bekleyen";
+                    res.lastTaskStatus = "Bekleyen";
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
@@ -721,11 +721,11 @@ namespace CRMWebApi.Controllers
                 if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                 {
                     var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                    res.lastTaskStatusType = StateTypeText[statu.statetype.Value];
-                    res.lastTaskStatus = statu.taskstate;
+                    res.lastTaskStatus = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatusName = statu.taskstate;
                 }
                 else
-                    res.lastTaskStatusType = "Bekleyen";
+                    res.lastTaskStatus = "Bekleyen";
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
