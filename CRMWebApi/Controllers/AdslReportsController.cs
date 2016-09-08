@@ -525,13 +525,15 @@ namespace CRMWebApi.Controllers
                 if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                 {
                     var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                    res.lastTaskStatus = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatusType = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatus = statu.taskstate;
                 }
                 else
-                    res.lastTaskStatus = "Bekleyen";
+                    res.lastTaskStatusType = "Bekleyen";
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
+                res.lastTaskDescription = lasttq.description;
                 res.lasttaskcreationdateyear = lasttq.creationdate.Value.Year;
                 res.lasttaskcreationdatemonth = lasttq.creationdate.Value.Month;
                 res.lasttaskcreationdateday = lasttq.creationdate.Value.Day;
@@ -719,13 +721,15 @@ namespace CRMWebApi.Controllers
                 if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
                 {
                     var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                    res.lastTaskStatus = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatusType = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatus = statu.taskstate;
                 }
                 else
-                    res.lastTaskStatus = "Bekleyen";
+                    res.lastTaskStatusType = "Bekleyen";
                 var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
                 res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
                 res.lastTaskName = lastTask.taskname;
+                res.lastTaskDescription = lasttq.description;
                 res.lasttaskcreationdateyear = lasttq.creationdate.Value.Year;
                 res.lasttaskcreationdatemonth = lasttq.creationdate.Value.Month;
                 res.lasttaskcreationdateday = lasttq.creationdate.Value.Day;
@@ -739,6 +743,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
+        // Bayi SL Report
         public static async Task<List<SLBayiReport>> getBayiSLReport(int BayiId, DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
@@ -780,8 +785,8 @@ namespace CRMWebApi.Controllers
                     }
                     else
                         r.SLName = "Tanımlanmamış SL";
-                    if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
-                    {
+                    if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) 
+                    { // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
                         var Bayi = WebApiConfig.AdslPersonels[bsl.Value.BayiID.Value];
                         r.BayiId = Bayi.personelid;
                         r.BayiName = Bayi.personelname;
@@ -789,8 +794,14 @@ namespace CRMWebApi.Controllers
                         r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
                     }
                     r.CustomerId = bsl.Value.CustomerId;
-                    r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId) ?
-                        WebApiConfig.AdslCustomers[bsl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                    if (WebApiConfig.AdslCustomers.ContainsKey(bsl.Value.CustomerId))
+                    {
+                        var cust = WebApiConfig.AdslCustomers[bsl.Value.CustomerId];
+                        r.CustomerName = cust.customername;
+                        r.superonlineNo = cust.superonlineCustNo;
+                    }
+                    else
+                        r.CustomerName = "Tanımlanmamış Müşteri";
                     return r;
                 })
             ).ToList();
@@ -859,8 +870,14 @@ namespace CRMWebApi.Controllers
                         r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
                     }
                     r.CustomerId = ksl.Value.CustomerId;
-                    r.CustomerName = WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId) ?
-                        WebApiConfig.AdslCustomers[ksl.Value.CustomerId].customername : "Tanımlanmamış Müşteri";
+                    if (WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId))
+                    {
+                        var cust = WebApiConfig.AdslCustomers[ksl.Value.CustomerId];
+                        r.CustomerName = cust.customername;
+                        r.superonlineNo = cust.superonlineCustNo;
+                    }
+                    else
+                        r.CustomerName = "Tanımlanmamış Müşteri";
                     return r;
                 })
             ).ToList();

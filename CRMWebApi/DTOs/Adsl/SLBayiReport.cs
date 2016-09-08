@@ -11,11 +11,12 @@ namespace CRMWebApi.DTOs.Adsl
         [Key]
         public string SLName { get; set; }
         [Key]
-        public int CustomerId { get; set; }
         public int? BayiId { get; set; }
         public string BayiName { get; set; }
         public string Il { get; set; }
         public string Ilce { get; set; }
+        public int CustomerId { get; set; }
+        public string superonlineNo { get; set; }
         public string CustomerName { get; set; }
         public DateTime? BayiSLTaskStart { get; set; }
         private DateTime? bayiSLEnd = DateTime.Now;

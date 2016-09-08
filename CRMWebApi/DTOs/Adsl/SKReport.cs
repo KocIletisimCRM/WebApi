@@ -80,9 +80,11 @@ namespace CRMWebApi.DTOs.Adsl
         public int? lasttaskconsummationdateyear { get; set; }
         public int? lasttaskconsummationdatemonth { get; set; }
         public int? lasttaskconsummationdateday { get; set; }
+        public string lastTaskStatusType { get; set; }
         public string lastTaskStatus { get; set; }
         public string lastTaskTypeName { get; set; }
         public string lastTaskName { get; set; }
+        public string lastTaskDescription { get; set; }
 
         public static string GetHeadhers()
         {
