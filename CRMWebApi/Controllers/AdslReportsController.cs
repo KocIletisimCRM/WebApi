@@ -551,7 +551,7 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKReport>> getCagriSKReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            Dictionary<int, int> tasks = new Dictionary<int, int> { { 133, 133 }, { 131, 131 }, { 122, 122 }, { 121, 121 }, { 120, 120 }, { 119, 119 } }; // çağrı satış taskları
+            Dictionary<int, int> tasks = new Dictionary<int, int> { { 133, 133 }, { 131, 131 }, { 122, 122 }, { 121, 121 }, { 120, 120 }, { 119, 119 }, { 139, 139 } }; // çağrı satış taskları
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
