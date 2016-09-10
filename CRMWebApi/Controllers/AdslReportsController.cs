@@ -820,65 +820,73 @@ namespace CRMWebApi.Controllers
                     return (!sl.Value.KEnd.HasValue && ((lasttq.consummationdate == null && request.start <= date && request.end >= date) || (lasttq.consummationdate != null && lasttq.consummationdate >= request.start && lasttq.consummationdate <= request.end))) || (sl.Value.KEnd.HasValue && sl.Value.KEnd.Value >= request.start && sl.Value.KEnd.Value <= request.end) || (sl.Value.BEnd.HasValue && sl.Value.BEnd.Value >= request.start && sl.Value.BEnd.Value <= request.end);
                 }).Select(ksl =>
                 {
-                    var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
-                    var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
-                    var stq = WebApiConfig.AdslTaskQueues[p.S_TON];
-                    var r = new SLKocReport();
-                    r.staskname = WebApiConfig.AdslTasks.ContainsKey(stq.taskid) ? WebApiConfig.AdslTasks[stq.taskid].taskname : "İsimsiz Task";
-                    if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
+                    try
                     {
-                        var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                        r.status = StateTypeText[statu.statetype.Value];
+                        var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+                        var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
+                        var stq = WebApiConfig.AdslTaskQueues[p.S_TON];
+                        var r = new SLKocReport();
+                        r.staskname = WebApiConfig.AdslTasks.ContainsKey(stq.taskid) ? WebApiConfig.AdslTasks[stq.taskid].taskname : "İsimsiz Task";
+                        if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
+                        {
+                            var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                            r.status = StateTypeText[statu.statetype.Value];
+                        }
+                        else
+                            r.status = "Bekleyen";
+                        if (ksl.Value.BEnd.HasValue) // slstatus anlık sl durumu bayi sl end yoksa ya iptaldir yada bekleyen ayırt etmek için oluşturuldu
+                            r.slstatus = "Tamamlanan";
+                        else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
+                            r.slstatus = "İptal Edilen";
+                        else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 3)
+                            r.slstatus = "Ertelenen";
+                        else
+                            r.slstatus = "Bekleyen";
+                        if ((ksl.Value.BEnd.HasValue && ksl.Value.BEnd.Value >= request.start && ksl.Value.BEnd.Value <= request.end) || (!ksl.Value.BEnd.HasValue && ksl.Value.BStart.HasValue && ksl.Value.BStart.Value <= request.end))
+                        { // koç sl yasin bey'in isteği üzerine anlık bayi sl işlemine göre çekilecek bundan dolayı aynı sl'in 2 farklı ayda görünmesini engellemek için şart koyuldu
+                            r.BayiSLTaskStart = ksl.Value.BStart;
+                            r.BayiSLEnd = ksl.Value.BEnd;
+                        }
+                        if ((ksl.Value.KEnd.HasValue && ksl.Value.KEnd.Value >= request.start && ksl.Value.KEnd.Value <= request.end) || (!ksl.Value.KEnd.HasValue && ksl.Value.KStart.HasValue && ksl.Value.KStart.Value <= request.end))
+                        { // koç sl yasin bey'in isteği üzerine anlık bayi sl işlemine göre çekilecek bundan dolayı aynı sl'in 2 farklı ayda görünmesini engellemek için şart koyuldu
+                            r.KocSLStart = ksl.Value.KStart;
+                            r.KocSLEnd = ksl.Value.KEnd;
+                        }
+                        if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
+                        {
+                            var kocSl = WebApiConfig.AdslSl[ksl.Key];
+                            r.SLName = kocSl.SLName;
+                            r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0;
+                            r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
+                            r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (kocSl.BayiMaxTime != null ? (maxSL / kocSl.BayiMaxTime.Value) : 1)), 2);
+                            r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * (kocSl.KocMaxTime != null ? (maxKSL / kocSl.KocMaxTime.Value) : 1)), 2);
+                        }
+                        else
+                            r.SLName = "Tanımlanmamış SL";
+                        if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
+                        {
+                            var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
+                            r.BayiId = Bayi.personelid;
+                            r.BayiName = Bayi.personelname;
+                            r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
+                            r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
+                        }
+                        r.CustomerId = ksl.Value.CustomerId;
+                        if (WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId))
+                        {
+                            var cust = WebApiConfig.AdslCustomers[ksl.Value.CustomerId];
+                            r.CustomerName = cust.customername;
+                            r.superonlineNo = cust.superonlineCustNo;
+                        }
+                        else
+                            r.CustomerName = "Tanımlanmamış Müşteri";
+                        return r;
                     }
-                    else
-                        r.status = "Bekleyen";
-                    if (ksl.Value.BEnd.HasValue) // slstatus anlık sl durumu bayi sl end yoksa ya iptaldir yada bekleyen ayırt etmek için oluşturuldu
-                        r.slstatus = "Tamamlanan";
-                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 2)
-                        r.slstatus = "İptal Edilen";
-                    else if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value) && WebApiConfig.AdslStatus[lasttq.status.Value].statetype.Value == 3)
-                        r.slstatus = "Ertelenen";
-                    else
-                        r.slstatus = "Bekleyen";
-                    if ((ksl.Value.BEnd.HasValue && ksl.Value.BEnd.Value >= request.start && ksl.Value.BEnd.Value <= request.end ) || (!ksl.Value.BEnd.HasValue && ksl.Value.BStart.HasValue && ksl.Value.BStart.Value <= request.end))
-                    { // koç sl yasin bey'in isteği üzerine anlık bayi sl işlemine göre çekilecek bundan dolayı aynı sl'in 2 farklı ayda görünmesini engellemek için şart koyuldu
-                        r.BayiSLTaskStart = ksl.Value.BStart;
-                        r.BayiSLEnd = ksl.Value.BEnd;
-                    }
-                    if ((ksl.Value.KEnd.HasValue && ksl.Value.KEnd.Value >= request.start && ksl.Value.KEnd.Value <= request.end) || (!ksl.Value.KEnd.HasValue && ksl.Value.KStart.HasValue && ksl.Value.KStart.Value <= request.end))
-                    { // koç sl yasin bey'in isteği üzerine anlık bayi sl işlemine göre çekilecek bundan dolayı aynı sl'in 2 farklı ayda görünmesini engellemek için şart koyuldu
-                        r.KocSLStart = ksl.Value.KStart;
-                        r.KocSLEnd = ksl.Value.KEnd;
-                    }
-                    if (WebApiConfig.AdslSl.ContainsKey(ksl.Key)) // bayi max time ve koc max time eklendi fazla sart olmasın diye tek ifte toplandı
+                    catch (Exception e)
                     {
-                        var kocSl = WebApiConfig.AdslSl[ksl.Key];
-                        r.SLName = kocSl.SLName;
-                        r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0;
-                        r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
-                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (kocSl.BayiMaxTime != null ? (maxSL / kocSl.BayiMaxTime.Value) : 1)), 2);
-                        r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * (kocSl.KocMaxTime != null ? (maxKSL / kocSl.KocMaxTime.Value) : 1)), 2);
+                        Console.WriteLine(e.Message);
                     }
-                    else
-                        r.SLName = "Tanımlanmamış SL";
-                    if (ksl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(ksl.Value.BayiID.Value))
-                    {
-                        var Bayi = WebApiConfig.AdslPersonels[ksl.Value.BayiID.Value];
-                        r.BayiId = Bayi.personelid;
-                        r.BayiName = Bayi.personelname;
-                        r.Il = WebApiConfig.AdslIls.ContainsKey(Bayi.ilKimlikNo ?? 0) ? WebApiConfig.AdslIls[Bayi.ilKimlikNo.Value].ad : null;
-                        r.Ilce = WebApiConfig.AdslIlces.ContainsKey(Bayi.ilceKimlikNo ?? 0) ? WebApiConfig.AdslIlces[Bayi.ilceKimlikNo.Value].ad : null;
-                    }
-                    r.CustomerId = ksl.Value.CustomerId;
-                    if (WebApiConfig.AdslCustomers.ContainsKey(ksl.Value.CustomerId))
-                    {
-                        var cust = WebApiConfig.AdslCustomers[ksl.Value.CustomerId];
-                        r.CustomerName = cust.customername;
-                        r.superonlineNo = cust.superonlineCustNo;
-                    }
-                    else
-                        r.CustomerName = "Tanımlanmamış Müşteri";
-                    return r;
+                    return null;
                 })
             ).ToList();
         }
