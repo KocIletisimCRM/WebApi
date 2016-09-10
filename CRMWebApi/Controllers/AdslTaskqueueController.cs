@@ -582,8 +582,8 @@ namespace CRMWebApi.Controllers
                     }
 
                     dtq.description = tq.description != null ? tq.description : dtq.description;
-                    dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
-                    dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
+                    dtq.appointmentdate = tq.appointmentdate;
+                    //dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.fault = tq.fault != null ? tq.fault : dtq.fault;
                     dtq.updatedby = user.userId;
