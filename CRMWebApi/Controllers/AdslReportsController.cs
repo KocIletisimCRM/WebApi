@@ -399,7 +399,7 @@ namespace CRMWebApi.Controllers
                 if (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid))
                     res.s_tqname = WebApiConfig.AdslTasks[s_tq.taskid].taskname;
                 res.campaign = WebApiConfig.AdslCustomerProducts.ContainsKey(r.S_TON) ? WebApiConfig.AdslCampaigns.ContainsKey((int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid) ? 
-                        WebApiConfig.AdslCampaigns[(int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid].name : null : null; // campaign ve customerproduct dictionary olması gerek
+                        WebApiConfig.AdslCampaigns[(int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid].name : null : null;
                 res.kaynak = s_tq.fault;
                 res.s_desc = s_tq.description;
                 res.s_createyear = s_tq.creationdate.Value.Year;

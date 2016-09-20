@@ -332,6 +332,7 @@ namespace CRMWebApi
                                 {
                                     var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
                                     AdslProccessIndexes[t.taskorderno] = proccessNo;
+                                    AdslProccesses[proccessNo] = new DTOs.Adsl.KocAdslProccess();
                                     if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(proccessNo);
                                 }
                             }
