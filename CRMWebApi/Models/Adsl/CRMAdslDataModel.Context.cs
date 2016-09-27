@@ -99,5 +99,15 @@ namespace CRMWebApi.Models.Adsl
     
             return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<string>("[KOCSAMADLSEntities].[getSerialsOnCustomerAdsl](@CUSTOMERID, @STOCKCARDID)", cUSTOMERIDParameter, sTOCKCARDIDParameter);
         }
+    
+        [DbFunction("KOCSAMADLSEntities", "getCustomerStockAdsl")]
+        public virtual IQueryable<getCustomerStockAdsl_Result> getCustomerStockAdsl(Nullable<int> cUSTOMERID)
+        {
+            var cUSTOMERIDParameter = cUSTOMERID.HasValue ?
+                new ObjectParameter("CUSTOMERID", cUSTOMERID) :
+                new ObjectParameter("CUSTOMERID", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.CreateQuery<getCustomerStockAdsl_Result>("[KOCSAMADLSEntities].[getCustomerStockAdsl](@CUSTOMERID)", cUSTOMERIDParameter);
+        }
     }
 }

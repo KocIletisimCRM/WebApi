@@ -466,6 +466,9 @@
     <Compile Include="Models\Adsl\daire.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Adsl\getCustomerStockAdsl_Result.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Adsl\getPersonelStockAdsl_Result.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>

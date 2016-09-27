@@ -289,7 +289,7 @@ namespace CRMWebApi.Controllers
                                         ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
                                     }
                                 }
-                                // kurulum task taslorderno
+                                // kurulum randevusu task taskorderno
                                 var pptq = dtq;
                                 int? krtask = null;
                                 while (pptq != null)
@@ -330,8 +330,8 @@ namespace CRMWebApi.Controllers
                                     var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
                                 }
-                                if (oot.tasktype == 3 && krtask != null)
-                                {
+                                if ((oot.tasktype == 3 || item == 142) && krtask != null)
+                                { // kurulum türünde gelenleri kurulum randevusu taskındaki personele ata (modem iade alma taskı da eklendi (taskid = 142))
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                 }
@@ -421,23 +421,46 @@ namespace CRMWebApi.Controllers
                         }
                         #endregion
                         #region stok hareketleri kaydediliyor
-                        db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
-                        {
-                            amount = sm.amount,
-                            confirmationdate = DateTime.Now,
-                            creationdate = DateTime.Now,
-                            fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
-                            fromobject = dtq.attachedpersonelid,
-                            deleted = false,
-                            lastupdated = DateTime.Now,
-                            movementdate = DateTime.Now,
-                            relatedtaskqueue = dtq.taskorderno,
-                            serialno = sm.serialno,
-                            stockcardid = sm.stockcardid,
-                            toobjecttype = (int)KOCUserTypes.ADSLCustomer,
-                            toobject = dtq.attachedobjectid,
-                            updatedby = user.userId
-                        }));
+                        if (dtq.taskid == 142)
+                        { // Müşteriden task içerisinde ürün alınması için
+                            db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
+                            {
+                                amount = sm.amount,
+                                confirmationdate = DateTime.Now,
+                                creationdate = DateTime.Now,
+                                fromobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                                fromobject = dtq.attachedobjectid,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                movementdate = DateTime.Now,
+                                relatedtaskqueue = dtq.taskorderno,
+                                serialno = sm.serialno,
+                                stockcardid = sm.stockcardid,
+                                toobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                                toobject = dtq.attachedpersonelid,
+                                updatedby = user.userId
+                            }));
+                        }
+                        else
+                        { // Diğer tüm işlemler için
+                            db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
+                            {
+                                amount = sm.amount,
+                                confirmationdate = DateTime.Now,
+                                creationdate = DateTime.Now,
+                                fromobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                                fromobject = dtq.attachedpersonelid,
+                                deleted = false,
+                                lastupdated = DateTime.Now,
+                                movementdate = DateTime.Now,
+                                relatedtaskqueue = dtq.taskorderno,
+                                serialno = sm.serialno,
+                                stockcardid = sm.stockcardid,
+                                toobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                                toobject = dtq.attachedobjectid,
+                                updatedby = user.userId
+                            }));
+                        }
                         db.SaveChanges();
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
@@ -1073,6 +1096,53 @@ namespace CRMWebApi.Controllers
                     sm.frompersonel = tq.attachedpersonel;
                     sm.toobjecttype = (int)KOCUserTypes.ADSLCustomer;
                     sm.tocustomer = tq.attachedcustomer;
+                });
+                return Request.CreateResponse(HttpStatusCode.OK, stockmovement.Select(sm => sm.toDTO()), "application/json");
+            }
+        }
+
+        [Route("getStockMovementsForCustomer")]
+        [HttpPost]
+        public HttpResponseMessage getStockMovementsForCustomer(DTORequestTaskqueueStockMovements request)
+        { // Task içerisinde müşteriden personele stock hareketi
+            DTOResponseError errormessage = new DTOResponseError();
+            using (var db = new KOCSAMADLSEntities())
+            {
+                var tq = db.taskqueue.Include(t => t.attachedpersonel).Include(t => t.attachedcustomer).Single(t => t.taskorderno == request.taskorderno);
+                var stockmovement = getStockmovements(db, request.taskorderno, request.taskid, request.stateid);
+                if (!stockmovement.Any()) return Request.CreateResponse(HttpStatusCode.OK, stockmovement, "application/json");
+                var scIds = stockmovement.Select(sm => sm.stockcardid).ToList();
+                var stockCards = db.stockcard.Where(sc => scIds.Contains(sc.stockid)).ToList();
+                var stockStatus = db.getCustomerStockAdsl(tq.attachedobjectid).Where(ss => scIds.Contains(ss.stockid)).ToList();
+
+                // stok kartı seri numaralı ürün ise task müşterisinin üzerindeki ürün seri noları alınıyor.
+                stockmovement.AsParallel().ForAll((sm) =>
+                {
+                    var sss = stockStatus.FirstOrDefault(ss => ss.stockid == sm.stockcardid);
+                    sm.stockStatus = new getPersonelStockAdsl_Result();
+                    sm.stockStatus.amount = sss.amount;
+                    sm.stockStatus.category = sss.category;
+                    sm.stockStatus.creationdate = sss.creationdate;
+                    sm.stockStatus.deleted = sss.deleted;
+                    sm.stockStatus.description = sss.description;
+                    sm.stockStatus.hasserial = sss.hasserial;
+                    sm.stockStatus.lastupdated = sss.lastupdated;
+                    sm.stockStatus.productname = sss.productname;
+                    sm.stockStatus.stockid = sss.stockid;
+                    sm.stockStatus.unit = sss.unit;
+                    sm.stockStatus.updatedby = sss.updatedby;
+                    if (sm.stockStatus != null)
+                    {
+                        sm.stockStatus.serials = db.getSerialsOnCustomerAdsl(tq.attachedobjectid, sm.stockcardid).ToList();
+                        // seçili seri no listede olmayacağı için listeye ekleniyor
+                        if (!string.IsNullOrWhiteSpace(sm.serialno))
+                            sm.stockStatus.serials.Insert(0, sm.serialno);
+                    }
+                    sm.stockcard = stockCards.First(sc => sc.stockid == sm.stockcardid);
+                    sm.fromobjecttype = (int)KOCUserTypes.ADSLCustomer;
+                    sm.fromcustomer = tq.attachedcustomer;
+                    sm.toobjecttype = (int)KOCUserTypes.TechnicalStuff;
+                    sm.topersonel = tq.attachedpersonel;
                 });
                 return Request.CreateResponse(HttpStatusCode.OK, stockmovement.Select(sm => sm.toDTO()), "application/json");
             }
