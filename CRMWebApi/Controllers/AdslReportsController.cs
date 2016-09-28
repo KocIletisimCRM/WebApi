@@ -215,17 +215,6 @@ namespace CRMWebApi.Controllers
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
 
-        private static Dictionary<int, adsl_taskqueue> getTaskqueues(DateTime start)
-        { // Başarı oranları hesaplanırken bütün tasklar içerisinde arama yapıldığı anda adsltaskqueues değişince hata alındığı için yedek alınarak işlem yapıldı
-            Dictionary<int, adsl_taskqueue> tqs = new Dictionary<int, adsl_taskqueue>();
-            WebApiConfig.AdslTaskQueues.Where(r => r.Value.creationdate >= start).Select(r =>
-            {
-                tqs[r.Key] = r.Value;
-                return true;
-            }).ToList();
-            return tqs;
-        }
-
         // Hakediş Raporu
         public static async Task<List<SKPaymentReport>> getPaymentReport(DateTimeRange request)
         {
@@ -313,7 +302,6 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKStandbyTasksHours>> getSKStandbyTasksHours ()
         {
             var list = await getSKStandbyTaskReport().ConfigureAwait(false);
-            var tqs = getTaskqueues(new DateTime(2016, 1, 1));
             return list.Select(r =>
             {
                 var res = new SKStandbyTasksHours();
@@ -333,7 +321,7 @@ namespace CRMWebApi.Controllers
                 res.taskid = r.taskid;
                 res.taskname = r.taskname;
                 res.taskorderno = r.taskorderno;
-                var k = tqs.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
+                var k = WebApiConfig.AdslTaskQueues.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
                 if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).FirstOrDefault().Value != null)
                 {
                     var kdate = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;
@@ -1027,7 +1015,6 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKRate>> getRates(DateTimeRange request)
         { // istenilen ay içerisinde kurulum randevusuna düşen (kr netflow tarihi o ay olan) ve bunların başarılı gerçekleşen miktarları
             var skdate = new DateTimeRange { start = request.start.AddMonths(-4), end = request.end.AddMonths(2) };
-            var tqs = getTaskqueues(request.start.AddMonths(-4));
             List<SKReport> SKReport = await getSKReport(skdate).ConfigureAwait(false);
             List<DateTime> allDates = new List<DateTime>();
             for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
@@ -1078,7 +1065,7 @@ namespace CRMWebApi.Controllers
                     totalDoc++;
                     if (s_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(s_tq.status.Value) && WebApiConfig.AdslStatus[s_tq.status.Value].statetype == 1)
                     {
-                        var tq = tqs.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
+                        var tq = WebApiConfig.AdslTaskQueues.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
                         // Churn evrağı emtor sisteme yükleme ara taskı olumlu kapatılmış mı ?
                         if (tq != null)
                         {
@@ -1120,6 +1107,30 @@ namespace CRMWebApi.Controllers
                 res.worksay = bekleyenTaskq.Where(t => t.personelid == r.Value.personelid && WebApiConfig.AdslTasks.ContainsKey(t.taskid) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[t.taskid].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[t.taskid].tasktype].TaskTypeId != 0).ToList().Count;
                 using (var db = new KOCSAMADLSEntities(false))
                     res.modemsay = db.getSerialsOnPersonelAdsl(r.Value.personelid, 1117).ToList().Count;
+                return res;
+            }).ToList();
+        }
+
+        public static async Task<List<StockMovementBackSeri>> getSMBS ()
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            using (var db = new KOCSAMADLSEntities())
+            return WebApiConfig.AdslTaskQueues.Where(r => r.Value.status.HasValue && r.Value.deleted == false && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) && WebApiConfig.AdslStatus[r.Value.status.Value].statetype == 2 /*İptal Durumu*/ && (r.Value.taskid == 42 || r.Value.taskid == 97 || r.Value.taskid == 49) && db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault() != null).Select(r =>
+            {
+                var res = new StockMovementBackSeri();
+                res.customerid = r.Value.attachedobjectid.Value;
+                if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
+                {
+                    var cust = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
+                    res.customername = cust.customername;
+                    res.superonlineno = cust.superonlineCustNo;
+                }
+                res.taskNo = r.Value.taskorderno;
+                res.task = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
+                res.seri = db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault();
+                var person = db.stockmovement.Where(per => per.serialno == res.seri && per.toobject == res.customerid && per.deleted == false).OrderByDescending(ss => ss.movementid).FirstOrDefault();
+                res.personelid = person.fromobject.Value;
+                res.personelname = WebApiConfig.AdslPersonels.ContainsKey(res.personelid) ? WebApiConfig.AdslPersonels[res.personelid].personelname : "İsimsiz Personel";
                 return res;
             }).ToList();
         }

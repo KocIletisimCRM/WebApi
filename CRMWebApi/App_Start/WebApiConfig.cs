@@ -1,5 +1,6 @@
 ﻿using CRMWebApi.NetflowWebServis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -240,10 +241,10 @@ namespace CRMWebApi
 
         public static SemaphoreSlim aLockObject = new SemaphoreSlim(1);
         public static DateTime AdslLastUpdated = new DateTime(1900, 1, 1);
-        public static Dictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new Dictionary<int, DTOs.Adsl.KocAdslProccess>();
-        public static Dictionary<int, int> AdslProccessIndexes = new Dictionary<int, int>();
-        public static Dictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new Dictionary<int, Models.Adsl.adsl_taskqueue>();
-        public static Dictionary<int, Models.Adsl.customer> AdslCustomers = new Dictionary<int, Models.Adsl.customer>();
+        public static ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess>();
+        public static ConcurrentDictionary<int, int> AdslProccessIndexes = new ConcurrentDictionary<int, int>();
+        public static ConcurrentDictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new ConcurrentDictionary<int, CRMWebApi.Models.Adsl.adsl_taskqueue>();
+        public static ConcurrentDictionary<int, Models.Adsl.customer> AdslCustomers = new ConcurrentDictionary<int, Models.Adsl.customer>();
         public static Dictionary<int, Models.Adsl.adsl_task> AdslTasks = new Dictionary<int, Models.Adsl.adsl_task>();
         public static Dictionary<int, Models.Adsl.adsl_personel> AdslPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
         public static Dictionary<int, Models.Adsl.adsl_taskstatepool> AdslStatus = new Dictionary<int, Models.Adsl.adsl_taskstatepool>();
@@ -257,7 +258,7 @@ namespace CRMWebApi
         public static Dictionary<int, Dictionary<int, List<int>>> AdslTaskSl = new Dictionary<int, Dictionary<int, List<int>>>();
         public static Dictionary<int, Models.Adsl.adsl_objecttypes> AdslObjectTypes = new Dictionary<int, Models.Adsl.adsl_objecttypes>(); // personel görev tanımlamalrı için
         public static Dictionary<int, Models.Adsl.adsl_campaigns> AdslCampaigns = new Dictionary<int, Models.Adsl.adsl_campaigns>(); // müşteri kampanyası için
-        public static Dictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new Dictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
+        public static ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
@@ -306,13 +307,16 @@ namespace CRMWebApi
                                     while (queue.Count > 0)
                                     {
                                         var ton = queue.Dequeue();
+                                        Models.Adsl.adsl_taskqueue ax;
+                                        int ix;
                                         foreach (var item in AdslTaskQueues.Where(r => r.Value.previoustaskorderid == ton).Select(r => r.Value.taskorderno)) queue.Enqueue(item);
-                                        AdslTaskQueues.Remove(ton);
+                                        AdslTaskQueues.TryRemove(ton, out ax);
                                         if (AdslProccessIndexes.ContainsKey(ton))
-                                            AdslProccessIndexes.Remove(ton);
+                                            AdslProccessIndexes.TryRemove(ton, out ix);
                                     }
+                                    DTOs.Adsl.KocAdslProccess kx;
                                     if (AdslProccesses.ContainsKey(t.taskorderno))
-                                        AdslProccesses.Remove(t.taskorderno);
+                                        AdslProccesses.TryRemove(t.taskorderno, out kx);
                                 }
                             }
                             else
@@ -1667,6 +1671,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.ISSSuccessRate>("ISSSuccessRates");
             builder.EntitySet<DTOs.Adsl.SKRate>("SKRates");
             builder.EntitySet<DTOs.Adsl.InfoBayiReport>("InfoBayiReports");
+            builder.EntitySet<DTOs.Adsl.StockMovementBackSeri>("StockMovementBackSeriReports");
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",

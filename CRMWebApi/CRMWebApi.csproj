@@ -211,6 +211,7 @@
     <Compile Include="Controllers\OData\SKStandbyTaskReportsController.cs" />
     <Compile Include="Controllers\OData\SLBayiReportsController.cs" />
     <Compile Include="Controllers\OData\SLKocReportsController.cs" />
+    <Compile Include="Controllers\OData\StockMovementBackSeriReportsController.cs" />
     <Compile Include="Controllers\PenetrasyonGirisController.cs" />
     <Compile Include="Controllers\FiberStockController.cs" />
     <Compile Include="Controllers\FiberTaskqueueController.cs" />
@@ -300,6 +301,7 @@
     <Compile Include="DTOs\Adsl\SLBayiReport.cs" />
     <Compile Include="DTOs\Adsl\SLKocReport.cs" />
     <Compile Include="DTOs\Adsl\SLTime.cs" />
+    <Compile Include="DTOs\Adsl\StockMovementBackSeri.cs" />
     <Compile Include="DTOs\Cari\CariHareketReport.cs" />
     <Compile Include="DTOs\daskResponseVT.cs" />
     <Compile Include="DTOs\DTOBasvuru.cs" />
