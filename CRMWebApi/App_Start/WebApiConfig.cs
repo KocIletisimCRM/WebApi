@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -244,6 +245,7 @@ namespace CRMWebApi
         public static ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess>();
         public static ConcurrentDictionary<int, int> AdslProccessIndexes = new ConcurrentDictionary<int, int>();
         public static ConcurrentDictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new ConcurrentDictionary<int, CRMWebApi.Models.Adsl.adsl_taskqueue>();
+        public static ConcurrentDictionary<int, ConcurrentBag<int>> AdslSubTasks = new ConcurrentDictionary<int, ConcurrentBag<int>>(); // Bu taska bağlı türemiş tasklar
         public static ConcurrentDictionary<int, Models.Adsl.customer> AdslCustomers = new ConcurrentDictionary<int, Models.Adsl.customer>();
         public static Dictionary<int, Models.Adsl.adsl_task> AdslTasks = new Dictionary<int, Models.Adsl.adsl_task>();
         public static Dictionary<int, Models.Adsl.adsl_personel> AdslPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
@@ -262,6 +264,7 @@ namespace CRMWebApi
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
+            Stopwatch stw = Stopwatch.StartNew();
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
                 db.Configuration.LazyLoadingEnabled = false;
@@ -296,8 +299,24 @@ namespace CRMWebApi
                                 assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
                                 fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
                             });
+                            if (t.previoustaskorderid.HasValue)
+                            {
+                                if (AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
+                                    AdslSubTasks[t.previoustaskorderid.Value].Add(t.taskorderno);
+                                else
+                                {
+                                    AdslSubTasks[t.previoustaskorderid.Value] = new ConcurrentBag<int>(new int[] { t.taskorderno });
+                                }
+                            }
                             if (t.deleted == true)
                             {
+                                if(t.previoustaskorderid.HasValue && AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
+                                {
+                                    int i = 0;
+                                    ConcurrentBag<int> c;
+                                    AdslSubTasks[t.previoustaskorderid.Value].TryTake(out i);
+                                    if (AdslSubTasks[t.previoustaskorderid.Value].IsEmpty) AdslSubTasks.TryRemove(t.previoustaskorderid.Value, out c);
+                                }
                                 if (AdslTaskQueues.ContainsKey(t.taskorderno))
                                 {
                                     //Derinlemesine temizlik :) Silinen task ve bu taska bağlı tüm taskları listeden çıkart
@@ -341,6 +360,7 @@ namespace CRMWebApi
                                 }
                             }
                         }
+                        var tttt = stw.Elapsed;
                         DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccesIds));
                     }
                 }

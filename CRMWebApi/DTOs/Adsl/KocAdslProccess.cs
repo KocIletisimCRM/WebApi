@@ -1,5 +1,7 @@
 ﻿using CRMWebApi.Models.Adsl;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CRMWebApi.DTOs.Adsl
@@ -114,6 +116,8 @@ namespace CRMWebApi.DTOs.Adsl
 
         public static void updateProccesses(Queue<int> proccessIds)
         {
+            var i = 0;
+            Stopwatch stw = new Stopwatch();
             while (proccessIds.Count > 0)
             {
                 var proccessId = proccessIds.Dequeue();
@@ -121,10 +125,26 @@ namespace CRMWebApi.DTOs.Adsl
                 subTasks.Enqueue(proccessId);
                 while (subTasks.Count > 0)
                 {
+                    stw.Start();
+                    i++;
                     var taskId = subTasks.Dequeue();
-                    if (WebApiConfig.AdslTaskQueues.ContainsKey(taskId) && WebApiConfig.AdslProccessIndexes.ContainsKey(taskId) && WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[taskId]))
-                        WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[taskId]].Update(WebApiConfig.AdslTaskQueues[taskId]);
-                    foreach (var item in WebApiConfig.AdslTaskQueues.Where(r => r.Value.previoustaskorderid == taskId).OrderBy(r => r.Value.taskorderno)) subTasks.Enqueue(item.Value.taskorderno);
+                    //if (WebApiConfig.AdslTaskQueues.ContainsKey(taskId) && WebApiConfig.AdslProccessIndexes.ContainsKey(taskId) && WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[taskId]))
+                    KocAdslProccess kap = null;
+                    adsl_taskqueue atq = null;
+                    int proccessID = 0;
+                    if (WebApiConfig.AdslProccessIndexes.TryGetValue(taskId, out proccessID))
+                        if (WebApiConfig.AdslTaskQueues.TryGetValue(taskId, out atq))
+                            if (WebApiConfig.AdslProccesses.TryGetValue(proccessID, out kap))
+                            {
+                                kap.Update(atq);
+                            }
+                    //foreach (var item in WebApiConfig.AdslTaskQueues.Where(r => r.Value.previoustaskorderid == taskId).OrderBy(r => r.Value.taskorderno)) subTasks.Enqueue(item.Value.taskorderno);
+                    ConcurrentBag<int> stks = new ConcurrentBag<int>();
+                    if (WebApiConfig.AdslSubTasks.TryGetValue(taskId, out stks))
+                        foreach (var item in stks) subTasks.Enqueue(item);
+                    stw.Stop();
+                    var ttt = stw.Elapsed;
+                    var btt = stw.ElapsedMilliseconds / (i);
                 }
             }
         }
