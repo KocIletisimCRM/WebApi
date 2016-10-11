@@ -117,14 +117,31 @@ namespace CRMWebApi.Controllers
                         WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[r.taskorderno]].Last_Status : 0 : 0];
                     if (request.taskOrderNo != null)
                     {
+                        var ptq = r;
+                        int? saletask = null;
+                        while (ptq != null)
+                        {
+                            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                            if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
+                            {
+                                saletask = ptq.taskorderno;
+                                break;
+                            }
+                            else
+                            {
+                                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                            }
+                        }
+                        // taska bağlı müşteri kampanyası ve bilgileri
+                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
                         // taska bağlı müşteri kampanyası ve bilgileri
                         /* WebApiConfig.AdslProccessIndexes satış taskını içerdiği için saletask bulma işlem silinerek product bu şekilde bulunacak.
                          * r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno)
                             && c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
-                        */
+                        */ // PROCCESSINDEX HATA ALDI SEBEBİ BAKILACAK
                         //r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
-                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno)
-                            && c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
+                        //if (WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno))
+                        //    r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
                         {
