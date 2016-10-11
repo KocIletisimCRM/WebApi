@@ -6,7 +6,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -265,6 +268,7 @@ namespace CRMWebApi
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
             Stopwatch stw = Stopwatch.StartNew();
+            raporLogs(DateTime.Now, true, "Load ADSL Taskqueues");
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
                 db.Configuration.LazyLoadingEnabled = false;
@@ -361,6 +365,7 @@ namespace CRMWebApi
                             }
                         }
                         var tttt = stw.Elapsed;
+                        raporLogs(DateTime.Now, false, "Load Adsl Taskqueues");
                         DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccesIds));
                     }
                 }
@@ -370,6 +375,7 @@ namespace CRMWebApi
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Customer");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -398,12 +404,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Customer");
             }
         }
         public static async Task loadAdslTasks(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Task");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -426,12 +434,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Task");
             }
         }
         public static async Task loadAdslPersonels(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Personel");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -461,12 +471,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Personel");
             }
         }
         public static async Task loadAdslStatus(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Status");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -489,12 +501,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Status");
             }
         }
         public static async Task loadAdslSl(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL SL");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -593,12 +607,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL SL");
             }
         }
         public static async Task loadAdslIls()
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL İL");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -619,12 +635,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL İL");
             }
         }
         public static async Task loadAdslIlces()
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL İLÇE");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -645,6 +663,7 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL İLÇE");
             }
         }
         public static async Task loadAdslTaskTypes()
@@ -759,6 +778,7 @@ namespace CRMWebApi
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Kampanya");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -780,12 +800,14 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Kampanya");
             }
         }
         public static async Task loadAdslCustomerProducts(DateTime lastUpdated)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
+                raporLogs(DateTime.Now, true, "Load ADSL Customer Product");
                 db.Configuration.LazyLoadingEnabled = false;
                 db.Configuration.ProxyCreationEnabled = false;
                 using (var conn = db.Database.Connection as SqlConnection)
@@ -806,10 +828,12 @@ namespace CRMWebApi
                         }
                     }
                 }
+                raporLogs(DateTime.Now, false, "Load ADSL Customer Product");
             }
         }
         public static async Task updateAdslData()
         {
+            raporLogs(DateTime.Now, true, "Update ADSL Data");
             await aLockObject.WaitAsync().ConfigureAwait(false);
             var lastUpdated = DateTime.Now;
             await Task.WhenAll(new Task[] {
@@ -824,6 +848,7 @@ namespace CRMWebApi
             await loadAdslTaskQueues(AdslLastUpdated).ConfigureAwait(false);
             AdslLastUpdated = lastUpdated;
             aLockObject.Release();
+            raporLogs(DateTime.Now, false, "Update ADSL Data");
         }
 
         // Cari işlemler raporu için cari hareket ve gerekli bilgilerin alınması işlemleri start
@@ -1666,7 +1691,58 @@ namespace CRMWebApi
             {
                 Console.WriteLine(e.Message);
             }
-        }, null, 0, 1000 * 60 * 10);  
+        }, null, 0, 1000 * 60 * 10);
+
+        public static void raporLogs(DateTime time, bool onay, string message)
+        {
+            try
+            {
+                StreamWriter log;
+
+                //string path = @"C:\Users\LENOVO\Desktop\log.txt";
+                string path = @"C:\Logs\Log_Report.txt";
+
+                if (!File.Exists(path))
+                {
+                    log = new StreamWriter(path);
+                    log.Write("DURUM; ZAMAN; MESAJ \r\n");
+                }
+                else
+                    log = File.AppendText(path);
+
+                if (onay)
+                    log.Write("LOG BAŞLAT; ");
+                else
+                    log.Write("LOG BİTİR; ");
+
+                log.Write(time.ToString() + "; ");
+
+                log.Write(message + "\r\n");
+
+                log.Close();
+            }
+            catch (Exception e) {
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress("adslbayidestek@kociletisim.com.tr"); // Mail'in kimden olduğu adresi buraya yazılır.
+                mail.Subject = "RAPOR LOG HATA"; // mail'in konusu
+
+                mail.To.Add("huseyinkoz@kociletisim.com.tr");
+                mail.Body = string.Format(e.Message); // mail'in ana kısmı, içeriği.. 
+                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
+
+                smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
+                smtp.EnableSsl = true;
+
+                try
+                {
+                    smtp.Send(mail); // mail gönderilir.
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+        }
 
         public async static void Register(HttpConfiguration config)
         {
