@@ -1,9 +1,7 @@
 ﻿using CRMWebApi.Models.Adsl;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -128,7 +126,6 @@ namespace CRMWebApi.DTOs.Adsl
 
         public static void updateProccesses(Queue<int> proccessIds)
         {
-            WebApiConfig.raporLogs(DateTime.Now, true, "Update Proccess");
             var i = 0;
             Stopwatch stw = new Stopwatch();
             while (proccessIds.Count > 0)
@@ -160,7 +157,6 @@ namespace CRMWebApi.DTOs.Adsl
                     var btt = stw.ElapsedMilliseconds / (i);
                 }
             }
-            WebApiConfig.raporLogs(DateTime.Now, false, "Update Proccess");
         }
     }
 }
