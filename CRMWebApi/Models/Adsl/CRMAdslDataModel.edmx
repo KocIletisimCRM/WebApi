@@ -1068,7 +1068,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             <Parameter Name="STOCKCARDID" Mode="In" Type="Int32" />
           </FunctionImport>
           <FunctionImport Name="getCustomerStockAdsl" IsComposable="true" ReturnType="Collection(KOCSAMADLSModel.getCustomerStockAdsl_Result)">
-            <Parameter Name="CUSTOMERID" Mode="In" Type="Int32" />
+          <Parameter Name="CUSTOMERID" Mode="In" Type="Int32" />
           </FunctionImport>
           </EntityContainer>
         <Association Name="personeltaskqueue">

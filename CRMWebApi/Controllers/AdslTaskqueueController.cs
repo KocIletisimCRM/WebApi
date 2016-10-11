@@ -25,6 +25,7 @@ namespace CRMWebApi.Controllers
     [KOCAuthorize]
     public class AdslTaskqueueController : ApiController
     {
+        string[] lastStateType = new string[] { "Bekleyen", "Tamamlanan", "İptal Edilen", "Ertelenen" };
         [Route("getTaskQueues")]
         [HttpPost]
         public HttpResponseMessage getTaskQueues(DTOGetTaskQueueRequest request)
@@ -100,7 +101,6 @@ namespace CRMWebApi.Controllers
                 var taskorderIds = res.Select(r => r.taskorderno).ToList();
                 var editables = db.v_taskorderIsEditable.Where(r => taskorderIds.Contains(r.taskorderno)).ToList();
 
-
                 res.ForEach(r =>
                 {
                     r.task = tasks.Where(t => t.taskid == r.taskid).FirstOrDefault();
@@ -113,25 +113,18 @@ namespace CRMWebApi.Controllers
                     //r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
+                    r.laststatus = lastStateType[WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[r.taskorderno]) ? 
+                        WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[r.taskorderno]].Last_Status : 0 : 0];
                     if (request.taskOrderNo != null)
                     {
-                        var ptq = r;
-                        int? saletask = null;
-                        while (ptq != null)
-                        {
-                            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                            if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
-                            {
-                                saletask = ptq.taskorderno;
-                                break;
-                            }
-                            else
-                            {
-                                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                            }
-                        }
                         // taska bağlı müşteri kampanyası ve bilgileri
-                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
+                        /* WebApiConfig.AdslProccessIndexes satış taskını içerdiği için saletask bulma işlem silinerek product bu şekilde bulunacak.
+                         * r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno)
+                            && c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
+                        */
+                        //r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
+                        r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno)
+                            && c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
                         {
@@ -168,7 +161,6 @@ namespace CRMWebApi.Controllers
                             });
                         }
                     }
-
                 });
                 var ld = perf.Elapsed;
                 DTOResponsePagingInfo paginginfo = new DTOResponsePagingInfo

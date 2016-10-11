@@ -23,7 +23,7 @@
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_stockcard" Width="1.5" PointX="0.75" PointY="11.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_stockmovement" Width="1.5" PointX="8.625" PointY="12.375" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_task" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskqueue" Width="1.5" PointX="14.125" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskqueue" Width="1.5" PointX="14.375" PointY="5" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskstatematches" Width="1.5" PointX="12.75" PointY="10.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_taskstatepool" Width="1.5" PointX="2.75" PointY="13.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_tasktypes" Width="1.5" PointX="17.375" PointY="0.5" IsExpanded="true" />

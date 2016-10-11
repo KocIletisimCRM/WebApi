@@ -35,14 +35,18 @@ namespace CRMWebApi.DTOs.Adsl
                 }
             }
         }
+        //Last Taskın StateType'ni içerir
+        public int Last_Status { get; set; }
         //Bu sürecin SL süreleri
         public Dictionary<int, SLTime> SLs = new Dictionary<int, SLTime>();
         public void Update(adsl_taskqueue tq)
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
+            int stataType = tq.status.HasValue ? WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) ? WebApiConfig.AdslStatus[tq.status.Value].statetype.Value : 0 : 0;
             //Başlangıç Taskı ise
             if (WebApiConfig.AdslTaskTypes[taskType].startsProccess)
             {
+                Last_Status = stataType;
                 Last_TON = tq.taskorderno;
                 S_TON = tq.taskorderno;
                 Kr_TON = null;
@@ -52,6 +56,7 @@ namespace CRMWebApi.DTOs.Adsl
             //Randevu Taskı ise
             else if (taskType == 2)
             {
+                Last_Status = stataType;
                 Last_TON = tq.taskorderno;
                 Kr_TON = tq.taskorderno;
                 K_TON = null;
@@ -60,6 +65,7 @@ namespace CRMWebApi.DTOs.Adsl
             //Kurulum ve Rand.suz Kurulum Taskı ise
             else if (taskType == 3 || taskType == 4)
             {
+                Last_Status = stataType;
                 Last_TON = tq.taskorderno;
                 K_TON = tq.taskorderno;
                 Ktk_TON = null;
@@ -67,11 +73,16 @@ namespace CRMWebApi.DTOs.Adsl
             //SOL Kapama Taskı ise
             else if (taskType == 5)
             {
+                Last_Status = stataType;
                 Last_TON = tq.taskorderno;
                 Ktk_TON = tq.taskorderno;
             }
 
-            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid)) Last_TON = tq.taskorderno;
+            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid))
+            {
+                Last_Status = stataType;
+                Last_TON = tq.taskorderno;
+            }
             if (proccessCancelled) return;
             // Task SL taskı mı ?
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid))

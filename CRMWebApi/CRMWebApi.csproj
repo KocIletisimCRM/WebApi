@@ -280,6 +280,7 @@
     <Compile Include="DTOs\Adsl\DTOstockstatus.cs" />
     <Compile Include="DTOs\Adsl\DTOtask.cs" />
     <Compile Include="DTOs\Adsl\DTOtaskqueue.cs" />
+    <Compile Include="DTOs\Adsl\DTOTaskqueueLast.cs" />
     <Compile Include="DTOs\Adsl\DTOtaskstatematches.cs" />
     <Compile Include="DTOs\Adsl\DTOtaskstatepool.cs" />
     <Compile Include="DTOs\Adsl\DTOTaskTypes.cs" />

@@ -59,6 +59,7 @@ namespace CRMWebApi.Models.Adsl
 
     public partial class adsl_taskqueue : EntityBase
     {
+        public virtual string laststatus { get; set; }
         public virtual bool editable { get; set; }
         public override object toDTO()
         {
