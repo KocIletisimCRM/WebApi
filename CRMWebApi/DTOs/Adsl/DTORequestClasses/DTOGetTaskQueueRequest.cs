@@ -332,6 +332,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         public string appointmentDate { get; set; }
         public string consummationDate { get; set; }
         public int? taskOrderNo { get; set; }
+        public int? laststatus { get; set; } // Sürecin son durum kontrolü için eklendi (Hüseyin KOZ) 12.10.2016
 
         public DTOFilter getFilter()
         {

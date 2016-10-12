@@ -32,7 +32,18 @@ namespace CRMWebApi.Controllers
         {
             using (var db = new KOCSAMADLSEntities(false))
             {
+                var perf = Stopwatch.StartNew();
+                TimeSpan ls;
                 var filter = request.getFilter();
+                if (request.laststatus != null)
+                { // süreç kriteri için oluşturuldu (Hüseyin KOZ) 12.10.2016
+                    perf.Restart();
+                    var rtlist = WebApiConfig.AdslProccesses.Where(tt => tt.Value.Last_Status == request.laststatus).Select(t => t.Key).ToList();
+                    JArray rt = new JArray(rtlist);
+                    filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "relatedtaskorderid", op = 7, value = rt });
+                    ls = perf.Elapsed;
+                }
+                perf.Restart();
                 filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 var user = KOCAuthorizeAttribute.getCurrentUser();
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
@@ -67,7 +78,8 @@ namespace CRMWebApi.Controllers
                     }
                 } // task state açık ile beraber durum seçildiğinde açık gelmiyor diye eklendi
 
-                var perf = Stopwatch.StartNew();
+                var sd = perf.Elapsed;
+                perf.Restart();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
                 var qd = perf.Elapsed;
                 perf.Restart();
@@ -117,32 +129,26 @@ namespace CRMWebApi.Controllers
                         WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[r.taskorderno]].Last_Status : 0 : 0];
                     if (request.taskOrderNo != null)
                     {
-                        /*var ptq = r;
-                        int? saletask = null;
-                        while (ptq != null)
-                        {
-                            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                            if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
-                            {
-                                saletask = ptq.taskorderno;
-                                break;
-                            }
-                            else
-                            {
-                                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                            }
-                        }*/
                         // taska bağlı müşteri kampanyası ve bilgileri
                         int saletask = WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccessIndexes[r.taskorderno] : 0;
+                        if (saletask == 0)
+                        { // bu döngü önceden dönüyordu kısa olması için üsteki dictionary eklendi bazen dictionary çekemediği durum olursa ürün kesin bulunsun diye kaldırılmadı (Hüseyin KOZ) 12.10.2016
+                            var ptq = r;
+                            while (ptq != null)
+                            {
+                                ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
+                                {
+                                    saletask = ptq.taskorderno;
+                                    break;
+                                }
+                                else
+                                {
+                                    ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                }
+                            }
+                        }
                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
-                        // taska bağlı müşteri kampanyası ve bilgileri
-                        /* WebApiConfig.AdslProccessIndexes satış taskını içerdiği için saletask bulma işlem silinerek product bu şekilde bulunacak.
-                         * r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno)
-                            && c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
-                        */ // PROCCESSINDEX HATA ALDI SEBEBİ BAKILACAK
-                        //r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
-                        //if (WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno))
-                        //    r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == WebApiConfig.AdslProccessIndexes[r.taskorderno] && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
                         {
