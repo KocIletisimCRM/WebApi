@@ -117,7 +117,7 @@ namespace CRMWebApi.Controllers
                         WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[r.taskorderno]].Last_Status : 0 : 0];
                     if (request.taskOrderNo != null)
                     {
-                        var ptq = r;
+                        /*var ptq = r;
                         int? saletask = null;
                         while (ptq != null)
                         {
@@ -131,8 +131,9 @@ namespace CRMWebApi.Controllers
                             {
                                 ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
                             }
-                        }
+                        }*/
                         // taska bağlı müşteri kampanyası ve bilgileri
+                        int saletask = WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccessIndexes[r.taskorderno] : 0;
                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
                         // taska bağlı müşteri kampanyası ve bilgileri
                         /* WebApiConfig.AdslProccessIndexes satış taskını içerdiği için saletask bulma işlem silinerek product bu şekilde bulunacak.
