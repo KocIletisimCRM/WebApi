@@ -114,6 +114,8 @@ namespace CRMWebApi.Controllers
 
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
+                    taskqueue.relatedtaskorderid = taskqueue.taskorderno;
+                    db.SaveChanges();
 
                     if (request.productids != null && request.productids.Length > 0)
                     {

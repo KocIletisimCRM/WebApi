@@ -1006,6 +1006,8 @@ namespace CRMWebApi
                         };
                         db.taskqueue.Add(taskqueue);
                         db.SaveChanges();
+                        taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
+                        db.SaveChanges();
                     }
                     tran.Commit();
                 }
@@ -1044,7 +1046,7 @@ namespace CRMWebApi
                                     ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
                                 }
                             }
-                            if (db.taskqueue.Where(r => r.deleted == false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
+                            if (db.taskqueue.Where(r => r.deleted == false && (r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                 continue;
                             int? personel_id = tq.attachedpersonelid; // Orhan Özçelik
                             //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
@@ -1112,6 +1114,8 @@ namespace CRMWebApi
                     deleted = false
                 };
                 db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();
             }
         } 

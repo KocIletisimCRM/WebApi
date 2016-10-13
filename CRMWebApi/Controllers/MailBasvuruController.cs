@@ -31,6 +31,8 @@ namespace CRMWebApi.Controllers
                     deleted = false
                 };
                 db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();*/
 
             var end = sendemail(basvuru);
