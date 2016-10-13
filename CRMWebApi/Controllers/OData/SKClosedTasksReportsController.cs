@@ -5,12 +5,12 @@ using System.Web.OData;
 
 namespace CRMWebApi.Controllers.OData
 {
-    public class SKStandbyTaskReportsController : ODataController
+    public class SKClosedTasksReportsController : ODataController
     {
         [EnableQuery]
-        public async Task<IQueryable<SKStandbyTaskReport>> get()
+        public async Task<IQueryable<SKClosedTasksReport>> get()
         {
-            var report = (await AdslReportsController.getSKStandbyTaskReport());
+            var report = (await AdslReportsController.getSKClosedTasksReport());
             return report.AsQueryable();
         }
     }

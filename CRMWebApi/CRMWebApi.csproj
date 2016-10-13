@@ -203,6 +203,7 @@
     <Compile Include="Controllers\OData\InfoBayiReportsController.cs" />
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />
     <Compile Include="Controllers\OData\PersonelsReportsController.cs" />
+    <Compile Include="Controllers\OData\SKClosedTasksReportsController.cs" />
     <Compile Include="Controllers\OData\SKPaymentReportsController.cs" />
     <Compile Include="Controllers\OData\SKRatesController.cs" />
     <Compile Include="Controllers\OData\CagriSKReportsController.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="DTOs\Adsl\ISSSuccessRate.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
     <Compile Include="DTOs\Adsl\PersonelsReport.cs" />
+    <Compile Include="DTOs\Adsl\SKClosedTasksReport.cs" />
     <Compile Include="DTOs\Adsl\SKPayment.cs" />
     <Compile Include="DTOs\Adsl\SKPaymentReport.cs" />
     <Compile Include="DTOs\Adsl\SKRate.cs" />
