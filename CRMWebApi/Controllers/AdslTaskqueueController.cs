@@ -843,7 +843,6 @@ namespace CRMWebApi.Controllers
                         updatedby = user.userId,
                         fault=request.fault
                     };
-
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
                     taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
@@ -975,7 +974,7 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage insertTaskqueue(DTOtaskqueue request)
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();
-            using (var db = new KOCSAMADLSEntities(false))
+            using (var db = new KOCSAMADLSEntities())
             {
                 adsl_taskqueue taskqueue = new adsl_taskqueue
                 {
