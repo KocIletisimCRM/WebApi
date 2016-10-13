@@ -43,7 +43,6 @@ namespace CRMWebApi.Controllers
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "relatedtaskorderid", op = 7, value = rt });
                     ls = perf.Elapsed;
                 }
-                perf.Restart();
                 filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 var user = KOCAuthorizeAttribute.getCurrentUser();
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
@@ -78,8 +77,6 @@ namespace CRMWebApi.Controllers
                     }
                 } // task state açık ile beraber durum seçildiğinde açık gelmiyor diye eklendi
 
-                var sd = perf.Elapsed;
-                perf.Restart();
                 var res = db.taskqueue.SqlQuery(querySQL).ToList();
                 var qd = perf.Elapsed;
                 perf.Restart();
@@ -196,7 +193,7 @@ namespace CRMWebApi.Controllers
                 };
                 DTOQueryPerformance qp = new DTOQueryPerformance
                 {
-                    QuerSQLyDuration = qd + sd,
+                    QuerSQLyDuration = qd,
                     CountSQLDuration = cd,
                     LookupDuration = ld
                 };
