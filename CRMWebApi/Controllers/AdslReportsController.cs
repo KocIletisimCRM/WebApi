@@ -298,7 +298,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        // Bütün bekleyen tasklar
+        // Bütün kapatıla tasklar 13.10.2016 Hüseyin KOZ
         public static async Task<List<SKClosedTasksReport>> getSKClosedTasksReport()
         {
             string[] lastStateType = new string[] { "Bekleyen", "Tamamlanan", "İptal Edilen", "Ertelenen" };

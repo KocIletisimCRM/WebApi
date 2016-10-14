@@ -1099,7 +1099,7 @@ namespace CRMWebApi
         }
         private static void insertOnlyTaskqueue (Models.Adsl.adsl_taskqueue request)
         {
-            using (var db = new Models.Adsl.KOCSAMADLSEntities(false))
+            using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
                 Models.Adsl.adsl_taskqueue taskqueue = new Models.Adsl.adsl_taskqueue
                 {
@@ -1110,6 +1110,7 @@ namespace CRMWebApi
                     creationdate = DateTime.Now,
                     attachmentdate = DateTime.Now,
                     lastupdated = DateTime.Now,
+                    description = "Web Servis aracılığı ile oluşturuldu.",
                     updatedby = 1393, // Yazılım Koç
                     deleted = false
                 };
