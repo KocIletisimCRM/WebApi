@@ -301,6 +301,7 @@ namespace CRMWebApi.Controllers
         // Bütün bekleyen tasklar
         public static async Task<List<SKClosedTasksReport>> getSKClosedTasksReport()
         {
+            string[] lastStateType = new string[] { "Bekleyen", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslTaskQueues.Where(r => r.Value.status != null && r.Value.status.Value != 9159 && r.Value.status.Value != 9165 && r.Value.deleted == false).Select(r =>
             {
@@ -344,7 +345,16 @@ namespace CRMWebApi.Controllers
                     res.consummationdatemonth = adate.Month;
                     res.consummationdateday = adate.Day;
                 }
-                res.status = WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? WebApiConfig.AdslStatus[r.Value.status.Value].taskstate : "İsimsiz Durum";
+                if (WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value)) {
+                    var status = WebApiConfig.AdslStatus[r.Value.status.Value];
+                    res.status = status.taskstate;
+                    res.taskstatus = lastStateType[status.statetype.Value];
+                }
+                else
+                {
+                    res.status = "Durum Bulunamadı";
+                    res.taskstatus = "Bilinmiyor";
+                }
                 res.description = r.Value.description;
                 res.fault = r.Value.fault;
                 return res;
