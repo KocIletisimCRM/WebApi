@@ -27,6 +27,7 @@ namespace CRMWebApi.Controllers
             using (var db = new KOCSAMADLSEntities(false))
             {
                 var filter = request.getFilter();
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "deleted", value = 0, op = 2 });
                 if (request.isTaskFilter())
                     return Request.CreateResponse(HttpStatusCode.OK, db.task.SqlQuery(filter.subTables["taskid"].getFilterSQL())
                             .OrderBy(t => t.taskname)
