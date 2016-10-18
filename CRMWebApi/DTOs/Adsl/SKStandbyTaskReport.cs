@@ -19,10 +19,10 @@ namespace CRMWebApi.DTOs.Adsl
         public string customername { get; set; }
         public string il { get; set; }
         public string ilce { get; set; }
-        public string customeradres { get; set; }
         public int? personelid { get; set; }
         public string personelname { get; set; }
-        public string description { get; set; }
         public string fault { get; set; }
+        public string description { get; set; }
+        public string customeradres { get; set; }
     }
 }
