@@ -384,18 +384,18 @@ namespace CRMWebApi.Controllers
                 res.taskid = r.taskid;
                 res.taskname = r.taskname;
                 res.taskorderno = r.taskorderno;
-                var k = WebApiConfig.AdslTaskQueues.Where(t => t.Value.attachedobjectid == r.customerid && t.Value.deleted == false && t.Value.status != null).ToList();
-                if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).FirstOrDefault().Value != null)
+                var k = WebApiConfig.AdslProccesses.Where(pt => pt.Key == WebApiConfig.AdslTaskQueues[r.taskorderno].relatedtaskorderid).FirstOrDefault();
+                if (k.Value != null && k.Value.K_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(k.Value.K_TON.Value) && WebApiConfig.AdslTaskQueues[k.Value.K_TON.Value].consummationdate.HasValue)
                 {
-                    var kdate = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 3).Value.consummationdate;
+                    var kdate = WebApiConfig.AdslTaskQueues[k.Value.K_TON.Value].consummationdate;
                     res.kyear = kdate.Value.Year;
                     res.kmonth = kdate.Value.Month;
                     res.kday = kdate.Value.Day;
                     res.ktime = kdate.Value.ToString("HH:mm");
                 }
-                if (k.Where(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).FirstOrDefault().Value != null)
+                if (k.Value != null && k.Value.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(k.Value.Ktk_TON.Value) && WebApiConfig.AdslTaskQueues[k.Value.Ktk_TON.Value].consummationdate.HasValue)
                 {
-                    var ktkdate = k.First(p => WebApiConfig.AdslTasks[p.Value.taskid].tasktype == 5).Value.consummationdate;
+                    var ktkdate = WebApiConfig.AdslTaskQueues[k.Value.Ktk_TON.Value].consummationdate;
                     res.ktkyear = ktkdate.Value.Year;
                     res.ktkmonth = ktkdate.Value.Month;
                     res.ktkday = ktkdate.Value.Day;
