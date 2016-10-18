@@ -1203,7 +1203,7 @@ namespace CRMWebApi.Controllers
         [Route("getTaskqueuesForBayi")]
         [HttpPost]
         public HttpResponseMessage getTaskqueuesForBayi(DTOGetTaskqueuesForBayi request)
-        {
+        { // search.kociletisim.com.tr için oluşturuldu. task süreci de buradan faydalanmakta (Hüseyin KOZ)
             using (var db = new KOCSAMADLSEntities(false))
             {
                 var filter = request.getFilter();
