@@ -15,6 +15,7 @@ namespace CRMWebApi.KOCAuthorization
         Reserved1 = 1 << 4,
         SalesStuff = 1 << 5,
         ProtocolStuff = 1 << 6,
+        updateStaff = 1 << 7,
         Customer = 1 << 24,
         ADSLCustomer = Customer | 1,
         Assosiation = 1 << 25,

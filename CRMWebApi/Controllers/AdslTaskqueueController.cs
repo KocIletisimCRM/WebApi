@@ -47,7 +47,7 @@ namespace CRMWebApi.Controllers
                 var user = KOCAuthorizeAttribute.getCurrentUser();
                 if (!filter.subTables.ContainsKey("taskid")) filter.subTables.Add("taskid", new DTOFilter("task", "taskid"));
 
-                if ((user != null && (user.userRole & (int)FiberKocUserTypes.Admin) != (int)FiberKocUserTypes.Admin))
+                if ((user != null && (user.userRole & (int)KOCUserTypes.Admin) != (int)KOCUserTypes.Admin))
                     filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { op = 9, value = $"(attachablepersoneltype = (attachablepersoneltype & {user.userRole}))" });
 
                 if (user.userId == 1458) {// Cağrı Merkezi için şart koyuldu kişi bazlı şarttan kaçmak için kanal yöneticilerine bu şart yazılabilir !!!user.userId
@@ -56,7 +56,7 @@ namespace CRMWebApi.Controllers
                     JArray pers = new JArray(per);
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 7, value = pers });
                 }
-                else if (user != null && ((user.userRole & (int)FiberKocUserTypes.TeamLeader) != (int)FiberKocUserTypes.TeamLeader))
+                else if (user != null && ((user.userRole & (int)KOCUserTypes.TeamLeader) != (int)KOCUserTypes.TeamLeader))
                     filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "attachedpersonelid", op = 2, value = user.userId });
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
@@ -347,6 +347,10 @@ namespace CRMWebApi.Controllers
                                 { // kurulum türünde gelenleri kurulum randevusu taskındaki personele ata (modem iade alma taskı da eklendi (taskid = 142))
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
+                                }
+                                if (oot.tasktype == 10)
+                                { // Netflow Modem Güncelleme Taskı oluştuğunda personellerin il sorumlu alanında müşterinin il ilçe içeriyorsa ona ata
+
                                 }
                                 if ((item == 45 || item == 118) && krtask != null)  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {

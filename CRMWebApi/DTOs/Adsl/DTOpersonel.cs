@@ -22,7 +22,8 @@ namespace CRMWebApi.DTOs.Adsl
         public Nullable<System.DateTime> lastupdated { get; set; }
         public int updatedby { get; set; }
         public Nullable<bool> deleted { get; set; }
-        
+        public string responseregions { get; set; } // kurulum güncellemesi yapan back office personelinin sorumlu olduğu bölgeler.
+
         public DTOil il { get; set; }
         public DTOilce ilce { get; set; }
         //public DTOpersonel relatedpersonel { get; set; }

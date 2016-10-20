@@ -44,6 +44,7 @@ namespace CRMWebApi.Models.Adsl
         public Nullable<int> ilceKimlikNo { get; set; }
         public Nullable<int> relatedpersonelid { get; set; }
         public Nullable<int> kurulumpersonelid { get; set; }
+        public string responseregions { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> attachedTaskqueue { get; set; }
