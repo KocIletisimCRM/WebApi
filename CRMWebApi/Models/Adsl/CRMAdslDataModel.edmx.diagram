@@ -13,7 +13,7 @@
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_document" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_gsmKullanımıStatus" Width="1.5" PointX="3.25" PointY="7.875" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.il" Width="1.5" PointX="14.75" PointY="15.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="KOCSAMADLSModel.ilce" Width="1.5" PointX="14.75" PointY="17.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.ilce" Width="1.5" PointX="14.75" PointY="17.375" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_issStatus" Width="1.5" PointX="8.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_mailservices" Width="1.5" PointX="10.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_netStatus" Width="1.5" PointX="10.75" PointY="3.75" IsExpanded="true" />
@@ -74,6 +74,7 @@
         <EntityTypeShape EntityType="KOCSAMADLSModel.paymentsystem" Width="1.5" PointX="17.5" PointY="15.375" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.paymentsystemtype" Width="1.5" PointX="17.5" PointY="19.125" />
         <AssociationConnector Association="KOCSAMADLSModel.paymentsystempaymentsystemtype" />
+        <AssociationConnector Association="KOCSAMADLSModel.mahalle" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

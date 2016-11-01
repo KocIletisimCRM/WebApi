@@ -42,6 +42,7 @@ namespace CRMWebApi.DTOs.Adsl
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
             int stataType = tq.status.HasValue ? WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) ? WebApiConfig.AdslStatus[tq.status.Value].statetype.Value : 0 : 0;
+            List<int> containLastTask = new List<int> { 10}; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
             //Başlangıç Taskı ise
             if (WebApiConfig.AdslTaskTypes[taskType].startsProccess)
             {
@@ -77,7 +78,7 @@ namespace CRMWebApi.DTOs.Adsl
                 Ktk_TON = tq.taskorderno;
             }
 
-            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid))
+            if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid) || containLastTask.Contains(taskType))
             {
                 Last_Status = stataType;
                 Last_TON = tq.taskorderno;

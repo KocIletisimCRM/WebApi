@@ -98,6 +98,9 @@ namespace CRMWebApi.Controllers
                 var customerIds = res.Select(c => c.attachedobjectid).Distinct().ToList();
                 var customers = db.customer.Where(c => customerIds.Contains(c.customerid)).ToList();
 
+                var mahalleIds = customers.Select(m => m.mahalleKimlikNo).Distinct().ToList();
+                var mahalles = db.mahalleKoy.Where(m => mahalleIds.Contains(m.kimlikNo)).ToList();
+
                 var ilIds = res.Select(s => s.attachedcustomer.ilKimlikNo).Distinct().ToList();
                 var iller = db.il.Where(i => ilIds.Contains(i.kimlikNo)).ToList();
 
@@ -120,6 +123,7 @@ namespace CRMWebApi.Controllers
                     r.attachedcustomer.ilce = ilceler.Where(i => i.kimlikNo == r.attachedcustomer.ilceKimlikNo).FirstOrDefault();
                     r.taskstatepool = taskstates.Where(tsp => tsp.taskstateid == r.status).FirstOrDefault();
                     //r.Updatedpersonel = personels.Where(u => u.personelid == r.updatedby).FirstOrDefault();
+                    r.attachedcustomer.mahalle = mahalles.Where(m => m.kimlikNo == r.attachedcustomer.mahalleKimlikNo).FirstOrDefault(); // yasin bey istedi mahalle ismi görünsün 26.10.2016
                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
                     r.laststatus = lastStateType[WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[r.taskorderno]) ? 
@@ -209,9 +213,9 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();
-            var customerdocuments =tq.customerdocument!=null? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList():null;
-            var customerproducts =tq.customerproduct!=null? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList():null;
-            var stockmovements =tq.stockmovement!=null ?tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList():null;
+            var customerdocuments = tq.customerdocument != null ? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList() : null;
+            var customerproducts = tq.customerproduct != null ? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : null;
+            var stockmovements = tq.stockmovement != null ? tq.stockmovement.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOstockmovement>()).ToList() : null;
             using (var db = new KOCSAMADLSEntities())
             using (var transaction = db.Database.BeginTransaction())
                 try
@@ -319,8 +323,8 @@ namespace CRMWebApi.Controllers
                                     }
                                 }
 
-                                if (db.taskqueue.Where(r => r.deleted==false && (r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
-                                    continue;  
+                                if (db.taskqueue.Where(r => r.deleted == false && (r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
+                                    continue;
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
                                 // Bayi Şatışlarının Randevu tarihi Emptor Sisteme Giriş Yalın/Churn (35/47) tasklarının kapanma tarihi olacak (Yasin Bey'in isteği)
                                 if (saletask != null && (dtq.taskid == 35 || dtq.taskid == 47))
@@ -348,9 +352,52 @@ namespace CRMWebApi.Controllers
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).kurulumpersonelid;//Kurulum bayisi idsi
                                 }
+                                var time = Stopwatch.StartNew();
                                 if (oot.tasktype == 10)
                                 { // Netflow Modem Güncelleme Taskı oluştuğunda personellerin il sorumlu alanında müşterinin il ilçe içeriyorsa ona ata
-
+                                    time.Restart();
+                                    WebApiConfig.loadAdslCustomers(DateTime.Now).ConfigureAwait(false);
+                                    var cilce = WebApiConfig.AdslCustomers.ContainsKey(dtq.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[dtq.attachedobjectid.Value].ilceKimlikNo : null; // müşterinin ilçe kodu
+                                    List<int> gPersonels = new List<int>(); //o ilçeden sorumlu güncelleme personelleri
+                                    if (cilce != null)
+                                    {
+                                        WebApiConfig.loadAdslPersonels(DateTime.Now).ConfigureAwait(false);
+                                        // sorumluluk bölgesi bulunan güncelleme personelleri
+                                        var perList = WebApiConfig.AdslPersonels.Where(per => per.Value.responseregions != null && ((per.Value.roles & (int)KOCUserTypes.updateStaff) == (int)KOCUserTypes.updateStaff)).Select(kkk => kkk.Value).ToList(); 
+                                        foreach (var per in perList)
+                                        {
+                                            var perilce = per.responseregions.Split(',').Select(n => Convert.ToInt32(n)).ToList();
+                                            if (perilce.FirstOrDefault(rrr => rrr == cilce) != 0)
+                                                gPersonels.Add(per.personelid);
+                                        }
+                                        if (gPersonels.Count != 0)
+                                        {
+                                            if (gPersonels.Count == 1)
+                                                personel_id = gPersonels[0];
+                                            else
+                                            {
+                                                int perTask = -1;
+                                                int perId = 0;
+                                                foreach (var pp in gPersonels)
+                                                {
+                                                    var count = WebApiConfig.AdslTaskQueues.Where(tt => tt.Value.taskid == item && tt.Value.status == null && tt.Value.attachedpersonelid == pp).Count();
+                                                    if (count == 0)
+                                                    {
+                                                        perId = pp;
+                                                        break;
+                                                    }
+                                                    else if (perTask == -1 || count < perTask)
+                                                    {
+                                                        perId = pp;
+                                                        perTask = count;
+                                                    }
+                                                }
+                                                if (perId != 0)
+                                                    personel_id = perId;
+                                            }
+                                        }
+                                    }
+                                    var qqq = time.Elapsed;
                                 }
                                 if ((item == 45 || item == 118) && krtask != null)  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
@@ -361,7 +408,7 @@ namespace CRMWebApi.Controllers
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
                                 if (oott != null && oott.Count > 0)
                                 {
-                                    var turAtama = oott.FirstOrDefault(t=> t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
+                                    var turAtama = oott.FirstOrDefault(t => t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
                                     var task = db.atama.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
                                     //Task atama kuralları işlesin.
                                     if (task != null)
@@ -373,7 +420,7 @@ namespace CRMWebApi.Controllers
                                 {
                                     appointmentdate = (dtq.task.tasktype == 2) ? (tq.appointmentdate) : (null),
                                     attachedpersonelid = personel_id,
-                                    attachmentdate = personel_id != null? ((dtq.taskstatepool != null ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (DateTime?)DateTime.Now)) : (null),
+                                    attachmentdate = personel_id != null ? ((dtq.taskstatepool != null ? ((dtq.taskstatepool.statetype == 3) ? (DateTime?)DateTime.Now.AddDays(1) : (DateTime?)DateTime.Now) : (DateTime?)DateTime.Now)) : (null),
                                     attachedobjectid = dtq.attachedobjectid,
                                     taskid = item,
                                     creationdate = DateTime.Now,
@@ -383,11 +430,17 @@ namespace CRMWebApi.Controllers
                                     updatedby = user.userId, //User.Identity.PersonelID,
                                     relatedtaskorderid = saletask
                                 };
-                                if((automandatoryTasks.Contains(38) || automandatoryTasks.Contains(60)) && dtq.attachedpersonelid!=1016)
+                                if ((automandatoryTasks.Contains(38) || automandatoryTasks.Contains(60)) && dtq.attachedpersonelid != 1016)
                                 {
                                     mailInfo.Add(dtq.attachedobjectid);
                                     mailInfo.Add(dtq.attachedpersonelid);
                                     sendemail(mailInfo);
+                                    if (personel_id != null)
+                                    {
+                                        mailInfo.Add(dtq.attachedobjectid);
+                                        mailInfo.Add(personel_id);
+                                        sendemail(mailInfo);
+                                    }
                                 }
                                 db.taskqueue.Add(amtq);
                             }
@@ -439,7 +492,7 @@ namespace CRMWebApi.Controllers
                         #endregion
                         #region stok hareketleri kaydediliyor
                         if (dtq.taskid == 142)
-                        { // Müşteriden task içerisinde ürün alınması için
+                        { // Müşteriden task içerisinde ürün alınması için task type çevrilmesi gerekiyor.
                             db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
                             {
                                 amount = sm.amount,
@@ -460,6 +513,44 @@ namespace CRMWebApi.Controllers
                         }
                         else
                         { // Diğer tüm işlemler için
+                            foreach (var ss in stockmovements)
+                            { // bir task hiyerarşi sürecinde uniqueforsales (bir hiyerarşi için tekil stokcard) true olan stockcard'lar için ikinci bir stock oluşuyorsa öncekini stok verene dödür. (Hüseyin KOZ)
+                                var sm = db.stockmovement.Where(s => s.serialno == ss.serialno && s.deleted == false && s.confirmationdate == null).ToList();
+                                sm.ForEach(s =>
+                                {
+                                    s.updatedby = user.userId;
+                                    s.lastupdated = DateTime.Now;
+                                    s.deleted = true;
+                                }); // bir seri onaylanmadan başka birisine çıkıldığında onaylanmayan hareketi sil (Hüseyin KOZ) 27.10.2016
+
+                                if (db.stockcard.First(sc => sc.stockid == ss.stockcardid && sc.deleted == false).salesonly.Value)
+                                {
+                                    var stm = db.getSerialsOnCustomerAdsl(dtq.attachedobjectid, ss.stockcardid).ToList();
+                                    foreach (var seri in stm)
+                                    {
+                                        var related = db.stockmovement.OrderByDescending(s => s.movementid).First(s => s.serialno == seri && s.deleted == false && s.toobject == dtq.attachedobjectid && s.toobjecttype == (int)KOCUserTypes.ADSLCustomer).relatedtaskqueue;
+                                        if (WebApiConfig.AdslProccessIndexes[related.Value] == WebApiConfig.AdslProccessIndexes[dtq.relatedtaskorderid.Value])
+                                        {
+                                            db.stockmovement.Add(new adsl_stockmovement
+                                            {
+                                                amount = ss.amount,
+                                                confirmationdate = DateTime.Now,
+                                                creationdate = DateTime.Now,
+                                                fromobjecttype = (int)KOCUserTypes.ADSLCustomer,
+                                                fromobject = dtq.attachedobjectid,
+                                                deleted = false,
+                                                lastupdated = DateTime.Now,
+                                                movementdate = DateTime.Now,
+                                                serialno = seri,
+                                                stockcardid = ss.stockcardid,
+                                                toobjecttype = (int)KOCUserTypes.TechnicalStuff,
+                                                toobject = dtq.attachedpersonelid,
+                                                updatedby = user.userId
+                                            });
+                                        }
+                                    }
+                                }
+                            }
                             db.stockmovement.AddRange(stockmovements.Select(sm => new adsl_stockmovement
                             {
                                 amount = sm.amount,
@@ -481,7 +572,7 @@ namespace CRMWebApi.Controllers
                         db.SaveChanges();
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if ((tq.task.taskid==41 && tq.taskstatepool.taskstateid==9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115))
+                        if ((tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115))
                         {
                             // satış task task orderno
                             var ptq = dtq;
@@ -500,8 +591,8 @@ namespace CRMWebApi.Controllers
                                 }
                             }
                             var custproducts = db.customerproduct.Where(c => c.customerid == dtq.attachedobjectid && c.deleted == false && c.taskid == saletask).Select(s => s.productid).ToList();
-                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s=>s.automandatorytasks).ToList();
-                            if (autotasks.Count>0)
+                            var autotasks = db.product_service.Where(p => custproducts.Contains(p.productid) && p.automandatorytasks != null).Select(s => s.automandatorytasks).ToList();
+                            if (autotasks.Count > 0)
                             {
                                 foreach (var item in (autotasks.First() ?? "").Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)))
                                 {
@@ -510,7 +601,7 @@ namespace CRMWebApi.Controllers
                                     int? personel_id = null;
                                     var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
                                     if (oott.Count > 0)
-                                    {  
+                                    {
                                         //Task atama kuralları işlesin.
                                         var turAtama = oott.FirstOrDefault(t => t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
                                         var task = oott.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
@@ -534,10 +625,10 @@ namespace CRMWebApi.Controllers
                                         relatedtaskorderid = saletask //tq.relatedtaskorderid
                                     });
                                 }
-                            }                            
+                            }
                         }
                         #endregion
-                   }
+                    }
                     #endregion
                     else
                     {
@@ -546,7 +637,7 @@ namespace CRMWebApi.Controllers
                         {
                             foreach (var p in customerproducts)
                             {
-                                    db.customerproduct.Add( new adsl_customerproduct
+                                db.customerproduct.Add(new adsl_customerproduct
                                 {
                                     campaignid = p.campaignid,
                                     creationdate = DateTime.Now,
@@ -624,7 +715,7 @@ namespace CRMWebApi.Controllers
                     dtq.description = tq.description != null ? tq.description : dtq.description;
                     dtq.appointmentdate = tq.appointmentdate;
                     //dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
-                    dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
+                    //dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.fault = tq.fault != null ? tq.fault : dtq.fault;
                     dtq.updatedby = user.userId;
                     dtq.lastupdated = DateTime.Now;
@@ -1004,6 +1095,16 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage personelattachment(DTORequestAttachmentPersonel request)
         {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            if ((user.userRole & (int)KOCUserTypes.BackOfficeStuff) != (int)KOCUserTypes.BackOfficeStuff)
+            {
+                DTOResponseError re = new DTOResponseError
+                {
+                    errorCode = -1,
+                    errorMessage = "Task Atama Yetkiniz Bulunmamaktadır..."
+                };
+                return Request.CreateResponse(HttpStatusCode.OK, re, "application/json");
+            }
             if (request.ids.Count() > 0)
             {
                 using (var db = new KOCSAMADLSEntities())

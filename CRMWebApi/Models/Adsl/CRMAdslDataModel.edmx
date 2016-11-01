@@ -309,6 +309,7 @@
           <Property Name="lastupdated" Type="datetime2" Precision="7" />
           <Property Name="updatedby" Type="int" />
           <Property Name="deleted" Type="bit" />
+          <Property Name="salesonly" Type="bit" />
         </EntityType>
         <EntityType Name="stockmovement">
           <Key>
@@ -460,6 +461,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
                 <Property Name="lastupdated" Type="datetime2" Precision="7" />
                 <Property Name="updatedby" Type="int" />
                 <Property Name="deleted" Type="bit" />
+                <Property Name="salesonly" Type="bit" />
                 <Property Name="amount" Type="int" />
               </RowType>
             </CollectionType>
@@ -752,6 +754,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="updatedby" Type="Int32" />
           <Property Name="deleted" Type="Boolean" />
           <NavigationProperty Name="stockmovement" Relationship="KOCSAMADLSModel.adsl_stockcardadsl_stockmovement" FromRole="adsl_stockcard" ToRole="adsl_stockmovement" />
+          <Property Name="salesonly" Type="Boolean" />
         </EntityType>
         <EntityType Name="adsl_stockmovement">
           <Key>
@@ -1072,6 +1075,10 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <FunctionImport Name="getCustomerStockAdsl" IsComposable="true" ReturnType="Collection(KOCSAMADLSModel.getCustomerStockAdsl_Result)">
           <Parameter Name="CUSTOMERID" Mode="In" Type="Int32" />
           </FunctionImport>
+          <AssociationSet Name="mahalle" Association="KOCSAMADLSModel.mahalle">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="mahalleKoy" EntitySet="mahalleKoy" />
+          </AssociationSet>
           </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -1283,6 +1290,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="bucakKimlikNo" Type="Int32" />
           <Property Name="email" Type="String" MaxLength="100" FixedLength="true" Unicode="true" />
           <Property Name="superonlineCustNo" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="mahalle" Relationship="KOCSAMADLSModel.mahalle" FromRole="customer" ToRole="mahalleKoy" />
         </EntityType>
         <Association Name="customeradsl_taskqueue">
           <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
@@ -1505,6 +1513,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="kimlikNo" Type="Int32" Nullable="false" />
           <Property Name="ad" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="bucakKimlikNo" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="customer" Relationship="KOCSAMADLSModel.mahalle" FromRole="mahalleKoy" ToRole="customer" />
         </EntityType>
         <Association Name="adsl_personeladsl_personel">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="adsl_personel" Multiplicity="0..1" />
@@ -1680,6 +1689,18 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Type="Boolean" Name="deleted" Nullable="true" />
           <Property Type="Int32" Name="amount" Nullable="true" />
         </ComplexType>
+        <Association Name="mahalle">
+          <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="*" />
+          <End Type="KOCSAMADLSModel.mahalleKoy" Role="mahalleKoy" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="mahalleKoy">
+              <PropertyRef Name="kimlikNo" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="mahalleKimlikNo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1875,6 +1896,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="stockcard">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.adsl_stockcard">
               <MappingFragment StoreEntitySet="stockcard">
+                <ScalarProperty Name="salesonly" ColumnName="salesonly" />
                 <ScalarProperty Name="stockid" ColumnName="stockid" />
                 <ScalarProperty Name="productname" ColumnName="productname" />
                 <ScalarProperty Name="category" ColumnName="category" />

@@ -437,7 +437,7 @@ namespace CRMWebApi
                 {
                     await conn.OpenAsync().ConfigureAwait(false);
                     var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo, roles, email, kurulumpersonelid, notes, mobile from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
+                    selectCommand.CommandText = $"select personelid,personelname,lastupdated,relatedpersonelid, ilKimlikNo, ilceKimlikNo, roles, email, kurulumpersonelid, notes, mobile, responseregions from personel where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'";
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
@@ -455,6 +455,7 @@ namespace CRMWebApi
                                 kurulumpersonelid = sqlreader.IsDBNull(8) ? null : (int?)sqlreader[8],
                                 notes = sqlreader.IsDBNull(9) ? null : (string)sqlreader[9],
                                 mobile = sqlreader.IsDBNull(10) ? null : (string)sqlreader[10],
+                                responseregions = sqlreader.IsDBNull(11) ? null : (string)sqlreader[11],
                             });
                             AdslPersonels[t.personelid] = t;
                         }
@@ -1276,7 +1277,7 @@ namespace CRMWebApi
                                     else
                                         taskid = 57; // Satış CC Yalın Vdsl
                                     if (taskid != -1)
-                                        customerInfo(customer, data, taskid, 1154); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
+                                        customerInfo(customer, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
                                 }
                             }
                             else
@@ -1287,7 +1288,7 @@ namespace CRMWebApi
                                 else
                                     taskid = 57; // Satış CC Yalın Vdsl
                                 if (taskid != -1)
-                                    customerInfo(null, data, taskid, 1154); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
+                                    customerInfo(null, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
                             }
                         }
                     }
@@ -1340,10 +1341,10 @@ namespace CRMWebApi
                                     }
                                 }
                                 if (newCust)
-                                    customerInfo(customer, data, 33, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                    customerInfo(customer, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                             }
                             else
-                                customerInfo(null, data, 33, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                customerInfo(null, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                         }
                     }
                 }
@@ -1395,10 +1396,10 @@ namespace CRMWebApi
                                     }
                                 }
                                 if (newCust)
-                                    customerInfo(customer, data, 64, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                    customerInfo(customer, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                             }
                             else
-                                customerInfo(null, data, 64, 1241); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                customerInfo(null, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                         }
                     }
                 }
@@ -1698,6 +1699,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.InfoBayiReport>("InfoBayiReports");
             builder.EntitySet<DTOs.Adsl.StockMovementBackSeri>("StockMovementBackSeriReports");
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
+            builder.EntitySet<DTOs.Adsl.EvrakBasari>("OnlyDocSuccesReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

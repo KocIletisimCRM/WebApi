@@ -79,6 +79,7 @@ namespace CRMWebApi.Controllers
                 dp.email = request.email;
                 dp.password = request.password;
                 dp.notes = request.notes;
+                dp.responseregions = request.responseregions;
                 dp.lastupdated = DateTime.Now;
                 dp.updatedby = KOCAuthorization.KOCAuthorizeAttribute.getCurrentUser().userId;
                 db.SaveChanges();

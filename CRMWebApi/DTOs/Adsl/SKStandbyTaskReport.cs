@@ -21,6 +21,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string ilce { get; set; }
         public int? personelid { get; set; }
         public string personelname { get; set; }
+        public string k_personel { get; set; }
         public string fault { get; set; }
         public string description { get; set; }
         public string customeradres { get; set; }

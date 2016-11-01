@@ -28,5 +28,6 @@ namespace CRMWebApi.DTOs.Adsl
 
         public DTOil il { get; set; }
         public DTOilce ilce { get; set; }
+        public DTOmahalle mahalle { get; set; } // yasin bey istedi mahalle ismi görünsün 26.10.2016 Hüseyin KOZ
     }
 }

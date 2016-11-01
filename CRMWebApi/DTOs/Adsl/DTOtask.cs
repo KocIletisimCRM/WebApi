@@ -12,6 +12,8 @@ namespace CRMWebApi.DTOs.Adsl
         public DTOpersonel updatedpersonel { get; set; }
         public Nullable<bool> deleted { get; set; }
         public string description { get; set; }
+        public Nullable<int> attachablepersoneltype { get; set; }
+        public Nullable<int> attachableobjecttype { get; set; }
 
         public DTOTaskTypes tasktypes { get; set; }
         public DTOobjecttypes objecttypes { get; set; }

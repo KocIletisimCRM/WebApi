@@ -14,8 +14,17 @@ namespace CRMWebApi.Models.Adsl
     
     public partial class mahalleKoy
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public mahalleKoy()
+        {
+            this.customer = new HashSet<customer>();
+        }
+    
         public int kimlikNo { get; set; }
         public string ad { get; set; }
         public int bucakKimlikNo { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<customer> customer { get; set; }
     }
 }

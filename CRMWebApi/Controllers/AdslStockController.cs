@@ -188,7 +188,13 @@ namespace CRMWebApi.Controllers
                             }
                             else
                             {
-
+                                var stm = db.stockmovement.Where(s => s.serialno == seri && s.deleted == false && s.confirmationdate == null).ToList();
+                                stm.ForEach(s =>
+                                {
+                                    s.updatedby = userID;
+                                    s.lastupdated = DateTime.Now;
+                                    s.deleted = true;
+                                }); // bir seri onaylanmadan başka birisine çıkıldığında onaylanmayan hareketi sil (Hüseyin KOZ) 27.10.2016
 
                                 adsl_stockmovement sm = new adsl_stockmovement();
                                 sm.serialno = seri;

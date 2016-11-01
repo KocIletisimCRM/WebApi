@@ -52,5 +52,6 @@ namespace CRMWebApi.Models.Adsl
         public virtual ICollection<adsl_stockmovement> adsl_stockmovement { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_stockmovement> adsl_stockmovement1 { get; set; }
+        public virtual mahalleKoy mahalle { get; set; }
     }
 }

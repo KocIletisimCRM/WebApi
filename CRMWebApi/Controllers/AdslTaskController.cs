@@ -43,9 +43,7 @@ namespace CRMWebApi.Controllers
                     r.tasktypes = tasktypess.Where(t => t.TaskTypeId == r.tasktype).FirstOrDefault();
                 });
 
-
                 return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
-
             }
         }
 

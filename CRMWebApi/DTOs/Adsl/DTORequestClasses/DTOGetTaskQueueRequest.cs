@@ -333,10 +333,15 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
         public string consummationDate { get; set; }
         public int? taskOrderNo { get; set; }
         public int? laststatus { get; set; } // Sürecin son durum kontrolü için eklendi (Hüseyin KOZ) 12.10.2016
+        public string ranking { get; set; } // sıralama mekanizmasını değişmek için kullan (Hüseyin KOZ) 31.10.2016
 
         public DTOFilter getFilter()
         {
-            var filter = new DTOFilter("taskqueue", "taskorderno");
+            DTOFilter filter;
+            if (ranking != null)
+                filter = new DTOFilter("taskqueue", ranking);
+            else
+                filter = new DTOFilter("taskqueue", "taskorderno");
             var csbFilter = csbRequest.getFilter();
             if (hasTaskFilter())
             {
