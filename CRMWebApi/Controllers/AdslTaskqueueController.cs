@@ -126,29 +126,29 @@ namespace CRMWebApi.Controllers
                     r.attachedcustomer.mahalle = mahalles.Where(m => m.kimlikNo == r.attachedcustomer.mahalleKimlikNo).FirstOrDefault(); // yasin bey istedi mahalle ismi görünsün 26.10.2016
                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
-                    r.laststatus = lastStateType[WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[r.taskorderno]) ? 
-                        WebApiConfig.AdslProccesses[WebApiConfig.AdslProccessIndexes[r.taskorderno]].Last_Status : 0 : 0];
+                    r.laststatus = lastStateType[r.relatedtaskorderid.HasValue ? WebApiConfig.AdslProccesses.ContainsKey(r.relatedtaskorderid.Value) ? 
+                        WebApiConfig.AdslProccesses[r.relatedtaskorderid.Value].Last_Status : 0 : 0];
                     if (request.taskOrderNo != null)
                     {
                         // taska bağlı müşteri kampanyası ve bilgileri
-                        int saletask = WebApiConfig.AdslProccessIndexes.ContainsKey(r.taskorderno) ? WebApiConfig.AdslProccessIndexes[r.taskorderno] : 0;
-                        if (saletask == 0)
-                        { // bu döngü önceden dönüyordu kısa olması için üsteki dictionary eklendi bazen dictionary çekemediği durum olursa ürün kesin bulunsun diye kaldırılmadı (Hüseyin KOZ) 12.10.2016
-                            var ptq = r;
-                            while (ptq != null)
-                            {
-                                ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
-                                {
-                                    saletask = ptq.taskorderno;
-                                    break;
-                                }
-                                else
-                                {
-                                    ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                }
-                            }
-                        }
+                        int saletask = r.relatedtaskorderid ?? r.taskorderno;
+                        //if (saletask == 0) // artık relatedtaskorderid proccess index tuttuğu için kapatıldı (Hüseyin KOZ) 01.11.2016
+                        //{ // bu döngü önceden dönüyordu kısa olması için üsteki dictionary eklendi bazen dictionary çekemediği durum olursa ürün kesin bulunsun diye kaldırılmadı (Hüseyin KOZ) 12.10.2016
+                        //    var ptq = r;
+                        //    while (ptq != null)
+                        //    {
+                        //        ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                        //        if (ptq.task != null && WebApiConfig.AdslTaskTypes.ContainsKey(ptq.task.tasktype) && WebApiConfig.AdslTaskTypes[ptq.task.tasktype].startsProccess)
+                        //        {
+                        //            saletask = ptq.taskorderno;
+                        //            break;
+                        //        }
+                        //        else
+                        //        {
+                        //            ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                        //        }
+                        //    }
+                        //}
                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == saletask && c.deleted == false).ToList();
                         r.customerdocument = getDocuments(db, r.taskorderno, r.taskid, (r.task.tasktype == 1 || r.task.tasktype == 8 || r.task.tasktype == 9), r.status ?? 0, r.customerproduct.Any() ? r.customerproduct.First().campaignid : null, r.customerproduct.Select(cp => cp.productid ?? 0).ToList());
                         if (r.customerdocument.Any())
@@ -239,6 +239,12 @@ namespace CRMWebApi.Controllers
                         }// taskın durumunu açığa alma
                         else
                         {
+                            if ((dtq.taskid == 153 || dtq.taskid == 155) && WebApiConfig.AdslPersonels.ContainsKey(dtq.attachedpersonelid ?? 0) 
+                                && WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Count > 0 
+                                && !WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.ContainsKey(dtq.relatedtaskorderid ?? dtq.taskorderno))
+                            {
+                                return Request.CreateResponse(HttpStatusCode.OK, "Tamamlanmayan Kurulumunuz Bulunmaktadır. Önce onu tamamlayınız !", "application/json");
+                            }
                             dtq.consummationdate = DateTime.Now;
                             dtq.status = tq.taskstatepool.taskstateid;
                         }
@@ -523,13 +529,15 @@ namespace CRMWebApi.Controllers
                                     s.deleted = true;
                                 }); // bir seri onaylanmadan başka birisine çıkıldığında onaylanmayan hareketi sil (Hüseyin KOZ) 27.10.2016
                                 var salesonlycontrol = db.stockcard.First(sc => sc.stockid == ss.stockcardid && sc.deleted == false).salesonly;
-                                if (salesonlycontrol.HasValue && salesonlycontrol.Value)
+                                if (salesonlycontrol != null && salesonlycontrol.Value)
                                 {
                                     var stm = db.getSerialsOnCustomerAdsl(dtq.attachedobjectid, ss.stockcardid).ToList();
                                     foreach (var seri in stm)
                                     {
                                         var related = db.stockmovement.OrderByDescending(s => s.movementid).First(s => s.serialno == seri && s.deleted == false && s.toobject == dtq.attachedobjectid && s.toobjecttype == (int)KOCUserTypes.ADSLCustomer).relatedtaskqueue;
-                                        if (WebApiConfig.AdslProccessIndexes[related.Value] == WebApiConfig.AdslProccessIndexes[dtq.relatedtaskorderid.Value])
+                                        // stock hareketinden bulunan taskorderno süreç başlangıç numarası olan relatedtaskorderid ile kontrol edildiği için kapatıldı (Hüseyin KOZ) 01.11.2016
+                                        //if (WebApiConfig.AdslProccessIndexes[related.Value] == WebApiConfig.AdslProccessIndexes[dtq.relatedtaskorderid.Value]) 
+                                        if (WebApiConfig.AdslTaskQueues[related.Value].relatedtaskorderid == dtq.relatedtaskorderid.Value)
                                         {
                                             db.stockmovement.Add(new adsl_stockmovement
                                             {
@@ -721,12 +729,13 @@ namespace CRMWebApi.Controllers
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
+                    WebApiConfig.updateAdslData();
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }
                 catch (Exception e)
                 {
                     transaction.Rollback();
-                    return Request.CreateResponse(HttpStatusCode.NotModified, e.Message, "application/json");
+                    return Request.CreateResponse(HttpStatusCode.OK, e.Message, "application/json");
                 }
         }
 
@@ -883,6 +892,7 @@ namespace CRMWebApi.Controllers
                 }
                 #endregion
                 db.SaveChanges();
+                WebApiConfig.updateAdslData();
                 return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
             }
         }
@@ -962,6 +972,7 @@ namespace CRMWebApi.Controllers
                         }
                         db.SaveChanges();
                     }
+                    WebApiConfig.updateAdslData();
                     return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, "Girilen TC Numarası Başkasına Aittir", "application/json");
@@ -993,6 +1004,7 @@ namespace CRMWebApi.Controllers
                 db.SaveChanges();
                 taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();
+                WebApiConfig.updateAdslData();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
         }
@@ -1086,9 +1098,9 @@ namespace CRMWebApi.Controllers
                 db.SaveChanges();
                 taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();
+                WebApiConfig.updateAdslData();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
-
         }
 
         [Route("personelattachment")]

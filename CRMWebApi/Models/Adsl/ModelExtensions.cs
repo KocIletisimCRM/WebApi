@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections;
 using CRMWebApi.DTOs.Adsl;
+using System.Collections.Concurrent;
 
 namespace CRMWebApi.Models.Adsl
 {
@@ -86,9 +87,23 @@ namespace CRMWebApi.Models.Adsl
 
     public partial class adsl_personel : EntityBase
     {
+        ConcurrentDictionary<int, bool> t_153_155 = new ConcurrentDictionary<int, bool>();
+        public virtual ConcurrentDictionary<int, bool> T_153_155 { get { return t_153_155; } } 
         public override object toDTO()
         {
             return toDTO<DTOpersonel>();
+        }
+
+        public void updateT_153_155Dic(adsl_taskqueue ax)
+        {
+            if (ax.taskid == 153 || ax.taskid == 155)
+            {
+                if (WebApiConfig.AdslPersonels.ContainsKey(ax.attachedpersonelid ?? 0))
+                {
+                    bool b;
+                    WebApiConfig.AdslPersonels[ax.attachedpersonelid.Value].T_153_155.TryRemove(ax.relatedtaskorderid.Value, out b);
+                }
+            }
         }
     }
 

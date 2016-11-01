@@ -137,6 +137,7 @@ namespace CRMWebApi.Controllers
                         db.SaveChanges();
                     }
                     transaction.Commit();
+                    WebApiConfig.updateAdslData();
                     logs(request, true, "");
                     return Request.CreateResponse(HttpStatusCode.OK, "Tamamlandı", "application/json");
                 }

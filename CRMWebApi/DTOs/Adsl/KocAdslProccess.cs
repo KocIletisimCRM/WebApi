@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -19,7 +20,7 @@ namespace CRMWebApi.DTOs.Adsl
 
         public bool proccessCancelled = false;
         private int last_TON = 0;
-        public int Last_TON 
+        public int Last_TON
         {
             get { return last_TON; }
             set
@@ -42,7 +43,37 @@ namespace CRMWebApi.DTOs.Adsl
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
             int stataType = tq.status.HasValue ? WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) ? WebApiConfig.AdslStatus[tq.status.Value].statetype.Value : 0 : 0;
-            List<int> containLastTask = new List<int> { 10}; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
+            List<int> containLastTask = new List<int> { 10 }; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
+
+            // Model Güncelleme Talebi taskları ve kurulum taskları için
+            if(taskType == 3)
+            {
+                if(tq.taskid == 153 || tq.taskid == 155)
+                {
+                    if(WebApiConfig.AdslPersonels.ContainsKey(tq.attachedpersonelid ?? 0))
+                    {
+                        if (stataType == 1 || stataType == 3)
+                        {
+                            WebApiConfig.AdslPersonels[tq.attachedpersonelid.Value].T_153_155.TryAdd(tq.relatedtaskorderid ?? tq.taskorderno, true);
+                            WebApiConfig.K_PersonelForProccess.TryAdd(tq.relatedtaskorderid ?? tq.taskorderno, tq.attachedpersonelid.Value);
+                        }
+                    }
+                }
+                else
+                {
+                    if (WebApiConfig.AdslPersonels.ContainsKey(tq.attachedpersonelid ?? 0))
+                    {
+                        bool b;
+                        int x;
+                        if (stataType == 1 || stataType == 3)
+                        {
+                            WebApiConfig.AdslPersonels[tq.attachedpersonelid.Value].T_153_155.TryRemove(tq.relatedtaskorderid ?? tq.taskorderno, out b);
+                            WebApiConfig.K_PersonelForProccess.TryRemove(tq.relatedtaskorderid ?? tq.taskorderno, out x);
+                        }
+                    }
+                }
+            }
+
             //Başlangıç Taskı ise
             if (WebApiConfig.AdslTaskTypes[taskType].startsProccess)
             {
@@ -108,7 +139,7 @@ namespace CRMWebApi.DTOs.Adsl
                         SLs[sl].CustomerId = tq.attachedobjectid.Value;
                     }
                 //Bayi SL Bitiş (9156 iptal onayı bekliyor durumu sl sonlandırmamalı geçici olarak id ekledim çözüm sorulacak)
-                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2 && tq.status != 9156) 
+                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2 && tq.status != 9156)
                 {
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
                     {
@@ -132,6 +163,12 @@ namespace CRMWebApi.DTOs.Adsl
             while (proccessIds.Count > 0)
             {
                 var proccessId = proccessIds.Dequeue();
+                //Proccess yeniden oluşturulduğunda personel üzerindeki engeller kaldırılıyor (Ali AKAY) 01.11.2016
+                int x;
+                bool b;
+                WebApiConfig.K_PersonelForProccess.TryRemove(proccessId, out x);
+                if (WebApiConfig.AdslPersonels.ContainsKey(x)) WebApiConfig.AdslPersonels[x].T_153_155.TryRemove(proccessId, out b);
+                
                 var subTasks = new Queue<int>();
                 subTasks.Enqueue(proccessId);
                 while (subTasks.Count > 0)
@@ -142,15 +179,16 @@ namespace CRMWebApi.DTOs.Adsl
                     //if (WebApiConfig.AdslTaskQueues.ContainsKey(taskId) && WebApiConfig.AdslProccessIndexes.ContainsKey(taskId) && WebApiConfig.AdslProccesses.ContainsKey(WebApiConfig.AdslProccessIndexes[taskId]))
                     KocAdslProccess kap = null;
                     adsl_taskqueue atq = null;
-                    int proccessID = 0;
-                    if (WebApiConfig.AdslProccessIndexes.TryGetValue(taskId, out proccessID))
-                        if (WebApiConfig.AdslTaskQueues.TryGetValue(taskId, out atq))
-                            if (WebApiConfig.AdslProccesses.TryGetValue(proccessID, out kap))
-                            {
-                                kap.Update(atq);
-                            }
+                    // AdslProccessIndexes dictionary nesnesi atrık kullanılmıyor (Hüseyin KOZ) 01.11.2016
+                    //int proccessID = 0;
+                    //if (WebApiConfig.AdslProccessIndexes.TryGetValue(taskId, out proccessID))
+                    if (WebApiConfig.AdslTaskQueues.TryGetValue(taskId, out atq))
+                        if (WebApiConfig.AdslProccesses.TryGetValue(atq.relatedtaskorderid ?? taskId, out kap))
+                        {
+                            kap.Update(atq);
+                        }
                     //foreach (var item in WebApiConfig.AdslTaskQueues.Where(r => r.Value.previoustaskorderid == taskId).OrderBy(r => r.Value.taskorderno)) subTasks.Enqueue(item.Value.taskorderno);
-                    ConcurrentBag<int> stks = new ConcurrentBag<int>();
+                    HashSet<int> stks = new HashSet<int>();
                     if (WebApiConfig.AdslSubTasks.TryGetValue(taskId, out stks))
                         foreach (var item in stks) subTasks.Enqueue(item);
                     stw.Stop();

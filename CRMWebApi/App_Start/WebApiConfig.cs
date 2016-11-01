@@ -242,9 +242,9 @@ namespace CRMWebApi
         public static SemaphoreSlim aLockObject = new SemaphoreSlim(1);
         public static DateTime AdslLastUpdated = new DateTime(1900, 1, 1);
         public static ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess> AdslProccesses = new ConcurrentDictionary<int, DTOs.Adsl.KocAdslProccess>();
-        public static ConcurrentDictionary<int, int> AdslProccessIndexes = new ConcurrentDictionary<int, int>();
+        //public static ConcurrentDictionary<int, int> AdslProccessIndexes = new ConcurrentDictionary<int, int>();
         public static ConcurrentDictionary<int, Models.Adsl.adsl_taskqueue> AdslTaskQueues = new ConcurrentDictionary<int, CRMWebApi.Models.Adsl.adsl_taskqueue>();
-        public static ConcurrentDictionary<int, ConcurrentBag<int>> AdslSubTasks = new ConcurrentDictionary<int, ConcurrentBag<int>>(); // Bu taska bağlı türemiş tasklar
+        public static ConcurrentDictionary<int, HashSet<int>> AdslSubTasks = new ConcurrentDictionary<int, HashSet<int>>(); // Bu taska bağlı türemiş tasklar
         public static ConcurrentDictionary<int, Models.Adsl.customer> AdslCustomers = new ConcurrentDictionary<int, Models.Adsl.customer>();
         public static Dictionary<int, Models.Adsl.adsl_task> AdslTasks = new Dictionary<int, Models.Adsl.adsl_task>();
         public static Dictionary<int, Models.Adsl.adsl_personel> AdslPersonels = new Dictionary<int, Models.Adsl.adsl_personel>();
@@ -260,6 +260,7 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_objecttypes> AdslObjectTypes = new Dictionary<int, Models.Adsl.adsl_objecttypes>(); // personel görev tanımlamalrı için
         public static Dictionary<int, Models.Adsl.adsl_campaigns> AdslCampaigns = new Dictionary<int, Models.Adsl.adsl_campaigns>(); // müşteri kampanyası için
         public static ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
+        public static ConcurrentDictionary<int, int> K_PersonelForProccess = new ConcurrentDictionary<int, int>(); // bir şüreçin kurulumunu gerçekleştiren personel için aynı anda kısıtlı sayıda kurulum izni (key : proccessid, value : personelid)
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
@@ -275,7 +276,7 @@ namespace CRMWebApi
                     selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'"; // aynı gün içerisinde yapılan değişiklikler işleme alınamadığı için HH:mm:ss eklendi (Hüseyin KOZ)
                     using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                     {
-                        var proccesIds = new HashSet<int>();
+                        var proccessIds = new HashSet<int>();
                         while (await sqlreader.ReadAsync().ConfigureAwait(false))
                         {
                             var t = (new Models.Adsl.adsl_taskqueue
@@ -304,33 +305,29 @@ namespace CRMWebApi
                                     AdslSubTasks[t.previoustaskorderid.Value].Add(t.taskorderno);
                                 else
                                 {
-                                    AdslSubTasks[t.previoustaskorderid.Value] = new ConcurrentBag<int>(new int[] { t.taskorderno });
+                                    AdslSubTasks[t.previoustaskorderid.Value] = new HashSet<int>(new int[] { t.taskorderno });
                                 }
                             }
                             if (t.deleted == true)
                             {
                                 if(t.previoustaskorderid.HasValue && AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
                                 {
-                                    int i = 0;
-                                    ConcurrentBag<int> c;
-                                    AdslSubTasks[t.previoustaskorderid.Value].TryTake(out i);
-                                    if (AdslSubTasks[t.previoustaskorderid.Value].IsEmpty) AdslSubTasks.TryRemove(t.previoustaskorderid.Value, out c);
+                                    HashSet<int> c;
+                                    AdslSubTasks[t.previoustaskorderid.Value].Remove(t.taskorderno);
+                                    if (AdslSubTasks[t.previoustaskorderid.Value].Count == 0) AdslSubTasks.TryRemove(t.previoustaskorderid.Value, out c);
                                 }
                                 if (AdslTaskQueues.ContainsKey(t.taskorderno))
                                 {
                                     //Derinlemesine temizlik :) Silinen task ve bu taska bağlı tüm taskları listeden çıkart
-                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(t.taskorderno);
+                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
                                     var queue = new Queue<int>();
                                     queue.Enqueue(t.taskorderno);
                                     while (queue.Count > 0)
                                     {
                                         var ton = queue.Dequeue();
                                         Models.Adsl.adsl_taskqueue ax;
-                                        int ix;
                                         foreach (var item in AdslTaskQueues.Where(r => r.Value.previoustaskorderid == ton).Select(r => r.Value.taskorderno)) queue.Enqueue(item);
                                         AdslTaskQueues.TryRemove(ton, out ax);
-                                        if (AdslProccessIndexes.ContainsKey(ton))
-                                            AdslProccessIndexes.TryRemove(ton, out ix);
                                     }
                                     DTOs.Adsl.KocAdslProccess kx;
                                     if (AdslProccesses.ContainsKey(t.taskorderno))
@@ -347,20 +344,17 @@ namespace CRMWebApi
                                     {
                                         AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
-                                    AdslProccessIndexes[t.taskorderno] = t.taskorderno;
-                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(t.taskorderno);
+                                    if (!proccessIds.Contains(t.taskorderno)) proccessIds.Add(t.taskorderno);
                                 }
                                 else
                                 {
-                                    var proccessNo = AdslProccessIndexes[t.previoustaskorderid.Value];
-                                    AdslProccessIndexes[t.taskorderno] = proccessNo;
-                                    AdslProccesses[proccessNo] = new DTOs.Adsl.KocAdslProccess();
-                                    if (!proccesIds.Contains(t.taskorderno)) proccesIds.Add(proccessNo);
+                                    AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
                                 }
                             }
                         }
                         var tttt = stw.Elapsed;
-                        DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccesIds));
+                        DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccessIds));
                     }
                 }
             }
@@ -1011,6 +1005,7 @@ namespace CRMWebApi
                         db.SaveChanges();
                     }
                     tran.Commit();
+                    WebApiConfig.updateAdslData();
                 }
                 catch (Exception e)
                 {
@@ -1090,6 +1085,7 @@ namespace CRMWebApi
 
                             db.SaveChanges();
                             tran.Commit();
+                            WebApiConfig.updateAdslData();
                         }
                 }
                 catch (Exception e)
@@ -1119,6 +1115,7 @@ namespace CRMWebApi
                 db.SaveChanges();
                 taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();
+                WebApiConfig.updateAdslData();
             }
         } 
 
