@@ -522,8 +522,8 @@ namespace CRMWebApi.Controllers
                                     s.lastupdated = DateTime.Now;
                                     s.deleted = true;
                                 }); // bir seri onaylanmadan başka birisine çıkıldığında onaylanmayan hareketi sil (Hüseyin KOZ) 27.10.2016
-
-                                if (db.stockcard.First(sc => sc.stockid == ss.stockcardid && sc.deleted == false).salesonly.Value)
+                                var salesonlycontrol = db.stockcard.First(sc => sc.stockid == ss.stockcardid && sc.deleted == false).salesonly;
+                                if (salesonlycontrol.HasValue && salesonlycontrol.Value)
                                 {
                                     var stm = db.getSerialsOnCustomerAdsl(dtq.attachedobjectid, ss.stockcardid).ToList();
                                     foreach (var seri in stm)
