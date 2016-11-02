@@ -65,7 +65,7 @@ namespace CRMWebApi.DTOs.Adsl
                     {
                         bool b;
                         int x;
-                        if (stataType == 1 || stataType == 3)
+                        if (stataType == 1 || stataType == 2 || stataType == 3) // task iptale çekilince de işlem bitirilmeli iptal ekledim (Hüseyin KOZ) 02.11.2016
                         {
                             WebApiConfig.AdslPersonels[tq.attachedpersonelid.Value].T_153_155.TryRemove(tq.relatedtaskorderid ?? tq.taskorderno, out b);
                             WebApiConfig.K_PersonelForProccess.TryRemove(tq.relatedtaskorderid ?? tq.taskorderno, out x);
