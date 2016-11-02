@@ -43,7 +43,7 @@ namespace CRMWebApi.DTOs.Adsl
         {
             var taskType = WebApiConfig.AdslTasks[tq.taskid].tasktype;
             int stataType = tq.status.HasValue ? WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) ? WebApiConfig.AdslStatus[tq.status.Value].statetype.Value : 0 : 0;
-            List<int> containLastTask = new List<int> { 10 }; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
+            List<int> containLastTask = new List<int> { 7, 10 }; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
 
             // Model Güncelleme Talebi taskları ve kurulum taskları için
             if(taskType == 3)
