@@ -360,7 +360,7 @@ namespace CRMWebApi.Controllers
                 {
                     var ktask = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[r.Value.relatedtaskorderid.Value].K_TON.Value];
                     res.k_personelid = ktask.attachedpersonelid;
-                    res.k_personelname = WebApiConfig.AdslPersonels.ContainsKey(ktask.attachedpersonelid.Value) ? WebApiConfig.AdslPersonels[ktask.attachedpersonelid.Value].personelname : null;
+                    res.k_personelname = WebApiConfig.AdslPersonels.ContainsKey(ktask.attachedpersonelid ?? 0) ? WebApiConfig.AdslPersonels[ktask.attachedpersonelid.Value].personelname : null;
                 }
                 res.description = r.Value.description;
                 res.fault = r.Value.fault;

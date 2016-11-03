@@ -50,7 +50,8 @@ namespace CRMWebApi.Controllers
                 if ((user != null && (user.userRole & (int)KOCUserTypes.Admin) != (int)KOCUserTypes.Admin))
                     filter.subTables["taskid"].fieldFilters.Add(new DTOFieldFilter { op = 9, value = $"(attachablepersoneltype = (attachablepersoneltype & {user.userRole}))" });
 
-                if (user.userId == 1458) {// Cağrı Merkezi için şart koyuldu kişi bazlı şarttan kaçmak için kanal yöneticilerine bu şart yazılabilir !!!user.userId
+                if (user.userId == 1458)
+                {// Cağrı Merkezi için şart koyuldu kişi bazlı şarttan kaçmak için kanal yöneticilerine bu şart yazılabilir !!!user.userId
                     var per = db.personel.Where(p => p.relatedpersonelid == user.userId).Select(p => p.personelid).ToList();
                     per.Add(user.userId);
                     JArray pers = new JArray(per);
@@ -61,7 +62,8 @@ namespace CRMWebApi.Controllers
 
                 string querySQL = filter.getPagingSQL(request.pageNo, request.rowsPerPage);
                 var countSQL = filter.getCountSQL();
-                if (request.taskstate != null && request.taskstate.value != null && request.taskstate.op == 7) {
+                if (request.taskstate != null && request.taskstate.value != null && request.taskstate.op == 7)
+                {
                     try
                     {
                         JArray array = (JArray)request.taskstate.value;
@@ -126,10 +128,10 @@ namespace CRMWebApi.Controllers
                     r.attachedcustomer.mahalle = mahalles.Where(m => m.kimlikNo == r.attachedcustomer.mahalleKimlikNo).FirstOrDefault(); // yasin bey istedi mahalle ismi görünsün 26.10.2016
                     r.asistanPersonel = personels.Where(ap => ap.personelid == r.assistant_personel).FirstOrDefault();
                     r.editable = editables.Where(e => e.taskorderno == r.taskorderno).First().editable == 1;
-                    r.laststatus = lastStateType[r.relatedtaskorderid.HasValue ? WebApiConfig.AdslProccesses.ContainsKey(r.relatedtaskorderid.Value) ? 
+                    r.laststatus = lastStateType[r.relatedtaskorderid.HasValue ? WebApiConfig.AdslProccesses.ContainsKey(r.relatedtaskorderid.Value) ?
                         WebApiConfig.AdslProccesses[r.relatedtaskorderid.Value].Last_Status : 0 : 0];
-                    if (request.taskOrderNo != null)
-                    {
+                    //if (request.taskOrderNo != null)
+                    //{
                         // taska bağlı müşteri kampanyası ve bilgileri
                         int saletask = r.relatedtaskorderid ?? r.taskorderno;
                         //if (saletask == 0) // artık relatedtaskorderid proccess index tuttuğu için kapatıldı (Hüseyin KOZ) 01.11.2016
@@ -159,7 +161,7 @@ namespace CRMWebApi.Controllers
                             {
                                 csd.adsl_document = documents.First(d => d.documentid == csd.documentid);
                             });
-                        }
+                        //}
                         // taska bağlı stok hareketleri yükleniyor
                         if (r.status != null)
                         {
@@ -239,10 +241,14 @@ namespace CRMWebApi.Controllers
                         }// taskın durumunu açığa alma
                         else
                         {
-                            if ((dtq.taskid == 153 || dtq.taskid == 155) && WebApiConfig.AdslPersonels.ContainsKey(dtq.attachedpersonelid ?? 0) 
-                                && WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Count > 0 
+                            if ((dtq.taskid == 153 || dtq.taskid == 155) && WebApiConfig.AdslPersonels.ContainsKey(dtq.attachedpersonelid ?? 0)
+                                && WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Count > 0
                                 && !WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.ContainsKey(dtq.relatedtaskorderid ?? dtq.taskorderno))
-                            {
+                            { 
+                                // Bayinin hangi işlemi açık onu göstermek için yazıldı (Hüseyin KOZ) 03.11.2016
+                                var etq = WebApiConfig.AdslTaskQueues.ContainsKey(WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()) ? WebApiConfig.AdslTaskQueues[WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()] : null;
+                                if (tq != null && WebApiConfig.AdslCustomers.ContainsKey(etq.attachedobjectid.Value))
+                                    return Request.CreateResponse(HttpStatusCode.OK, (WebApiConfig.AdslCustomers[etq.attachedobjectid.Value].customername + " adlı müşterinin işlemini tamamlayınız !"), "application/json");
                                 return Request.CreateResponse(HttpStatusCode.OK, "Tamamlanmayan Kurulumunuz Bulunmaktadır. Önce onu tamamlayınız !", "application/json");
                             }
                             dtq.consummationdate = DateTime.Now;
@@ -369,7 +375,7 @@ namespace CRMWebApi.Controllers
                                     {
                                         WebApiConfig.loadAdslPersonels(DateTime.Now).ConfigureAwait(false);
                                         // sorumluluk bölgesi bulunan güncelleme personelleri
-                                        var perList = WebApiConfig.AdslPersonels.Where(per => per.Value.responseregions != null && ((per.Value.roles & (int)KOCUserTypes.updateStaff) == (int)KOCUserTypes.updateStaff)).Select(kkk => kkk.Value).ToList(); 
+                                        var perList = WebApiConfig.AdslPersonels.Where(per => per.Value.responseregions != null && ((per.Value.roles & (int)KOCUserTypes.updateStaff) == (int)KOCUserTypes.updateStaff)).Select(kkk => kkk.Value).ToList();
                                         foreach (var per in perList)
                                         {
                                             var perilce = per.responseregions.Split(',').Select(n => Convert.ToInt32(n)).ToList();
@@ -747,7 +753,7 @@ namespace CRMWebApi.Controllers
                 var request = HttpContext.Current.Request;
                 var docids = JsonConvert.DeserializeObject<List<int>>(request.Form["documentids"]);
                 var req = JsonConvert.DeserializeObject<DTOtaskqueue>(request.Form["tq"]);
-               // var user = KOCAuthorizeAttribute.getCurrentUser();
+                // var user = KOCAuthorizeAttribute.getCurrentUser();
 
                 var custid = Convert.ToInt32(request.Form["customer"].Split('-')[0]);
                 var il = request.Form["il"].ToString();
@@ -946,14 +952,14 @@ namespace CRMWebApi.Controllers
                         status = null,
                         taskid = request.taskid,
                         updatedby = user.userId,
-                        fault=request.fault
+                        fault = request.fault
                     };
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
                     taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                     db.SaveChanges();
 
-                    if (request.productids!=null)
+                    if (request.productids != null)
                     {
                         foreach (var item in request.productids)
                         {
@@ -1087,7 +1093,7 @@ namespace CRMWebApi.Controllers
                 {
                     taskid = request.task.taskid,
                     attachedobjectid = request.attachedcustomer.customerid,
-                    attachedpersonelid=user.userId,
+                    attachedpersonelid = user.userId,
                     creationdate = DateTime.Now,
                     attachmentdate = DateTime.Now,
                     lastupdated = DateTime.Now,
@@ -1427,7 +1433,7 @@ namespace CRMWebApi.Controllers
             MailMessage mail = new MailMessage();
             mail.From = new MailAddress("adslbayidestek@kociletisim.com.tr"); // Mail'in kimden olduğu adresi buraya yazılır.
             mail.Subject = "KOÇ İLETİŞİM RANDEVU TASKI"; // mail'in konusu
-            int customer =Convert.ToInt32(info[0].ToString());
+            int customer = Convert.ToInt32(info[0].ToString());
             int bayiid = Convert.ToInt32(info[1]);
 
             using (var db = new KOCSAMADLSEntities(false))
@@ -1439,38 +1445,38 @@ namespace CRMWebApi.Controllers
                     mail.To.Add(bayi.email.ToString().Split(';')[i]); // kime gönderileceği adresin yazıldığı textbox'tan alınır.
 
                 }
-                mail.Body=  string.Format(@" Merhaba Sayın  {0}, {1}  {2}
+                mail.Body = string.Format(@" Merhaba Sayın  {0}, {1}  {2}
                        Merkezimizden {3} adlı müşterimizin Kurulum Randevu Taskı size atanmıştır.Müşterimizin İletişim Numarası {4} 'dır.{5} İyi Çalışmalar Dileriz",
-                       bayi.personelname.ToUpper().ToString(), 
+                       bayi.personelname.ToUpper().ToString(),
                        Environment.NewLine,
                        Environment.NewLine,
                        customerinfo.customername,
                        customerinfo.gsm,
                        Environment.NewLine);
-             // mail'in ana kısmı, içeriği.. 
-            SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
+                // mail'in ana kısmı, içeriği.. 
+                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
 
-            smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
+                smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
 
-            smtp.EnableSsl = true;
+                smtp.EnableSsl = true;
 
-            try
-            {
-                smtp.Send(mail); // mail gönderilir.
-            }
-            catch (Exception)
-            {
-                throw ;
-            }
+                try
+                {
+                    smtp.Send(mail); // mail gönderilir.
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
         }
 
-        public adsl_taskqueue saleTask(int taskorderno) 
+        public adsl_taskqueue saleTask(int taskorderno)
         { // taskorderno gönderildiginde o taskın başlangıç taskını geri döndürür
             using (var db = new KOCSAMADLSEntities())
             {
-                var ptq = db.taskqueue.FirstOrDefault(r=> r.taskorderno == taskorderno && r.deleted == false);
-                var startertasks = db.tasktypes.Where(r => r.startsProccess == true).Select(r=> r.TaskTypeId).ToList();
+                var ptq = db.taskqueue.FirstOrDefault(r => r.taskorderno == taskorderno && r.deleted == false);
+                var startertasks = db.tasktypes.Where(r => r.startsProccess == true).Select(r => r.TaskTypeId).ToList();
                 int? saletask = null;
                 while (ptq != null)
                 {
@@ -1492,7 +1498,7 @@ namespace CRMWebApi.Controllers
         }
 
         [Route("getTaskqueueInfo")]
-        [HttpPost,HttpGet]
+        [HttpPost, HttpGet]
         public HttpResponseMessage getTaskqueueInfo(adsl_taskqueue request)
         { // Tasklarda satış ve önceki task bilgilerini çekmek için oluşturuldu (Hüseyin)
             using (var db = new KOCSAMADLSEntities())
@@ -1502,6 +1508,27 @@ namespace CRMWebApi.Controllers
                 task.personel = db.personel.FirstOrDefault(r => r.personelid == task.attachedpersonelid);
                 return Request.CreateResponse(HttpStatusCode.OK, task.toDTO(), "application/json");
             }
+        }
+
+        [Route("saveTaskCollective")]
+        [HttpPost, HttpGet]
+        public HttpResponseMessage saveTaskCollective(List<DTOtaskqueue> request)
+        { // toplu task kapatmak için oluşturuldu (Hüseyin) 03.11.2016
+            using (var db = new KOCSAMADLSEntities())
+                foreach (var item in request)
+                {
+                    // her task tek tek kontrol et, task için stok veya dokuman entegrasyonu varsa kaydetme
+                    var ttype = db.task.First(t => t.taskid == item.task.taskid).tasktype;
+                    if (db.taskstatematches.Any(t => t.taskid == item.task.taskid && t.stateid == item.taskstatepool.taskstateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty))) { }
+                    else if (db.taskstatematches.Any(tsm => tsm.deleted == false && tsm.taskid == item.task.taskid && tsm.stateid == item.taskstatepool.taskstateid && !(tsm.documents == null || tsm.documents.Trim() == string.Empty))) { }
+                    else if ((ttype == 1 || ttype == 7 || ttype == 8 || ttype == 9) && item.customerproduct.Count > 0 && db.campaigns.Any(c => c.deleted == false && c.id == (Convert.ToInt32(item.customerproduct[0])) && !(c.documents == null || c.documents.Trim() == string.Empty))) { }
+                    else
+                    {
+                        item.customerproduct = null; // ürün kaydında yanlışlık olmaması için ürünü temizle
+                        saveTaskQueues(item);
+                    }
+                }
+            return Request.CreateResponse(HttpStatusCode.OK, "Ok", "application/json");
         }
     }
 }
