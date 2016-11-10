@@ -1269,10 +1269,10 @@ namespace CRMWebApi
                                 {
                                     // yeni adsl veya vdsl cc yalın olarak girilecek
                                     int taskid = -1;
-                                    if (data.XdslServiceType.ToString() == "ADSL")
-                                        taskid = 32; // Satış CC Yalın Adsl
-                                    else
+                                    if (data.XdslServiceType.ToString() == "VDSL")
                                         taskid = 57; // Satış CC Yalın Vdsl
+                                    else
+                                        taskid = 32; // Satış CC Yalın Adsl
                                     if (taskid != -1)
                                         customerInfo(customer, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
                                 }
@@ -1280,10 +1280,10 @@ namespace CRMWebApi
                             else
                             { // müşteri yoksa sisteme adsl veya vdsl satış cc yalın olarak girilecek.
                                 int taskid = -1;
-                                if (data.XdslServiceType.ToString() == "ADSL")
-                                    taskid = 32; // Satış CC Yalın Adsl
-                                else
+                                if (data.XdslServiceType.ToString() == "VDSL")
                                     taskid = 57; // Satış CC Yalın Vdsl
+                                else
+                                    taskid = 32; // Satış CC Yalın Adsl
                                 if (taskid != -1)
                                     customerInfo(null, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
                             }

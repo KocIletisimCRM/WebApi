@@ -26,7 +26,7 @@ namespace CRMWebApi.DTOs.Adsl.DTORequestClasses
                 filter.subTables.Add("stockcardid", subFilter);
             }
             if (movementdate != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "movementdate", op = 5, value = movementdate.value });
-            if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "serialno", op = 2, value = serialno.value });
+            if (serialno != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "serialno", op = 6, value = serialno.value });
             if (fromobjectid != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "fromobject", op = 2, value = fromobjectid.value });
             if (toobjectid != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "toobject", op = 2, value = toobjectid.value });
             if (isconfirmed != null) filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "confirmationdate", op = 8, value = null });

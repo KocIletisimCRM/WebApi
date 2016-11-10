@@ -56,6 +56,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string k_tqname { get; set; }
         public int? k_perid { get; set; }
         public string k_pername { get; set; }
+        public string k_perky { get; set; } // kurulum personeli kanal yöneticisi
         public DateTime? k_consummationdate { get; set; }
         public int? k_consummationdateyear { get; set; }
         public int? k_consummationdatemonth { get; set; }

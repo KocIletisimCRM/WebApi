@@ -560,7 +560,8 @@ namespace CRMWebApi.Controllers
                         var kPersonelInfo = WebApiConfig.AdslPersonels[k_tq.attachedpersonelid.Value];
                         res.k_perid = kPersonelInfo.personelid;
                         res.k_pername = kPersonelInfo.personelname;
-                        //res.k_perky = null;
+                        if (kPersonelInfo.relatedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(kPersonelInfo.relatedpersonelid.Value))
+                            res.k_perky = WebApiConfig.AdslPersonels[kPersonelInfo.relatedpersonelid.Value].personelname;
                     }
                     if (k_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(k_tq.status.Value))
                     {
