@@ -248,7 +248,7 @@ namespace CRMWebApi.Controllers
                                 // Bayinin hangi işlemi açık onu göstermek için yazıldı (Hüseyin KOZ) 03.11.2016
                                 var etq = WebApiConfig.AdslTaskQueues.ContainsKey(WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()) ? WebApiConfig.AdslTaskQueues[WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()] : null;
                                 if (tq != null && WebApiConfig.AdslCustomers.ContainsKey(etq.attachedobjectid.Value))
-                                    return Request.CreateResponse(HttpStatusCode.OK, (WebApiConfig.AdslCustomers[etq.attachedobjectid.Value].customername + " adlı müşterinin işlemini tamamlayınız !"), "application/json");
+                                    return Request.CreateResponse(HttpStatusCode.OK, (WebApiConfig.AdslCustomers[etq.attachedobjectid.Value].customerid + " - " + WebApiConfig.AdslCustomers[etq.attachedobjectid.Value].customername + " adlı müşterinin işlemini tamamlayınız !"), "application/json");
                                 return Request.CreateResponse(HttpStatusCode.OK, "Tamamlanmayan Kurulumunuz Bulunmaktadır. Önce onu tamamlayınız !", "application/json");
                             }
                             dtq.consummationdate = DateTime.Now;
@@ -411,9 +411,10 @@ namespace CRMWebApi.Controllers
                                     }
                                     var qqq = time.Elapsed;
                                 }
-                                if ((item == 45 || item == 118) && krtask != null)  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
+                                if ((item == 45 || item == 118 ||item == 148) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
-                                    var kbayi = db.taskqueue.First(r => r.taskorderno == krtask).attachedpersonelid;
+                                    var kt = WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value;
+                                    var kbayi = db.taskqueue.First(r => r.taskorderno == kt).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
                                 //Diğer otomatik personel atamaları ()

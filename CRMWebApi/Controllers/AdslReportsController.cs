@@ -419,6 +419,7 @@ namespace CRMWebApi.Controllers
                     res.kmonth = kdate.Value.Month;
                     res.kday = kdate.Value.Day;
                     res.ktime = kdate.Value.ToString("HH:mm");
+                    res.kyear = kdate.Value.Year;
                 }
                 if (k.Value != null && k.Value.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(k.Value.Ktk_TON.Value) && WebApiConfig.AdslTaskQueues[k.Value.Ktk_TON.Value].consummationdate.HasValue)
                 {
@@ -1360,6 +1361,19 @@ namespace CRMWebApi.Controllers
                         res.process_status = "Bekleyen";
                     }
                 }
+                return res;
+            }).ToList();
+        }
+
+        public static async Task<List<Cozum>> getHataRaporu()
+        {
+            return WebApiConfig.Rapor.Select(r =>
+            {
+                var res = new Cozum();
+                res.eleh = r.Value.eleh;
+                res.sdate = r.Value.sdate;
+                res.fdate = r.Value.fdate;
+                res.s = r.Value.s;
                 return res;
             }).ToList();
         }

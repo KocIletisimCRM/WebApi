@@ -6,6 +6,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -261,100 +263,133 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_campaigns> AdslCampaigns = new Dictionary<int, Models.Adsl.adsl_campaigns>(); // müşteri kampanyası için
         public static ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
         public static ConcurrentDictionary<int, int> K_PersonelForProccess = new ConcurrentDictionary<int, int>(); // bir şüreçin kurulumunu gerçekleştiren personel için aynı anda kısıtlı sayıda kurulum izni (key : proccessid, value : personelid)
+        public static ConcurrentDictionary<int, DTOs.Adsl.Cozum> Rapor = new ConcurrentDictionary<int, DTOs.Adsl.Cozum>();
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
             Stopwatch stw = Stopwatch.StartNew();
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
-                db.Configuration.LazyLoadingEnabled = false;
-                db.Configuration.ProxyCreationEnabled = false;
-                using (var conn = db.Database.Connection as SqlConnection)
+                try
                 {
-                    await conn.OpenAsync().ConfigureAwait(false);
-                    var selectCommand = conn.CreateCommand();
-                    selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'"; // aynı gün içerisinde yapılan değişiklikler işleme alınamadığı için HH:mm:ss eklendi (Hüseyin KOZ)
-                    using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
+                    db.Configuration.LazyLoadingEnabled = false;
+                    db.Configuration.ProxyCreationEnabled = false;
+                    using (var conn = db.Database.Connection as SqlConnection)
                     {
-                        var proccessIds = new HashSet<int>();
-                        while (await sqlreader.ReadAsync().ConfigureAwait(false))
+                        int sira = Rapor.Count + 1;
+                        if (!Rapor.ContainsKey(sira)) Rapor[sira] = new DTOs.Adsl.Cozum();
+                        Rapor[sira].eleh = sira;
+                        Rapor[sira].sdate = DateTime.Now;
+                        //Rapor[sira].pids = new HashSet<int>(proccessIds);
+                        conn.Open(); //AsenkronConnectionOpen kaldırıldı. Transaction  was deadlocked on lock hatası sebebi ile (25-11-2016)
+                        var selectCommand = conn.CreateCommand();
+                        selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'"; // aynı gün içerisinde yapılan değişiklikler işleme alınamadığı için HH:mm:ss eklendi (Hüseyin KOZ)
+                        using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
                         {
-                            var t = (new Models.Adsl.adsl_taskqueue
+                            var proccessIds = new HashSet<int>();
+                            while (await sqlreader.ReadAsync().ConfigureAwait(false))
                             {
-                                taskorderno = (int)sqlreader[0],
-                                taskid = Convert.ToInt32(sqlreader[1]),
-                                previoustaskorderid = sqlreader.IsDBNull(2) ? null : (int?)sqlreader[2],
-                                relatedtaskorderid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
-                                creationdate = sqlreader.IsDBNull(4) ? null : (DateTime?)sqlreader[4],
-                                attachedobjectid = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
-                                attachmentdate = sqlreader.IsDBNull(6) ? null : (DateTime?)sqlreader[6],
-                                attachedpersonelid = sqlreader.IsDBNull(7) ? null : (int?)sqlreader[7],
-                                appointmentdate = sqlreader.IsDBNull(8) ? null : (DateTime?)sqlreader[8],
-                                status = sqlreader.IsDBNull(9) ? null : (int?)sqlreader[9],
-                                consummationdate = sqlreader.IsDBNull(10) ? null : (DateTime?)sqlreader[10],
-                                description = sqlreader.IsDBNull(11) ? null : (string)sqlreader[11],
-                                lastupdated = sqlreader.IsDBNull(12) ? null : (DateTime?)sqlreader[12],
-                                updatedby = sqlreader.IsDBNull(13) ? null : (int?)sqlreader[13],
-                                deleted = sqlreader.IsDBNull(14) ? null : (bool?)sqlreader[14],
-                                assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
-                                fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
-                            });
-                            if (t.previoustaskorderid.HasValue)
-                            {
-                                if (AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
-                                    AdslSubTasks[t.previoustaskorderid.Value].Add(t.taskorderno);
-                                else
+                                var t = (new Models.Adsl.adsl_taskqueue
                                 {
-                                    AdslSubTasks[t.previoustaskorderid.Value] = new HashSet<int>(new int[] { t.taskorderno });
-                                }
-                            }
-                            if (t.deleted == true)
-                            {
-                                if(t.previoustaskorderid.HasValue && AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
+                                    taskorderno = (int)sqlreader[0],
+                                    taskid = Convert.ToInt32(sqlreader[1]),
+                                    previoustaskorderid = sqlreader.IsDBNull(2) ? null : (int?)sqlreader[2],
+                                    relatedtaskorderid = sqlreader.IsDBNull(3) ? null : (int?)sqlreader[3],
+                                    creationdate = sqlreader.IsDBNull(4) ? null : (DateTime?)sqlreader[4],
+                                    attachedobjectid = sqlreader.IsDBNull(5) ? null : (int?)sqlreader[5],
+                                    attachmentdate = sqlreader.IsDBNull(6) ? null : (DateTime?)sqlreader[6],
+                                    attachedpersonelid = sqlreader.IsDBNull(7) ? null : (int?)sqlreader[7],
+                                    appointmentdate = sqlreader.IsDBNull(8) ? null : (DateTime?)sqlreader[8],
+                                    status = sqlreader.IsDBNull(9) ? null : (int?)sqlreader[9],
+                                    consummationdate = sqlreader.IsDBNull(10) ? null : (DateTime?)sqlreader[10],
+                                    description = sqlreader.IsDBNull(11) ? null : (string)sqlreader[11],
+                                    lastupdated = sqlreader.IsDBNull(12) ? null : (DateTime?)sqlreader[12],
+                                    updatedby = sqlreader.IsDBNull(13) ? null : (int?)sqlreader[13],
+                                    deleted = sqlreader.IsDBNull(14) ? null : (bool?)sqlreader[14],
+                                    assistant_personel = sqlreader.IsDBNull(15) ? null : (int?)sqlreader[15],
+                                    fault = sqlreader.IsDBNull(16) ? null : (string)sqlreader[16],
+                                });
+                                if (t.previoustaskorderid.HasValue)
                                 {
-                                    HashSet<int> c;
-                                    AdslSubTasks[t.previoustaskorderid.Value].Remove(t.taskorderno);
-                                    if (AdslSubTasks[t.previoustaskorderid.Value].Count == 0) AdslSubTasks.TryRemove(t.previoustaskorderid.Value, out c);
-                                }
-                                if (AdslTaskQueues.ContainsKey(t.taskorderno))
-                                {
-                                    //Derinlemesine temizlik :) Silinen task ve bu taska bağlı tüm taskları listeden çıkart
-                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
-                                    var queue = new Queue<int>();
-                                    queue.Enqueue(t.taskorderno);
-                                    while (queue.Count > 0)
+                                    if (AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
+                                        AdslSubTasks[t.previoustaskorderid.Value].Add(t.taskorderno);
+                                    else
                                     {
-                                        var ton = queue.Dequeue();
-                                        Models.Adsl.adsl_taskqueue ax;
-                                        foreach (var item in AdslTaskQueues.Where(r => r.Value.previoustaskorderid == ton).Select(r => r.Value.taskorderno)) queue.Enqueue(item);
-                                        AdslTaskQueues.TryRemove(ton, out ax);
+                                        AdslSubTasks[t.previoustaskorderid.Value] = new HashSet<int>(new int[] { t.taskorderno });
                                     }
-                                    DTOs.Adsl.KocAdslProccess kx;
-                                    if (AdslProccesses.ContainsKey(t.taskorderno))
-                                        AdslProccesses.TryRemove(t.taskorderno, out kx);
                                 }
-                            }
-                            else
-                            {
-                                AdslTaskQueues[t.taskorderno] = t;
-                                if (t.previoustaskorderid == null)
+                                if (t.deleted == true)
                                 {
-                                    //Süreç Başlangıç Taskları
-                                    if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
+                                    if (t.previoustaskorderid.HasValue && AdslSubTasks.ContainsKey(t.previoustaskorderid.Value))
                                     {
-                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                        HashSet<int> c;
+                                        AdslSubTasks[t.previoustaskorderid.Value].Remove(t.taskorderno);
+                                        if (AdslSubTasks[t.previoustaskorderid.Value].Count == 0) AdslSubTasks.TryRemove(t.previoustaskorderid.Value, out c);
                                     }
-                                    if (!proccessIds.Contains(t.taskorderno)) proccessIds.Add(t.taskorderno);
+                                    if (AdslTaskQueues.ContainsKey(t.taskorderno))
+                                    {
+                                        //Derinlemesine temizlik :) Silinen task ve bu taska bağlı tüm taskları listeden çıkart
+                                        if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                        var queue = new Queue<int>();
+                                        queue.Enqueue(t.taskorderno);
+                                        while (queue.Count > 0)
+                                        {
+                                            var ton = queue.Dequeue();
+                                            Models.Adsl.adsl_taskqueue ax;
+                                            foreach (var item in AdslTaskQueues.Where(r => r.Value.previoustaskorderid == ton).Select(r => r.Value.taskorderno)) queue.Enqueue(item);
+                                            AdslTaskQueues.TryRemove(ton, out ax);
+                                        }
+                                        DTOs.Adsl.KocAdslProccess kx;
+                                        if (AdslProccesses.ContainsKey(t.taskorderno))
+                                            AdslProccesses.TryRemove(t.taskorderno, out kx);
+                                    }
                                 }
                                 else
                                 {
-                                    AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    AdslTaskQueues[t.taskorderno] = t;
+                                    if (t.previoustaskorderid == null)
+                                    {
+                                        //Süreç Başlangıç Taskları
+                                        if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
+                                        {
+                                            AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                        }
+                                        if (!proccessIds.Contains(t.taskorderno)) proccessIds.Add(t.taskorderno);
+                                    }
+                                    else
+                                    {
+                                        AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                        if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    }
                                 }
                             }
+                            var tttt = stw.Elapsed;
+                            DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccessIds));
                         }
-                        var tttt = stw.Elapsed;
-                        DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccessIds));
+                        Rapor[sira].fdate = DateTime.Now;
+                        Rapor[sira].s = (Rapor[sira].fdate - Rapor[sira].sdate).TotalSeconds;
+                    }
+                }
+                catch (Exception e)
+                {
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress("yazilimkoc@gmail.com"); // Mail'in kimden olduğu adresi buraya yazılır.
+                    mail.Subject = "TQ HATA"; // mail'in konusu
+
+                    mail.To.Add("huseyinkoz@kociletisim.com.tr");
+                    mail.Body = string.Format(e.Message); // mail'in ana kısmı, içeriği.. 
+                    SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
+
+                    smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
+                    smtp.EnableSsl = true;
+
+                    try
+                    {
+                        smtp.Send(mail); // mail gönderilir.
+                    }
+                    catch (Exception)
+                    {
+                        throw;
                     }
                 }
             }
@@ -1697,6 +1732,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.StockMovementBackSeri>("StockMovementBackSeriReports");
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             builder.EntitySet<DTOs.Adsl.EvrakBasari>("OnlyDocSuccesReports");
+            builder.EntitySet<DTOs.Adsl.Cozum>("HataReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",
