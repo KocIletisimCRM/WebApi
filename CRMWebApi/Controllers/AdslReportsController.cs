@@ -1001,7 +1001,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        // Evrak başarı oranı raporu
+        // Evrak başarı oranı raporu (kontrol edilecek doğru mu çalışıyor ?)
         public static async Task<List<ISSSuccessRate>> getISSSuccessRateReport()
         {
             /* taskid = 47 => Emptor Sisteme Giriş Churn
@@ -1026,7 +1026,7 @@ namespace CRMWebApi.Controllers
                     var res = new ISSSuccessRate();
                     res.customerid = r.Value.attachedobjectid.Value;
                     res.customername = WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername : "İsimsiz Müşteri";
-                    if (r.Value.taskid == 47 || r.Value.taskid == 90)
+                    if (r.Value.taskid == 90)
                     {
                         var stask = r.Value.previoustaskorderid != null ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null : null;
                         if (stask != null)

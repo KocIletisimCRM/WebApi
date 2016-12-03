@@ -1062,28 +1062,28 @@ namespace CRMWebApi
                     if (automandatoryTasks != null)
                         foreach (var item in automandatoryTasks)
                         {
-                            var ptq = tq;
-                            int? saletask = null;
-                            while (ptq != null)
-                            {
-                                ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
-                                {
-                                    saletask = ptq.taskorderno;
-                                    break;
-                                }
-                                else
-                                {
-                                    ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                }
-                            }
+                            //var ptq = tq;
+                            int saletask = tq.relatedtaskorderid ?? tq.taskorderno;
+                            //while (ptq != null)
+                            //{
+                            //    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                            //    if (ptq.task != null && db.tasktypes.First(r => ptq.task.tasktype == r.TaskTypeId).startsProccess)
+                            //    {
+                            //        saletask = ptq.taskorderno;
+                            //        break;
+                            //    }
+                            //    else
+                            //    {
+                            //        ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                            //    }
+                            //}
                             if (db.taskqueue.Where(r => r.deleted == false && (r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                 continue;
                             int? personel_id = tq.attachedpersonelid; // Orhan Özçelik
                             //Otomatik Kurulum Bayisi Ataması (Oluşan task kurulum taskı ise)
                             var oot = db.task.FirstOrDefault(t => t.taskid == item);
                             if (oot == null) continue;
-                            if (oot.tasktype == 2 && saletask != null)
+                            if (oot.tasktype == 2)
                             {
                                 var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
                                 personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
