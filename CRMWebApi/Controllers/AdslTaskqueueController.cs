@@ -419,7 +419,12 @@ namespace CRMWebApi.Controllers
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
-                                if (oott != null && oott.Count > 0)
+                                var otaka = db.atama.Where(r => r.closedtask == dtq.taskid && r.formedtask == item).FirstOrDefault();
+                                if (otaka != null)
+                                {
+                                    personel_id = otaka.appointedpersonel;
+                                }
+                                else if (oott != null && oott.Count > 0)
                                 {
                                     var turAtama = oott.FirstOrDefault(t => t.formedtask == null); //bir türdeki bütün oluşacak taskların bir personele atanması
                                     var task = db.atama.FirstOrDefault(r => r.formedtask == item);  //tür ve task seçilerek kural oluşturulmuşsa
