@@ -354,10 +354,11 @@ namespace CRMWebApi.Controllers
                                     personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
                                     //Satış taskını bul. Taskı yapanın kurulum bayisini al. Kurulum taskını bu bayiyie ata
                                 }
-                                if (item == 115)
+                                if (item == 115 || item == 163)
                                 { // Oluşan task evrak tedarik taskıysa kurulum yapacak bayiye ata
-                                    var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
-                                    personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
+                                    //var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
+                                    //personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
+                                    personel_id = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value].attachedpersonelid;
                                 }
                                 if ((oot.tasktype == 3 || item == 142) && krtask != null)
                                 { // kurulum türünde gelenleri kurulum randevusu taskındaki personele ata (modem iade alma taskı da eklendi (taskid = 142))
