@@ -11,13 +11,13 @@ using CRMWebApi.KOCAuthorization;
 namespace CRMWebApi.Controllers
 {
     [RoutePrefix("api/Fiber/SiteBlock")]
-   public  class FiberSiteBlockController : ApiController
+    public class FiberSiteBlockController : ApiController
     {
         [Route("getBlocks")]
         [HttpPost]
         public HttpResponseMessage getBlocks(DTOGetBlockFilter request)
         {
-            using (var db=new CRMEntities())
+            using (var db = new CRMEntities())
             {
                 db.Configuration.AutoDetectChangesEnabled = false;
                 db.Configuration.LazyLoadingEnabled = false;
@@ -34,7 +34,8 @@ namespace CRMWebApi.Controllers
                 var personelids = res.Select(s => s.salesrepresentative).Distinct().ToList();
                 var personels = db.personel.Where(p => personelids.Contains(p.personelid)).ToList();
 
-                res.ForEach(r=>{
+                res.ForEach(r =>
+                {
                     r.site = sites.Where(s => s.siteid == r.siteid).FirstOrDefault();
                     r.salespersonel = personels.Where(p => p.personelid == r.salesrepresentative).FirstOrDefault();
                 });
@@ -61,38 +62,39 @@ namespace CRMWebApi.Controllers
                 var dblock = db.block.Where(r => r.blockid == request.blockid).FirstOrDefault();
                 var errormessage = new DTOResponseError();
 
-                    dblock.blockname = request.blockname;
-                    dblock.binakodu = request.binakodu;
-                    dblock.cocierge = request.cocierge;
-                    dblock.cociergecontact = request.cociergecontact;
-                    dblock.groupid = request.groupid;
-                    dblock.hp = request.hp;
-                    dblock.kocsaledate = request.kocsaledate;
-                    dblock.locationid = request.locationid;
-                    dblock.objid = request.objid;
-                    dblock.projectno = request.projectno;
-                    dblock.readytosaledate = request.readytosaledate;
-                   // dblock.salesrepresentative = request.salespersonel.personelid;
-                   // dblock.siteid = request.site.siteid;
-                    dblock.sosaledate = request.sosaledate;
-                    dblock.superintendent = request.superintendent;
-                    dblock.superintendentcontact = request.superintendentcontact;
-                    dblock.telocadia = request.telocadia;
-                    dblock.updatedby = user.userId;
-                    dblock.lastupdated = DateTime.Now;
-                    dblock.verticalproductionline = request.verticalproductionline;
-                    db.SaveChanges();
-                    errormessage.errorMessage = "İşlem Başarılı";
-                    errormessage.errorCode = 1;
-       
-                return Request.CreateResponse(HttpStatusCode.OK,errormessage, "application/json");
+                dblock.blockname = request.blockname;
+                dblock.binakodu = request.binakodu;
+                dblock.cocierge = request.cocierge;
+                dblock.cociergecontact = request.cociergecontact;
+                dblock.groupid = request.groupid;
+                dblock.hp = request.hp;
+                dblock.kocsaledate = request.kocsaledate;
+                dblock.locationid = request.locationid;
+                dblock.objid = request.objid;
+                dblock.projectno = request.projectno;
+                dblock.readytosaledate = request.readytosaledate;
+                // dblock.salesrepresentative = request.salespersonel.personelid;
+                // dblock.siteid = request.site.siteid;
+                dblock.sosaledate = request.sosaledate;
+                dblock.superintendent = request.superintendent;
+                dblock.superintendentcontact = request.superintendentcontact;
+                dblock.telocadia = request.telocadia;
+                dblock.updatedby = user.userId;
+                dblock.lastupdated = DateTime.Now;
+                dblock.verticalproductionline = request.verticalproductionline;
+                db.SaveChanges();
+                errormessage.errorMessage = "İşlem Başarılı";
+                errormessage.errorCode = 1;
+
+                return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
 
         }
 
         [Route("insertBlock")]
         [HttpPost]
-        public HttpResponseMessage insertBlock(DTOblock requst) {
+        public HttpResponseMessage insertBlock(DTOblock requst)
+        {
             using (var db = new CRMEntities())
             {
                 var errormessage = new DTOResponseError();
@@ -130,7 +132,7 @@ namespace CRMWebApi.Controllers
                         blockid = block.blockid,
                         creationdate = DateTime.Now,
                         lastupdated = DateTime.Now,
-                        updatedby =user.userId,
+                        updatedby = user.userId,
                         deleted = false,
                         flat = (i + 1).ToString()
                     };
@@ -191,7 +193,7 @@ namespace CRMWebApi.Controllers
                 dsite.siteregioncode = request.siteregioncode;
                 dsite.region = request.region;
                 dsite.siteregioncode = request.siteregioncode;
-          
+
                 db.SaveChanges();
                 errormessage.errorMessage = "İşlem Başarılı";
                 errormessage.errorCode = 1;
@@ -212,7 +214,7 @@ namespace CRMWebApi.Controllers
                 var dsite = new site
                 {
                     sitename = request.sitename,
-                    sitedistrict= request.sitedistrict,
+                    sitedistrict = request.sitedistrict,
                     siteaddress = request.siteaddress,
                     description = request.description,
                     creationdate = DateTime.Now,
@@ -230,6 +232,51 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
 
+        }
+
+        [Route("editSiteMultiple")]
+        [HttpPost]
+        public HttpResponseMessage editSiteMultiple(DTORequestSBEditMultiple request)
+        {
+            if ((request.siteIds == null && request.blockIds == null) || request.personelid == 0)
+                return Request.CreateResponse(HttpStatusCode.OK, "Seçimleri Yapınız !", "application/json");
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new CRMEntities())
+            using (var tran = db.Database.BeginTransaction())
+            {
+                try
+                {
+                    if (request.blockIds != null && request.blockIds.Count > 0)
+                    {
+                        var k = db.block.Where(r => request.blockIds.Contains(r.blockid)).ToList();
+                        k.ForEach(r =>
+                        {
+                            r.salesrepresentative = request.personelid;
+                            r.lastupdated = DateTime.Now;
+                            r.updatedby = user.userId;
+                        });
+                    }
+                    else
+                    {
+                        var k = db.block.Where(r => request.siteIds.Contains(r.siteid)).ToList();
+                        k.ForEach(r =>
+                        {
+                            r.salesrepresentative = request.personelid;
+                            r.lastupdated = DateTime.Now;
+                            r.updatedby = user.userId;
+                        });
+                    }
+
+                    db.SaveChanges();
+                    tran.Commit();
+                    return Request.CreateResponse(HttpStatusCode.OK, "Tamamlandı", "application/json");
+                }
+                catch (Exception)
+                {
+                    tran.Rollback();
+                    return Request.CreateResponse(HttpStatusCode.OK, "Tamamlanmadı", "application/json");
+                }
+            }
         }
     }
 }

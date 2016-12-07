@@ -321,6 +321,7 @@
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetCustomerRequest.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOFilterGetAtamaRequest.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestKatZiyareti.cs" />
+    <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestSBEditMultiple.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueStockMovements.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTOSaveGlobalTask.cs" />
     <Compile Include="DTOs\Fiber\DTORequestClasses\DTORequestTaskqueueDocuments.cs" />
