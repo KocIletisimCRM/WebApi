@@ -263,25 +263,20 @@ namespace CRMWebApi
         public static Dictionary<int, Models.Adsl.adsl_campaigns> AdslCampaigns = new Dictionary<int, Models.Adsl.adsl_campaigns>(); // müşteri kampanyası için
         public static ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct> AdslCustomerProducts = new ConcurrentDictionary<int, Models.Adsl.adsl_customerproduct>(); // Raporda müşterinin kampanyasını göstermek için
         public static ConcurrentDictionary<int, int> K_PersonelForProccess = new ConcurrentDictionary<int, int>(); // bir şüreçin kurulumunu gerçekleştiren personel için aynı anda kısıtlı sayıda kurulum izni (key : proccessid, value : personelid)
-        public static ConcurrentDictionary<int, DTOs.Adsl.Cozum> Rapor = new ConcurrentDictionary<int, DTOs.Adsl.Cozum>();
+        ///public static ConcurrentDictionary<int, DTOs.Adsl.Cozum> Rapor = new ConcurrentDictionary<int, DTOs.Adsl.Cozum>();
 
         public static async Task loadAdslTaskQueues(DateTime lastUpdated)
         {
             Stopwatch stw = Stopwatch.StartNew();
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
-                try
+                db.Configuration.LazyLoadingEnabled = false;
+                db.Configuration.ProxyCreationEnabled = false;
+                using (var conn = db.Database.Connection as SqlConnection)
                 {
-                    db.Configuration.LazyLoadingEnabled = false;
-                    db.Configuration.ProxyCreationEnabled = false;
-                    using (var conn = db.Database.Connection as SqlConnection)
+                    try
                     {
-                        int sira = Rapor.Count + 1;
-                        if (!Rapor.ContainsKey(sira)) Rapor[sira] = new DTOs.Adsl.Cozum();
-                        Rapor[sira].eleh = sira;
-                        Rapor[sira].sdate = DateTime.Now;
-                        //Rapor[sira].pids = new HashSet<int>(proccessIds);
-                        conn.Open(); //AsenkronConnectionOpen kaldırıldı. Transaction  was deadlocked on lock hatası sebebi ile (25-11-2016)
+                        await conn.OpenAsync().ConfigureAwait(false);
                         var selectCommand = conn.CreateCommand();
                         selectCommand.CommandText = $"select * from taskqueue where lastupdated > '{lastUpdated.ToString("yyyy-MM-dd HH:mm:ss")}'"; // aynı gün içerisinde yapılan değişiklikler işleme alınamadığı için HH:mm:ss eklendi (Hüseyin KOZ)
                         using (var sqlreader = await selectCommand.ExecuteReaderAsync(CommandBehavior.SequentialAccess).ConfigureAwait(false))
@@ -366,30 +361,11 @@ namespace CRMWebApi
                             var tttt = stw.Elapsed;
                             DTOs.Adsl.KocAdslProccess.updateProccesses(new Queue<int>(proccessIds));
                         }
-                        Rapor[sira].fdate = DateTime.Now;
-                        Rapor[sira].s = (Rapor[sira].fdate - Rapor[sira].sdate).TotalSeconds;
-                    }
-                }
-                catch (Exception e)
-                {
-                    MailMessage mail = new MailMessage();
-                    mail.From = new MailAddress("yazilimkoc@gmail.com"); // Mail'in kimden olduğu adresi buraya yazılır.
-                    mail.Subject = "TQ HATA"; // mail'in konusu
 
-                    mail.To.Add("huseyinkoz@kociletisim.com.tr");
-                    mail.Body = string.Format(e.Message); // mail'in ana kısmı, içeriği.. 
-                    SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587); // gmail üzerinden gönderileceğinden smtp.gmail.com ve onun 587 nolu portu kullanılır.
-
-                    smtp.Credentials = new NetworkCredential("yazilimkoc@gmail.com", "612231Tb"); //hangi e-posta üzerinden gönderileceği. E posta, şifre'si yazılır.
-                    smtp.EnableSsl = true;
-
-                    try
-                    {
-                        smtp.Send(mail); // mail gönderilir.
                     }
                     catch (Exception)
                     {
-                        throw;
+                        loadAdslTaskQueues(lastUpdated);
                     }
                 }
             }
@@ -1027,7 +1003,7 @@ namespace CRMWebApi
                             attachmentdate = DateTime.Now,
                             creationdate = DateTime.Now,
                             deleted = false,
-                            description = "Web Servis aracılığı ile oluşturuldu.",
+                            description = request.taskdescription,
                             lastupdated = DateTime.Now,
                             status = null,
                             taskid = request.taskid,
@@ -1142,7 +1118,7 @@ namespace CRMWebApi
                     creationdate = DateTime.Now,
                     attachmentdate = DateTime.Now,
                     lastupdated = DateTime.Now,
-                    description = "Web Servis aracılığı ile oluşturuldu.",
+                    description = request.description,
                     updatedby = 1393, // Yazılım Koç
                     deleted = false
                 };
@@ -1223,19 +1199,24 @@ namespace CRMWebApi
                 obj.salespersonel = salespersonel;
                 string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
                 obj.appointmentdate = Convert.ToDateTime(appointment);
+                obj.taskdescription = "$#&" + data.WorkflowId + "$#& Web servis aracılığı ile oluşturuldu.";
 
                 insertTaskqueue(obj);
             }
         } 
         //NetFlow Tracker
-        static Timer nfT = new Timer((o) =>
+        static Timer nfT = new Timer(async (o) =>
         {
+            await updateAdslData().ConfigureAwait(false);
+            var typeIds = AdslTaskTypes.Where(r => r.Value.startsProccess == true).Select(r => r.Key).ToList(); // proces başlatan task tip id'leri
+            var taskIds = AdslTasks.Where(r => typeIds.Contains(r.Value.tasktype)).Select(r => r.Key).ToList(); // proces başlatan task id'leri
+
             // Bu kod 60 dakikada bir çalışacak
             authHeader.Username = "EXT02308383_66010.00002";
             authHeader.Password = "6qRF0687";
 
             var request = new GetWorkflowListByUserRequest();
-            request.TicketingTypeCode = "321";  
+            request.TicketingTypeCode = "321";
             request.SegmentCode = "Residential";
             request.SearchStartDate = DateTime.Now.AddHours(-3);
             //request.SearchStartDate = DateTime.Now.AddDays(-1);
@@ -1254,74 +1235,115 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA" || data.WorkflowStatusCode == "KURULUMATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
-                            { // müşteri varsa task onay internet geçişi veya onay tesis süreci açık ise onaylanacak.
-                                bool newCust = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                            foreach (var item in cust)
+                            {
+                                bool isSaved = false;
+                                register = true;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && taskIds.Contains(r.Value.taskid)).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = null;
-                                    taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
-                                    Models.Adsl.adsl_taskqueue tq = taskqueue.Where(r => (r.taskid == 36 || r.taskid == 34) && r.status == null).FirstOrDefault();
-                                    if (tq != null)
-                                    {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
-                                        tq.status = 9119; // Onaylandı
-                                        string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
-                                        tq.appointmentdate = Convert.ToDateTime(appointment);
-                                        saveTaskqueue(tq);
-                                        newCust = false;
+                                    var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    {
+                                        if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
+                                        {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
+                                            Models.Adsl.adsl_taskqueue tq = AdslTaskQueues[AdslProccesses[id].Last_TON];
+                                            tq.status = 9119; // Onaylandı
+                                            string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                                            tq.appointmentdate = Convert.ToDateTime(appointment);
+                                            saveTaskqueue(tq);
+                                        }
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
-                                    {   // ilgili bütün müşterilerden herhangi bir müşterinin ktk'sı yoksa ve son taskı iptal değilse crm'de işlem yapılmış netflowda yapılmamıştır.
-                                        // hepsinde ktk var ve kapatılmışsa bu yeni bir satıştır. *** veya müşterinin son taskı iptalse yine yeni satıştır 
-                                        bool isSaved = false;
-                                        for (int z = 0; z < taskqueue.Count; z++)
-                                        {
-                                            int taskid = taskqueue[z].taskid;
-                                            taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
-                                            if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
-                                            {
-                                                isSaved = true;
-                                                break;
-                                            }
-                                        }
-                                        if (isSaved)
-                                        {
-                                            newCust = false;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            customer = cust[j];
-                                            newCust = true;
-                                        }
-                                    }
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    {
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newCust)
+                                if (isSaved)
                                 {
-                                    // yeni adsl veya vdsl cc yalın olarak girilecek
-                                    int taskid = -1;
-                                    if (data.XdslServiceType.ToString() == "VDSL")
-                                        taskid = 57; // Satış CC Yalın Vdsl
-                                    else
-                                        taskid = 32; // Satış CC Yalın Adsl
-                                    if (taskid != -1)
-                                        customerInfo(customer, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
+                                    register = false;
+                                    break;
                                 }
                             }
-                            else
-                            { // müşteri yoksa sisteme adsl veya vdsl satış cc yalın olarak girilecek.
-                                int taskid = -1;
-                                if (data.XdslServiceType.ToString() == "VDSL")
-                                    taskid = 57; // Satış CC Yalın Vdsl
-                                else
-                                    taskid = 32; // Satış CC Yalın Adsl
-                                if (taskid != -1)
-                                    customerInfo(null, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
-                            }
+                            if (register || cust.Count == 0)
+                                customerInfo(cust.Count > 0 ? cust[0] : null, data, data.XdslServiceType.ToString() == "VDSL" ? 57 : 32, 1393);
+
+                            //string smno = data.CustomerId + "";
+                            //var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            //if (cust.Count > 0)
+                            //{ // müşteri varsa task onay internet geçişi veya onay tesis süreci açık ise onaylanacak.
+                            //    bool newCust = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = null;
+                            //        taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
+                            //        Models.Adsl.adsl_taskqueue tq = taskqueue.Where(r => (r.taskid == 36 || r.taskid == 34) && r.status == null).FirstOrDefault();
+                            //        if (tq != null)
+                            //        {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
+                            //            tq.status = 9119; // Onaylandı
+                            //            string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                            //            tq.appointmentdate = Convert.ToDateTime(appointment);
+                            //            saveTaskqueue(tq);
+                            //            newCust = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {   // ilgili bütün müşterilerden herhangi bir müşterinin ktk'sı yoksa ve son taskı iptal değilse crm'de işlem yapılmış netflowda yapılmamıştır.
+                            //            // hepsinde ktk var ve kapatılmışsa bu yeni bir satıştır. *** veya müşterinin son taskı iptalse yine yeni satıştır 
+                            //            bool isSaved = false;
+                            //            for (int z = 0; z < taskqueue.Count; z++)
+                            //            {
+                            //                int taskid = taskqueue[z].taskid;
+                            //                taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
+                            //                if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
+                            //                {
+                            //                    isSaved = true;
+                            //                    break;
+                            //                }
+                            //            }
+                            //            if (isSaved)
+                            //            {
+                            //                newCust = false;
+                            //                break;
+                            //            }
+                            //            else
+                            //            {
+                            //                customer = cust[j];
+                            //                newCust = true;
+                            //            }
+                            //        }
+                            //    }
+                            //    if (newCust)
+                            //    {
+                            //        // yeni adsl veya vdsl cc yalın olarak girilecek
+                            //        int taskid = -1;
+                            //        if (data.XdslServiceType.ToString() == "VDSL")
+                            //            taskid = 57; // Satış CC Yalın Vdsl
+                            //        else
+                            //            taskid = 32; // Satış CC Yalın Adsl
+                            //        if (taskid != -1)
+                            //            customerInfo(customer, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
+                            //    }
+                            //}
+                            //else
+                            //{ // müşteri yoksa sisteme adsl veya vdsl satış cc yalın olarak girilecek.
+                            //    int taskid = -1;
+                            //    if (data.XdslServiceType.ToString() == "VDSL")
+                            //        taskid = 57; // Satış CC Yalın Vdsl
+                            //    else
+                            //        taskid = 32; // Satış CC Yalın Adsl
+                            //    if (taskid != -1)
+                            //        customerInfo(null, data, taskid, 1393); // 1154 Orhan Özçelik (Satış CC Yalın sorumlu personel)
+                            //}
                         }
                     }
                 }
@@ -1340,43 +1362,73 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "BIRINCISEVIYEATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
+                            foreach (var item in cust)
                             {
-                                // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
-                                bool newCust = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                                bool isSaved = false;
+                                register = true;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && taskIds.Contains(r.Value.taskid)).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
-                                    bool isSaved = false;
-                                    for (int z = 0; z < taskqueue.Count; z++)
+                                    var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        int taskid = taskqueue[z].taskid;
-                                        taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
-                                        if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
-                                        {
-                                            isSaved = true;
-                                            break;
-                                        }
-                                    }
-                                    if (isSaved)
-                                    {
-                                        newCust = false;
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
-                                        customer = cust[j];
-                                        newCust = true;
-                                    }
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newCust)
-                                    customerInfo(customer, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                if (isSaved)
+                                {
+                                    register = false;
+                                    break;
+                                }
                             }
-                            else
-                                customerInfo(null, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                            if (register || cust.Count == 0)
+                                customerInfo(cust.Count > 0 ? cust[0] : null, data, 33, 1393); // 1393 yazılım koç (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                            //if (cust.Count > 0)
+                            //{
+                            //    // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
+                            //    bool newCust = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
+                            //        bool isSaved = false;
+                            //        for (int z = 0; z < taskqueue.Count; z++)
+                            //        {
+                            //            int taskid = taskqueue[z].taskid;
+                            //            taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
+                            //            if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
+                            //            {
+                            //                isSaved = true;
+                            //                break;
+                            //            }
+                            //        }
+                            //        if (isSaved)
+                            //        {
+                            //            newCust = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {
+                            //            customer = cust[j];
+                            //            newCust = true;
+                            //        }
+                            //    }
+                            //    if (newCust)
+                            //        customerInfo(customer, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                            //}
+                            //else
+                            //    customerInfo(null, data, 33, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                         }
                     }
                 }
@@ -1395,43 +1447,76 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "BIRINCISEVIYEATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
+                            foreach (var item in cust)
                             {
-                                // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
-                                bool newCust = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                                register = true;
+                                bool isSaved = false;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && taskIds.Contains(r.Value.taskid)).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
-                                    bool isSaved = false;
-                                    for (int z = 0; z < taskqueue.Count; z++)
+                                    var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        int taskid = taskqueue[z].taskid;
-                                        taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
-                                        if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
-                                        {
-                                            isSaved = true;
-                                            break;
-                                        }
-                                    }
-                                    if (isSaved)
-                                    {
-                                        newCust = false;
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
-                                        customer = cust[j];
-                                        newCust = true;
-                                    }
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newCust)
-                                    customerInfo(customer, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                                if (isSaved)
+                                {
+                                    register = false;
+                                    break;
+                                }
                             }
-                            else
-                                customerInfo(null, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                            if (register || cust.Count == 0)
+                                customerInfo(cust.Count > 0 ? cust[0] : null, data, 64, 1393); // 1393 yazılım koç (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+
+                            //string smno = data.CustomerId + "";
+                            //var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            //if (cust.Count > 0)
+                            //{
+                            //    // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
+                            //    bool newCust = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.deleted == false).ToList();
+                            //        bool isSaved = false;
+                            //        for (int z = 0; z < taskqueue.Count; z++)
+                            //        {
+                            //            int taskid = taskqueue[z].taskid;
+                            //            taskqueue[z].task = db.task.Where(s => s.taskid == taskid).FirstOrDefault();
+                            //            if (taskqueue[z].task != null && taskqueue[z].task.tasktype != 0 && taskqueue[z].status == null)
+                            //            {
+                            //                isSaved = true;
+                            //                break;
+                            //            }
+                            //        }
+                            //        if (isSaved)
+                            //        {
+                            //            newCust = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {
+                            //            customer = cust[j];
+                            //            newCust = true;
+                            //        }
+                            //    }
+                            //    if (newCust)
+                            //        customerInfo(customer, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
+                            //}
+                            //else
+                            //    customerInfo(null, data, 64, 1393); // 1241 Aycan Derçin (Satış CC Churn sorumlu personel) (33 Satış CC Churn taskı)
                         }
                     }
                 }
@@ -1450,76 +1535,120 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA" || data.WorkflowStatusCode == "KURULUMATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
+                            foreach (var item in cust)
                             {
-                                // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
-                                bool newSave = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                                bool isSaved = false;
+                                register = true;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && r.Value.taskid == 88).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    bool isSaved = false;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 88 && r.deleted == false).ToList(); //88 İkinci Donanım Giriş Taskı
-                                    if (taskqueue.Count > 0)
+                                    var id = t.Value.relatedtaskorderid ?? t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        for (int z = 0; z < taskqueue.Count; z++)
-                                        {
-                                            if (taskqueue[z].status == null)
-                                            {
-                                                isSaved = true;
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                while (taskqueue[z] != null)
-                                                {
-                                                    if (taskqueue[z].status == null)
-                                                    {
-                                                        isSaved = true;
-                                                        break;
-                                                    }
-                                                    else
-                                                    {
-                                                        int taskorderno = taskqueue[z].taskorderno;
-                                                        taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
-                                                    }
-                                                }
-                                                if (isSaved)
-                                                {
-                                                    newSave = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                        isSaved = false;
-                                    if (isSaved)
-                                    {
-                                        newSave = false;
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
-                                    {
-                                        customer = cust[j];
-                                        newSave = true;
-                                    }
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    { // ikinci donanımlarda bayi satışları kontrol edilmeli
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newSave)
-                                { // müşteri bizde var ve ikinci donanım taskı oluşacaksa
-                                    Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
-                                    newTask.taskid = 88; //88 İkinci Donanım Giriş Taskı
-                                    newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (İkinci Donanım sorumlu personel)
-                                    string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
-                                    newTask.appointmentdate = Convert.ToDateTime(appointment);
-                                    newTask.attachedobjectid = customer.customerid;
-
-                                    insertOnlyTaskqueue(newTask);
+                                if (isSaved)
+                                {
+                                    register = false;
+                                    break;
                                 }
                             }
-                            else
+                            if (register)
+                            { // müşteri bizde var ve ikinci donanım taskı oluşacaksa
+                                Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                                newTask.taskid = 88; //88 İkinci Donanım Giriş Taskı
+                                newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (İkinci Donanım sorumlu personel)
+                                string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                                newTask.appointmentdate = Convert.ToDateTime(appointment);
+                                newTask.attachedobjectid = cust[0].customerid;
+                                newTask.description = "$#&" + data.WorkflowId + "$#& Web servis aracılığı ile oluşturuldu.";
+
+                                insertOnlyTaskqueue(newTask);
+                            } else if (cust.Count == 0)
                                 customerInfo(null, data, 88, 1003); // 1003 Banur Aydın (İkinci Donanım sorumlu personel) (88 İkinci Donanım Giriş Taskı)
+
+                            //string smno = data.CustomerId + "";
+                            //var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            //if (cust.Count > 0)
+                            //{
+                            //    // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
+                            //    bool newSave = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        bool isSaved = false;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 88 && r.deleted == false).ToList(); //88 İkinci Donanım Giriş Taskı
+                            //        if (taskqueue.Count > 0)
+                            //        {
+                            //            for (int z = 0; z < taskqueue.Count; z++)
+                            //            {
+                            //                if (taskqueue[z].status == null)
+                            //                {
+                            //                    isSaved = true;
+                            //                    break;
+                            //                }
+                            //                else
+                            //                {
+                            //                    while (taskqueue[z] != null)
+                            //                    {
+                            //                        if (taskqueue[z].status == null)
+                            //                        {
+                            //                            isSaved = true;
+                            //                            break;
+                            //                        }
+                            //                        else
+                            //                        {
+                            //                            int taskorderno = taskqueue[z].taskorderno;
+                            //                            taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
+                            //                        }
+                            //                    }
+                            //                    if (isSaved)
+                            //                    {
+                            //                        newSave = false;
+                            //                        break;
+                            //                    }
+                            //                }
+                            //            }
+                            //        }
+                            //        else
+                            //            isSaved = false;
+                            //        if (isSaved)
+                            //        {
+                            //            newSave = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {
+                            //            customer = cust[j];
+                            //            newSave = true;
+                            //        }
+                            //    }
+                            //    if (newSave)
+                            //    { // müşteri bizde var ve ikinci donanım taskı oluşacaksa
+                            //        Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                            //        newTask.taskid = 88; //88 İkinci Donanım Giriş Taskı
+                            //        newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (İkinci Donanım sorumlu personel)
+                            //        string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                            //        newTask.appointmentdate = Convert.ToDateTime(appointment);
+                            //        newTask.attachedobjectid = customer.customerid;
+
+                            //        insertOnlyTaskqueue(newTask);
+                            //    }
+                            //}
+                            //else
+                            //    customerInfo(null, data, 88, 1003); // 1003 Banur Aydın (İkinci Donanım sorumlu personel) (88 İkinci Donanım Giriş Taskı)
                         }
                     }
                 }
@@ -1538,75 +1667,120 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "BIRINCISEVIYEATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
-                            { // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
-                                bool newSave = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                            foreach (var item in cust)
+                            {
+                                bool isSaved = false;
+                                register = true;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && r.Value.taskid == 51).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    bool isSaved = false;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 51 && r.deleted == false).ToList(); // 51 Bağlantı Problemi Taskı
-                                    if (taskqueue.Count > 0)
+                                    var id = t.Value.relatedtaskorderid ?? t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        for (int z = 0; z < taskqueue.Count; z++)
-                                        {
-                                            if (taskqueue[z].status == null)
-                                            {
-                                                isSaved = true;
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                while (taskqueue[z] != null)
-                                                {
-                                                    if (taskqueue[z].status == null)
-                                                    {
-                                                        isSaved = true;
-                                                        break;
-                                                    }
-                                                    else
-                                                    {
-                                                        int taskorderno = taskqueue[z].taskorderno;
-                                                        taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
-                                                    }
-                                                }
-                                                if (isSaved)
-                                                {
-                                                    newSave = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                        isSaved = false;
-                                    if (isSaved)
-                                    {
-                                        newSave = false;
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
-                                        customer = cust[j];
-                                        newSave = true;
-                                    }
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newSave)
-                                { // müşteri bizde var ve bağlantı problemi taskı oluşacaksa
-                                    Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
-                                    newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
-                                    newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
-                                    string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
-                                    newTask.appointmentdate = Convert.ToDateTime(appointment);
-                                    newTask.attachedobjectid = customer.customerid;
-
-                                    insertOnlyTaskqueue(newTask);
+                                if (isSaved)
+                                {
+                                    register = false;
+                                    break;
                                 }
                             }
-                            else
-                                customerInfo(null, data, 51, 1003); // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel) (51 Bağlantı Problemi Taskı)
+                            if (register)
+                            { // müşteri bizde var ve ikinci donanım taskı oluşacaksa
+                                Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                                newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
+                                newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
+                                string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                                newTask.appointmentdate = Convert.ToDateTime(appointment);
+                                newTask.attachedobjectid = cust[0].customerid;
+                                newTask.description = "$#&" + data.WorkflowId + "$#& Web servis aracılığı ile oluşturuldu.";
+
+                                insertOnlyTaskqueue(newTask);
+                            }
+                            else if (cust.Count == 0)
+                                customerInfo(null, data, 51, 1003); // 1003 Banur Aydın
+
+                            //string smno = data.CustomerId + "";
+                            //var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            //if (cust.Count > 0)
+                            //{ // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
+                            //    bool newSave = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        bool isSaved = false;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 51 && r.deleted == false).ToList(); // 51 Bağlantı Problemi Taskı
+                            //        if (taskqueue.Count > 0)
+                            //        {
+                            //            for (int z = 0; z < taskqueue.Count; z++)
+                            //            {
+                            //                if (taskqueue[z].status == null)
+                            //                {
+                            //                    isSaved = true;
+                            //                    break;
+                            //                }
+                            //                else
+                            //                {
+                            //                    while (taskqueue[z] != null)
+                            //                    {
+                            //                        if (taskqueue[z].status == null)
+                            //                        {
+                            //                            isSaved = true;
+                            //                            break;
+                            //                        }
+                            //                        else
+                            //                        {
+                            //                            int taskorderno = taskqueue[z].taskorderno;
+                            //                            taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
+                            //                        }
+                            //                    }
+                            //                    if (isSaved)
+                            //                    {
+                            //                        newSave = false;
+                            //                        break;
+                            //                    }
+                            //                }
+                            //            }
+                            //        }
+                            //        else
+                            //            isSaved = false;
+                            //        if (isSaved)
+                            //        {
+                            //            newSave = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {
+                            //            customer = cust[j];
+                            //            newSave = true;
+                            //        }
+                            //    }
+                            //    if (newSave)
+                            //    { // müşteri bizde var ve bağlantı problemi taskı oluşacaksa
+                            //        Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                            //        newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
+                            //        newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
+                            //        string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                            //        newTask.appointmentdate = Convert.ToDateTime(appointment);
+                            //        newTask.attachedobjectid = customer.customerid;
+
+                            //        insertOnlyTaskqueue(newTask);
+                            //    }
+                            //}
+                            //else
+                            //    customerInfo(null, data, 51, 1003); // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel) (51 Bağlantı Problemi Taskı)
                         }
                     }
                 }
@@ -1625,81 +1799,127 @@ namespace CRMWebApi
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "BIRINCISEVIYEATANDI"))
                         {
                             string smno = data.CustomerId + "";
+                            bool register = false;
                             var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
-                            if (cust.Count > 0)
-                            { // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
-                                bool newSave = false;
-                                Models.Adsl.customer customer = null;
-                                for (int j = 0; j < cust.Count; j++)
+                            foreach (var item in cust)
+                            {
+                                bool isSaved = false;
+                                register = true;
+                                var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && r.Value.taskid == 51).ToList();
+                                foreach (var t in tasks)
                                 {
-                                    int cc = cust[j].customerid;
-                                    bool isSaved = false;
-                                    List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 51 && r.deleted == false).ToList(); // 51 Bağlantı Problemi Taskı
-                                    if (taskqueue.Count > 0)
+                                    var id = t.Value.relatedtaskorderid ?? t.Key;
+                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        for (int z = 0; z < taskqueue.Count; z++)
-                                        {
-                                            if (taskqueue[z].status == null)
-                                            {
-                                                isSaved = true;
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                while (taskqueue[z] != null)
-                                                {
-                                                    if (taskqueue[z].status == null)
-                                                    {
-                                                        isSaved = true;
-                                                        break;
-                                                    }
-                                                    else
-                                                    {
-                                                        int taskorderno = taskqueue[z].taskorderno;
-                                                        taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
-                                                    }
-                                                }
-                                                if (isSaved)
-                                                {
-                                                    newSave = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                        isSaved = false;
-                                    if (isSaved)
-                                    {
-                                        newSave = false;
+                                        isSaved = true;
                                         break;
                                     }
-                                    else
+                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
-                                        customer = cust[j];
-                                        newSave = true;
-                                    }
+                                        isSaved = true;
+                                        break;
+                                    }*/
                                 }
-                                if (newSave)
-                                { // müşteri bizde var ve bağlantı problemi taskı oluşacaksa
-                                    Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
-                                    newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
-                                    newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
-                                    string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
-                                    newTask.appointmentdate = Convert.ToDateTime(appointment);
-                                    newTask.attachedobjectid = customer.customerid;
-
-                                    insertOnlyTaskqueue(newTask);
+                                if (isSaved)
+                                {
+                                    register = false;
+                                    break;
                                 }
                             }
-                            else
-                                customerInfo(null, data, 51, 1003); // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel) (51 Bağlantı Problemi Taskı)
+                            if (register)
+                            { // müşteri bizde var ve ikinci donanım taskı oluşacaksa
+                                Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                                newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
+                                newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
+                                string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                                newTask.appointmentdate = Convert.ToDateTime(appointment);
+                                newTask.attachedobjectid = cust[0].customerid;
+                                newTask.description = "$#&" + data.WorkflowId + "$#& Web servis aracılığı ile oluşturuldu.";
+
+                                insertOnlyTaskqueue(newTask);
+                            }
+                            else if (cust.Count == 0)
+                                customerInfo(null, data, 51, 1003); // 1003 Banur Aydın
+
+                            //string smno = data.CustomerId + "";
+                            //var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            //if (cust.Count > 0)
+                            //{ // müşterinin sistemde bekleyen işlemi var mı kontrol edilecek varsa hiç bir işlem yapılmayacak
+                            //    bool newSave = false;
+                            //    Models.Adsl.customer customer = null;
+                            //    for (int j = 0; j < cust.Count; j++)
+                            //    {
+                            //        int cc = cust[j].customerid;
+                            //        bool isSaved = false;
+                            //        List<Models.Adsl.adsl_taskqueue> taskqueue = db.taskqueue.Where(r => r.attachedobjectid == cc && r.taskid == 51 && r.deleted == false).ToList(); // 51 Bağlantı Problemi Taskı
+                            //        if (taskqueue.Count > 0)
+                            //        {
+                            //            for (int z = 0; z < taskqueue.Count; z++)
+                            //            {
+                            //                if (taskqueue[z].status == null)
+                            //                {
+                            //                    isSaved = true;
+                            //                    break;
+                            //                }
+                            //                else
+                            //                {
+                            //                    while (taskqueue[z] != null)
+                            //                    {
+                            //                        if (taskqueue[z].status == null)
+                            //                        {
+                            //                            isSaved = true;
+                            //                            break;
+                            //                        }
+                            //                        else
+                            //                        {
+                            //                            int taskorderno = taskqueue[z].taskorderno;
+                            //                            taskqueue[z] = db.taskqueue.Where(r => r.previoustaskorderid == taskorderno && r.deleted == false).FirstOrDefault();
+                            //                        }
+                            //                    }
+                            //                    if (isSaved)
+                            //                    {
+                            //                        newSave = false;
+                            //                        break;
+                            //                    }
+                            //                }
+                            //            }
+                            //        }
+                            //        else
+                            //            isSaved = false;
+                            //        if (isSaved)
+                            //        {
+                            //            newSave = false;
+                            //            break;
+                            //        }
+                            //        else
+                            //        {
+                            //            customer = cust[j];
+                            //            newSave = true;
+                            //        }
+                            //    }
+                            //    if (newSave)
+                            //    { // müşteri bizde var ve bağlantı problemi taskı oluşacaksa
+                            //        Models.Adsl.adsl_taskqueue newTask = new Models.Adsl.adsl_taskqueue();
+                            //        newTask.taskid = 51; // 51 Bağlantı Problemi Taskı
+                            //        newTask.attachedpersonelid = 1003; // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel)
+                            //        string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                            //        newTask.appointmentdate = Convert.ToDateTime(appointment);
+                            //        newTask.attachedobjectid = customer.customerid;
+
+                            //        insertOnlyTaskqueue(newTask);
+                            //    }
+                            //}
+                            //else
+                            //    customerInfo(null, data, 51, 1003); // 1003 Banur Aydın (Bağlantı Problemi sorumlu personel) (51 Bağlantı Problemi Taskı)
                         }
                     }
                 }
                 #endregion
 
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
@@ -1732,7 +1952,6 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.StockMovementBackSeri>("StockMovementBackSeriReports");
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             builder.EntitySet<DTOs.Adsl.EvrakBasari>("OnlyDocSuccesReports");
-            builder.EntitySet<DTOs.Adsl.Cozum>("HataReports");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

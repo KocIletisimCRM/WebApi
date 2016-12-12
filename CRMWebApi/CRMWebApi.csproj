@@ -200,7 +200,6 @@
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\MailBasvuruController.cs" />
     <Compile Include="Controllers\OData\CariHareketReportsController.cs" />
-    <Compile Include="Controllers\OData\HataReportsController.cs" />
     <Compile Include="Controllers\OData\InfoBayiReportsController.cs" />
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />
     <Compile Include="Controllers\OData\OnlyDocSuccesReportsController.cs" />
@@ -223,7 +222,6 @@
     <Compile Include="DTOs\Adsl\attachedObjectTypeConverter.cs" />
     <Compile Include="DTOs\Adsl\BaseAttachedObject.cs" />
     <Compile Include="DTOs\Adsl\CustomerTransferObject.cs" />
-    <Compile Include="DTOs\Adsl\Cozum.cs" />
     <Compile Include="DTOs\Adsl\DTOatama.cs" />
     <Compile Include="DTOs\Adsl\DTObucak.cs" />
     <Compile Include="DTOs\Adsl\DTOCallCenter.cs" />

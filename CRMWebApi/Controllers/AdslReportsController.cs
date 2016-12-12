@@ -1365,19 +1365,6 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        public static async Task<List<Cozum>> getHataRaporu()
-        {
-            return WebApiConfig.Rapor.Select(r =>
-            {
-                var res = new Cozum();
-                res.eleh = r.Value.eleh;
-                res.sdate = r.Value.sdate;
-                res.fdate = r.Value.fdate;
-                res.s = r.Value.s;
-                return res;
-            }).ToList();
-        }
-
         [Route("SKR")]
         [HttpPost]
         public async Task<HttpResponseMessage> SKR(DateTimeRange request)
