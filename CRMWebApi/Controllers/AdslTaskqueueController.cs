@@ -214,6 +214,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
+            List<DTOtaskqueue> listArray = new List<DTOtaskqueue>(); // Hat satışı taskından sonra gelen tasklardan otomatik kapamalar için
             var user = KOCAuthorizeAttribute.getCurrentUser();
             var customerdocuments = tq.customerdocument != null ? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList() : null;
             var customerproducts = tq.customerproduct != null ? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : null;
@@ -244,7 +245,7 @@ namespace CRMWebApi.Controllers
                             if ((dtq.taskid == 153 || dtq.taskid == 155) && WebApiConfig.AdslPersonels.ContainsKey(dtq.attachedpersonelid ?? 0)
                                 && WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Count > 0
                                 && !WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.ContainsKey(dtq.relatedtaskorderid ?? dtq.taskorderno))
-                            { 
+                            {
                                 // Bayinin hangi işlemi açık onu göstermek için yazıldı (Hüseyin KOZ) 03.11.2016
                                 var etq = WebApiConfig.AdslTaskQueues.ContainsKey(WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()) ? WebApiConfig.AdslTaskQueues[WebApiConfig.AdslPersonels[dtq.attachedpersonelid.Value].T_153_155.Keys.First()] : null;
                                 if (tq != null && WebApiConfig.AdslCustomers.ContainsKey(etq.attachedobjectid.Value))
@@ -412,7 +413,7 @@ namespace CRMWebApi.Controllers
                                     }
                                     var qqq = time.Elapsed;
                                 }
-                                if ((item == 45 || item == 118 ||item == 148) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
+                                if ((item == 45 || item == 118 || item == 148) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
                                     var kt = WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value;
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == kt).attachedpersonelid;
@@ -464,18 +465,39 @@ namespace CRMWebApi.Controllers
                                 db.taskqueue.Add(amtq);
                                 /*
                                  * ADSL'Lİ HAT SATIŞINDA İNTERNET HİYERARŞİSİ OLUŞURKEN İNTERNET SÜRECİNİ BAŞLATAN SATIŞ TASKI RELATED OLARAK KENDİNİ TUTMALI
-                                 * ÇÜNKÜ HAT İŞLEM SÜRECİ HARİCİNDE İNTERNET İŞLEM SÜRECİ DE RAPORLARDA GÖZÜKECEK 
-                                 
+                                 * ÇÜNKÜ HAT İŞLEM SÜRECİ HARİCİNDE İNTERNET İŞLEM SÜRECİ DE RAPORLARDA GÖZÜKECEK 14.12.2016 (Hüseyin KOZ)
+                                 */
+
                                 if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[item].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[item].tasktype].startsProccess && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid ?? dtq.taskorderno) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno].taskid].tasktype == 11)
                                 {
                                     db.SaveChanges();
                                     amtq.relatedtaskorderid = amtq.taskorderno;
+                                    amtq.attachedpersonelid = WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno].attachedpersonelid;
+                                    amtq.attachmentdate = DateTime.Now;
                                     var pid = db.customerproduct.Where(tz => tz.customerid == dtq.attachedobjectid && tz.taskid == (dtq.relatedtaskorderid ?? dtq.taskorderno) && tz.deleted == false).OrderByDescending(tz => tz.id).Select(tz => tz.campaignid).FirstOrDefault();
                                     var cp = db.customerproduct.Where(tz => tz.customerid == dtq.attachedobjectid && tz.taskid == (dtq.relatedtaskorderid ?? dtq.taskorderno) && tz.deleted == false && tz.campaignid == pid).ToList();
-                                    cp.ForEach(tk => tk.taskid = amtq.taskorderno);
-                                    if (cp.Count > 0)
-                                        db.customerproduct.AddRange(cp);
-                                }*/
+                                    DTOtaskqueue stq = amtq.toDTO<DTOtaskqueue>();
+                                    cp.ForEach(tk =>
+                                    {
+                                        var k = new JObject();
+                                        k.Add("productid", tk.productid);
+                                        k.Add("campaignid", tk.campaignid);
+                                        k.Add("taskid", amtq.taskorderno);
+                                        k.Add("customerid", amtq.attachedobjectid);
+                                        stq.customerproduct.Add(k.ToObject<object>());
+                                    });
+                                    // bu task da otomatik olarak kapatılmalı
+                                    var state = db.taskstatematches.Where(ts => ts.taskid == amtq.taskid && ts.deleted == false).Select(ts => ts.stateid).ToList();
+                                    stq.taskstatepool = new DTOtaskstatepool();
+                                    foreach (var sid in state)
+                                    {
+                                        if (WebApiConfig.AdslStatus.ContainsKey(sid.Value) && WebApiConfig.AdslStatus[sid.Value].statetype == 1)
+                                            stq.taskstatepool.taskstateid = sid.Value;
+                                    }
+                                    stq.fault = "Bayi";
+                                    stq.description = "Satış Otomatik Olarak Kapatıldı.";
+                                    listArray.Add(stq);
+                                }
                             }
                         }
 
@@ -607,8 +629,9 @@ namespace CRMWebApi.Controllers
                         db.SaveChanges();
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
-                        if ((tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115))
-                        {
+                        // hat satışları task tipine göre olumlu kapatılınca maya sisteme giriş mobil türeyecek tip : 11 (Hüseyin KOZ 14.12.2016)
+                        if ((tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115) || (tq.task.tasktypes.TaskTypeId == 11 && tq.taskstatepool.taskstateid == 9118))
+                        { 
                             // satış task task orderno
                             //var ptq = dtq;
                             int saletask = dtq.relatedtaskorderid ?? dtq.taskorderno;
@@ -756,6 +779,10 @@ namespace CRMWebApi.Controllers
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
+                    foreach (var item in listArray)
+                    { // adsl'li hat satışından oluşan satış taskalrının otomatik kapatılması için (oto kapatılacak taklar hazırnnıp yine buna atanabilir)
+                        saveTaskQueues(item);
+                    }
                     WebApiConfig.updateAdslData();
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }

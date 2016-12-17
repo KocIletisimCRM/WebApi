@@ -342,20 +342,20 @@ namespace CRMWebApi
                                 else
                                 {
                                     AdslTaskQueues[t.taskorderno] = t;
-                                    if (t.previoustaskorderid == null)
+                                    //if (t.previoustaskorderid == null)
+                                    //{
+                                    //Süreç Başlangıç Taskları
+                                    if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
                                     {
-                                        //Süreç Başlangıç Taskları
-                                        if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
-                                        {
-                                            AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                        }
-                                        if (!proccessIds.Contains(t.taskorderno)) proccessIds.Add(t.taskorderno);
+                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
-                                    else
-                                    {
-                                        AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                        if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
-                                    }
+                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    //}
+                                    //else
+                                    //{
+                                    //    AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                    //    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    //}
                                 }
                             }
                             var tttt = stw.Elapsed;
@@ -1207,22 +1207,22 @@ namespace CRMWebApi
         //NetFlow Tracker
         static Timer nfT = new Timer(async (o) =>
         {
-            await updateAdslData().ConfigureAwait(false);
-            var typeIds = AdslTaskTypes.Where(r => r.Value.startsProccess == true).Select(r => r.Key).ToList(); // proces başlatan task tip id'leri
-            var taskIds = AdslTasks.Where(r => typeIds.Contains(r.Value.tasktype)).Select(r => r.Key).ToList(); // proces başlatan task id'leri
-
-            // Bu kod 60 dakikada bir çalışacak
-            authHeader.Username = "EXT02308383_66010.00002";
-            authHeader.Password = "6qRF0687";
-
-            var request = new GetWorkflowListByUserRequest();
-            request.TicketingTypeCode = "321";
-            request.SegmentCode = "Residential";
-            request.SearchStartDate = DateTime.Now.AddHours(-3);
-            //request.SearchStartDate = DateTime.Now.AddDays(-1);
-            request.SearchEndDate = DateTime.Now;
             try
             {
+                await updateAdslData().ConfigureAwait(false);
+                var typeIds = AdslTaskTypes.Where(r => r.Value.startsProccess == true).Select(r => r.Key).ToList(); // proces başlatan task tip id'leri
+                var taskIds = AdslTasks.Where(r => typeIds.Contains(r.Value.tasktype)).Select(r => r.Key).ToList(); // proces başlatan task id'leri
+
+                // Bu kod 60 dakikada bir çalışacak
+                authHeader.Username = "EXT02308383_66010.00002";
+                authHeader.Password = "6qRF0687";
+
+                var request = new GetWorkflowListByUserRequest();
+                request.TicketingTypeCode = "321";
+                request.SegmentCode = "Residential";
+                request.SearchStartDate = DateTime.Now.AddHours(-3);
+                //request.SearchStartDate = DateTime.Now.AddDays(-1);
+                request.SearchEndDate = DateTime.Now;
                 #region Kurulum ve Cihaz Gönderim Taskları
                 using (var wsc = new NetflowTellcomWSSoapClient())
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -1247,7 +1247,8 @@ namespace CRMWebApi
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
                                     if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                        if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
+                                       isSaved = true;
+                                       if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
                                         {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
                                             Models.Adsl.adsl_taskqueue tq = AdslTaskQueues[AdslProccesses[id].Last_TON];
                                             tq.status = 9119; // Onaylandı
@@ -1255,7 +1256,6 @@ namespace CRMWebApi
                                             tq.appointmentdate = Convert.ToDateTime(appointment);
                                             saveTaskqueue(tq);
                                         }
-                                        isSaved = true;
                                         break;
                                     }
                                     /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
@@ -1575,7 +1575,8 @@ namespace CRMWebApi
                                 newTask.description = "$#&" + data.WorkflowId + "$#& Web servis aracılığı ile oluşturuldu.";
 
                                 insertOnlyTaskqueue(newTask);
-                            } else if (cust.Count == 0)
+                            }
+                            else if (cust.Count == 0)
                                 customerInfo(null, data, 88, 1003); // 1003 Banur Aydın (İkinci Donanım sorumlu personel) (88 İkinci Donanım Giriş Taskı)
 
                             //string smno = data.CustomerId + "";
@@ -1917,7 +1918,6 @@ namespace CRMWebApi
                     }
                 }
                 #endregion
-
             }
             catch (Exception e)
             {
