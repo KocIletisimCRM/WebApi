@@ -34,7 +34,8 @@ namespace CRMWebApi.Controllers
                             .Select(t => new
                             {
                                 t.taskid,
-                                t.taskname
+                                t.taskname,
+                                t.tasktype
                             }).ToList(), "application/json");
                 if (request.isTaskstateFilter())
                 {

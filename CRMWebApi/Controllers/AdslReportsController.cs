@@ -98,7 +98,7 @@ namespace CRMWebApi.Controllers
                      total[k_tq.attachedpersonelid.Value].kur++;
                  }
                  else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 8)
-                 { // satış taskı; teslimat ise bayinin teslimat hakedişine 1 ekle
+                 { // satış taskı; cc teslimat ise bayinin teslimat hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].teslimat++;
                  }
@@ -106,6 +106,18 @@ namespace CRMWebApi.Controllers
                  { // satış taskı; arıza ise bayinin arıza hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].ariza++;
+                 }
+                 else if (k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
+                 { // satış taskı; teslimat ise ve satış yapan bayi teslimat yapmışsa bayinin d-sat-tes hakedişine 1 ekle
+                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[s_tq.attachedpersonelid.Value].d_sat_tes++;
+                 }
+                 else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
+                 { // satış taskı; teslimat taskı ise satış yapan bayinin d-sat, kurulum yapan bayinin teslimat hakedişine 1 ekle
+                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[s_tq.attachedpersonelid.Value].d_sat++;
+                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[k_tq.attachedpersonelid.Value].teslimat++;
                  }
                  return true;
              }).ToList();
@@ -115,11 +127,29 @@ namespace CRMWebApi.Controllers
                 return tq.taskid == 90 && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
             }).Select(r =>
             {
-                var s_tq = r.Value.previoustaskorderid.HasValue ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null : null;
+                var s_tq = r.Value.relatedtaskorderid.HasValue ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.relatedtaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.relatedtaskorderid.Value] : null : null;
                 if (s_tq != null && s_tq.taskid == 33 || s_tq.taskid == 64) // başlangıç task tipi ekrak alma olamaz evrak alma tasklarının idleri ile kontrol edildi (Hüseyin KOZ) !!
                 { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                     total[s_tq.attachedpersonelid.Value].evrak++;
+                }
+                else if (s_tq != null && s_tq.taskid == 122)
+                { // çağrı churn bölge içiyse evrak taskının personeline evrak hakedişi ver
+                    HashSet<int> tt = new HashSet<int>();
+                    var subs = new Queue<int>();
+                    if (WebApiConfig.AdslSubTasks.TryGetValue(s_tq.taskorderno, out tt))
+                        foreach (var item in tt) subs.Enqueue(item);
+                    while (subs.Count > 0)
+                    {
+                        var p = subs.Dequeue();
+                        if (WebApiConfig.AdslSubTasks.TryGetValue(p, out tt))
+                            foreach (var item in tt) subs.Enqueue(item);
+                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[p].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[p].taskid].tasktype == 7)
+                        {
+                            total[WebApiConfig.AdslTaskQueues[p].attachedpersonelid.Value].evrak++;
+                            break;
+                        }
+                    }
                 }
                 return true;
             }).ToList();
@@ -232,9 +262,12 @@ namespace CRMWebApi.Controllers
                 res.arzAdet = r.Value.ariza;
                 res.evrAdet = r.Value.evrak;
                 res.tesAdet = r.Value.teslimat;
-                if (WebApiConfig.AdslPersonels.ContainsKey(r.Key)) {
+                res.doSatAdet = r.Value.d_sat;
+                res.doSat_tesAdet = r.Value.d_sat_tes;
+                if (WebApiConfig.AdslPersonels.ContainsKey(r.Key))
+                {
                     var personel = WebApiConfig.AdslPersonels[r.Key];
-                    res.bName =  personel.personelname;
+                    res.bName = personel.personelname;
                     res.il = personel.ilKimlikNo != null ? WebApiConfig.AdslIls.ContainsKey((int)personel.ilKimlikNo) ? WebApiConfig.AdslIls[(int)personel.ilKimlikNo].ad : "İl Yok" : "İl Yok";
                 }
                 else
@@ -242,12 +275,15 @@ namespace CRMWebApi.Controllers
                     res.bName = "İsimsiz Personel";
                     res.il = "İl Yok";
                 }
+                // payment kayıt sıralaması hep küçükten büyüğe olmalı
                 res.sat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 1 && r.Value.sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat) ?? 0;
                 res.kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 2 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.kur) ?? 0;
                 res.sat_kur = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 3 && r.Value.sat_kur <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.sat_kur) ?? 0;
                 res.ariza = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 4 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.ariza) ?? 0;
                 res.teslimat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat) ?? 0;
                 res.evrak = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak) ?? 0;
+                res.doSat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 7 && r.Value.d_sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat) ?? 0;
+                res.doSat_tes = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 8 && r.Value.d_sat_tes <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat_tes) ?? 0;
                 return res;
             }).ToList();
         }
@@ -891,8 +927,8 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SLKocReport>> getKocSLReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            var maxSL = 24; // (çarpan için)
-            var maxKSL = 48; // (çarpan için)
+            var maxSL = 24.0; // (çarpan için)
+            var maxKSL = 48.0; // (çarpan için)
             return WebApiConfig.AdslProccesses.Values.SelectMany(
                 p => p.SLs.Where(sl => {
                     var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
@@ -936,10 +972,10 @@ namespace CRMWebApi.Controllers
                         {
                             var kocSl = WebApiConfig.AdslSl[ksl.Key];
                             r.SLName = kocSl.SLName;
-                            r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? kocSl.BayiMaxTime.Value : 0;
-                            r.KocSLMaxTime = kocSl.KocMaxTime != null ? kocSl.KocMaxTime.Value : 0;
-                            r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (kocSl.BayiMaxTime != null ? (maxSL / kocSl.BayiMaxTime.Value) : 1)), 2);
-                            r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * (kocSl.KocMaxTime != null ? (maxKSL / kocSl.KocMaxTime.Value) : 1)), 2);
+                            r.BayiSLMaxTime = kocSl.BayiMaxTime != null ? (int?)kocSl.BayiMaxTime.Value : null;
+                            r.KocSLMaxTime = kocSl.KocMaxTime != null ? (int?)kocSl.KocMaxTime.Value : null;
+                            r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (kocSl.BayiMaxTime != null ? (maxSL / (double)kocSl.BayiMaxTime.Value) : 1)), 2);
+                            r.KocSLEtkisi = r.KocSLStart == null ? null : (double?)Math.Round((((r.KocSLEnd - r.KocSLStart).Value.TotalHours) * (kocSl.KocMaxTime != null ? (maxKSL / (double)kocSl.KocMaxTime.Value) : 1)), 2);
                         }
                         else
                             r.SLName = "Tanımlanmamış SL";
@@ -965,8 +1001,8 @@ namespace CRMWebApi.Controllers
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
+                        return null;
                     }
-                    return null;
                 })
             ).ToList();
         }
@@ -1262,7 +1298,7 @@ namespace CRMWebApi.Controllers
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Where(t => {
                 var stq = WebApiConfig.AdslTaskQueues.ContainsKey(t.Value.S_TON) ? WebApiConfig.AdslTaskQueues[t.Value.S_TON] : null;
-                return stq != null && (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122) || stq.taskid == 114;
+                return stq != null && (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122 || stq.taskid == 114);
             }).Select(r => {
                 EvrakBasari res = new EvrakBasari();
                 var stq = WebApiConfig.AdslTaskQueues[r.Value.S_TON];
@@ -1286,6 +1322,8 @@ namespace CRMWebApi.Controllers
                 res.s_create_day = stq.creationdate.Value.Day;
                 res.s_create_month = stq.creationdate.Value.Month;
                 res.s_create_year = stq.creationdate.Value.Year;
+                if (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114)
+                    res.slstart = stq.appointmentdate.HasValue ? stq.appointmentdate : stq.creationdate;
                 if (stq.appointmentdate.HasValue)
                 {
                     res.s_netflow_day = stq.appointmentdate.Value.Day;
@@ -1310,10 +1348,28 @@ namespace CRMWebApi.Controllers
                         }
                         else
                         {
-                            var aa = 
-                            samtq = WebApiConfig.AdslTaskQueues.Where(s => s.Value.relatedtaskorderid == r.Value.S_TON && (s.Value.taskid == 90 || s.Value.taskid == 47)).Select(s => s.Value).FirstOrDefault();
                             res.s_statustype = StateTypeText[WebApiConfig.AdslStatus[stq.status.Value].statetype.Value];
-                            res.process_status = StateTypeText[WebApiConfig.AdslStatus[stq.status.Value].statetype.Value];
+                            HashSet<int> tt = new HashSet<int>();
+                            var subs = new Queue<int>();
+                            if (WebApiConfig.AdslSubTasks.TryGetValue(stq.taskorderno, out tt))
+                                foreach (var item in tt) subs.Enqueue(item);
+                            else
+                                res.process_status = StateTypeText[WebApiConfig.AdslStatus[stq.status.Value].statetype.Value];
+                            while (subs.Count > 0)
+                            {
+                                var p = subs.Dequeue();
+                                if (WebApiConfig.AdslSubTasks.TryGetValue(p, out tt))
+                                    foreach (var item in tt) subs.Enqueue(item);
+                                if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 90)
+                                {
+                                    samtq = WebApiConfig.AdslTaskQueues[p];
+                                    break;
+                                }
+                                else if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].status == null)
+                                    res.process_status = "Bekleyen";
+                                else if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].status != null && WebApiConfig.AdslStatus.ContainsKey(WebApiConfig.AdslTaskQueues[p].status.Value))
+                                    res.process_status = StateTypeText[WebApiConfig.AdslStatus[WebApiConfig.AdslTaskQueues[p].status.Value].statetype.Value];
+                            }
                         }
                     }
                     else
@@ -1336,11 +1392,15 @@ namespace CRMWebApi.Controllers
                     res.kapamatask_create_month = samtq.creationdate.Value.Month;
                     res.kapamatask_create_year = samtq.creationdate.Value.Year;
                     res.kapamatask_desc = samtq.description;
+                    if (stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122)
+                        res.slstart = samtq.creationdate;
                     if (samtq.consummationdate.HasValue)
                     {
                         res.kapamatask_close_day = samtq.consummationdate.Value.Day;
                         res.kapamatask_close_month = samtq.consummationdate.Value.Month;
                         res.kapamatask_close_year = samtq.consummationdate.Value.Year;
+                        res.slfinish = samtq.consummationdate;
+                        //res.sl = (TimeSpan?)(res.slstart.Value - res.slfinish.Value);
                     }
                     if (samtq.status.HasValue)
                     {

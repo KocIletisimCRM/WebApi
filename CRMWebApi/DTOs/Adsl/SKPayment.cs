@@ -13,5 +13,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int ariza { get; set; }
         public int teslimat { get; set; }
         public int evrak { get; set; }
+        public int d_sat { get; set; } // donanım satışı
+        public int d_sat_tes { get; set; } // donanım sat-tes
     }
 }

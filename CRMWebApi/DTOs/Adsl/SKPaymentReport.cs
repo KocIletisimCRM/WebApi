@@ -21,11 +21,15 @@ namespace CRMWebApi.DTOs.Adsl
         public double teslimat { get; set; }
         public int evrAdet { get; set; }
         public double evrak { get; set; }
+        public int doSatAdet { get; set; }
+        public double doSat { get; set; }
+        public int doSat_tesAdet { get; set; }
+        public double doSat_tes { get; set; }
         public double toplam
         {
             get
             {
-                return sat + sat_kur + kur + ariza + teslimat + evrak;
+                return sat + sat_kur + kur + ariza + teslimat + evrak + doSat + doSat_tes;
             }
             set { }
         }

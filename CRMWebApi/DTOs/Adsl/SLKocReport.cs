@@ -8,7 +8,6 @@ namespace CRMWebApi.DTOs.Adsl
     {
         public string staskname { get; set; }
         public DateTime? KocSLStart { get; set; }
-
         public DateTime? kocSLEnd = DateTime.Now;
         public DateTime? KocSLEnd
         {
@@ -16,7 +15,7 @@ namespace CRMWebApi.DTOs.Adsl
             set { if (value != null) kocSLEnd = value; }
         }
         public TimeSpan? KocSLTime { get { return (KocSLStart == null) ? null : (TimeSpan?)(KocSLEnd.Value - KocSLStart.Value); } } //SLEnd - SLStart
-        public int KocSLMaxTime { get; set; } //bitirilmesi gereken azami süre
+        public int? KocSLMaxTime { get; set; } //bitirilmesi gereken azami süre
         public double? KocSLEtkisi { get; set; } // Yasin Bey; varolan bilgilerin yanında sadece saat olarak işlem süresini görmesini istediği için oluşturuldu
         public string KocSLTimeString
         {
@@ -34,8 +33,7 @@ namespace CRMWebApi.DTOs.Adsl
                 }
                 catch (Exception)
                 {
-
-                    throw;
+                    return null;
                 }
             }
             set { }

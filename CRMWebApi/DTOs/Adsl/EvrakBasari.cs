@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace CRMWebApi.DTOs.Adsl
 {
@@ -20,6 +21,9 @@ namespace CRMWebApi.DTOs.Adsl
         public int? s_close_year { get; set; }
         public string s_status { get; set; }
         public string s_statustype { get; set; }
+        public DateTime? slstart { get; set; }
+        public DateTime? slfinish { get; set; }
+        public double? sl { get { return (slstart.HasValue && slfinish.HasValue) ? (double?)Math.Round((slfinish.Value - slstart.Value).TotalHours, 2) : null; } set { } }
         public string custname { get; set; }
         public int custid { get; set; }
         public string custsolid { get; set; }

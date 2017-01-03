@@ -463,11 +463,12 @@ namespace CRMWebApi.Controllers
                                     }
                                 }
                                 db.taskqueue.Add(amtq);
+                                #region Hat Satışları için Otomatik Task Kapamalar
                                 /*
+                                 * ADSL'Lİ HAT SATIŞLARINDA BAYİ SATIŞ TASKI OTOMATİK KAPATILACAK
                                  * ADSL'Lİ HAT SATIŞINDA İNTERNET HİYERARŞİSİ OLUŞURKEN İNTERNET SÜRECİNİ BAŞLATAN SATIŞ TASKI RELATED OLARAK KENDİNİ TUTMALI
                                  * ÇÜNKÜ HAT İŞLEM SÜRECİ HARİCİNDE İNTERNET İŞLEM SÜRECİ DE RAPORLARDA GÖZÜKECEK 14.12.2016 (Hüseyin KOZ)
                                  */
-
                                 if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[item].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[item].tasktype].startsProccess && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid ?? dtq.taskorderno) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno].taskid].tasktype == 11)
                                 {
                                     db.SaveChanges();
@@ -498,6 +499,49 @@ namespace CRMWebApi.Controllers
                                     stq.description = "Satış Otomatik Olarak Kapatıldı.";
                                     listArray.Add(stq);
                                 }
+                                /* 
+                                 *  mobil hat aktivasyon işlemlerinde hat aktif edildiğinde adsl işlemi başlar. hat aktivasyon farklılık olsun diye kurulum tipinde atandı task tipine göre kontrol edilecek, olumlu kapandığında eğer mabil aktivasyon bekleyen kurulum açıksa otomatik kapat. (Hüseyin KOZ) 03.01.2017
+                                 */
+                                if (WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[dtq.taskorderno].taskid].tasktype == 3 && dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid.Value].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid.Value].taskid].tasktype == 11 && dtq.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(dtq.status.Value) && WebApiConfig.AdslStatus[dtq.status.Value].statetype.Value == 1)
+                                {
+                                    HashSet<int> tt = new HashSet<int>();
+                                    var subs = new Queue<int>();
+                                    if (WebApiConfig.AdslSubTasks.TryGetValue(dtq.relatedtaskorderid.Value, out tt))
+                                        foreach (var st in tt) subs.Enqueue(st);
+                                    while (subs.Count > 0)
+                                    { // başlangıç taskından türeyen diğer türünde mobil aktivasyon bekleyen kurulum taskını bul ve otomatik kapat
+                                        var p = subs.Dequeue();
+                                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[p].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[p].taskid].tasktype == 0 && !WebApiConfig.AdslTaskQueues[p].status.HasValue)
+                                        {
+                                            var pt = WebApiConfig.AdslTaskQueues[p];
+                                            DTOtaskqueue atq = pt.toDTO<DTOtaskqueue>();
+                                            // bu task da otomatik olarak kapatılmalı
+                                            var state = db.taskstatematches.Where(ts => ts.taskid.Value == pt.taskid && ts.deleted == false).Select(ts => ts.stateid).ToList();
+                                            atq.taskstatepool = new DTOtaskstatepool();
+                                            foreach (var sid in state)
+                                            {
+                                                if (WebApiConfig.AdslStatus.ContainsKey(sid.Value) && WebApiConfig.AdslStatus[sid.Value].statetype == 1)
+                                                {
+                                                    atq.taskstatepool.taskstateid = sid.Value;
+                                                    break;
+                                                }
+                                            }
+                                            atq.task = new DTOtask();
+                                            atq.task.taskid = pt.taskid;
+                                            atq.description = "Task Hat Aktivasyonuyla Otomatik Olarak Kapatıldı.";
+                                            if (!pt.attachedpersonelid.HasValue)
+                                            {
+                                                var pp = db.taskqueue.First(r => r.taskorderno == p);
+                                                pp.attachedpersonelid = 1173; // mobil aktivasyon atanmamışsa kapanmadan önce Hüseyin Koz'a ata 
+                                                pp.lastupdated = DateTime.Now;
+                                                pp.updatedby = user.userId;
+                                            }
+                                            listArray.Add(atq);
+                                            break;
+                                        }
+                                    }
+                                }
+                                #endregion
                             }
                         }
 
@@ -630,7 +674,7 @@ namespace CRMWebApi.Controllers
                         #endregion
                         #region kurulum tamamlanınca ürüne bağlı taskların türetilmesi
                         // hat satışları task tipine göre olumlu kapatılınca maya sisteme giriş mobil türeyecek tip : 11 (Hüseyin KOZ 14.12.2016)
-                        if ((tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115) || (tq.task.tasktypes.TaskTypeId == 11 && tq.taskstatepool.taskstateid == 9118))
+                        if ((tq.task.taskid == 41 && tq.taskstatepool.taskstateid == 9117) || (tq.task.taskid == 49 && tq.taskstatepool.taskstateid == 9129) || ((tq.task.taskid == 88 || tq.task.taskid == 132) && tq.taskstatepool.taskstateid == 9115) || (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 11 && tq.taskstatepool.taskstateid == 9118))
                         { 
                             // satış task task orderno
                             //var ptq = dtq;
@@ -1137,6 +1181,7 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new KOCSAMADLSEntities())
             {
+                var customerproducts = request.customerproduct != null ? request.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : new List<DTOcustomerproduct>();
                 adsl_taskqueue taskqueue = new adsl_taskqueue
                 {
                     taskid = request.task.taskid,
@@ -1150,6 +1195,20 @@ namespace CRMWebApi.Controllers
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();
+                foreach (var p in customerproducts)
+                {
+                    db.customerproduct.Add(new adsl_customerproduct
+                    {
+                        campaignid = p.campaignid,
+                        creationdate = DateTime.Now,
+                        customerid = request.attachedcustomer.customerid,
+                        deleted = false,
+                        lastupdated = DateTime.Now,
+                        productid = p.productid,
+                        taskid = taskqueue.taskorderno,
+                        updatedby = user.userId
+                    });
+                }
                 taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
                 db.SaveChanges();
                 WebApiConfig.updateAdslData();
