@@ -833,7 +833,7 @@ namespace CRMWebApi.Controllers
                 catch (Exception e)
                 {
                     transaction.Rollback();
-                    return Request.CreateResponse(HttpStatusCode.OK, e.Message, "application/json");
+                    return Request.CreateResponse(HttpStatusCode.OK, e.Source, "application/json");
                 }
         }
 
