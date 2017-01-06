@@ -223,6 +223,7 @@ namespace CRMWebApi.Controllers
             using (var transaction = db.Database.BeginTransaction())
                 try
                 {
+                    //var sss = tq.task.objecttypes.typeid;
                     var tsm = db.taskstatematches.Include(t => t.taskstatepool).Where(r => r.taskid == tq.task.taskid && r.stateid == tq.taskstatepool.taskstateid).FirstOrDefault();
                     var dtq = db.taskqueue.Include(tt => tt.task)
                                           .Include(p => p.attachedpersonel)
@@ -833,7 +834,7 @@ namespace CRMWebApi.Controllers
                 catch (Exception e)
                 {
                     transaction.Rollback();
-                    return Request.CreateResponse(HttpStatusCode.OK, e.Source, "application/json");
+                    return Request.CreateResponse(HttpStatusCode.OK, e.Message + " *** KONUM : " + e.StackTrace, "application/json");
                 }
         }
 

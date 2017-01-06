@@ -1247,7 +1247,22 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    {
+                                        isSaved = true;
+                                        if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
+                                        {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
+                                            Models.Adsl.adsl_taskqueue tq = AdslTaskQueues[AdslProccesses[id].Last_TON];
+                                            tq.status = 9119; // Onaylandı
+                                            string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
+                                            tq.appointmentdate = Convert.ToDateTime(appointment);
+                                            saveTaskqueue(tq);
+                                        }
+                                        break;
+                                    }
+                                    if (t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                        isSaved = true;
                                        if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
@@ -1260,13 +1275,6 @@ namespace CRMWebApi
                                         }
                                         break;
                                     }
-                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
-                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
-                                    {
-                                        isSaved = true;
-                                        break;
-                                    }*/
                                 }
                                 if (isSaved)
                                 {
@@ -1308,15 +1316,15 @@ namespace CRMWebApi
                                 var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && taskIds.Contains(r.Value.taskid)).ToList();
                                 foreach (var t in tasks)
                                 {
-                                    //var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    //if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
-                                    //{
-                                    //    isSaved = true;
-                                    //    break;
-                                    //}
-                                    // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    //bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
                                     var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    {
+                                        isSaved = true;
+                                        break;
+                                    }
+                                    var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
+                                    if (t.Value.taskid != 114 && t.Value.taskid != 33 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1362,15 +1370,15 @@ namespace CRMWebApi
                                 var tasks = AdslTaskQueues.Where(r => r.Value.attachedobjectid == item.customerid && taskIds.Contains(r.Value.taskid)).ToList();
                                 foreach (var t in tasks)
                                 {
-                                    //var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    //if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
-                                    //{
-                                    //    isSaved = true;
-                                    //    break;
-                                    //}
                                     // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
                                     var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    {
+                                        isSaved = true;
+                                        break;
+                                    }
+                                    var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
+                                    if (t.Value.taskid != 114 && t.Value.taskid != 64 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1418,18 +1426,18 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     var id = t.Value.relatedtaskorderid ?? t.Key;
-                                    if (AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (t.Value.taskid != 88 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
                                     }
-                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
                                     var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     { // ikinci donanımlarda bayi satışları kontrol edilmeli
                                         isSaved = true;
                                         break;
-                                    }*/
+                                    }
                                 }
                                 if (isSaved)
                                 {
