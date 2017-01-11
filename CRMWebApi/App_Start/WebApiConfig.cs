@@ -1207,7 +1207,7 @@ namespace CRMWebApi
             }
         } 
         //NetFlow Tracker
-        static Timer nfT = new Timer(async (o) =>
+        static Timer nfT = new Timer(async o =>
         {
             try
             {
@@ -1236,9 +1236,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA" || data.WorkflowStatusCode == "KURULUMATANDI"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 bool isSaved = false;
@@ -1248,8 +1248,8 @@ namespace CRMWebApi
                                 {
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
                                     // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
-                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId.ToString()))
                                     {
                                         isSaved = true;
                                         if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
@@ -1264,8 +1264,8 @@ namespace CRMWebApi
                                     }
                                     if (t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
-                                       isSaved = true;
-                                       if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
+                                        isSaved = true;
+                                        if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
                                         {  // task, churnler için onay tesis süreci veya onay internet geçişi ise kuruluma onay ver
                                             Models.Adsl.adsl_taskqueue tq = AdslTaskQueues[AdslProccesses[id].Last_TON];
                                             tq.status = 9119; // Onaylandı
@@ -1306,9 +1306,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 bool isSaved = false;
@@ -1317,8 +1317,9 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     //bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
-                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    //var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId.ToString()))
                                     {
                                         isSaved = true;
                                         break;
@@ -1360,9 +1361,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 register = true;
@@ -1371,8 +1372,9 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
-                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    //var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId.ToString()))
                                     {
                                         isSaved = true;
                                         break;
@@ -1414,9 +1416,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA" || data.WorkflowStatusCode == "KURULUMATANDI"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 bool isSaved = false;
@@ -1432,8 +1434,9 @@ namespace CRMWebApi
                                         break;
                                     }
                                     // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
-                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
+                                    //var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
+                                    if (descs.Length > 2 && descs[1] == (data.WorkflowId.ToString()))
                                     { // ikinci donanımlarda bayi satışları kontrol edilmeli
                                         isSaved = true;
                                         break;
@@ -1476,9 +1479,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 bool isSaved = false;
@@ -1493,7 +1496,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
                                         isSaved = true;
@@ -1537,9 +1540,9 @@ namespace CRMWebApi
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
                         if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA"))
                         {
-                            string smno = data.CustomerId + "";
+                            string smno = data.CustomerId.ToString();
                             bool register = false;
-                            var cust = db.customer.Where(r => r.superonlineCustNo == smno && r.deleted == false).ToList();
+                            var cust = AdslCustomers.Where(r => r.Value.superonlineCustNo == smno).Select(r => r.Value).ToList();
                             foreach (var item in cust)
                             {
                                 bool isSaved = false;
@@ -1554,7 +1557,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
-                                    var descs = t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None);
+                                    var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
                                         isSaved = true;

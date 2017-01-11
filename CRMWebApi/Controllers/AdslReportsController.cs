@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using System.Text;
 using CRMWebApi.KOCAuthorization;
+using System.Data.SqlClient;
 
 namespace CRMWebApi.Controllers
 {
@@ -1139,6 +1140,74 @@ namespace CRMWebApi.Controllers
                 }).ToList();
         }
 
+        // Aylık başarı raporu detey için kullanılabilir.
+        public static async Task<List<SKRate>> sil(DateTimeRange request)
+        {
+            int k_total = 0, e_total = 0;
+            List<KocAdslProccess> kurulum = new List<KocAdslProccess>();
+            List<KocAdslProccess> evrak = new List<KocAdslProccess>();
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            WebApiConfig.AdslProccesses.Values.Select(r =>
+            {
+                if (r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) && (WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 38 || WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 60)) {
+                    var krtq = WebApiConfig.AdslTaskQueues[r.Kr_TON.Value];
+                    var ktk = (r.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Ktk_TON.Value)) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                    var aptq = (krtq != null && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value)) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
+                    var netflow = (aptq != null && aptq.appointmentdate.HasValue) ? aptq.appointmentdate.Value : (krtq != null ? (DateTime?)krtq.creationdate.Value : null);
+                    if (ktk != null && netflow != null && netflow >= request.start && ktk.consummationdate.HasValue && ktk.consummationdate.Value < request.end.AddDays(7) && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype == 1)
+                    {
+                        k_total++;
+                        kurulum.Add(r);
+                    }
+                    else if (netflow != null && netflow >= request.start && DateTime.Now < request.end.AddDays(7))
+                        k_total++;
+                }
+                var stq = WebApiConfig.AdslTaskQueues.ContainsKey(r.S_TON) ? WebApiConfig.AdslTaskQueues[r.S_TON] : null;
+                if (stq != null && (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114 || stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122) && ((stq.appointmentdate.HasValue && stq.appointmentdate.Value >= request.start) || stq.creationdate.Value >= request.start))
+                {
+                    if (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114)
+                        e_total++;
+                    HashSet<int> tt = new HashSet<int>();
+                    var subs = new Queue<int>();
+                    if (WebApiConfig.AdslSubTasks.TryGetValue(stq.taskorderno, out tt))
+                        foreach (var item in tt) subs.Enqueue(item);
+                    while (subs.Count > 0)
+                    {
+                        var p = subs.Dequeue();
+                        if (WebApiConfig.AdslSubTasks.TryGetValue(p, out tt))
+                            foreach (var item in tt) subs.Enqueue(item);
+                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 47 && WebApiConfig.AdslTaskQueues[p].status.HasValue && WebApiConfig.AdslStatus.ContainsKey(WebApiConfig.AdslTaskQueues[p].status.Value) && WebApiConfig.AdslStatus[WebApiConfig.AdslTaskQueues[p].status.Value].statetype.Value == 1)
+                            e_total++;
+                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 90)
+                        {
+                            var tq = WebApiConfig.AdslTaskQueues[p];
+                            if (tq.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value < request.end.AddDays(7))
+                                evrak.Add(r);
+                            break;
+                        }
+                    }
+                }
+                return true;
+            }).ToList();
+            List<DateTime> allDates = new List<DateTime>();
+            Dictionary<string, SKRate> rate = new Dictionary<string, SKRate>();
+            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
+                allDates.Add(date);
+            foreach (var day in allDates)
+            {
+                if (!rate.ContainsKey($"{day.Year}-{day.Month}-{day.Day}"))
+                    rate[$"{day.Year}-{day.Month}-{day.Day}"] = new SKRate();
+                double ksuccess = 0, esuccess = 0;
+                foreach (var item in kurulum)
+                {
+                    var netf = (WebApiConfig.AdslTaskQueues.ContainsKey(WebApiConfig.AdslTaskQueues[item.Kr_TON.Value].previoustaskorderid.Value) && WebApiConfig.AdslTaskQueues[WebApiConfig.AdslTaskQueues[item.Kr_TON.Value].previoustaskorderid.Value].appointmentdate.HasValue) ? WebApiConfig.AdslTaskQueues[WebApiConfig.AdslTaskQueues[item.Kr_TON.Value].previoustaskorderid.Value].appointmentdate.Value : WebApiConfig.AdslTaskQueues[item.Kr_TON.Value].creationdate.Value;
+                    if (netf > day)
+                        ksuccess++;
+                }
+            }
+            return new List<SKRate>();
+        }
+
         // Başarı oranları ve sl süreleri raporu
         public static async Task<List<SKRate>> getRates(DateTimeRange request)
         { // istenilen ay içerisinde kurulum randevusuna düşen (kr netflow tarihi o ay olan) ve bunların başarılı gerçekleşen miktarları
@@ -1186,23 +1255,32 @@ namespace CRMWebApi.Controllers
                 { // 31, 33, 63, 64 taskidleri evrak alma gerektiren tasklar
                     var s_tq = WebApiConfig.AdslTaskQueues[t.s_ton];
                     return (r.Date >= lastDate || s_tq.creationdate <= r) && s_tq.appointmentdate != null && s_tq.appointmentdate.Value >= dtr.start && s_tq.appointmentdate.Value <= dtr.end && 
-                                (s_tq.taskid == 31 || s_tq.taskid == 63 || s_tq.taskid == 33 || s_tq.taskid == 64);
+                                (s_tq.taskid == 31 || s_tq.taskid == 63 || s_tq.taskid == 33 || s_tq.taskid == 64 || s_tq.taskid == 114 || s_tq.taskid == 122);
                 }).Select(k =>
                 {  // Satış taskı evrak alınması gereken task ise
                     var s_tq = WebApiConfig.AdslTaskQueues[k.s_ton];
-                    totalDoc++;
-                    if (s_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(s_tq.status.Value) && WebApiConfig.AdslStatus[s_tq.status.Value].statetype == 1)
+                    if (s_tq.taskid == 33 || s_tq.taskid == 64 || s_tq.taskid == 114)
+                        totalDoc++;
+                    HashSet<int> tt = new HashSet<int>();
+                    var subs = new Queue<int>();
+                    if (WebApiConfig.AdslSubTasks.TryGetValue(s_tq.taskorderno, out tt))
+                        foreach (var item in tt) subs.Enqueue(item);
+                    while (subs.Count > 0)
                     {
-                        var tq = WebApiConfig.AdslTaskQueues.Where(p => p.Value.attachedobjectid == s_tq.attachedobjectid && p.Value.deleted == false && (p.Value.taskid == 47 || p.Value.taskid == 90) && p.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(p.Value.status.Value) && WebApiConfig.AdslStatus[p.Value.status.Value].statetype == 1).Select(f => f.Value).FirstOrDefault();
-                        // Churn evrağı emtor sisteme yükleme ara taskı olumlu kapatılmış mı ?
-                        if (tq != null)
+                        var p = subs.Dequeue();
+                        if (WebApiConfig.AdslSubTasks.TryGetValue(p, out tt))
+                            foreach (var item in tt) subs.Enqueue(item);
+                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 47 && WebApiConfig.AdslTaskQueues[p].status.HasValue && WebApiConfig.AdslStatus.ContainsKey(WebApiConfig.AdslTaskQueues[p].status.Value) && WebApiConfig.AdslStatus[WebApiConfig.AdslTaskQueues[p].status.Value].statetype.Value == 1)
+                            totalDoc++;
+                        if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 90)
                         {
-                            completedDoc++;
-                            if (tq.taskid == 90)
+                            var tq = WebApiConfig.AdslTaskQueues[p];
+                            if (tq.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value < request.end.AddDays(7))
                             {
                                 saySL++;
                                 timeSL += (tq.consummationdate - s_tq.appointmentdate).Value.TotalHours;
                             }
+                            break;
                         }
                     }
                     return res;
