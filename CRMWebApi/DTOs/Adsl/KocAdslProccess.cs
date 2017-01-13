@@ -103,7 +103,7 @@ namespace CRMWebApi.DTOs.Adsl
                 Ktk_TON = null;
             }
             //SOL Kapama Taskı ise
-            else if (taskType == 5)
+            if (WebApiConfig.AdslTaskTypes[taskType].endsProccess)
             {
                 Last_Status = stataType;
                 Last_TON = tq.taskorderno;

@@ -342,20 +342,20 @@ namespace CRMWebApi
                                 else
                                 {
                                     AdslTaskQueues[t.taskorderno] = t;
-                                    if (t.previoustaskorderid == null)
-                                    {
-                                        /*Süreç Başlangıç Taskları*/
+                                    //if (t.previoustaskorderid == null)
+                                    //{
+                                    /*Süreç Başlangıç Taskları*/
                                     if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
-                                        {
-                                            AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                        }
-                                        if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
-                                    }
-                                    else
                                     {
-                                        AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                        if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
                                     }
+                                    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    //}
+                                    //else
+                                    //{
+                                    //    AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                    //    if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
+                                    //}
                                 }
                             }
                             var tttt = stw.Elapsed;
@@ -672,6 +672,7 @@ namespace CRMWebApi
                                 TaskTypeId = (int)sqlreader[0],
                                 TaskTypeName = (string)sqlreader[1],
                                 startsProccess = (bool)sqlreader[2],
+                                endsProccess = (bool)sqlreader[3],
                             });
                             AdslTaskTypes[t.TaskTypeId] = t;
                         }

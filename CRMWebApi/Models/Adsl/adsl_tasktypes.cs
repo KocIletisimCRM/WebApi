@@ -25,6 +25,7 @@ namespace CRMWebApi.Models.Adsl
         public int TaskTypeId { get; set; }
         public string TaskTypeName { get; set; }
         public bool startsProccess { get; set; }
+        public bool endsProccess { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_task> adsl_task { get; set; }

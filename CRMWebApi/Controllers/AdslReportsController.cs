@@ -80,45 +80,53 @@ namespace CRMWebApi.Controllers
             }).Select(r =>
              {
                  var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
-                 var k_tq = WebApiConfig.AdslTaskQueues[r.K_TON.Value];
-                 if (k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
+                 var k_tq = r.K_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.K_TON.Value] : null;
+                 if (k_tq != null && k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
                  { // satış taskı; satış ise ve satış yapan bayi kurulum yapmışsa bayinin sat-kur hakedişine 1 ekle
                      if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                      total[s_tq.attachedpersonelid.Value].sat_kur++;
                  }
-                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 9)
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 9 && k_tq != null)
                  { // satış taskı; CC Satışı ise bayinin kurulum hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].kur++;
                  }
-                 else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
+                 else if (k_tq != null && k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 1)
                  { // satış taskı; bayi satış taskı ise satış yapan bayinin satış, kurulum yapan bayinin kurulum hakedişine 1 ekle
                      if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                      total[s_tq.attachedpersonelid.Value].sat++;
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].kur++;
                  }
-                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 8)
+                 else if (k_tq != null && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 8)
                  { // satış taskı; cc teslimat ise bayinin teslimat hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].teslimat++;
                  }
-                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 6)
+                 else if (k_tq != null && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 6)
                  { // satış taskı; arıza ise bayinin arıza hakedişine 1 ekle
                      if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
                      total[k_tq.attachedpersonelid.Value].ariza++;
                  }
-                 else if (k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
+                 else if (k_tq != null && k_tq.attachedpersonelid.Value == s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
                  { // satış taskı; teslimat ise ve satış yapan bayi teslimat yapmışsa bayinin d-sat-tes hakedişine 1 ekle
                      if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                      total[s_tq.attachedpersonelid.Value].d_sat_tes++;
                  }
-                 else if (k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
+                 else if (((k_tq != null && k_tq.attachedpersonelid.Value != s_tq.attachedpersonelid.Value) || k_tq == null) && WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 12)
                  { // satış taskı; teslimat taskı ise satış yapan bayinin d-sat, kurulum yapan bayinin teslimat hakedişine 1 ekle
                      if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                      total[s_tq.attachedpersonelid.Value].d_sat++;
-                     if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
-                     total[k_tq.attachedpersonelid.Value].teslimat++;
+                     if (k_tq != null)
+                     {
+                         if (!total.ContainsKey(k_tq.attachedpersonelid.Value)) total[k_tq.attachedpersonelid.Value] = new SKPayment();
+                         total[k_tq.attachedpersonelid.Value].teslimat++;
+                     }
+                 }
+                 else if (WebApiConfig.AdslTasks[s_tq.taskid].tasktype == 14)
+                 { // satış taskı; Dsmart kontrol taskı ise satış yapan bayinin d-sat hakedişine 1 ekle
+                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
+                     total[s_tq.attachedpersonelid.Value].d_sat++;
                  }
                  return true;
              }).ToList();

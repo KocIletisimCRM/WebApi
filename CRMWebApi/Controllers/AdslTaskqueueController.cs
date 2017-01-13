@@ -713,7 +713,7 @@ namespace CRMWebApi.Controllers
                                         else if (turAtama != null)
                                             personel_id = turAtama.appointedpersonel;
                                     }
-                                    db.taskqueue.Add(new adsl_taskqueue
+                                     var ntq = new adsl_taskqueue
                                     {
                                         attachedpersonelid = personel_id,
                                         appointmentdate = null,
@@ -726,7 +726,15 @@ namespace CRMWebApi.Controllers
                                         previoustaskorderid = tq.taskorderno,
                                         updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
                                         relatedtaskorderid = saletask //tq.relatedtaskorderid
-                                    });
+                                    };
+                                    db.taskqueue.Add(ntq);
+                                    // Dsmart satışlarında bayiye hakediş yansıtılması için açılan task işleminde task başlangıç task rolü üstlenecek ve satışı yapana atanacak (Hüseyin koz) 12.01.17
+                                    if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTasks[item].tasktype == 14)
+                                    {
+                                        db.SaveChanges();
+                                        ntq.attachedpersonelid = WebApiConfig.AdslTaskQueues.ContainsKey(saletask) ? WebApiConfig.AdslTaskQueues[saletask].attachedpersonelid : null;
+                                        ntq.relatedtaskorderid = ntq.taskorderno;
+                                    }
                                 }
                             }
                         }
