@@ -345,10 +345,10 @@ namespace CRMWebApi
                                     //if (t.previoustaskorderid == null)
                                     //{
                                     /*Süreç Başlangıç Taskları*/
-                                    if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
-                                    {
-                                        AdslProccesses[t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
-                                    }
+                                    //if (AdslTaskTypes[AdslTasks[t.taskid].tasktype].startsProccess)
+                                    //{
+                                    AdslProccesses[t.relatedtaskorderid ?? t.taskorderno] = new DTOs.Adsl.KocAdslProccess();
+                                    //}
                                     if (!proccessIds.Contains(t.relatedtaskorderid ?? t.taskorderno)) proccessIds.Add(t.relatedtaskorderid ?? t.taskorderno);
                                     //}
                                     //else
@@ -840,7 +840,7 @@ namespace CRMWebApi
         public static SemaphoreSlim cLockObject = new SemaphoreSlim(1);
         public static string JoinHakedis = null;
 
-        public static async Task loadCariGelirGiderTurleri ()
+        public static async Task loadCariGelirGiderTurleri()
         {
             using (var db = new Models.Cari.KOCCariEntities())
             {
@@ -881,7 +881,7 @@ namespace CRMWebApi
                 JoinHakedis += ")";
             }
         }
-        public static async Task loadCariHareketler ()
+        public static async Task loadCariHareketler()
         {
             using (var db = new Models.Cari.KOCCariEntities())
             {
@@ -1026,7 +1026,7 @@ namespace CRMWebApi
                     tran.Rollback();
                 }
         }
-        private static void saveTaskqueue (Models.Adsl.adsl_taskqueue tq)
+        private static void saveTaskqueue(Models.Adsl.adsl_taskqueue tq)
         { // task kapatmak için kullanılacak
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             using (var tran = db.Database.BeginTransaction())
@@ -1107,7 +1107,7 @@ namespace CRMWebApi
                     tran.Rollback();
                 }
         }
-        private static void insertOnlyTaskqueue (Models.Adsl.adsl_taskqueue request)
+        private static void insertOnlyTaskqueue(Models.Adsl.adsl_taskqueue request)
         {
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
@@ -1130,9 +1130,9 @@ namespace CRMWebApi
                 db.SaveChanges();
                 WebApiConfig.updateAdslData();
             }
-        } 
+        }
 
-        private static void customerInfo (Models.Adsl.customer cust, GetWorkflowDetailByUserResponse data, int taskid, int salespersonel)
+        private static void customerInfo(Models.Adsl.customer cust, GetWorkflowDetailByUserResponse data, int taskid, int salespersonel)
         {  // yeni task oluşturmak için gerekli bilgileri oluştur... (newCheckin -> yeni müşteri mi yoksa sadece yeni task oluşturma işlemi mi ? false : sadece gelen müşteriye task oluştur)
             using (var db = new Models.Adsl.KOCSAMADLSEntities())
             {
@@ -1206,7 +1206,7 @@ namespace CRMWebApi
                 if (obj.ilKimlikNo == null || ils.FirstOrDefault(r => r == obj.ilKimlikNo.Value) != null)
                     insertTaskqueue(obj);
             }
-        } 
+        }
         //NetFlow Tracker
         static Timer nfT = new Timer(async o =>
         {
@@ -1263,7 +1263,7 @@ namespace CRMWebApi
                                         }
                                         break;
                                     }
-                                    if (t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (/*t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
@@ -1326,7 +1326,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    if (t.Value.taskid != 114 && t.Value.taskid != 33 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (/*t.Value.taskid != 114 && t.Value.taskid != 33 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1381,7 +1381,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    if (t.Value.taskid != 114 && t.Value.taskid != 64 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (/*t.Value.taskid != 114 && t.Value.taskid != 64 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1429,7 +1429,7 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     var id = t.Value.relatedtaskorderid ?? t.Key;
-                                    if (t.Value.taskid != 88 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (/*t.Value.taskid != 88 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1623,13 +1623,14 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Adsl.StockMovementBackSeri>("StockMovementBackSeriReports");
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             builder.EntitySet<DTOs.Adsl.EvrakBasari>("OnlyDocSuccesReports");
+            builder.EntitySet<DTOs.Adsl.stocksayim>("StockSayim");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",
                 model: builder.GetEdmModel()
             );
             TeknarProxyService.Start();
-            await Task.WhenAll((new Task[] { updateCariData() ,loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/})).ConfigureAwait(false);
+            await Task.WhenAll((new Task[] { updateCariData(), loadAdslPaymentSystemTypes(), loadAdslPaymentSystem(), loadAdslIls(), loadAdslObjectTypes(), loadAdslTaskTypes(), loadAdslIlces(), updateAdslData()/*, updateFiberData()*/})).ConfigureAwait(false);
         }
     }
 }

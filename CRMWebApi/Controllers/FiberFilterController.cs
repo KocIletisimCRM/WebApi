@@ -127,7 +127,6 @@ namespace CRMWebApi.Controllers
                                   , "application/json");
             }
         }
-         
 
         /// <summary> 
         /// Web Uygulamasındaki Müşteri durumu filtresi bileşeninin verilerini çekmek için kullanılır. <c>getCustomerStatus</c> 
