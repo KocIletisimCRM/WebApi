@@ -1263,7 +1263,7 @@ namespace CRMWebApi
                                         }
                                         break;
                                     }
-                                    if (/*t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (t.Value.taskid != 56 && t.Value.taskid != 57 && t.Value.taskid != 32 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         if (AdslTaskQueues.ContainsKey(AdslProccesses[id].Last_TON) && (AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 34 || AdslTaskQueues[AdslProccesses[id].Last_TON].taskid == 36))
@@ -1326,7 +1326,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    if (/*t.Value.taskid != 114 && t.Value.taskid != 33 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (t.Value.taskid != 114 && t.Value.taskid != 33 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1381,7 +1381,7 @@ namespace CRMWebApi
                                         break;
                                     }
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
-                                    if (/*t.Value.taskid != 114 && t.Value.taskid != 64 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (t.Value.taskid != 114 && t.Value.taskid != 64 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;
@@ -1429,7 +1429,7 @@ namespace CRMWebApi
                                 foreach (var t in tasks)
                                 {
                                     var id = t.Value.relatedtaskorderid ?? t.Key;
-                                    if (/*t.Value.taskid != 88 && */AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
+                                    if (t.Value.taskid != 88 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
                                         isSaved = true;
                                         break;

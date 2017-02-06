@@ -9,11 +9,15 @@ namespace CRMWebApi.DTOs.Adsl
     public class stocksayim
     {
         [Key]
-        public int movementid { get; set; }
-        public int id { get; set; }
+        public string gsm { get; set; }
         public string ad { get; set; }
-        public string seri { get; set; }
-        public string tur { get; set; }
-        public string stock { get; set; }
+        public string soyad { get; set; }
+        public string tckimlik { get; set; }
+        public string telefon { get; set; }
+        public string adres { get; set; }
+        public string il { get; set; }
+        public string ilce { get; set; }
+        public string mahalle { get; set; }
+
     }
 }
