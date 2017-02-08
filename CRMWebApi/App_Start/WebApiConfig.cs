@@ -1610,6 +1610,7 @@ namespace CRMWebApi
             ODataModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<DTOs.Adsl.SKReport>("SKReports");
             builder.EntitySet<DTOs.Adsl.SKReport>("CagriSKReports");
+            builder.EntitySet<DTOs.Adsl.SKReport>("AgentSKReports");
             builder.EntitySet<DTOs.Adsl.SLBayiReport>("SLBayiReports");
             builder.EntitySet<DTOs.Adsl.SLKocReport>("SLKocReports");
             builder.EntitySet<DTOs.Adsl.SKPaymentReport>("SKPaymentReports");

@@ -199,6 +199,7 @@
     <Compile Include="Controllers\FiberSiteBlockController.cs" />
     <Compile Include="Controllers\CustomerTransferController.cs" />
     <Compile Include="Controllers\MailBasvuruController.cs" />
+    <Compile Include="Controllers\OData\AgentSKReportsController.cs" />
     <Compile Include="Controllers\OData\CariHareketReportsController.cs" />
     <Compile Include="Controllers\OData\InfoBayiReportsController.cs" />
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />

@@ -672,6 +672,201 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
+        // SKR Bimser vb. bayiler için (07.02.2017) Hüseyin KOZ
+        public static async Task<List<SKReport>> getAgentBayiSKReport(DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+            return WebApiConfig.AdslProccesses.Values.Where(r =>
+            {
+                var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
+                var s_per = WebApiConfig.AdslPersonels.ContainsKey(3602) ? WebApiConfig.AdslPersonels[3602] : null;
+                var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
+                return s_per != null && (s_per.roles & (int)KOCUserTypes.AgentStuff) == (int)KOCUserTypes.AgentStuff && s_tq.attachedpersonelid == s_per.personelid && (ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end);
+            }).Select(r =>
+            {
+                var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                var kr_tq = (r.Kr_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.Kr_TON.Value] : null;
+                var k_tq = (r.K_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.K_TON.Value] : null;
+                var ktk_tq = (r.Ktk_TON.HasValue) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                var lasttq = WebApiConfig.AdslTaskQueues[r.Last_TON];
+                var res = new SKReport();
+                //Satış kurulum view sonucuna göre class tanımı yap ve o class türünde bir nesne oluşturup döndür...
+                if (s_tq.attachedobjectid != null && WebApiConfig.AdslCustomers.ContainsKey(s_tq.attachedobjectid.Value))
+                {
+                    var customerInfo = WebApiConfig.AdslCustomers[s_tq.attachedobjectid.Value];
+                    res.custid = customerInfo.customerid;
+                    res.custname = customerInfo.customername;
+                    res.custphone = customerInfo.phone;
+                    res.customeradres = customerInfo.description;
+                    if (customerInfo.ilKimlikNo != null && WebApiConfig.AdslIls.ContainsKey(customerInfo.ilKimlikNo.Value))
+                        res.il = WebApiConfig.AdslIls[customerInfo.ilKimlikNo.Value].ad;
+                    if (customerInfo.ilceKimlikNo != null && WebApiConfig.AdslIlces.ContainsKey(customerInfo.ilceKimlikNo.Value))
+                        res.ilce = WebApiConfig.AdslIlces[customerInfo.ilceKimlikNo.Value].ad;
+                    res.gsm = customerInfo.gsm;
+                    res.superonlinecustno = customerInfo.superonlineCustNo;
+                }
+                if (s_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(s_tq.attachedpersonelid.Value))
+                {
+                    var sPersonelInfo = WebApiConfig.AdslPersonels[s_tq.attachedpersonelid.Value];
+                    res.s_perid = sPersonelInfo.personelid;
+                    res.s_pername = sPersonelInfo.personelname;
+                    if (sPersonelInfo.relatedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(sPersonelInfo.relatedpersonelid.Value))
+                        res.s_perky = WebApiConfig.AdslPersonels[sPersonelInfo.relatedpersonelid.Value].personelname;
+                }
+                res.s_ton = s_tq.taskorderno;
+                if (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid))
+                    res.s_tqname = WebApiConfig.AdslTasks[s_tq.taskid].taskname;
+                res.campaign = WebApiConfig.AdslCustomerProducts.ContainsKey(r.S_TON) ? WebApiConfig.AdslCampaigns.ContainsKey((int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid) ?
+                        WebApiConfig.AdslCampaigns[(int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid].name : null : null; // campaign ve customerproduct dictionary olması gerek
+                res.kaynak = s_tq.fault;
+                res.s_desc = s_tq.description;
+                res.s_createyear = s_tq.creationdate.Value.Year;
+                res.s_createmonth = s_tq.creationdate.Value.Month;
+                res.s_createday = s_tq.creationdate.Value.Day;
+                if (s_tq.appointmentdate != null)
+                {
+                    res.s_netflowyear = s_tq.appointmentdate.Value.Year;
+                    res.s_netflowmonth = s_tq.appointmentdate.Value.Month;
+                    res.s_netflowday = s_tq.appointmentdate.Value.Day;
+                }
+                if (s_tq.consummationdate != null)
+                {
+                    res.s_consummationdate = s_tq.consummationdate.Value;
+                    res.s_consummationdateyear = s_tq.consummationdate.Value.Year;
+                    res.s_consummationdatemonth = s_tq.consummationdate.Value.Month;
+                    res.s_consummationdateday = s_tq.consummationdate.Value.Day;
+                }
+                if (s_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(s_tq.status.Value))
+                {
+                    var statu = WebApiConfig.AdslStatus[s_tq.status.Value];
+                    res.s_tqstate = statu.taskstate;
+                    res.s_tqstatetype = StateTypeText[statu.statetype.Value];
+                }
+                else
+                    res.s_tqstatetype = "Bekleyen";
+                if (kr_tq != null)
+                {
+                    res.kr_ton = kr_tq.taskorderno;
+                    res.kr_creationdateyear = kr_tq.creationdate.Value.Year;
+                    res.kr_creationdatemonth = kr_tq.creationdate.Value.Month;
+                    res.kr_creationdateday = kr_tq.creationdate.Value.Day;
+                    if (WebApiConfig.AdslTasks.ContainsKey(kr_tq.taskid))
+                        res.kr_tqname = WebApiConfig.AdslTasks[kr_tq.taskid].taskname;
+                    if (kr_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(kr_tq.attachedpersonelid.Value))
+                    {
+                        var krPersonelInfo = WebApiConfig.AdslPersonels[kr_tq.attachedpersonelid.Value];
+                        res.kr_perid = krPersonelInfo.personelid;
+                        res.kr_pername = krPersonelInfo.personelname;
+                        //res.kr_perky = null;
+                    }
+                    var kr_previous = kr_tq.previoustaskorderid != null ? (WebApiConfig.AdslTaskQueues.ContainsKey(kr_tq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[kr_tq.previoustaskorderid.Value] : null) : null;
+                    if (kr_previous != null && kr_previous.appointmentdate != null)
+                    {
+                        res.kr_netflowdateyear = kr_previous.appointmentdate.Value.Year;
+                        res.kr_netflowdatemonth = kr_previous.appointmentdate.Value.Month;
+                        res.kr_netflowdateday = kr_previous.appointmentdate.Value.Day;
+                    }
+                    if (kr_tq.consummationdate != null)
+                    {
+                        res.kr_consummationdate = kr_tq.consummationdate;
+                        res.kr_consummationdateyear = kr_tq.consummationdate.Value.Year;
+                        res.kr_consummationdatemonth = kr_tq.consummationdate.Value.Month;
+                        res.kr_consummationdateday = kr_tq.consummationdate.Value.Day;
+                    }
+                    if (kr_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(kr_tq.status.Value))
+                    {
+                        var statu = WebApiConfig.AdslStatus[kr_tq.status.Value];
+                        res.kr_tqstate = statu.taskstate;
+                        res.kr_tqstatetype = StateTypeText[statu.statetype.Value];
+                    }
+                    else
+                        res.kr_tqstatetype = "Bekleyen";
+                    res.kr_desc = kr_tq.description;
+                }
+                if (k_tq != null)
+                {
+                    res.k_ton = k_tq.taskorderno;
+                    if (WebApiConfig.AdslTasks.ContainsKey(k_tq.taskid))
+                        res.k_tqname = WebApiConfig.AdslTasks[k_tq.taskid].taskname;
+                    if (k_tq.consummationdate != null)
+                    {
+                        res.k_consummationdate = k_tq.consummationdate;
+                        res.k_consummationdateyear = k_tq.consummationdate.Value.Year;
+                        res.k_consummationdatemonth = k_tq.consummationdate.Value.Month;
+                        res.k_consummationdateday = k_tq.consummationdate.Value.Day;
+                    }
+                    if (k_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(k_tq.attachedpersonelid.Value))
+                    {
+                        var kPersonelInfo = WebApiConfig.AdslPersonels[k_tq.attachedpersonelid.Value];
+                        res.k_perid = kPersonelInfo.personelid;
+                        res.k_pername = kPersonelInfo.personelname;
+                        //res.k_perky = null;
+                    }
+                    if (k_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(k_tq.status.Value))
+                    {
+                        var statu = WebApiConfig.AdslStatus[k_tq.status.Value];
+                        res.k_tqstate = statu.taskstate;
+                        res.k_tqstatetype = StateTypeText[statu.statetype.Value];
+                    }
+                    else
+                        res.k_tqstatetype = "Bekleyen";
+                    res.k_desc = k_tq.description;
+                }
+                if (ktk_tq != null)
+                {
+                    res.ktk_ton = ktk_tq.taskorderno;
+                    if (WebApiConfig.AdslTasks.ContainsKey(ktk_tq.taskid))
+                        res.ktk_tqname = WebApiConfig.AdslTasks[ktk_tq.taskid].taskname;
+                    if (ktk_tq.attachedpersonelid != null && WebApiConfig.AdslPersonels.ContainsKey(ktk_tq.attachedpersonelid.Value))
+                    {
+                        var ktkPersonelInfo = WebApiConfig.AdslPersonels[ktk_tq.attachedpersonelid.Value];
+                        res.ktk_perid = ktkPersonelInfo.personelid;
+                        res.ktk_pername = ktkPersonelInfo.personelname;
+                    }
+                    if (ktk_tq.consummationdate != null)
+                    {
+                        res.ktk_consummationdate = ktk_tq.consummationdate;
+                        res.ktk_consummationdateyear = ktk_tq.consummationdate.Value.Year;
+                        res.ktk_consummationdatemonth = ktk_tq.consummationdate.Value.Month;
+                        res.ktk_consummationdateday = ktk_tq.consummationdate.Value.Day;
+                    }
+                    if (ktk_tq.status != null && WebApiConfig.AdslStatus.ContainsKey(ktk_tq.status.Value))
+                    {
+                        var statu = WebApiConfig.AdslStatus[ktk_tq.status.Value];
+                        res.ktk_tqstate = statu.taskstate;
+                        res.ktk_tqstatetype = StateTypeText[statu.statetype.Value];
+                    }
+                    else
+                        res.ktk_tqstatetype = "Bekleyen";
+                    res.ktk_desc = ktk_tq.description;
+                }
+                if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
+                {
+                    var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
+                    res.lastTaskStatus = StateTypeText[statu.statetype.Value];
+                    res.lastTaskStatusName = statu.taskstate;
+                }
+                else
+                    res.lastTaskStatus = "Bekleyen";
+                var lastTask = WebApiConfig.AdslTasks[lasttq.taskid];
+                res.lastTaskTypeName = WebApiConfig.AdslTaskTypes[lastTask.tasktype].TaskTypeName;
+                res.lastTaskName = lastTask.taskname;
+                res.lastTaskDescription = lasttq.description;
+                res.lasttaskcreationdateyear = lasttq.creationdate.Value.Year;
+                res.lasttaskcreationdatemonth = lasttq.creationdate.Value.Month;
+                res.lasttaskcreationdateday = lasttq.creationdate.Value.Day;
+                if (lasttq.consummationdate != null)
+                {
+                    res.lasttaskconsummationdateyear = lasttq.consummationdate.Value.Year;
+                    res.lasttaskconsummationdatemonth = lasttq.consummationdate.Value.Month;
+                    res.lasttaskconsummationdateday = lasttq.consummationdate.Value.Day;
+                }
+                return res;
+            }).ToList();
+        }
+
         // Çağrı Satış kurulum raporu
         public static async Task<List<SKReport>> getCagriSKReport(DateTimeRange request)
         {
