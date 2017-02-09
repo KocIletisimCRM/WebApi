@@ -1226,6 +1226,7 @@ namespace CRMWebApi
                 request.SearchStartDate = DateTime.Now.AddHours(-3);
                 //request.SearchStartDate = DateTime.Now.AddDays(-1);
                 request.SearchEndDate = DateTime.Now;
+ 
                 #region Kurulum ve Cihaz Gönderim Taskları
                 using (var wsc = new NetflowTellcomWSSoapClient())
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
@@ -1260,6 +1261,10 @@ namespace CRMWebApi
                                             string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
                                             tq.appointmentdate = Convert.ToDateTime(appointment);
                                             saveTaskqueue(tq);
+                                            Models.Adsl.adsl_taskqueue rt = AdslTaskQueues[id];
+                                            rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
+                                            var ko = db.Entry(rt);
+                                            ko.State = System.Data.Entity.EntityState.Modified;
                                         }
                                         break;
                                     }
@@ -1273,6 +1278,10 @@ namespace CRMWebApi
                                             string appointment = data.WorkflowStartTime.ToString("yyyy-MM-dd HH':'mm':'ss");
                                             tq.appointmentdate = Convert.ToDateTime(appointment);
                                             saveTaskqueue(tq);
+                                            Models.Adsl.adsl_taskqueue rt = AdslTaskQueues[id];
+                                            rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
+                                            var ko = db.Entry(rt);
+                                            ko.State = System.Data.Entity.EntityState.Modified;
                                         }
                                         break;
                                     }
