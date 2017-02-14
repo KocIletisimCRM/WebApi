@@ -191,7 +191,7 @@ namespace CRMWebApi.Controllers
             ).ToList();
             return Math.Round(sayCust == 0 ? 0 : timeOrt / sayCust, 2);
         }
-        
+
         // Koç sl total
         private static double getKocSLOrt(DateTimeRange request)
         {
@@ -301,46 +301,46 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKStandbyTaskReport>> getSKStandbyTaskReport()
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslTaskQueues.Where(r=> (r.Value.status == null || r.Value.status.Value == 9159 || r.Value.status.Value == 9165) && r.Value.deleted == false).Select(r =>
-            {
-                var res = new SKStandbyTaskReport();
-                res.taskorderno = r.Value.taskorderno;
-                res.taskid = r.Value.taskid;
-                res.taskname = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
-                res.creationdateyear = r.Value.creationdate.Value.Year;
-                res.creationdatemonth = r.Value.creationdate.Value.Month;
-                res.creationdateday = r.Value.creationdate.Value.Day;
-                res.customerid = r.Value.attachedobjectid.Value;
-                if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
-                {
-                    var cstmr = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
-                    res.customername = cstmr.customername;
-                    res.customeradres = cstmr.description;
-                    if (cstmr.ilKimlikNo.HasValue && WebApiConfig.AdslIls.ContainsKey(cstmr.ilKimlikNo.Value))
-                        res.il = WebApiConfig.AdslIls[cstmr.ilKimlikNo.Value].ad;
-                    if (cstmr.ilceKimlikNo.HasValue && WebApiConfig.AdslIlces.ContainsKey(cstmr.ilceKimlikNo.Value))
-                        res.ilce = WebApiConfig.AdslIlces[cstmr.ilceKimlikNo.Value].ad;
-                }
-                else
-                    res.customername = "İsimsiz Müşteri";
-                if (r.Value.attachedpersonelid != null)
-                {
-                    var personel = (int?)r.Value.attachedpersonelid.Value;
-                    res.personelid = personel;
-                    res.personelname = WebApiConfig.AdslPersonels.ContainsKey(personel.Value) ? WebApiConfig.AdslPersonels[personel.Value].personelname : "İsimsiz Personel";
-                }
-                if (r.Value.attachmentdate != null)
-                {
-                    var adate = r.Value.attachmentdate.Value;
-                    res.attachmentdateyear = adate.Year;
-                    res.attachmentdatemonth = adate.Month;
-                    res.attachmentdateday = adate.Day;
-                }
-                res.status = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? WebApiConfig.AdslStatus[r.Value.status.Value].taskstate : null : null;
-                res.description = r.Value.description;
-                res.fault = r.Value.fault;
-                return res;
-            }).ToList();
+            return WebApiConfig.AdslTaskQueues.Where(r => (r.Value.status == null || r.Value.status.Value == 9159 || r.Value.status.Value == 9165) && r.Value.deleted == false).Select(r =>
+             {
+                 var res = new SKStandbyTaskReport();
+                 res.taskorderno = r.Value.taskorderno;
+                 res.taskid = r.Value.taskid;
+                 res.taskname = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
+                 res.creationdateyear = r.Value.creationdate.Value.Year;
+                 res.creationdatemonth = r.Value.creationdate.Value.Month;
+                 res.creationdateday = r.Value.creationdate.Value.Day;
+                 res.customerid = r.Value.attachedobjectid.Value;
+                 if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
+                 {
+                     var cstmr = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
+                     res.customername = cstmr.customername;
+                     res.customeradres = cstmr.description;
+                     if (cstmr.ilKimlikNo.HasValue && WebApiConfig.AdslIls.ContainsKey(cstmr.ilKimlikNo.Value))
+                         res.il = WebApiConfig.AdslIls[cstmr.ilKimlikNo.Value].ad;
+                     if (cstmr.ilceKimlikNo.HasValue && WebApiConfig.AdslIlces.ContainsKey(cstmr.ilceKimlikNo.Value))
+                         res.ilce = WebApiConfig.AdslIlces[cstmr.ilceKimlikNo.Value].ad;
+                 }
+                 else
+                     res.customername = "İsimsiz Müşteri";
+                 if (r.Value.attachedpersonelid != null)
+                 {
+                     var personel = (int?)r.Value.attachedpersonelid.Value;
+                     res.personelid = personel;
+                     res.personelname = WebApiConfig.AdslPersonels.ContainsKey(personel.Value) ? WebApiConfig.AdslPersonels[personel.Value].personelname : "İsimsiz Personel";
+                 }
+                 if (r.Value.attachmentdate != null)
+                 {
+                     var adate = r.Value.attachmentdate.Value;
+                     res.attachmentdateyear = adate.Year;
+                     res.attachmentdatemonth = adate.Month;
+                     res.attachmentdateday = adate.Day;
+                 }
+                 res.status = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? WebApiConfig.AdslStatus[r.Value.status.Value].taskstate : null : null;
+                 res.description = r.Value.description;
+                 res.fault = r.Value.fault;
+                 return res;
+             }).ToList();
         }
 
         // Bütün kapatılan tasklar 13.10.2016 Hüseyin KOZ
@@ -391,7 +391,8 @@ namespace CRMWebApi.Controllers
                     res.consummationdatemonth = adate.Month;
                     res.consummationdateday = adate.Day;
                 }
-                if (WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value)) {
+                if (WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value))
+                {
                     var status = WebApiConfig.AdslStatus[r.Value.status.Value];
                     res.status = status.taskstate;
                     res.taskstatus = lastStateType[status.statetype.Value];
@@ -414,7 +415,7 @@ namespace CRMWebApi.Controllers
         }
 
         // bekleyen tasklar kurulum ve ktk kapanma tarihleri ile birlikte
-        public static async Task<List<SKStandbyTasksHours>> getSKStandbyTasksHours ()
+        public static async Task<List<SKStandbyTasksHours>> getSKStandbyTasksHours()
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslTaskQueues.Where(r => (r.Value.status == null || r.Value.status.Value == 9159 || r.Value.status.Value == 9165) && r.Value.deleted == false).Select(r =>
@@ -522,7 +523,7 @@ namespace CRMWebApi.Controllers
                 res.s_ton = s_tq.taskorderno;
                 if (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid))
                     res.s_tqname = WebApiConfig.AdslTasks[s_tq.taskid].taskname;
-                res.campaign = WebApiConfig.AdslCustomerProducts.ContainsKey(r.S_TON) ? WebApiConfig.AdslCampaigns.ContainsKey((int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid) ? 
+                res.campaign = WebApiConfig.AdslCustomerProducts.ContainsKey(r.S_TON) ? WebApiConfig.AdslCampaigns.ContainsKey((int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid) ?
                         WebApiConfig.AdslCampaigns[(int)WebApiConfig.AdslCustomerProducts[r.S_TON].campaignid].name : null : null;
                 res.kaynak = s_tq.fault;
                 res.s_desc = s_tq.description;
@@ -1101,11 +1102,11 @@ namespace CRMWebApi.Controllers
                         var bayiSl = WebApiConfig.AdslSl[bsl.Key];
                         r.SLName = bayiSl.SLName;
                         r.BayiSLMaxTime = bayiSl.BayiMaxTime != null ? bayiSl.BayiMaxTime.Value : 0;
-                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours)*(bayiSl.BayiMaxTime != null ? (maxSL / bayiSl.BayiMaxTime.Value) : 1)),2);
+                        r.BayiSLEtkisi = r.BayiSLStart == null ? null : (double?)Math.Round((((r.BayiSLEnd - r.BayiSLStart).Value.TotalHours) * (bayiSl.BayiMaxTime != null ? (maxSL / bayiSl.BayiMaxTime.Value) : 1)), 2);
                     }
                     else
                         r.SLName = "Tanımlanmamış SL";
-                    if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value)) 
+                    if (bsl.Value.BayiID.HasValue && WebApiConfig.AdslPersonels.ContainsKey(bsl.Value.BayiID.Value))
                     { // Bayi bilgileri yazılmıyordu boş geliyordu o yüzden ekledim gerek yoksa bilgiler slkocreport classına alınabilir ?
                         var Bayi = WebApiConfig.AdslPersonels[bsl.Value.BayiID.Value];
                         r.BayiId = Bayi.personelid;
@@ -1134,7 +1135,8 @@ namespace CRMWebApi.Controllers
             var maxSL = 24.0; // (çarpan için)
             var maxKSL = 48.0; // (çarpan için)
             return WebApiConfig.AdslProccesses.Values.SelectMany(
-                p => p.SLs.Where(sl => {
+                p => p.SLs.Where(sl =>
+                {
                     var lasttq = WebApiConfig.AdslTaskQueues[p.Last_TON];
                     var date = DateTime.Now; // geçmiş aylarda bekleyen işlem gözükmemesi için oluşturuldu
                     return (!sl.Value.KEnd.HasValue && ((lasttq.consummationdate == null && request.start <= date && request.end >= date) || (lasttq.consummationdate != null && lasttq.consummationdate >= request.start && lasttq.consummationdate <= request.end))) || (sl.Value.KEnd.HasValue && sl.Value.KEnd.Value >= request.start && sl.Value.KEnd.Value <= request.end) || (sl.Value.BEnd.HasValue && sl.Value.BEnd.Value >= request.start && sl.Value.BEnd.Value <= request.end);
@@ -1258,7 +1260,7 @@ namespace CRMWebApi.Controllers
                     int taskid = r.Value.taskid;
                     var previous = (r.Value.previoustaskorderid != null && WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value)) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null;
                     int? statetype = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? (int?)WebApiConfig.AdslStatus[r.Value.status.Value].statetype.Value : null : null;
-                    return r.Value.deleted == false && ((taskid == 47 && previous != null && previous.taskid != 113) || 
+                    return r.Value.deleted == false && ((taskid == 47 && previous != null && previous.taskid != 113) ||
                                    (taskid == 90 && previous != null && previous.taskid != 114) ||
                                     ((taskid == 31 || taskid == 63 || taskid == 33 || taskid == 64) && (statetype == null || statetype.Value != 1)));
                 }).Select(r =>
@@ -1352,7 +1354,8 @@ namespace CRMWebApi.Controllers
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             WebApiConfig.AdslProccesses.Values.Select(r =>
             {
-                if (r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) && (WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 38 || WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 60)) {
+                if (r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) && (WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 38 || WebApiConfig.AdslTaskQueues[r.Kr_TON.Value].taskid == 60))
+                {
                     var krtq = WebApiConfig.AdslTaskQueues[r.Kr_TON.Value];
                     var ktk = (r.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Ktk_TON.Value)) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
                     var aptq = (krtq != null && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value)) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
@@ -1425,7 +1428,7 @@ namespace CRMWebApi.Controllers
                 var dtr = new DateTimeRange { start = (r - r.TimeOfDay).AddDays(1 - r.Day), end = (r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1)).Date.AddDays(1).AddMinutes(-1) };
                 var lastDate = r.AddDays(1 - r.Day).AddMonths(1).AddDays(-1).Date;
 
-                res.k_SLOrt = getKocKurulumSLOrt(new DateTimeRange { start = dtr.start, end = r});
+                res.k_SLOrt = getKocKurulumSLOrt(new DateTimeRange { start = dtr.start, end = r });
                 res.date = r;
                 res.year = r.Year;
                 res.month = r.Month;
@@ -1454,10 +1457,10 @@ namespace CRMWebApi.Controllers
                 }).ToList();
 
                 // Churn evrak alma miktarları ve Evrak alma sl
-                SKReport.Where(t => 
+                SKReport.Where(t =>
                 { // 31, 33, 63, 64 taskidleri evrak alma gerektiren tasklar
                     var s_tq = WebApiConfig.AdslTaskQueues[t.s_ton];
-                    return (r.Date >= lastDate || s_tq.creationdate <= r) && s_tq.appointmentdate != null && s_tq.appointmentdate.Value >= dtr.start && s_tq.appointmentdate.Value <= dtr.end && 
+                    return (r.Date >= lastDate || s_tq.creationdate <= r) && s_tq.appointmentdate != null && s_tq.appointmentdate.Value >= dtr.start && s_tq.appointmentdate.Value <= dtr.end &&
                                 (s_tq.taskid == 31 || s_tq.taskid == 63 || s_tq.taskid == 33 || s_tq.taskid == 64 || s_tq.taskid == 114 || s_tq.taskid == 122);
                 }).Select(k =>
                 {  // Satış taskı evrak alınması gereken task ise
@@ -1503,10 +1506,12 @@ namespace CRMWebApi.Controllers
         public static async Task<List<InfoBayiReport>> getInfoBayi()
         {
             var bekleyenTaskq = await getSKStandbyTaskReport();
-            return WebApiConfig.AdslPersonels.Where(r => {
+            return WebApiConfig.AdslPersonels.Where(r =>
+            {
                 var mail = r.Value.email != null ? r.Value.email.Contains("@") ? r.Value.email.Split('@')[1] : null : null;
                 return mail != "kociletisim.com.tr" && r.Value.deleted == false;
-            }).Select(r => {
+            }).Select(r =>
+            {
                 InfoBayiReport res = new InfoBayiReport();
                 res.personelid = r.Value.personelid;
                 res.personelname = r.Value.personelname;
@@ -1520,36 +1525,37 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        public static async Task<List<StockMovementBackSeri>> getSMBS ()
+        public static async Task<List<StockMovementBackSeri>> getSMBS()
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             using (var db = new KOCSAMADLSEntities())
-            return WebApiConfig.AdslTaskQueues.Where(r => r.Value.status.HasValue && r.Value.deleted == false && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) && WebApiConfig.AdslStatus[r.Value.status.Value].statetype == 2 /*İptal Durumu*/ && (r.Value.taskid == 42 || r.Value.taskid == 97 || r.Value.taskid == 49) && db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault() != null).Select(r =>
-            {
-                var res = new StockMovementBackSeri();
-                res.customerid = r.Value.attachedobjectid.Value;
-                if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
+                return WebApiConfig.AdslTaskQueues.Where(r => r.Value.status.HasValue && r.Value.deleted == false && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) && WebApiConfig.AdslStatus[r.Value.status.Value].statetype == 2 /*İptal Durumu*/ && (r.Value.taskid == 42 || r.Value.taskid == 97 || r.Value.taskid == 49) && db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault() != null).Select(r =>
                 {
-                    var cust = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
-                    res.customername = cust.customername;
-                    res.superonlineno = cust.superonlineCustNo;
-                }
-                res.taskNo = r.Value.taskorderno;
-                res.task = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
-                res.seri = db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault();
-                var person = db.stockmovement.Where(per => per.serialno == res.seri && per.toobject == res.customerid && per.deleted == false).OrderByDescending(ss => ss.movementid).FirstOrDefault();
-                res.personelid = person.fromobject.Value;
-                res.personelname = WebApiConfig.AdslPersonels.ContainsKey(res.personelid) ? WebApiConfig.AdslPersonels[res.personelid].personelname : "İsimsiz Personel";
-                return res;
-            }).ToList();
+                    var res = new StockMovementBackSeri();
+                    res.customerid = r.Value.attachedobjectid.Value;
+                    if (WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value))
+                    {
+                        var cust = WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value];
+                        res.customername = cust.customername;
+                        res.superonlineno = cust.superonlineCustNo;
+                    }
+                    res.taskNo = r.Value.taskorderno;
+                    res.task = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "İsimsiz Task";
+                    res.seri = db.getSerialsOnCustomerAdsl(r.Value.attachedobjectid, 1117/*Modem*/).FirstOrDefault();
+                    var person = db.stockmovement.Where(per => per.serialno == res.seri && per.toobject == res.customerid && per.deleted == false).OrderByDescending(ss => ss.movementid).FirstOrDefault();
+                    res.personelid = person.fromobject.Value;
+                    res.personelname = WebApiConfig.AdslPersonels.ContainsKey(res.personelid) ? WebApiConfig.AdslPersonels[res.personelid].personelname : "İsimsiz Personel";
+                    return res;
+                }).ToList();
         }
 
         // Muhasebe programı Cari Hareketler raporu
-        public static async Task<List<CRMWebApi.DTOs.Cari.CariHareketReport>> getCariHareketler ()
+        public static async Task<List<CRMWebApi.DTOs.Cari.CariHareketReport>> getCariHareketler()
         {
             Dictionary<int, CRMWebApi.DTOs.Cari.CariHareketReport> info = new Dictionary<int, DTOs.Cari.CariHareketReport>();
             await WebApiConfig.updateCariData().ConfigureAwait(false);
-            WebApiConfig.CariHareketler.Select(r => {
+            WebApiConfig.CariHareketler.Select(r =>
+            {
                 int periodId = Convert.ToInt32(r.Value.AlacakliFirma.ToString() + r.Value.Donem.Year.ToString() + r.Value.Donem.Month.ToString());
                 if (!info.ContainsKey(periodId)) info[periodId] = new DTOs.Cari.CariHareketReport();
                 info[periodId].personelid = r.Value.AlacakliFirma;
@@ -1560,7 +1566,8 @@ namespace CRMWebApi.Controllers
                 info[periodId].period = r.Value.Donem.AddDays(1 - r.Value.Donem.Day).AddMonths(1).AddDays(-1).ToShortDateString();
                 return true;
             }).ToList();
-            return info.Select(r => {
+            return info.Select(r =>
+            {
                 DTOs.Cari.CariHareketReport res = new DTOs.Cari.CariHareketReport();
                 res.periodId = r.Value.periodId;
                 res.personelid = r.Value.personelid;
@@ -1577,10 +1584,12 @@ namespace CRMWebApi.Controllers
         {
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslProccesses.Where(t => {
+            return WebApiConfig.AdslProccesses.Where(t =>
+            {
                 var stq = WebApiConfig.AdslTaskQueues.ContainsKey(t.Value.S_TON) ? WebApiConfig.AdslTaskQueues[t.Value.S_TON] : null;
                 return stq != null && (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122 || stq.taskid == 114);
-            }).Select(r => {
+            }).Select(r =>
+            {
                 EvrakBasari res = new EvrakBasari();
                 var stq = WebApiConfig.AdslTaskQueues[r.Value.S_TON];
                 adsl_taskqueue samtq = null;
@@ -1706,7 +1715,7 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
-        public static async Task<List<stocksayim>> stock ()
+        public static async Task<List<stocksayim>> stock()
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -1736,8 +1745,9 @@ namespace CRMWebApi.Controllers
                         }
                         catch (Exception g)
                         {
-                            
-                        }                    }
+
+                        }
+                    }
                     return data.Select(r =>
                     {
                         var res = new stocksayim();
@@ -1755,7 +1765,7 @@ namespace CRMWebApi.Controllers
                 }
                 catch (Exception e)
                 {
-                    
+
                 }
                 return new List<stocksayim>();
             }
@@ -1778,21 +1788,22 @@ namespace CRMWebApi.Controllers
 
         [Route("SKRGet")]
         [HttpGet]
-        public async Task<HttpResponseMessage> SKR([FromUri] string start, [FromUri] string end )
+        public async Task<HttpResponseMessage> SKR([FromUri] string start, [FromUri] string end)
         {
-            var request = new DateTimeRange {
+            var request = new DateTimeRange
+            {
                 start = DateTime.ParseExact(start, "d", System.Globalization.CultureInfo.InvariantCulture),
-                end = DateTime.ParseExact(end,  "d", System.Globalization.CultureInfo.InvariantCulture),
+                end = DateTime.ParseExact(end, "d", System.Globalization.CultureInfo.InvariantCulture),
             };
             var report = await getSKReport(request).ConfigureAwait(false);
             var dataString = new List<string>();
             dataString.Add(SKReport.GetHeadhers());
             dataString.AddRange(report.Select(r => r.ToString()));
-                var result = new HttpResponseMessage(HttpStatusCode.OK);
-                result.Content = new StringContent(string.Join("\r\n", dataString));
-                result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "SKReport.csv" };
-                return result;
+            var result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new StringContent(string.Join("\r\n", dataString));
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "SKReport.csv" };
+            return result;
         }
 
         [Route("SLBayiGet")]

@@ -1236,7 +1236,7 @@ namespace CRMWebApi
                     for (int i = 0; i < workList.Count; i++)
                     {
                         var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
-                        if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA" || data.WorkflowStatusCode == "KURULUMATANDI"))
+                        if (data != null && (data.WorkflowStatusCode == "KURULUMKUYRUKTA"))
                         {
                             string smno = data.CustomerId.ToString();
                             bool register = false;
@@ -1265,6 +1265,7 @@ namespace CRMWebApi
                                             rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
                                             var ko = db.Entry(rt);
                                             ko.State = System.Data.Entity.EntityState.Modified;
+                                            await db.SaveChangesAsync();
                                         }
                                         break;
                                     }
@@ -1282,6 +1283,7 @@ namespace CRMWebApi
                                             rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
                                             var ko = db.Entry(rt);
                                             ko.State = System.Data.Entity.EntityState.Modified;
+                                            await db.SaveChangesAsync();
                                         }
                                         break;
                                     }
@@ -1337,6 +1339,11 @@ namespace CRMWebApi
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
                                     if (t.Value.taskid != 114 && t.Value.taskid != 33 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
+                                        Models.Adsl.adsl_taskqueue rt = AdslTaskQueues[id];
+                                        rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
+                                        var ko = db.Entry(rt);
+                                        ko.State = System.Data.Entity.EntityState.Modified;
+                                        await db.SaveChangesAsync();
                                         isSaved = true;
                                         break;
                                     }
@@ -1392,6 +1399,11 @@ namespace CRMWebApi
                                     var id = t.Value.relatedtaskorderid.HasValue ? t.Value.relatedtaskorderid.Value : t.Key;
                                     if (t.Value.taskid != 114 && t.Value.taskid != 64 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
+                                        Models.Adsl.adsl_taskqueue rt = AdslTaskQueues[id];
+                                        rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
+                                        var ko = db.Entry(rt);
+                                        ko.State = System.Data.Entity.EntityState.Modified;
+                                        await db.SaveChangesAsync();
                                         isSaved = true;
                                         break;
                                     }
@@ -1440,6 +1452,11 @@ namespace CRMWebApi
                                     var id = t.Value.relatedtaskorderid ?? t.Key;
                                     if (t.Value.taskid != 88 && AdslProccesses.ContainsKey(id) && (AdslProccesses[id].Last_Status == 0 || AdslProccesses[id].Last_Status == 3))
                                     {
+                                        Models.Adsl.adsl_taskqueue rt = AdslTaskQueues[id];
+                                        rt.description = "$#&" + data.WorkflowId + "$#& " + rt.description;
+                                        var ko = db.Entry(rt);
+                                        ko.State = System.Data.Entity.EntityState.Modified;
+                                        await db.SaveChangesAsync();
                                         isSaved = true;
                                         break;
                                     }
@@ -1505,13 +1522,13 @@ namespace CRMWebApi
                                         isSaved = true;
                                         break;
                                     }
-                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
                                     var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
                                         isSaved = true;
                                         break;
-                                    }*/
+                                    }
                                 }
                                 if (isSaved)
                                 {
@@ -1566,13 +1583,13 @@ namespace CRMWebApi
                                         isSaved = true;
                                         break;
                                     }
-                                    /*// bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
+                                    // bu tasklardan süreç id kısmı descriptionda kontrol edilecek varsa işlem yapılmayacak $#&sid$# sid: süreç id
                                     var descs = t.Value.description != null ? t.Value.description.Split(new[] { "$#&" }, StringSplitOptions.None) : new string[0];
                                     if (descs.Length > 2 && descs[1] == (data.WorkflowId + ""))
                                     {
                                         isSaved = true;
                                         break;
-                                    }*/
+                                    }
                                 }
                                 if (isSaved)
                                 {
