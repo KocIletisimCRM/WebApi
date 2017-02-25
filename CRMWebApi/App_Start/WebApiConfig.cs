@@ -1651,6 +1651,7 @@ namespace CRMWebApi
             builder.EntitySet<DTOs.Cari.CariHareketReport>("CariHareketReports");
             builder.EntitySet<DTOs.Adsl.EvrakBasari>("OnlyDocSuccesReports");
             builder.EntitySet<DTOs.Adsl.stocksayim>("StockSayim");
+            builder.EntitySet<DTOs.Adsl.MemnuniyetRapor>("MemnuniyetRapor");
             config.MapODataServiceRoute(
                 routeName: "ODataRoute",
                 routePrefix: "odata",

@@ -203,6 +203,7 @@
     <Compile Include="Controllers\OData\CariHareketReportsController.cs" />
     <Compile Include="Controllers\OData\InfoBayiReportsController.cs" />
     <Compile Include="Controllers\OData\ISSSuccessRatesController.cs" />
+    <Compile Include="Controllers\OData\MemnuniyetRaporController.cs" />
     <Compile Include="Controllers\OData\OnlyDocSuccesReportsController.cs" />
     <Compile Include="Controllers\OData\PersonelsReportsController.cs" />
     <Compile Include="Controllers\OData\SKClosedTasksReportsController.cs" />
@@ -297,6 +298,7 @@
     <Compile Include="DTOs\Adsl\InfoBayiReport.cs" />
     <Compile Include="DTOs\Adsl\ISSSuccessRate.cs" />
     <Compile Include="DTOs\Adsl\KocAdslProccess.cs" />
+    <Compile Include="DTOs\Adsl\MemnuniyetRapor.cs" />
     <Compile Include="DTOs\Adsl\PersonelsReport.cs" />
     <Compile Include="DTOs\Adsl\SKClosedTasksReport.cs" />
     <Compile Include="DTOs\Adsl\SKPayment.cs" />

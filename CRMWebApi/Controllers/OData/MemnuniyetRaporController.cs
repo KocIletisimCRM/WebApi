@@ -5,12 +5,12 @@ using System.Web.OData;
 
 namespace CRMWebApi.Controllers.OData
 {
-    public class StockMovementBackSeriReportsController : ODataController
+    public class MemnuniyetRaporController : ODataController
     {
         [EnableQuery]
-        public async Task<IQueryable<StockMovementBackSeri>> get()
+        public async Task<IQueryable<MemnuniyetRapor>> get()
         {
-            var report = (await AdslReportsController.getSMBS());
+            var report = (await AdslReportsController.getMemnuniyetRapor());
             return report.AsQueryable();
         }
     }
