@@ -28,7 +28,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int? MemnuniyetAramaAy { get; set; }
         public int? MemnuniyetAramaGun { get; set; }
         public string MemnuniyetPersonel { get; set; }
-        public string SonDurum { get; set; }
+        public string MemnuniyetDurum { get; set; }
         public string MemnuniyetAciklama { get; set; }
     }
 }

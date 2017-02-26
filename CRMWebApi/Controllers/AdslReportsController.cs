@@ -1822,18 +1822,11 @@ namespace CRMWebApi.Controllers
                     res.MemnuniyetAramaAy = r.Value.consummationdate.Value.Month;
                     res.MemnuniyetAramaGun = r.Value.consummationdate.Value.Day;
                 }
+                if (r.Value.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value))
+                    res.MemnuniyetDurum = WebApiConfig.AdslStatus[r.Value.status.Value].taskstate;
                 var proccess = (r.Value.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(r.Value.relatedtaskorderid.Value)) ? WebApiConfig.AdslProccesses[r.Value.relatedtaskorderid.Value] : null;
                 if (proccess != null)
                 {
-                    var lasttq = WebApiConfig.AdslTaskQueues[proccess.Last_TON];
-                    if (lasttq.status != null && WebApiConfig.AdslStatus.ContainsKey(lasttq.status.Value))
-                    {
-                        var statu = WebApiConfig.AdslStatus[lasttq.status.Value];
-                        res.SonDurum = StateTypeText[statu.statetype.Value];
-                        res.SonDurum = statu.taskstate;
-                    }
-                    else
-                        res.SonDurum = "Bekleyen";
                     var ktq = (proccess.K_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(proccess.K_TON.Value)) ? WebApiConfig.AdslTaskQueues[proccess.K_TON.Value] : null;
                     if (ktq != null)
                     {
