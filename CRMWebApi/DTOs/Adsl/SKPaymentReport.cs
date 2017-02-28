@@ -9,6 +9,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string bName { get; set; }
         public string il { get; set; }
         public double bSLOrt { get; set; }
+        public double skor { get; set; }
         public int satAdet { get; set; }
         public double sat { get; set; }
         public int stkrAdet { get; set; }

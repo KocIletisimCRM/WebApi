@@ -7,6 +7,7 @@ namespace CRMWebApi.DTOs.Adsl
 {
     public class SKPayment
     { // Hakedişler hesaplanarak döndürülecek olan class
+        public double score { get; set; }
         public int sat { get; set; }
         public int sat_kur { get; set; }
         public int kur { get; set; }
