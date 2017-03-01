@@ -63,6 +63,7 @@ namespace CRMWebApi.Controllers
                     else if (user.hasRole(KOCUserTypes.TeamLeader))
                     {
                         var rolelist = Enum.GetValues(typeof(KOCUserTypes)).OfType<KOCUserTypes>().Where(r => user.hasRole(r)).Select(r => (int)r).ToList();
+                        rolelist.Add(user.userRole);
                         whereClauses.Add($"(fromobjecttype in ({string.Join(",", rolelist)}) or toobjecttype in ({string.Join(",", rolelist)}))");
                     }
                     else whereClauses.Add($"((fromobject = {user.userId} and fromobjecttype!= 16777217) or (toobject = {user.userId} and toobjecttype!= 16777217))"); // aynı id'ye sahip personel ve müşterilerde müşterinin hareketini personelinmiş gibi göstermesin diye type eklendi (16777217 -> müşteri type)
