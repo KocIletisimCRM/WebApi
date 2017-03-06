@@ -1620,7 +1620,7 @@ namespace CRMWebApi
             {
                 Console.WriteLine(e.Message);
             }
-        }, null, 0, 1000 * 60 * 10);
+        }, null, 0, 1000 * 60 * 5);
 
         public async static void Register(HttpConfiguration config)
         {
