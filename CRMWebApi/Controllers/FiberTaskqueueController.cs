@@ -352,6 +352,10 @@ namespace CRMWebApi.Controllers
                         var automandatoryTask = new List<int>();
                         if (tq.task.tasktypes.TaskTypeId == 3 && tq.taskstatepool.statetype ==1)
                         {
+                            // firber kurulumlar tamamlandığında müşterinin kartındaki servis sağlayıcı SUPERONLİNE olsun (KOD : 2000) Hüseyin KOZ 08.03.2017
+                            var cust = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
+                            if (cust != null)
+                                cust.iss = 2000;
                             var ptq = dtq.previousTaskQueue;
                             int saletask=tq.taskorderno;
                             while (ptq!=null)
