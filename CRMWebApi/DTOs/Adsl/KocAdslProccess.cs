@@ -78,7 +78,7 @@ namespace CRMWebApi.DTOs.Adsl
             //Başlangıç Taskı ise
             if (WebApiConfig.AdslTaskTypes[taskType].startsProccess)
             {
-                Last_Status = stataType;
+                Last_Status = stataType == 1 ? 0 : stataType;
                 Last_TON = tq.taskorderno;
                 S_TON = tq.taskorderno;
                 Kr_TON = null;
@@ -88,7 +88,7 @@ namespace CRMWebApi.DTOs.Adsl
             //Randevu Taskı ise
             else if (taskType == 2)
             {
-                Last_Status = stataType;
+                Last_Status = stataType == 1 ? 0 : stataType;
                 Last_TON = tq.taskorderno;
                 Kr_TON = tq.taskorderno;
                 K_TON = null;
@@ -97,7 +97,7 @@ namespace CRMWebApi.DTOs.Adsl
             //Kurulum ve Rand.suz Kurulum Taskı ise
             else if (taskType == 3 || taskType == 4)
             {
-                Last_Status = stataType;
+                Last_Status = stataType == 1 ? 0 : stataType;
                 Last_TON = tq.taskorderno;
                 K_TON = tq.taskorderno;
                 Ktk_TON = null;
@@ -112,7 +112,7 @@ namespace CRMWebApi.DTOs.Adsl
 
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid) || containLastTask.Contains(taskType))
             {
-                Last_Status = stataType;
+                Last_Status = stataType == 1 ? 0 : stataType;
                 Last_TON = tq.taskorderno;
             }
             if (proccessCancelled) return;

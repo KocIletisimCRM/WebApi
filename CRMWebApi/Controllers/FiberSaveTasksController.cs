@@ -23,24 +23,26 @@ namespace CRMWebApi.Controllers
         {
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
+            {
+                var taskqueue = new taskqueue
                 {
-                    var taskqueue = new taskqueue
-                    {
-                        attachedobjectid =request.blockid,
-                        attachedpersonelid = request.attachedpersonelid,
-                        creationdate = request.date!=null?request.date:DateTime.Now,
-                        deleted = false,
-                        description = "İnternet Penetrasyon Taskı",
-                        lastupdated = DateTime.Now,
-                        status = null,
-                        taskid = 8164,
-                        updatedby = user.userId
-                    };
-                    db.taskqueue.Add(taskqueue);
-                    db.SaveChanges();
-                }
-         
-            return Request.CreateResponse(HttpStatusCode.OK,"İşlem Başarılı","application/json");
+                    attachedobjectid = request.blockid,
+                    attachedpersonelid = request.attachedpersonelid,
+                    creationdate = request.date != null ? request.date : DateTime.Now,
+                    deleted = false,
+                    description = "İnternet Penetrasyon Taskı",
+                    lastupdated = DateTime.Now,
+                    status = null,
+                    taskid = 8164,
+                    updatedby = user.userId
+                };
+                db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.03.2017
+                db.SaveChanges();
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, "İşlem Başarılı", "application/json");
         }
 
         [Route("saveGlobalTask")]
@@ -53,17 +55,19 @@ namespace CRMWebApi.Controllers
                 var taskqueue = new taskqueue
                 {
                     taskid = request.taskid,
-                    creationdate =request.creationdate!=null?request.creationdate: DateTime.Now,
+                    creationdate = request.creationdate != null ? request.creationdate : DateTime.Now,
                     attachedobjectid = request.customerid != null ? request.customerid : request.blockid,
                     attachmentdate = request.attachedpersonelid != null ? DateTime.Now : (DateTime?)null,
                     attachedpersonelid = request.attachedpersonelid,
                     description = request.description,
-                    lastupdated=DateTime.Now,
+                    lastupdated = DateTime.Now,
                     deleted = false,
                     fault = request.fault,
                     updatedby = user.userId
                 };
                 db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.03.2017
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }

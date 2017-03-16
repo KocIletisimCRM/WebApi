@@ -211,6 +211,7 @@ namespace CRMWebApi.Controllers
         [HttpPost]
         public HttpResponseMessage saveTaskQueues(DTOtaskqueue tq)
         {
+            List<DTOtaskqueue> listArray = new List<DTOtaskqueue>(); // Hat satışı taskından sonra gelen tasklardan otomatik kapamalar için
             var user = KOCAuthorizeAttribute.getCurrentUser();
             var customerdocuments = tq.customerdocument != null ? tq.customerdocument.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerdocument>()).ToList() : null;
             var customerproducts = tq.customerproduct != null ? tq.customerproduct.Select(cd => ((Newtonsoft.Json.Linq.JObject)(cd)).ToObject<DTOcustomerproduct>()).ToList() : null;
@@ -225,11 +226,10 @@ namespace CRMWebApi.Controllers
                                           .Include(p => p.attachedpersonel)
                                           .Include(tsp => tsp.taskstatepool)
                                           .Include(ap => ap.asistanPersonel)
-                                          .Include(rt => rt.relatedTaskQueue)
                                           .Include(pt => pt.previousTaskQueue)
                                           .Where(r => r.taskorderno == tq.taskorderno).First();
                     #region Taskın durumu değişmişse (Aynı Zamanda Taskın durumu açığa alınacaksa) yapılacaklar
-                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid != 0 || tq.taskstatepool.taskstate != "AÇIK"))
+                    if ((dtq.status != tq.taskstatepool.taskstateid) && (tq.taskstatepool.taskstateid == 0 || tq.taskstatepool.taskstate != "AÇIK"))
                     {
                         if (tq.taskstatepool.taskstateid == 0)
                         {
@@ -246,15 +246,28 @@ namespace CRMWebApi.Controllers
                         if (tsm != null)
                             automandatoryTasks.AddRange((tsm.automandatorytasks ?? "")
                                 .Split(',').Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => Convert.ToInt32(r)).ToList());
-                        foreach (var item in db.taskqueue.Where(r => !automandatoryTasks.Contains(r.taskid) && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)).ToList())
+                        Queue<taskqueue> delete = new Queue<taskqueue>();
+                        foreach (var item in db.taskqueue.Where(r => (r.previoustaskorderid == tq.taskorderno) && (r.deleted == false)))
+                            delete.Enqueue(item);
+                        while (delete.Count > 0)
                         {
-                            var stateid = db.taskstatematches.Include(s => s.taskstatepool).Where(r => r.taskid == item.taskid &&
-                                  r.automandatorytasks == null && r.taskstatepool.statetype == 2).First().taskstatepool.taskstateid;
-                            item.status = stateid;
-                            item.consummationdate = DateTime.Now;
-                            item.description = "Hiyerarşik Task iptali";
-                            db.SaveChanges();
+                            var t = delete.Dequeue();
+                            foreach (var item in db.taskqueue.Where(r => (r.previoustaskorderid == t.taskorderno) && (r.deleted == false)))
+                                delete.Enqueue(item);
+                            t.deleted = true;
+                            t.description += "\r\nHiyerarşik Olarak Silindi!";
+                            t.lastupdated = DateTime.Now;
+                            t.updatedby = user.userId;
                         }
+                        db.SaveChanges();//foreach (var item in db.taskqueue.Where(r => !automandatoryTasks.Contains(r.taskid) && r.previoustaskorderid == tq.taskorderno && (r.deleted == false)).ToList())
+                        //{
+                        //    var stateid = db.taskstatematches.Include(s => s.taskstatepool).Where(r => r.taskid == item.taskid &&
+                        //          r.automandatorytasks == null && r.taskstatepool.statetype == 2).First().taskstatepool.taskstateid;
+                        //    item.status = stateid;
+                        //    item.consummationdate = DateTime.Now;
+                        //    item.description = "Hiyerarşik Task iptali";
+                        //    db.SaveChanges();
+                        //}
                         #endregion
 
                         #region Browser tarafından attachedobjectid gönderilemediği için taskqueue tablosundan attachedobjectid ye erişme işlemi
@@ -269,7 +282,7 @@ namespace CRMWebApi.Controllers
                         #endregion
 
                         #region stok hareketlerini silme
-                        foreach (var item in db.stockmovement.Where(r => r.relatedtaskqueue == tq.taskorderno && r.deleted == false))
+                        foreach (var item in db.stockmovement.Where(r => r.relatedtaskqueue == tq.taskorderno && r.deleted == false).ToList())
                         {
                             item.deleted = true;
                             item.updatedby = user.userId;
@@ -287,7 +300,7 @@ namespace CRMWebApi.Controllers
 
                             foreach (var item in automandatoryTasks)
                             {
-                                if (db.taskqueue.Where(r => r.deleted == false && (r.relatedtaskorderid == tq.taskorderno || r.previoustaskorderid == tq.taskorderno) && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
+                                if (db.taskqueue.Where(r => r.deleted == false && r.previoustaskorderid == tq.taskorderno && r.taskid == item && (r.status == null || r.taskstatepool.statetype != 2)).Any())
                                     continue;
                                 int? personel_id = (db.task.Where(t => ((t.attachablepersoneltype & dtq.attachedpersonel.category) == t.attachablepersoneltype) && t.taskid == item).Any()) ? (int?)dtq.attachedpersonelid : null;
                                 var oot = db.task.FirstOrDefault(t => t.taskid == item);
@@ -341,9 +354,77 @@ namespace CRMWebApi.Controllers
                                     lastupdated = DateTime.Now,
                                     previoustaskorderid = dtq.taskorderno,
                                     updatedby = user.userId, //User.Identity.PersonelID,
-                                    relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                                    relatedtaskorderid = dtq.relatedtaskorderid.HasValue ? dtq.relatedtaskorderid.Value : dtq.taskorderno
                                 };
                                 db.taskqueue.Add(amtq);
+                                #region Hat Satışları Otomatik Task Kapamalar (16.03.2017)
+                                /*
+                                 * HAT SATIŞINDAN SONRA OLUŞAN FİBER SATIŞ BİREYSEL TASKINI OTOMATİK KAPAT 16.03.2017 (Hüseyin KOZ)
+                                 */
+                                var ttp = db.task.First(r => r.taskid == amtq.taskid).tasktype;
+                                if (dtq.task.tasktype == 10 && ttp == 1)
+                                {
+                                    db.SaveChanges();
+                                    amtq.relatedtaskorderid = amtq.taskorderno;
+                                    amtq.attachedpersonelid = dtq.attachedpersonelid;
+                                    amtq.attachmentdate = DateTime.Now;
+                                    DTOtaskqueue stq = amtq.toDTO<DTOtaskqueue>();
+                                    customerproducts.ForEach(tk =>
+                                    {
+                                        var k = new JObject();
+                                        k.Add("productid", tk.productid);
+                                        k.Add("campaignid", tk.campaignid);
+                                        k.Add("taskid", amtq.taskorderno);
+                                        k.Add("customerid", amtq.attachedobjectid);
+                                        stq.customerproduct.Add(k.ToObject<object>());
+                                    });
+                                    stq.task.tasktypes = new DTOTaskTypes();
+                                    stq.task.tasktypes.TaskTypeId = ttp;
+                                    stq.customerdocument = new List<object>();
+                                    stq.stockmovement = new List<object>();
+                                    stq.asistanPersonel = new DTOpersonel();
+                                    var state = db.taskstatematches.Where(ts => ts.taskid == amtq.taskid && ts.deleted == false).Select(ts => ts.stateid).ToList();
+                                    stq.taskstatepool = new DTOtaskstatepool();
+                                    foreach (var sid in state)
+                                    {
+                                        var st = db.taskstatepool.FirstOrDefault(r => r.taskstateid == sid);
+                                        if (st != null && st.statetype == 1)
+                                        {
+                                            stq.taskstatepool.taskstateid = sid.Value;
+                                            break;
+                                        }
+                                    }
+                                    stq.description = "Satış Otomatik Olarak Kapatıldı.";
+                                    listArray.Add(stq);
+                                }
+                                // mobil aktivasyon tamamlama otomatik olarak kapatılsın
+                                if (amtq.taskid == 10233)
+                                {
+                                    db.SaveChanges();
+                                    amtq.attachedpersonelid = personel_id.HasValue ? personel_id : 21213; // 21213 (Hüseyin KOZ)
+                                    amtq.attachmentdate = DateTime.Now;
+                                    DTOtaskqueue stq = amtq.toDTO<DTOtaskqueue>();
+                                    stq.customerproduct = new List<object>();
+                                    stq.customerdocument = new List<object>();
+                                    stq.stockmovement = new List<object>();
+                                    stq.task.tasktypes = new DTOTaskTypes();
+                                    stq.task.tasktypes.TaskTypeId = ttp;
+                                    stq.asistanPersonel = new DTOpersonel();
+                                    var state = db.taskstatematches.Where(ts => ts.taskid == amtq.taskid && ts.deleted == false).Select(ts => ts.stateid).ToList();
+                                    stq.taskstatepool = new DTOtaskstatepool();
+                                    foreach (var sid in state)
+                                    {
+                                        var st = db.taskstatepool.FirstOrDefault(r => r.taskstateid == sid);
+                                        if (st != null && st.statetype == 1)
+                                        {
+                                            stq.taskstatepool.taskstateid = sid.Value;
+                                            break;
+                                        }
+                                    }
+                                    stq.description = "Otomatik Olarak Kapatıldı.";
+                                    listArray.Add(stq);
+                                }
+                                #endregion
                             }
                         }
                         #endregion
@@ -435,7 +516,7 @@ namespace CRMWebApi.Controllers
                                         lastupdated = DateTime.Now,
                                         previoustaskorderid = tq.taskorderno,
                                         updatedby = KOCAuthorizeAttribute.getCurrentUser().userId,
-                                        relatedtaskorderid = tq.relatedtaskorderid
+                                        relatedtaskorderid = dtq.relatedtaskorderid.HasValue ? dtq.relatedtaskorderid.Value : dtq.taskorderno
                                     });
                                     db.SaveChanges();
                                 }
@@ -473,7 +554,7 @@ namespace CRMWebApi.Controllers
                                         lastupdated = DateTime.Now,
                                         previoustaskorderid = tq.taskorderno,
                                         updatedby = user.userId,
-                                        relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                        relatedtaskorderid = dtq.relatedtaskorderid.HasValue ? dtq.relatedtaskorderid.Value : dtq.taskorderno
                                     });
                                 }
                             }
@@ -670,7 +751,6 @@ namespace CRMWebApi.Controllers
                             db.taskqueue.Add(new taskqueue
                             {
                                 attachedpersonelid = dtq.attachedpersonelid,
-
                                 attachmentdate = (DateTime?)DateTime.Now,
                                 attachedobjectid = hps.customerid,
                                 taskid = 86,
@@ -680,7 +760,7 @@ namespace CRMWebApi.Controllers
                                 previoustaskorderid = dtq.taskorderno,
                                 //Kullanıcı Kontrolü
                                 updatedby = user.userId, // User.Identity.PersonelID,
-                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                                relatedtaskorderid = dtq.relatedtaskorderid.HasValue ? dtq.relatedtaskorderid.Value : dtq.taskorderno
                             });
                         }
 
@@ -706,7 +786,7 @@ namespace CRMWebApi.Controllers
                                 previoustaskorderid = dtq.taskorderno,
                                 //Kullanıcı Kontrolü
                                 updatedby = user.userId,// User.Identity.PersonelID,
-                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? dtq.taskorderno : dtq.relatedtaskorderid
+                                relatedtaskorderid = dtq.relatedtaskorderid.HasValue ? dtq.relatedtaskorderid.Value : dtq.taskorderno
                             });
                         }
 
@@ -719,10 +799,11 @@ namespace CRMWebApi.Controllers
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
                     dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
-
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
                     transaction.Commit();
+                    foreach (var item in listArray) // fiber'li hat satışından oluşan satış taskalrının otomatik kapatılması için (oto kapatılacak taklar hazırnnıp yine buna atanabilir)
+                        saveTaskQueues(item);
                     return Request.CreateResponse(HttpStatusCode.OK, "ok", "application/json");
                 }
                 catch (Exception e)
@@ -845,7 +926,7 @@ namespace CRMWebApi.Controllers
                                 previoustaskorderid = tq.taskorderno,
                                 updatedby = user.userId, //User.Identity.PersonelID,
                                 /*25.10.2014 17:33 OZAL  Önceki kod kısmında alttaki satır kapalıydı ve task oluşurken ilişkilendirme yapılamıyordu*/
-                                relatedtaskorderid = tsm.taskstatepool.statetype == 1 ? tq.taskorderno : tq.relatedtaskorderid
+                                relatedtaskorderid = tq.relatedtaskorderid.HasValue ? tq.relatedtaskorderid.Value : tq.taskorderno
                                 /*25.10.2014 17:33 */
                             });
                         }
@@ -881,6 +962,8 @@ namespace CRMWebApi.Controllers
                 };
                 db.taskqueue.Add(taskqueue);
                 db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.03.2017
+                db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
         }
@@ -908,6 +991,8 @@ namespace CRMWebApi.Controllers
                     updatedby = user.userId,//User.Identity.PersonelID
                 };
                 db.taskqueue.Add(taskqueue);
+                db.SaveChanges();
+                taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.03.2017
                 db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
             }
