@@ -52,6 +52,24 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
             {
+                if (request.newcustomer)
+                { // işlem eğer sadece mobil satış işlemi ise 
+                    var c = db.customer.First(r => r.customerid == request.customerid);
+                    var cs = new customer {
+                        blockid = c.blockid,
+                        customername = request.customername,
+                        creationdate = DateTime.Now,
+                        description = "Hat Satışı için Oluşturuldu",
+                        flat = c.flat,
+                        gsm = request.gsm,
+                        lastupdated = DateTime.Now,
+                        tckimlikno = request.tc,
+                        updatedby = user.userId
+                    };
+                    db.customer.Add(cs);
+                    db.SaveChanges();
+                    request.customerid = cs.customerid;
+                }
                 var taskqueue = new taskqueue
                 {
                     taskid = request.taskid,
