@@ -14,6 +14,7 @@ using CRMWebApi.DTOs.Adsl.DTORequestClasses;
 using System.Text;
 using CRMWebApi.KOCAuthorization;
 using System.Data.SqlClient;
+using System.Globalization;
 
 namespace CRMWebApi.Controllers
 {
@@ -137,21 +138,24 @@ namespace CRMWebApi.Controllers
                  }
                  return true;
              }).ToList();
+            // 10.03.2017 tarihinden sonra evrak hakedişleri 2 kat artacak sistemde evrak taskları değişti ona göre kontrol olacak 20.03.2017
+            // 90: Sipariş Kapama, 192: Emptor Sisteme Giriş Dsmart, 188 Mobil Aktivasyon Tamamlama
             WebApiConfig.AdslTaskQueues.Where(r =>
             {
                 var tq = r.Value; // Sam sdm sipariş kapama taskid = 90 (process iptal dahi olsa bayi ekrakları alıp koç personel sam sdm kapatmışsa bayi hakediş alacak)
-                return tq.taskid == 90 && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
+                return (tq.taskid == 90 || tq.taskid == 192 || tq.taskid == 188) && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 1 && tq.consummationdate.HasValue && tq.consummationdate.Value >= request.start && tq.consummationdate.Value <= request.end;
             }).Select(r =>
             {
                 var s_tq = r.Value.relatedtaskorderid.HasValue ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.relatedtaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.relatedtaskorderid.Value] : null : null;
-                if (s_tq != null && s_tq.taskid == 33 || s_tq.taskid == 64) // başlangıç task tipi ekrak alma olamaz evrak alma tasklarının idleri ile kontrol edildi (Hüseyin KOZ) !!
+                if ((s_tq != null && s_tq.taskid == 33 || s_tq.taskid == 64) && s_tq.attachmentdate < DateTime.ParseExact("2017-03-10", "yyyy-MM-dd", CultureInfo.InvariantCulture)) // 10.03.2017  (Hüseyin KOZ) !!
                 { // evrak alınmışsa bayinin evrak alma hakedişine 1 ekle
                     if (!total.ContainsKey(s_tq.attachedpersonelid.Value)) total[s_tq.attachedpersonelid.Value] = new SKPayment();
                     total[s_tq.attachedpersonelid.Value].evrak++;
                     total[s_tq.attachedpersonelid.Value].score += (WebApiConfig.AdslTasks.ContainsKey(s_tq.taskid) && WebApiConfig.AdslTasks[s_tq.taskid].performancescore.HasValue) ? WebApiConfig.AdslTasks[s_tq.taskid].performancescore.Value : 0.5;
                 }
-                else if (s_tq != null && s_tq.taskid == 122)
+                else if (s_tq != null && (s_tq.taskid == 122 || s_tq.taskid == 1195 || s_tq.taskid == 33 || s_tq.taskid == 64 || s_tq.taskid == 114 || s_tq.taskid == 1209 || s_tq.taskid == 193))
                 { // çağrı churn bölge içiyse evrak taskının personeline evrak hakedişi ver
+                    // 10.03.2017 tarihinden sonra SAM SDM ve CC TİM tasklarında değil sonraki evrak alma tasklarında evrak hakedişleri var ve 2 kat hakediş ödeme 
                     HashSet<int> tt = new HashSet<int>();
                     var subs = new Queue<int>();
                     if (WebApiConfig.AdslSubTasks.TryGetValue(s_tq.taskorderno, out tt))
@@ -164,7 +168,11 @@ namespace CRMWebApi.Controllers
                         if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[p].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[p].taskid].tasktype == 7)
                         {
                             var task = WebApiConfig.AdslTaskQueues[p];
-                            total[task.attachedpersonelid.Value].evrak++;
+                            if (!total.ContainsKey(WebApiConfig.AdslTaskQueues[p].attachedpersonelid.Value)) total[WebApiConfig.AdslTaskQueues[p].attachedpersonelid.Value] = new SKPayment();
+                            if (s_tq.attachmentdate < DateTime.ParseExact("2017-03-10", "yyyy-MM-dd", CultureInfo.InvariantCulture))
+                                total[task.attachedpersonelid.Value].evrak++;
+                            else
+                                total[task.attachedpersonelid.Value].evrakV2++;
                             total[task.attachedpersonelid.Value].score += (WebApiConfig.AdslTasks.ContainsKey(task.taskid) && WebApiConfig.AdslTasks[task.taskid].performancescore.HasValue) ? WebApiConfig.AdslTasks[task.taskid].performancescore.Value : 0.5;
                             break;
                         }
@@ -302,6 +310,8 @@ namespace CRMWebApi.Controllers
                 res.ariza = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 4 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.ariza) ?? 0;
                 res.teslimat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat) ?? 0;
                 res.evrak = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak) ?? 0;
+                // 10.03.2017 tarihinden sonraki evrak hakedişleri 2 kat ödeme alır. 21.03.2017 (Hüseyin KOZ)
+                res.evrak += (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrakV2 * 2) ?? 0; 
                 res.doSat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 7 && r.Value.d_sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat) ?? 0;
                 res.doSat_tes = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 8 && r.Value.d_sat_tes <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat_tes) ?? 0;
                 return res;
@@ -898,7 +908,7 @@ namespace CRMWebApi.Controllers
         public static async Task<List<SKReport>> getCagriSKReport(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            Dictionary<int, int> tasks = new Dictionary<int, int> { { 133, 133 }, { 131, 131 }, { 122, 122 }, { 121, 121 }, { 120, 120 }, { 119, 119 }, { 139, 139 } }; // çağrı satış taskları
+            Dictionary<int, int> tasks = new Dictionary<int, int> { { 133, 133 }, { 131, 131 }, { 122, 122 }, { 121, 121 }, { 120, 120 }, { 119, 119 }, { 139, 139 }, { 1209, 1209 }, { 1210, 1210 }, { 1211, 1211 }, { 1215, 1215 }, { 1216, 1216 } }; // çağrı satış taskları
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {

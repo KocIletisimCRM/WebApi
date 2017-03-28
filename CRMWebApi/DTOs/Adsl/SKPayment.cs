@@ -14,6 +14,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int ariza { get; set; }
         public int teslimat { get; set; }
         public int evrak { get; set; }
+        public int evrakV2 { get; set; } // 10.03.2017'den sonra evrak hakedişleri 2 kat fazla 20.03.2017 (Hüseyin KOZ)
         public int d_sat { get; set; } // donanım satışı
         public int d_sat_tes { get; set; } // donanım sat-tes
     }

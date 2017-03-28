@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 
 namespace CRMWebApi.DTOs.Adsl
@@ -47,11 +48,11 @@ namespace CRMWebApi.DTOs.Adsl
             List<int> containLastTask = new List<int> { 7, 10 }; // task type ana hiyerarşi içinde diğilse ve task sl içermiyorsa last task atanması için (Hüseyin KOZ)
 
             // Model Güncelleme Talebi taskları ve kurulum taskları için
-            if(taskType == 3)
+            if (taskType == 3)
             {
-                if(tq.taskid == 153 || tq.taskid == 155)
+                if (tq.taskid == 153 || tq.taskid == 155)
                 {
-                    if(WebApiConfig.AdslPersonels.ContainsKey(tq.attachedpersonelid ?? 0))
+                    if (WebApiConfig.AdslPersonels.ContainsKey(tq.attachedpersonelid ?? 0))
                     {
                         if (stataType == 1 || stataType == 3)
                         {
@@ -140,17 +141,21 @@ namespace CRMWebApi.DTOs.Adsl
                         SLs[sl].CustomerId = tq.attachedobjectid.Value;
                     }
                 //Bayi SL Bitiş (9156 iptal onayı bekliyor durumu sl sonlandırmamalı geçici olarak id ekledim çözüm sorulacak)
-                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2 && tq.status != 9156)
+                if (tq.consummationdate.HasValue && tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value) && (WebApiConfig.AdslStatus[tq.status.Value].statetype.Value != 2 || WebApiConfig.AdslTaskSl[tq.taskid][1].Contains(7)) && tq.status != 9156)
                 {
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][1])
                     {
                         //if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 2 && (sl != 7 || (tq.attachmentdate < DateTime.ParseExact("2017-03-10", "yyyy-MM-dd", CultureInfo.InvariantCulture))))
+                            continue; // sl türü 7: Evrak SL => 10.03.2017'den sonraki iptal'ler de sl'e etki edecek 
                         if (SLs.ContainsKey(sl) && !SLs[sl].BEnd.HasValue) SLs[sl].BEnd = tq.consummationdate;
                     }
                     //Koç SL Bitiş
                     foreach (var sl in WebApiConfig.AdslTaskSl[tq.taskid][3])
                     {
                         //if (!SLs.ContainsKey(sl)) SLs[sl] = new SLTime();
+                        if (WebApiConfig.AdslStatus[tq.status.Value].statetype.Value == 2 && (sl != 7 || tq.attachmentdate < DateTime.ParseExact("2017-03-10", "yyyy-MM-dd", CultureInfo.InvariantCulture)))
+                            continue; // sl türü 7: Evrak SL => 10.03.2017'den sonraki iptal'ler de sl'e etki edecek 
                         if (SLs.ContainsKey(sl) && !SLs[sl].KEnd.HasValue) SLs[sl].KEnd = tq.consummationdate;
                     }
                 }
@@ -169,7 +174,7 @@ namespace CRMWebApi.DTOs.Adsl
                 bool b;
                 WebApiConfig.K_PersonelForProccess.TryRemove(proccessId, out x);
                 if (WebApiConfig.AdslPersonels.ContainsKey(x)) WebApiConfig.AdslPersonels[x].T_153_155.TryRemove(proccessId, out b);
-                
+
                 var subTasks = new Queue<int>();
                 subTasks.Enqueue(proccessId);
                 while (subTasks.Count > 0)

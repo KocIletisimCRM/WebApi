@@ -146,28 +146,28 @@ namespace CRMWebApi.Controllers
                                          r.previousTaskQueue = db.taskqueue.Where(t => t.taskorderno == r.previoustaskorderid).FirstOrDefault();
                                          var ptq = r.previousTaskQueue;
                                          // artık reletedtaskorderno satış taskını göteriyor 18.03.2017 (Hüseyin KOZ)
-                                         //var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
-                                         // .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
-                                         ////herhangi bir taskın satış taskını bulup o satış taskı ile ilgili ürünleri taska gömmek için yazıldı.
-                                         //while (ptq != null)
-                                         //{
-                                         //    ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-                                         //    var test = ptq.task.tasktype;
-                                         //    if (test == 1)
-                                         //    {
-                                         //        salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid && t.taskorderno == ptq.taskorderno)
-                                         //  .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
-                                         //        break;
-                                         //    }
-                                         //    else
-                                         //    {
-                                         //        ptq.previousTaskQueue = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-                                         //        ptq = ptq.previousTaskQueue;
-                                         //    }
-                                         //}
+                                         var salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid)
+                                          .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                         //herhangi bir taskın satış taskını bulup o satış taskı ile ilgili ürünleri taska gömmek için yazıldı.
+                                         while (ptq != null)
+                                         {
+                                             ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
+                                             var test = ptq.task.tasktype;
+                                             if (test == 1)
+                                             {
+                                                 salestaskorderno = db.taskqueue.Where(t => t.task.tasktype == 1 && t.attachedobjectid == customerid && t.taskorderno == ptq.taskorderno)
+                                           .OrderByDescending(t => t.taskorderno).Select(t => t.taskorderno).FirstOrDefault();
+                                                 break;
+                                             }
+                                             else
+                                             {
+                                                 ptq.previousTaskQueue = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
+                                                 ptq = ptq.previousTaskQueue;
+                                             }
+                                         }
 
                                          //taska bağlı müşteri kampanyası ve bilgileri
-                                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == r.relatedtaskorderid && c.deleted == false).ToList();
+                                         r.customerproduct = db.customerproduct.Include(s => s.campaigns).Where(c => c.taskid == salestaskorderno && c.deleted == false).ToList();
                                          //taska bağlı stock hareketleri
                                          r.stockmovement = db.stockmovement.Include(s => s.stockcard).Where(s => s.relatedtaskqueue == r.taskorderno).ToList();
                                          var stockcardids = db.taskstatematches.Where(tsm => tsm.taskid == r.taskid && tsm.stateid == r.status && tsm.stockcards != null).ToList()
