@@ -363,7 +363,7 @@ namespace CRMWebApi
                         }
 
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
                         loadAdslTaskQueues(lastUpdated);
                     }

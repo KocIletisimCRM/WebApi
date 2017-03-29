@@ -113,7 +113,7 @@ namespace CRMWebApi.DTOs.Adsl
 
             if (WebApiConfig.AdslTaskSl.ContainsKey(tq.taskid) || containLastTask.Contains(taskType))
             {
-                Last_Status = stataType == 1 ? 0 : stataType;
+                Last_Status = stataType;
                 Last_TON = tq.taskorderno;
             }
             if (proccessCancelled) return;
