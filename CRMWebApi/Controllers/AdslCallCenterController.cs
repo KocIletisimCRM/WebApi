@@ -109,7 +109,7 @@ namespace CRMWebApi.Controllers
                         status = null,
                         taskid = request.taskid,
                         updatedby = request.salespersonel ?? 1458,
-                        fault = request.fault
+                        fault = "Sinerji Çağrı"
                     };
 
                     db.taskqueue.Add(taskqueue);
@@ -412,8 +412,8 @@ namespace CRMWebApi.Controllers
         {
             if (request.Properties.ContainsKey("MS_HttpContext"))
             {
-                if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "::1") // localhost
-                    return true;
+                //if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "::1") // localhost
+                //    return true;
                 //if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.14.169.225")
                 //    return true;
                 if (((HttpContextWrapper)request.Properties["MS_HttpContext"]).Request.UserHostAddress == "213.153.197.167")

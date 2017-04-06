@@ -289,6 +289,7 @@ namespace CRMWebApi.Controllers
                 res.kurAdet = r.Value.kur;
                 res.arzAdet = r.Value.ariza;
                 res.evrAdet = r.Value.evrak;
+                res.evrV2Adet = r.Value.evrakV2;
                 res.tesAdet = r.Value.teslimat;
                 res.doSatAdet = r.Value.d_sat;
                 res.doSat_tesAdet = r.Value.d_sat_tes;

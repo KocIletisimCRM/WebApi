@@ -21,6 +21,7 @@ namespace CRMWebApi.DTOs.Adsl
         public int tesAdet { get; set; }
         public double teslimat { get; set; }
         public int evrAdet { get; set; }
+        public int evrV2Adet { get; set; }
         public double evrak { get; set; }
         public int doSatAdet { get; set; }
         public double doSat { get; set; }
