@@ -158,6 +158,12 @@
     <Content Include="Models\Cari\KOCCari.edmx.diagram">
       <DependentUpon>KOCCari.edmx</DependentUpon>
     </Content>
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Service References\NetflowWebServis\CRMWebApi.NetflowWebServis.WorkflowDetailRow.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
     <None Include="Service References\NetflowWebServis\NetflowTellcomWS.disco" />
     <None Include="Service References\NetflowWebServis\configuration91.svcinfo" />
     <None Include="Service References\NetflowWebServis\configuration.svcinfo" />

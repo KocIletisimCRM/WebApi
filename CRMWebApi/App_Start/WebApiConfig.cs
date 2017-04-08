@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -1220,6 +1221,11 @@ namespace CRMWebApi
                 authHeader.Username = "EXT02308383_66010.00002";
                 authHeader.Password = "6qRF0687";
 
+                BasicHttpBinding httpBinding = new BasicHttpBinding();
+                httpBinding.MaxReceivedMessageSize = int.MaxValue;
+                httpBinding.MaxBufferSize = int.MaxValue;
+                //using (var serviceClient = new ulasimmobilservisSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
+
                 var request = new GetWorkflowListByUserRequest();
                 request.TicketingTypeCode = "321";
                 //request.SegmentCode = "Residential";
@@ -1228,7 +1234,7 @@ namespace CRMWebApi
                 request.SearchEndDate = DateTime.Now;
 
                 #region Kurulum ve Cihaz Gönderim Taskları
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);
@@ -1315,7 +1321,7 @@ namespace CRMWebApi
 
                 #region SAM-SDM Sipariş Tamamlama Taskları
                 request.TicketingTypeCode = "623";
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);
@@ -1382,7 +1388,7 @@ namespace CRMWebApi
 
                 #region CC-TİM Sipariş Tamamlama Taskları
                 request.TicketingTypeCode = "441";
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);
@@ -1449,7 +1455,7 @@ namespace CRMWebApi
 
                 #region İkinci Donanım Kurulum Taskları
                 request.TicketingTypeCode = "290";
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);
@@ -1525,7 +1531,7 @@ namespace CRMWebApi
 
                 #region Modem Değişikliği Taskları
                 request.TicketingTypeCode = "560";
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);
@@ -1594,7 +1600,7 @@ namespace CRMWebApi
 
                 #region Bağlantı Problemi Taskları
                 request.TicketingTypeCode = "106";
-                using (var wsc = new NetflowTellcomWSSoapClient())
+                using (var wsc = new NetflowTellcomWSSoapClient(httpBinding, new EndpointAddress("http://netflowext.superonline.net/NetflowSecureApiService/NetflowTellcomWS.asmx")))
                 using (var db = new Models.Adsl.KOCSAMADLSEntities())
                 {
                     var response = wsc.GetWorkflowIdListByUser(authHeader, request);

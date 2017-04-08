@@ -30,10 +30,18 @@ namespace CRMWebApi.NetflowWebServis {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/GetWorkflowDetailByUser", ReplyAction="*")]
         System.Threading.Tasks.Task<CRMWebApi.NetflowWebServis.GetWorkflowDetailByUserResponse1> GetWorkflowDetailByUserAsync(CRMWebApi.NetflowWebServis.GetWorkflowDetailByUserRequest request);
+        
+        // CODEGEN: Generating message contract since message GetWorkflowDetailRequest has headers
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/GetWorkflowDetail", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse GetWorkflowDetail(CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/GetWorkflowDetail", ReplyAction="*")]
+        System.Threading.Tasks.Task<CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse> GetWorkflowDetailAsync(CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest request);
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1038.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1586.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -93,7 +101,53 @@ namespace CRMWebApi.NetflowWebServis {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1038.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1586.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://tempuri.org/")]
+    public partial class WorkflowDetailRow : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private string keyField;
+        
+        private string valueField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Key {
+            get {
+                return this.keyField;
+            }
+            set {
+                this.keyField = value;
+                this.RaisePropertyChanged("Key");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Value {
+            get {
+                return this.valueField;
+            }
+            set {
+                this.valueField = value;
+                this.RaisePropertyChanged("Value");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1586.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -335,7 +389,7 @@ namespace CRMWebApi.NetflowWebServis {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1038.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1586.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -381,7 +435,7 @@ namespace CRMWebApi.NetflowWebServis {
     }
     
     /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1038.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.6.1586.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -558,6 +612,48 @@ namespace CRMWebApi.NetflowWebServis {
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="GetWorkflowDetail", WrapperNamespace="http://tempuri.org/", IsWrapped=true)]
+    public partial class GetWorkflowDetailRequest {
+        
+        [System.ServiceModel.MessageHeaderAttribute(Namespace="http://tempuri.org/")]
+        public CRMWebApi.NetflowWebServis.AuthHeader AuthHeader;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://tempuri.org/", Order=0)]
+        public int workflowId;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://tempuri.org/", Order=1)]
+        public string[] keys;
+        
+        public GetWorkflowDetailRequest() {
+        }
+        
+        public GetWorkflowDetailRequest(CRMWebApi.NetflowWebServis.AuthHeader AuthHeader, int workflowId, string[] keys) {
+            this.AuthHeader = AuthHeader;
+            this.workflowId = workflowId;
+            this.keys = keys;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="GetWorkflowDetailResponse", WrapperNamespace="http://tempuri.org/", IsWrapped=true)]
+    public partial class GetWorkflowDetailResponse {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="http://tempuri.org/", Order=0)]
+        public CRMWebApi.NetflowWebServis.WorkflowDetailRow[] GetWorkflowDetailResult;
+        
+        public GetWorkflowDetailResponse() {
+        }
+        
+        public GetWorkflowDetailResponse(CRMWebApi.NetflowWebServis.WorkflowDetailRow[] GetWorkflowDetailResult) {
+            this.GetWorkflowDetailResult = GetWorkflowDetailResult;
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     public interface NetflowTellcomWSSoapChannel : CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap, System.ServiceModel.IClientChannel {
     }
@@ -633,6 +729,33 @@ namespace CRMWebApi.NetflowWebServis {
             inValue.AuthHeader = AuthHeader;
             inValue.workflowId = workflowId;
             return ((CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap)(this)).GetWorkflowDetailByUserAsync(inValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap.GetWorkflowDetail(CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest request) {
+            return base.Channel.GetWorkflowDetail(request);
+        }
+        
+        public CRMWebApi.NetflowWebServis.WorkflowDetailRow[] GetWorkflowDetail(CRMWebApi.NetflowWebServis.AuthHeader AuthHeader, int workflowId, string[] keys) {
+            CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest inValue = new CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest();
+            inValue.AuthHeader = AuthHeader;
+            inValue.workflowId = workflowId;
+            inValue.keys = keys;
+            CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse retVal = ((CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap)(this)).GetWorkflowDetail(inValue);
+            return retVal.GetWorkflowDetailResult;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse> CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap.GetWorkflowDetailAsync(CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest request) {
+            return base.Channel.GetWorkflowDetailAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<CRMWebApi.NetflowWebServis.GetWorkflowDetailResponse> GetWorkflowDetailAsync(CRMWebApi.NetflowWebServis.AuthHeader AuthHeader, int workflowId, string[] keys) {
+            CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest inValue = new CRMWebApi.NetflowWebServis.GetWorkflowDetailRequest();
+            inValue.AuthHeader = AuthHeader;
+            inValue.workflowId = workflowId;
+            inValue.keys = keys;
+            return ((CRMWebApi.NetflowWebServis.NetflowTellcomWSSoap)(this)).GetWorkflowDetailAsync(inValue);
         }
     }
 }
