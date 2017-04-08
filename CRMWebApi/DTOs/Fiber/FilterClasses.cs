@@ -17,8 +17,8 @@ namespace CRMWebApi.DTOs.Fiber
         foIn = 7,
         foIsNull = 8,
         foRawCondition = 9,
-        foAnd = 10
-
+        foAnd = 10,
+        foInStr = 11 // String dizileri için
     }
 
     public class fieldFilter
@@ -28,7 +28,7 @@ namespace CRMWebApi.DTOs.Fiber
         private object filterValue2 { get; set; }
         private filterOperators filterOperator { get; set; }
 
-        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null", "", "({0} & {1})={1}" };
+        private static string[] operatorStrings = { "{0} < {1}", "{0} <= {1}", "{0} = {1}", "{0} > {1}", "{0} >= {1}", "{0} BETWEEN  {1} AND {2}", "{0} LIKE '%{1}%'", "{0} IN ({1})", "{0} is null", "", "({0} & {1})={1}", "{0} IN ({1})" };
 
         private string getValueCompairer(object val)
         {
@@ -80,6 +80,14 @@ namespace CRMWebApi.DTOs.Fiber
                     if (filterValue is Array)
                         return string.Format(operatorStrings[(int)filterOperator], fieldName,
                            string.Join(", ", array));
+                    else
+                        throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
+                case filterOperators.foInStr:
+                    string[] arrayStr = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => "'" +  (string)item + "'").ToArray();
+                    filterValue = ((Newtonsoft.Json.Linq.JArray)filterValue).Select(item => "'" + (string)item + "'").ToArray();
+                    if (arrayStr is Array)
+                        return string.Format(operatorStrings[(int)filterOperator], fieldName, 
+                           string.Join(", ", arrayStr));
                     else
                         throw new Exception(" IN operatörü için filtre değeri Array tipinde olmalı!");
                 case filterOperators.foIsNull:
