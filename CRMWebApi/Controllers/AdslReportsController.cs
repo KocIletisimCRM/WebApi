@@ -312,7 +312,7 @@ namespace CRMWebApi.Controllers
                 res.teslimat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 5 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.teslimat) ?? 0;
                 res.evrak = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrak) ?? 0;
                 // 10.03.2017 tarihinden sonraki evrak hakedişleri 2 kat ödeme alır. 21.03.2017 (Hüseyin KOZ)
-                res.evrak += (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrakV2 * 2) ?? 0; 
+                res.evrak += (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 6 && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.evrakV2 * 2) ?? 0;
                 res.doSat = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 7 && r.Value.d_sat <= h.Value.upperLimitAmount).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat) ?? 0;
                 res.doSat_tes = (WebApiConfig.AdslPaymentSystem.Where(h => h.Value.paymentType == 8 && r.Value.d_sat_tes <= h.Value.upperLimitAmount && bSLOrt <= h.Value.upperLimitSL).Select(h => h.Value.payment).FirstOrDefault() * r.Value.d_sat_tes) ?? 0;
                 return res;
@@ -1299,91 +1299,80 @@ namespace CRMWebApi.Controllers
              * taskid = 64 => Satış CC Churn Vdsl
              */
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+            HashSet<int> taskids = new HashSet<int>() { 114, 64, 33, 122, 1195 }; // etkileşimli başlangıç taskları
+            HashSet<int> containLastTask = new HashSet<int> { 1, 2, 3, 4, 7 }; // işleme alınacak task tipleri
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            return WebApiConfig.AdslTaskQueues.Where(r =>
+            return WebApiConfig.AdslProccesses.Where(r =>
                 {
-                    int taskid = r.Value.taskid;
-                    var previous = (r.Value.previoustaskorderid != null && WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value)) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null;
-                    int? statetype = r.Value.status != null ? WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value) ? (int?)WebApiConfig.AdslStatus[r.Value.status.Value].statetype.Value : null : null;
-                    return r.Value.deleted == false && ((taskid == 47 && previous != null && previous.taskid != 113) ||
-                                   (taskid == 90 && previous != null && previous.taskid != 114) ||
-                                    ((taskid == 31 || taskid == 63 || taskid == 33 || taskid == 64) && (statetype == null || statetype.Value != 1)));
+                    var tq = WebApiConfig.AdslTaskQueues[r.Key];
+                    var stq = tq.relatedtaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(tq.relatedtaskorderid.Value) ? WebApiConfig.AdslTaskQueues[tq.relatedtaskorderid.Value] : null;
+                    return stq != null && taskids.Contains(stq.taskid);
                 }).Select(r =>
                 {
                     var res = new ISSSuccessRate();
-                    res.customerid = r.Value.attachedobjectid.Value;
-                    res.customername = WebApiConfig.AdslCustomers.ContainsKey(r.Value.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[r.Value.attachedobjectid.Value].customername : "İsimsiz Müşteri";
-                    if (r.Value.taskid == 90)
+                    var dtq = WebApiConfig.AdslTaskQueues[r.Key];
+                    var stq = WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid ?? dtq.taskorderno];
+                    int tqno = stq.taskorderno;
+                    while (WebApiConfig.AdslSubTasks.ContainsKey(tqno))
                     {
-                        var stask = r.Value.previoustaskorderid != null ? WebApiConfig.AdslTaskQueues.ContainsKey(r.Value.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[r.Value.previoustaskorderid.Value] : null : null;
-                        if (stask != null)
+                        int test = tqno;
+                        foreach (var item in WebApiConfig.AdslSubTasks[tqno])
+                            if (containLastTask.Contains(WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[item].taskid].tasktype))
+                            {
+                                tqno = item;
+                                break;
+                            }
+                        if (tqno == test || WebApiConfig.AdslTaskQueues[tqno].taskid == 90) break;
+                    }
+
+                    var tq = WebApiConfig.AdslTaskQueues[tqno];
+                    res.customerid = tq.attachedobjectid.Value;
+                    res.customername = WebApiConfig.AdslCustomers.ContainsKey(tq.attachedobjectid.Value) ? WebApiConfig.AdslCustomers[tq.attachedobjectid.Value].customername : "İsimsiz Müşteri";
+                    var stask = WebApiConfig.AdslTaskQueues[tq.relatedtaskorderid ?? tq.taskorderno];
+                    if (stask != null)
+                    {
+                        res.staskoerderno = stask.taskorderno;
+                        res.stask = WebApiConfig.AdslTasks.ContainsKey(stask.taskid) ? WebApiConfig.AdslTasks[stask.taskid].taskname : "Task Adı Yok";
+                        res.screatedateyear = stask.creationdate.Value.Year;
+                        res.screatedatemonth = stask.creationdate.Value.Month;
+                        res.screatedateday = stask.creationdate.Value.Day;
+                        if (stask.status != null && WebApiConfig.AdslStatus.ContainsKey(stask.status.Value))
                         {
-                            res.staskoerderno = stask.taskorderno;
-                            res.stask = WebApiConfig.AdslTasks.ContainsKey(stask.taskid) ? WebApiConfig.AdslTasks[stask.taskid].taskname : "Task Adı Yok";
-                            res.screatedateyear = stask.creationdate.Value.Year;
-                            res.screatedatemonth = stask.creationdate.Value.Month;
-                            res.screatedateday = stask.creationdate.Value.Day;
-                            if (stask.status != null && WebApiConfig.AdslStatus.ContainsKey(stask.status.Value))
-                            {
-                                var state = WebApiConfig.AdslStatus[stask.status.Value];
-                                res.staskstatus = state.taskstate;
-                                res.staskstatetype = StateTypeText[state.statetype.Value];
-                            }
-                            if (stask.appointmentdate != null)
-                            {
-                                res.snetflowdateyear = stask.appointmentdate.Value.Year;
-                                res.snetflowdatemonth = stask.appointmentdate.Value.Month;
-                                res.snetflowdateday = stask.appointmentdate.Value.Day;
-                            }
-                            if (stask.consummationdate != null)
-                            {
-                                res.sconsummationdateday = stask.consummationdate.Value.Day;
-                                res.sconsummationdatemonth = stask.consummationdate.Value.Month;
-                                res.sconsummationdateyear = stask.consummationdate.Value.Year;
-                            }
+                            var state = WebApiConfig.AdslStatus[stask.status.Value];
+                            res.staskstatus = state.taskstate;
+                            res.staskstatetype = StateTypeText[state.statetype.Value];
                         }
-                        res.endtaskorderno = r.Value.taskorderno;
-                        res.endtask = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : "Task Adı Yok";
-                        if (r.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value))
+                        if (stask.appointmentdate != null)
                         {
-                            var state = WebApiConfig.AdslStatus[r.Value.status.Value];
+                            res.snetflowdateyear = stask.appointmentdate.Value.Year;
+                            res.snetflowdatemonth = stask.appointmentdate.Value.Month;
+                            res.snetflowdateday = stask.appointmentdate.Value.Day;
+                        }
+                        if (stask.consummationdate != null)
+                        {
+                            res.sconsummationdateday = stask.consummationdate.Value.Day;
+                            res.sconsummationdatemonth = stask.consummationdate.Value.Month;
+                            res.sconsummationdateyear = stask.consummationdate.Value.Year;
+                        }
+                    }
+                    if (tq.taskid == 90)
+                    {
+                        res.endtaskorderno = tq.taskorderno;
+                        res.endtask = WebApiConfig.AdslTasks.ContainsKey(tq.taskid) ? WebApiConfig.AdslTasks[tq.taskid].taskname : "Task Adı Yok";
+                        if (tq.status != null && WebApiConfig.AdslStatus.ContainsKey(tq.status.Value))
+                        {
+                            var state = WebApiConfig.AdslStatus[tq.status.Value];
                             res.endtaskstatus = state.taskstate;
                             res.endtaskstatetype = StateTypeText[state.statetype.Value];
                         }
-                        res.endtaskcreatedateday = r.Value.creationdate.Value.Day;
-                        res.endtaskcreatedatemonth = r.Value.creationdate.Value.Month;
-                        res.endtaskcreatedateyear = r.Value.creationdate.Value.Year;
-                        if (r.Value.consummationdate != null)
+                        res.endtaskcreatedateday = tq.creationdate.Value.Day;
+                        res.endtaskcreatedatemonth = tq.creationdate.Value.Month;
+                        res.endtaskcreatedateyear = tq.creationdate.Value.Year;
+                        if (tq.consummationdate != null)
                         {
-                            res.endconsummationdateday = r.Value.consummationdate.Value.Day;
-                            res.endconsummationdatemonth = r.Value.consummationdate.Value.Month;
-                            res.endconsummationdateyear = r.Value.consummationdate.Value.Year;
-                        }
-                    }
-                    else
-                    {
-                        res.staskoerderno = r.Value.taskorderno;
-                        res.stask = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? WebApiConfig.AdslTasks[r.Value.taskid].taskname : null;
-                        res.screatedateday = r.Value.creationdate.Value.Day;
-                        res.screatedatemonth = r.Value.creationdate.Value.Month;
-                        res.screatedateyear = r.Value.creationdate.Value.Year;
-                        if (r.Value.appointmentdate != null)
-                        {
-                            res.snetflowdateyear = r.Value.appointmentdate.Value.Year;
-                            res.snetflowdatemonth = r.Value.appointmentdate.Value.Month;
-                            res.snetflowdateday = r.Value.appointmentdate.Value.Day;
-                        }
-                        if (r.Value.consummationdate != null)
-                        {
-                            res.sconsummationdateday = r.Value.consummationdate.Value.Day;
-                            res.sconsummationdatemonth = r.Value.consummationdate.Value.Month;
-                            res.sconsummationdateyear = r.Value.consummationdate.Value.Year;
-                        }
-                        if (r.Value.status != null && WebApiConfig.AdslStatus.ContainsKey(r.Value.status.Value))
-                        {
-                            var state = WebApiConfig.AdslStatus[r.Value.status.Value];
-                            res.staskstatus = state.taskstate;
-                            res.staskstatetype = StateTypeText[state.statetype.Value];
+                            res.endconsummationdateday = tq.consummationdate.Value.Day;
+                            res.endconsummationdatemonth = tq.consummationdate.Value.Month;
+                            res.endconsummationdateyear = tq.consummationdate.Value.Year;
                         }
                     }
                     return res;
@@ -1627,17 +1616,29 @@ namespace CRMWebApi.Controllers
         // SAM SDM ve CC TİM Taskları için evrak alım durumu
         public static async Task<List<EvrakBasari>> getEvrakBasari()
         {
+            HashSet<int> containLastTask = new HashSet<int> { 1, 2, 3, 4, 7 }; // işleme alınacak task tipleri kontroll
+            HashSet<int> taskids = new HashSet<int>() { 114, 64, 33, 31, 63, 113, 122, 1195 }; // etkileşimli başlangıç taskları
+            HashSet<int> ssl = new HashSet<int>();
+            HashSet<int> fsl = new HashSet<int>();
+            using(var db = new KOCSAMADLSEntities())
+            {
+                var b = db.SL.First(r => r.SLID == 7);
+                foreach (var item in b.BayiSTask.Split(','))
+                    if (!ssl.Contains(Convert.ToInt32(item))) ssl.Add(Convert.ToInt32(item));
+                foreach (var item in b.BayiETask.Split(','))
+                    if (!fsl.Contains(Convert.ToInt32(item))) ssl.Add(Convert.ToInt32(item));
+            }
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             return WebApiConfig.AdslProccesses.Where(t =>
             {
                 var stq = WebApiConfig.AdslTaskQueues.ContainsKey(t.Value.S_TON) ? WebApiConfig.AdslTaskQueues[t.Value.S_TON] : null;
-                return stq != null && (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114);
+                return stq != null && taskids.Contains(stq.taskid);
             }).Select(r =>
             {
                 EvrakBasari res = new EvrakBasari();
                 var stq = WebApiConfig.AdslTaskQueues[r.Value.S_TON];
-                adsl_taskqueue samtq = null;
+                //adsl_taskqueue samtq = null;
                 res.custid = stq.attachedobjectid.Value;
                 res.stask_desc = stq.description;
                 if (WebApiConfig.AdslCustomers.ContainsKey(stq.attachedobjectid.Value))
@@ -1657,8 +1658,9 @@ namespace CRMWebApi.Controllers
                 res.s_create_day = stq.creationdate.Value.Day;
                 res.s_create_month = stq.creationdate.Value.Month;
                 res.s_create_year = stq.creationdate.Value.Year;
-                if (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114)
-                    res.slstart = stq.appointmentdate.HasValue ? stq.appointmentdate : stq.creationdate;
+                //res.process_status = StateTypeText[r.Value.Last_Status];
+                //if (stq.taskid == 33 || stq.taskid == 64 || stq.taskid == 114)
+                //    res.slstart = stq.appointmentdate.HasValue ? stq.appointmentdate : stq.creationdate;
                 if (stq.appointmentdate.HasValue)
                 {
                     res.s_netflow_day = stq.appointmentdate.Value.Day;
@@ -1684,27 +1686,61 @@ namespace CRMWebApi.Controllers
                         else
                         {
                             res.s_statustype = StateTypeText[WebApiConfig.AdslStatus[stq.status.Value].statetype.Value];
-                            HashSet<int> tt = new HashSet<int>();
-                            var subs = new Queue<int>();
-                            if (WebApiConfig.AdslSubTasks.TryGetValue(stq.taskorderno, out tt))
-                                foreach (var item in tt) subs.Enqueue(item);
-                            else
-                                res.process_status = StateTypeText[WebApiConfig.AdslStatus[stq.status.Value].statetype.Value];
-                            while (subs.Count > 0)
+                            int tqno = stq.taskorderno;
+                            while (WebApiConfig.AdslSubTasks.ContainsKey(tqno))
                             {
-                                var p = subs.Dequeue();
-                                if (WebApiConfig.AdslSubTasks.TryGetValue(p, out tt))
-                                    foreach (var item in tt) subs.Enqueue(item);
-                                if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].taskid == 90)
-                                {
-                                    samtq = WebApiConfig.AdslTaskQueues[p];
-                                    break;
-                                }
-                                else if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].status == null)
-                                    res.process_status = "Bekleyen";
-                                else if (WebApiConfig.AdslTaskQueues.ContainsKey(p) && WebApiConfig.AdslTaskQueues[p].status != null && WebApiConfig.AdslStatus.ContainsKey(WebApiConfig.AdslTaskQueues[p].status.Value))
-                                    res.process_status = StateTypeText[WebApiConfig.AdslStatus[WebApiConfig.AdslTaskQueues[p].status.Value].statetype.Value];
+                                int test = tqno;
+                                foreach (var item in WebApiConfig.AdslSubTasks[tqno])
+                                    if (containLastTask.Contains(WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[item].taskid].tasktype))
+                                    {
+                                        if (ssl.Contains(WebApiConfig.AdslTaskQueues[item].taskid) && WebApiConfig.AdslTaskQueues[item].attachmentdate.HasValue)
+                                            res.slstart = WebApiConfig.AdslTaskQueues[item].attachmentdate.Value;
+                                        if (fsl.Contains(WebApiConfig.AdslTaskQueues[item].taskid) && WebApiConfig.AdslTaskQueues[item].consummationdate.HasValue)
+                                            res.slfinish = WebApiConfig.AdslTaskQueues[item].consummationdate.Value;
+                                        tqno = item;
+                                        break;
+                                    }
+                                if (tqno == test || WebApiConfig.AdslTaskQueues[tqno].taskid == 90) break;
                             }
+
+                            var samtq = WebApiConfig.AdslTaskQueues[tqno];
+
+                            if (samtq.taskid == 90)
+                            {
+                                res.kapamatask_ton = samtq.taskorderno;
+                                res.kapamatask_name = WebApiConfig.AdslTasks.ContainsKey(samtq.taskid) ? WebApiConfig.AdslTasks[samtq.taskid].taskname : "İsimsiz Task";
+                                res.kapamatask_personel = samtq.attachedpersonelid.HasValue ? WebApiConfig.AdslPersonels.ContainsKey(samtq.attachedpersonelid.Value) ? WebApiConfig.AdslPersonels[samtq.attachedpersonelid.Value].personelname : "İsimsiz Personel" : "Atanmamış";
+                                res.kapamatask_create_day = samtq.creationdate.Value.Day;
+                                res.kapamatask_create_month = samtq.creationdate.Value.Month;
+                                res.kapamatask_create_year = samtq.creationdate.Value.Year;
+                                res.kapamatask_desc = samtq.description;
+                                //if (stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122)
+                                //    res.slstart = samtq.creationdate;
+                                if (samtq.consummationdate.HasValue)
+                                {
+                                    res.kapamatask_close_day = samtq.consummationdate.Value.Day;
+                                    res.kapamatask_close_month = samtq.consummationdate.Value.Month;
+                                    res.kapamatask_close_year = samtq.consummationdate.Value.Year;
+                                    res.slfinish = samtq.consummationdate;
+                                }
+                                if (samtq.status.HasValue)
+                                {
+                                    if (WebApiConfig.AdslStatus.ContainsKey(samtq.status.Value))
+                                    {
+                                        res.kapamatask_statustype = StateTypeText[WebApiConfig.AdslStatus[samtq.status.Value].statetype.Value];
+                                        res.process_status = StateTypeText[WebApiConfig.AdslStatus[samtq.status.Value].statetype.Value];
+                                    }
+                                    else
+                                        res.kapamatask_status = "Tanımsız Durum";
+                                }
+                                else
+                                {
+                                    res.kapamatask_statustype = "Bekleyen";
+                                    res.process_status = "Bekleyen";
+                                }
+                            }
+                            else
+                                res.process_status = "Bekleyen";
                         }
                     }
                     else
@@ -1717,44 +1753,6 @@ namespace CRMWebApi.Controllers
                 {
                     res.s_statustype = "Bekleyen";
                     res.process_status = "Bekleyen";
-                }
-                if (samtq != null)
-                {
-                    res.kapamatask_ton = samtq.taskorderno;
-                    res.kapamatask_name = WebApiConfig.AdslTasks.ContainsKey(samtq.taskid) ? WebApiConfig.AdslTasks[samtq.taskid].taskname : "İsimsiz Task";
-                    res.kapamatask_personel = samtq.attachedpersonelid.HasValue ? WebApiConfig.AdslPersonels.ContainsKey(samtq.attachedpersonelid.Value) ? WebApiConfig.AdslPersonels[samtq.attachedpersonelid.Value].personelname : "İsimsiz Personel" : "Atanmamış";
-                    res.kapamatask_create_day = samtq.creationdate.Value.Day;
-                    res.kapamatask_create_month = samtq.creationdate.Value.Month;
-                    res.kapamatask_create_year = samtq.creationdate.Value.Year;
-                    res.kapamatask_desc = samtq.description;
-                    if (stq.taskid == 31 || stq.taskid == 63 || stq.taskid == 113 || stq.taskid == 122)
-                        res.slstart = samtq.creationdate;
-                    if (samtq.consummationdate.HasValue)
-                    {
-                        res.kapamatask_close_day = samtq.consummationdate.Value.Day;
-                        res.kapamatask_close_month = samtq.consummationdate.Value.Month;
-                        res.kapamatask_close_year = samtq.consummationdate.Value.Year;
-                        res.slfinish = samtq.consummationdate;
-                        //res.sl = (TimeSpan?)(res.slstart.Value - res.slfinish.Value);
-                    }
-                    if (samtq.status.HasValue)
-                    {
-                        if (WebApiConfig.AdslStatus.ContainsKey(samtq.status.Value))
-                        {
-                            res.kapamatask_statustype = StateTypeText[WebApiConfig.AdslStatus[samtq.status.Value].statetype.Value];
-                            res.process_status = StateTypeText[WebApiConfig.AdslStatus[samtq.status.Value].statetype.Value];
-                        }
-                        else
-                        {
-                            res.kapamatask_status = "Tanımsız Durum";
-                            res.process_status = "Tanımsız Durum İhlali";
-                        }
-                    }
-                    else
-                    {
-                        res.kapamatask_statustype = "Bekleyen";
-                        res.process_status = "Bekleyen";
-                    }
                 }
                 return res;
             }).ToList();
