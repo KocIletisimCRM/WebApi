@@ -1536,6 +1536,32 @@ namespace CRMWebApi.Controllers
             }).ToList();
         }
 
+        public static async Task<List<SKRate>> getRatesReport(DateTimeRange request)
+        {
+            await WebApiConfig.updateAdslData().ConfigureAwait(false);
+            HashSet<int> etyp = new HashSet<int>() { 33, 64, 114 };
+            HashSet<int> ktyp = new HashSet<int>() { 1, 9 }; // kurulum Tasklarının başlangıç task tipleri
+            HashSet<int> dtyp = new HashSet<int>() { 6, 8, 12 }; // Arıza ve Donanım Tasklarının başlangıç task tipleri
+            Dictionary<DateTime, SKRate> allDates = new Dictionary<DateTime, SKRate>();
+            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
+                allDates[date] = new SKRate();
+            WebApiConfig.AdslProccesses.Values.Where(r =>
+            { // devam edilecek
+                var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                var krtq = r.Kr_TON.HasValue && WebApiConfig.FiberTaskQueues.ContainsKey(r.Kr_TON.Value) ? WebApiConfig.FiberTaskQueues[r.Kr_TON.Value] : null;
+                var krpre = krtq != null && krtq.previoustaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
+                var ttyp = WebApiConfig.AdslTasks[stq.taskid].tasktype;
+                var ntf = stq.appointmentdate.HasValue ? stq.appointmentdate : null;
+                var appointment = krpre != null && krpre.appointmentdate.HasValue ? krpre.appointmentdate : null;
+                return (dtyp.Contains(ttyp) && ntf.HasValue && ntf.Value >= request.start && ntf.Value <= request.end) || (ktyp.Contains(ttyp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end) || (etyp.Contains(stq.taskid) && stq.appointmentdate.HasValue && stq.appointmentdate.Value >= request.start && stq.appointmentdate.Value <= request.end);
+            }).Select(r =>
+            {
+
+                return r.Last_Status;
+            }).ToList();
+            return null;
+        }
+
         // Bayi bilgileri üzerindeki modem miktarları ve üzerlerindeki iş miktarları
         public static async Task<List<InfoBayiReport>> getInfoBayi()
         {
