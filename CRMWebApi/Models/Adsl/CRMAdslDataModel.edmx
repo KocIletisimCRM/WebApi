@@ -79,6 +79,7 @@
           <Property Name="customerid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="customername" Type="nvarchar" MaxLength="500" />
           <Property Name="superonlineCustNo" Type="nvarchar" MaxLength="15" />
+          <Property Name="xdslno" Type="nvarchar" MaxLength="10" />
           <Property Name="tc" Type="nvarchar" MaxLength="50" />
           <Property Name="gsm" Type="nvarchar" MaxLength="50" />
           <Property Name="phone" Type="nvarchar" MaxLength="50" />
@@ -1294,6 +1295,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="email" Type="String" MaxLength="100" FixedLength="true" Unicode="true" />
           <Property Name="superonlineCustNo" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="mahalle" Relationship="KOCSAMADLSModel.mahalle" FromRole="customer" ToRole="mahalleKoy" />
+          <Property Name="xdslno" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="customeradsl_taskqueue">
           <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
@@ -2017,6 +2019,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="customer">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.customer">
               <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="xdslno" ColumnName="xdslno" />
                 <ScalarProperty Name="superonlineCustNo" ColumnName="superonlineCustNo" />
                 <ScalarProperty Name="email" ColumnName="email" />
                 <ScalarProperty Name="bucakKimlikNo" ColumnName="bucakKimlikNo" />

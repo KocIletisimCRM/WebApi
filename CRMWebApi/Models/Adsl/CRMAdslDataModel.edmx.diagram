@@ -8,7 +8,7 @@
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_campaigns" Width="1.5" PointX="2.75" PointY="3.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customer_status" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerdocument" Width="2" PointX="4.75" PointY="3.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerproduct" Width="1.5" PointX="6.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_customerproduct" Width="1.5" PointX="6.875" PointY="0.5" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.daire" Width="1.5" PointX="18.375" PointY="7.375" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_document" Width="1.5" PointX="0.75" PointY="7.75" IsExpanded="true" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.adsl_gsmKullanımıStatus" Width="1.5" PointX="3.25" PointY="7.875" IsExpanded="true" />

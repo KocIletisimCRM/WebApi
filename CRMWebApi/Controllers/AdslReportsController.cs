@@ -1449,7 +1449,7 @@ namespace CRMWebApi.Controllers
         }
 
         // Başarı oranları ve sl süreleri raporu
-        public static async Task<List<SKRate>> getRates(DateTimeRange request)
+        public static async Task<List<SKRate>> getRatesReport(DateTimeRange request)
         { // istenilen ay içerisinde kurulum randevusuna düşen (kr netflow tarihi o ay olan) ve bunların başarılı gerçekleşen miktarları
             var skdate = new DateTimeRange { start = request.start.AddMonths(-4), end = request.end.AddMonths(2) };
             List<SKReport> SKReport = await getSKReport(skdate).ConfigureAwait(false);
@@ -1526,40 +1526,132 @@ namespace CRMWebApi.Controllers
                     return res;
                 }).ToList();
 
-                res.k_completed = (int?)completedProcess;
+                res.k_completed = (int)completedProcess;
                 res.k_total = totalProccess;
-                res.e_SuccesRate = completedDoc != 0 ? (double?)Math.Round(100 * (completedDoc / totalDoc), 2) : null;
-                res.k_SuccesRate = completedProcess != 0 ? (double?)Math.Round(100 * (completedProcess / totalProccess), 2) : null;
-                res.e_SLOrt = saySL != 0 ? (double?)Math.Round(timeSL / saySL, 2) : null;
+                res.e_SuccesRate = completedDoc != 0 ? (double)Math.Round(100 * (completedDoc / totalDoc), 2) : 0;
+                res.k_SuccesRate = completedProcess != 0 ? (double)Math.Round(100 * (completedProcess / totalProccess), 2) : 0;
+                res.e_SLOrt = saySL != 0 ? (double)Math.Round(timeSL / saySL, 2) : 0;
 
                 return res;
             }).ToList();
         }
 
-        public static async Task<List<SKRate>> getRatesReport(DateTimeRange request)
+        public static async Task<List<SKRate>> getRates(DateTimeRange request)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
-            HashSet<int> etyp = new HashSet<int>() { 33, 64, 114 };
+            HashSet<int> containLastTask = new HashSet<int> { 1, 2, 3, 4, 7 }; // işleme alınacak task tipleri
+            HashSet<int> etyp = new HashSet<int>() { 33, 64, 114 }; // evrak alma task idileri
             HashSet<int> ktyp = new HashSet<int>() { 1, 9 }; // kurulum Tasklarının başlangıç task tipleri
             HashSet<int> dtyp = new HashSet<int>() { 6, 8, 12 }; // Arıza ve Donanım Tasklarının başlangıç task tipleri
+            //if (request.end > DateTime.Now) request.end = DateTime.Now.Date.AddDays(1);
             Dictionary<DateTime, SKRate> allDates = new Dictionary<DateTime, SKRate>();
-            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < request.end; date = date.AddDays(1))
+            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < (request.end > DateTime.Now ? DateTime.Now.Date.AddDays(1) : request.end.AddDays(7)); date = date.AddDays(1))
+            {
                 allDates[date] = new SKRate();
+                allDates[date].date = date;
+            }
+            int a = 0;
             WebApiConfig.AdslProccesses.Values.Where(r =>
             { // devam edilecek
                 var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
-                var krtq = r.Kr_TON.HasValue && WebApiConfig.FiberTaskQueues.ContainsKey(r.Kr_TON.Value) ? WebApiConfig.FiberTaskQueues[r.Kr_TON.Value] : null;
+                var krtq = r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Kr_TON.Value] : null;
                 var krpre = krtq != null && krtq.previoustaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
                 var ttyp = WebApiConfig.AdslTasks[stq.taskid].tasktype;
                 var ntf = stq.appointmentdate.HasValue ? stq.appointmentdate : null;
                 var appointment = krpre != null && krpre.appointmentdate.HasValue ? krpre.appointmentdate : null;
-                return (dtyp.Contains(ttyp) && ntf.HasValue && ntf.Value >= request.start && ntf.Value <= request.end) || (ktyp.Contains(ttyp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end) || (etyp.Contains(stq.taskid) && stq.appointmentdate.HasValue && stq.appointmentdate.Value >= request.start && stq.appointmentdate.Value <= request.end);
+                return ((dtyp.Contains(ttyp) || etyp.Contains(stq.taskid)) && ntf.HasValue && ntf.Value >= request.start && ntf.Value <= request.end) || (ktyp.Contains(ttyp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end);
             }).Select(r =>
             {
+                a++;
+                var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
+                var krtq = r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Kr_TON.Value] : null;
+                var krpre = krtq != null && krtq.previoustaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
+                var ntfdate = stq.appointmentdate.HasValue ? stq.appointmentdate : null;
+                var appointment = krpre != null && krpre.appointmentdate.HasValue ? krpre.appointmentdate : null;
+                var styp = WebApiConfig.AdslTasks[stq.taskid].tasktype;
+                if (etyp.Contains(stq.taskid) && ntfdate.HasValue && ntfdate.Value >= request.start && ntfdate.Value <= request.end) // evrak işlemleri
+                {
+                    allDates[ntfdate.Value.Date.AddDays(1).AddMinutes(-1)].e_total++;
+                    int tqno = stq.taskorderno;
+                    while (WebApiConfig.AdslSubTasks.ContainsKey(tqno))
+                    {
+                        int test = tqno;
+                        foreach (var item in WebApiConfig.AdslSubTasks[tqno])
+                            if (containLastTask.Contains(WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[item].taskid].tasktype))
+                            {
+                                tqno = item;
+                                break;
+                            }
+                        if (tqno == test) break;
+                        else if (WebApiConfig.AdslTaskQueues[tqno].taskid == 90)
+                        {
+                            var csdt = WebApiConfig.AdslTaskQueues[tqno].consummationdate;
+                            if (csdt.HasValue && allDates.ContainsKey(csdt.Value.Date.AddDays(1).AddMinutes(-1)))
+                            {
+                                allDates[csdt.Value.Date.AddDays(1).AddMinutes(-1)].e_completed++;
+                                allDates[csdt.Value.Date.AddDays(1).AddMinutes(-1)].e_SLOrt += (csdt.Value - stq.appointmentdate.Value).TotalHours;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (dtyp.Contains(styp)) // donanım ve arıza işlemleri için
+                {
+                    var ktk = r.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Ktk_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                    var ktkdate = ktk != null && ktk.consummationdate.HasValue ? ktk.consummationdate : null;
+                    if (styp == 6)
+                    {
+                        allDates[ntfdate.Value.Date.AddDays(1).AddMinutes(-1)].a_total++;
+                        if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
+                        {
+                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].a_completed++;
+                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].a_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
+                        }
 
+                    }
+                    else
+                    {
+                        allDates[ntfdate.Value.Date.AddDays(1).AddMinutes(-1)].d_total++;
+                        if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
+                        {
+                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].d_completed++;
+                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].d_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
+                        }
+                    }
+                }
+                else if (ktyp.Contains(styp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end) // kurulum işlemleri
+                {
+                    allDates[appointment.Value.Date.AddDays(1).AddMinutes(-1)].k_total++;
+                    var ktk = r.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Ktk_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
+                    var ktkdate = ktk != null && ktk.consummationdate.HasValue ? ktk.consummationdate : null;
+                    if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
+                    {
+                        allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].k_completed++;
+                        allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].k_SLOrt += (ktkdate.Value - appointment.Value).TotalHours;
+                    }
+                }
                 return r.Last_Status;
             }).ToList();
-            return null;
+            SKRate back = new SKRate();
+            SKRate rate = new SKRate();
+            return allDates.Select(r =>
+            {
+                rate = new SKRate() { a_SLOrt = r.Value.a_SLOrt + rate.a_SLOrt, e_SLOrt = r.Value.e_SLOrt + rate.e_SLOrt, d_SLOrt = r.Value.d_SLOrt + rate.d_SLOrt, k_SLOrt = r.Value.k_SLOrt + rate.k_SLOrt };
+                r.Value.a_completed += back.a_completed;
+                r.Value.e_completed += back.e_completed;
+                r.Value.d_completed += back.d_completed;
+                r.Value.k_completed += back.k_completed;
+                r.Value.a_total += back.a_total;
+                r.Value.e_total += back.e_total;
+                r.Value.d_total += back.d_total;
+                r.Value.k_total += back.k_total;
+                r.Value.a_SLOrt = r.Value.a_completed > 0 ? (double)Math.Round((double)(rate.a_SLOrt / r.Value.a_completed), 2) : 0;
+                r.Value.e_SLOrt = r.Value.e_completed > 0 ? (double)Math.Round((double)(rate.e_SLOrt / r.Value.e_completed), 2) : 0;
+                r.Value.d_SLOrt = r.Value.d_completed > 0 ? (double)Math.Round((double)(rate.d_SLOrt / r.Value.d_completed), 2) : 0;
+                r.Value.k_SLOrt = r.Value.k_completed > 0 ? (double)Math.Round((double)(rate.k_SLOrt / r.Value.k_completed), 2) : 0;
+                back = r.Value;
+                return r.Value;
+            }).ToList();
         }
 
         // Bayi bilgileri üzerindeki modem miktarları ve üzerlerindeki iş miktarları
@@ -1646,7 +1738,7 @@ namespace CRMWebApi.Controllers
             HashSet<int> taskids = new HashSet<int>() { 114, 64, 33, 31, 63, 113, 122, 1195 }; // etkileşimli başlangıç taskları
             HashSet<int> ssl = new HashSet<int>();
             HashSet<int> fsl = new HashSet<int>();
-            using(var db = new KOCSAMADLSEntities())
+            using (var db = new KOCSAMADLSEntities())
             {
                 var b = db.SL.First(r => r.SLID == 7);
                 foreach (var item in b.BayiSTask.Split(','))

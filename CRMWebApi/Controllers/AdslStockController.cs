@@ -157,6 +157,7 @@ namespace CRMWebApi.Controllers
         public HttpResponseMessage InsertStockMovement(adsl_stockmovement r, int? tqid, string serinos)
         {
             //  var serinos = Request.Params.AllKeys;
+            HashSet<int> perids = new HashSet<int>() { 4672, 4673 };
             var serials = serinos.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).ToList();
             var errormessage = new DTOResponseError();
             if (!serials.Any()) serials.Add(null);
@@ -211,7 +212,6 @@ namespace CRMWebApi.Controllers
                                 {
                                     if (r.toobjecttype == (int)KOCUserTypes.StockRoomStuff)// ise bu bir satınalma işlemidir.
                                     {
-
                                         sm.fromobjecttype = (int)KOCUserTypes.ADSLProcurementAssosiation;
                                         sm.fromobject = (int)KOCUserTypes.ADSLProcurementAssosiation;
                                         sm.confirmationdate = DateTime.Now;
@@ -228,6 +228,7 @@ namespace CRMWebApi.Controllers
                                     sm.fromobject = userID;
                                 }
                                 if (r.relatedtaskqueue != null) sm.confirmationdate = DateTime.Now;
+                                if (perids.Contains(r.toobject.Value)) sm.confirmationdate = DateTime.Now; // listedeki personellere modem atıldığında işlem otomatik onaylanacak (28.04.2017) Hüseyin KOZ
                                 sm.movementdate = DateTime.Now;
                                 sm.updatedby = userID;
                                 db.stockmovement.Add(sm);
