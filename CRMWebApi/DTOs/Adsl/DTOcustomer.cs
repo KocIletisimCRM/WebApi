@@ -11,6 +11,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string phone { get; set; }
         public string email { get; set; }
         public string superonlineCustNo { get; set; }
+        public string xdslno { get; set; }
         public Nullable<int> ilKimlikNo { get; set; }
         public Nullable<int> ilceKimlikNo { get; set; }
         public Nullable<int> bucakKimlikNo { get; set; }

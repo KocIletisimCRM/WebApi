@@ -66,6 +66,7 @@ namespace CRMWebApi.Controllers
                             item.updatedby = KOCAuthorizeAttribute.getCurrentUser().userId;
                             item.email = ct.email;
                             item.superonlineCustNo = ct.superonlineCustNo;
+                            item.xdslno = ct.xdslno;
                             item.description = ct.description;
                         }
                         db.SaveChanges();

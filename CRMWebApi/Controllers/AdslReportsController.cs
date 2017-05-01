@@ -1545,7 +1545,7 @@ namespace CRMWebApi.Controllers
             HashSet<int> dtyp = new HashSet<int>() { 6, 8, 12 }; // Arıza ve Donanım Tasklarının başlangıç task tipleri
             //if (request.end > DateTime.Now) request.end = DateTime.Now.Date.AddDays(1);
             Dictionary<DateTime, SKRate> allDates = new Dictionary<DateTime, SKRate>();
-            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < (request.end > DateTime.Now ? DateTime.Now.Date.AddDays(1) : request.end.AddDays(7)); date = date.AddDays(1))
+            for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < (request.end.AddDays(7) > DateTime.Now ? DateTime.Now.Date.AddDays(1) : request.end.AddDays(7)); date = date.AddDays(1))
             {
                 allDates[date] = new SKRate();
                 allDates[date].date = date;
