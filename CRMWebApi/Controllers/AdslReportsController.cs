@@ -1550,7 +1550,6 @@ namespace CRMWebApi.Controllers
                 allDates[date] = new SKRate();
                 allDates[date].date = date;
             }
-            int a = 0;
             WebApiConfig.AdslProccesses.Values.Where(r =>
             { // devam edilecek
                 var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
@@ -1562,7 +1561,6 @@ namespace CRMWebApi.Controllers
                 return ((dtyp.Contains(ttyp) || etyp.Contains(stq.taskid)) && ntf.HasValue && ntf.Value >= request.start && ntf.Value <= request.end) || (ktyp.Contains(ttyp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end);
             }).Select(r =>
             {
-                a++;
                 var stq = WebApiConfig.AdslTaskQueues[r.S_TON];
                 var krtq = r.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Kr_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Kr_TON.Value] : null;
                 var krpre = krtq != null && krtq.previoustaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;

@@ -402,11 +402,11 @@ namespace CRMWebApi.Controllers
                                 { // Oluşan task evrak tedarik taskıysa kurulum yapacak bayiye ata
                                     //var satbayi = db.taskqueue.First(r => r.taskorderno == saletask).attachedpersonelid;
                                     //personel_id = db.personel.First(p => p.personelid == satbayi).kurulumpersonelid; //Kurulum bayisi idsi
-                                    personel_id = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value].attachedpersonelid;
+                                    personel_id = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[saletask].K_TON.Value].attachedpersonelid;
                                 }
-                                if (item == 1204)
+                                if (item == 1204 || item == 130)
                                 { // Oluşan task satış yapan bayiye ata
-                                    personel_id = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].S_TON].attachedpersonelid;
+                                    personel_id = WebApiConfig.AdslTaskQueues[WebApiConfig.AdslProccesses[saletask].S_TON].attachedpersonelid;
                                 }
                                 if ((oot.tasktype == 3 || item == 142) && krtask != null)
                                 { // kurulum türünde gelenleri kurulum randevusu taskındaki personele ata (modem iade alma taskı da eklendi (taskid = 142))
