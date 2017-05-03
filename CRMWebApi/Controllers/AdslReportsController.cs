@@ -1545,10 +1545,13 @@ namespace CRMWebApi.Controllers
             HashSet<int> dtyp = new HashSet<int>() { 6, 8, 12 }; // Arıza ve Donanım Tasklarının başlangıç task tipleri
             //if (request.end > DateTime.Now) request.end = DateTime.Now.Date.AddDays(1);
             Dictionary<DateTime, SKRate> allDates = new Dictionary<DateTime, SKRate>();
+            Dictionary<DateTime, SKRate> forsl = new Dictionary<DateTime, SKRate>(); // SL hesapları için oluşturuldu
             for (DateTime date = request.start.AddDays(1).AddMinutes(-1); date < (request.end.AddDays(7) > DateTime.Now ? DateTime.Now.Date.AddDays(1) : request.end.AddDays(7)); date = date.AddDays(1))
             {
                 allDates[date] = new SKRate();
                 allDates[date].date = date;
+                forsl[date] = new SKRate();
+                forsl[date].date = date;
             }
             WebApiConfig.AdslProccesses.Values.Where(r =>
             { // devam edilecek
@@ -1585,10 +1588,8 @@ namespace CRMWebApi.Controllers
                         {
                             var csdt = WebApiConfig.AdslTaskQueues[tqno].consummationdate;
                             if (csdt.HasValue && allDates.ContainsKey(csdt.Value.Date.AddDays(1).AddMinutes(-1)))
-                            {
                                 allDates[csdt.Value.Date.AddDays(1).AddMinutes(-1)].e_completed++;
-                                allDates[csdt.Value.Date.AddDays(1).AddMinutes(-1)].e_SLOrt += (csdt.Value - stq.appointmentdate.Value).TotalHours;
-                            }
+                            //allDates[csdt.Value.Date.AddDays(1).AddMinutes(-1)].e_SLOrt += (csdt.Value - stq.appointmentdate.Value).TotalHours;
                             break;
                         }
                     }
@@ -1601,20 +1602,15 @@ namespace CRMWebApi.Controllers
                     {
                         allDates[ntfdate.Value.Date.AddDays(1).AddMinutes(-1)].a_total++;
                         if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
-                        {
                             allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].a_completed++;
-                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].a_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
-                        }
-
+                        //allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].a_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
                     }
                     else
                     {
                         allDates[ntfdate.Value.Date.AddDays(1).AddMinutes(-1)].d_total++;
                         if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
-                        {
                             allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].d_completed++;
-                            allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].d_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
-                        }
+                        //allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].d_SLOrt += (ktkdate.Value - stq.appointmentdate.Value).TotalHours;
                     }
                 }
                 else if (ktyp.Contains(styp) && appointment.HasValue && appointment.Value >= request.start && appointment.Value <= request.end) // kurulum işlemleri
@@ -1623,18 +1619,77 @@ namespace CRMWebApi.Controllers
                     var ktk = r.Ktk_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(r.Ktk_TON.Value) ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : null;
                     var ktkdate = ktk != null && ktk.consummationdate.HasValue ? ktk.consummationdate : null;
                     if (ktk != null && ktk.status.HasValue && WebApiConfig.AdslStatus.ContainsKey(ktk.status.Value) && WebApiConfig.AdslStatus[ktk.status.Value].statetype.Value == 1 && ktkdate.HasValue && allDates.ContainsKey(ktkdate.Value.Date.AddDays(1).AddMinutes(-1)))
-                    {
                         allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].k_completed++;
-                        allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].k_SLOrt += (ktkdate.Value - appointment.Value).TotalHours;
-                    }
+                    //allDates[ktkdate.Value.Date.AddDays(1).AddMinutes(-1)].k_SLOrt += (ktkdate.Value - appointment.Value).TotalHours;
                 }
                 return r.Last_Status;
             }).ToList();
+            /*WebApiConfig.AdslTaskQueues.Where(r =>
+            { // SL hesapları atanma zamanına bakılmaksızın istenilen ay içerisinde kapanan işlemler için hesaplanacaktır.
+                var tno = r.Value.relatedtaskorderid ?? r.Value.taskorderno;
+                var stq = WebApiConfig.AdslTaskQueues.ContainsKey(tno) ? WebApiConfig.AdslTaskQueues[tno] : null;
+                var typ = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? (int?)WebApiConfig.AdslTasks[r.Value.taskid].tasktype : null;
+                return (r.Value.consummationdate.HasValue && r.Value.consummationdate.Value >= request.start && r.Value.consummationdate.Value < request.end && stq != null) && ((etyp.Contains(stq.taskid) && r.Value.taskid == 90) || (typ == 5));
+            }).Select(r =>
+            {
+                var tno = r.Value.relatedtaskorderid ?? r.Value.taskorderno;
+                var stq = WebApiConfig.AdslTaskQueues.ContainsKey(tno) ? WebApiConfig.AdslTaskQueues[tno] : null;
+                var styp = stq != null && WebApiConfig.AdslTasks.ContainsKey(stq.taskid) ? (int?)WebApiConfig.AdslTasks[stq.taskid].tasktype : null;
+                var typ = WebApiConfig.AdslTasks.ContainsKey(r.Value.taskid) ? (int?)WebApiConfig.AdslTasks[r.Value.taskid].tasktype : null;
+                if (r.Value.taskid == 90)
+                {
+                    forsl[r.Value.consummationdate.Value.Date.AddDays(1).AddMinutes(-1)].e_SLOrt += (r.Value.consummationdate.Value - (stq.appointmentdate ?? stq.creationdate).Value).TotalHours;
+                    forsl[r.Value.consummationdate.Value.Date.AddDays(1).AddMinutes(-1)].e_total++;
+                }
+                else if (styp.HasValue && ktyp.Contains(styp.Value) && typ == 5)
+                {
+                    var proccess = WebApiConfig.AdslProccesses.ContainsKey(tno) ? WebApiConfig.AdslProccesses[tno] : null;
+                    var krtq = proccess != null && proccess.Kr_TON.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(proccess.Kr_TON.Value) ? WebApiConfig.AdslTaskQueues[proccess.Kr_TON.Value] : null;
+                    var pretq = krtq != null && krtq.previoustaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(krtq.previoustaskorderid.Value) ? WebApiConfig.AdslTaskQueues[krtq.previoustaskorderid.Value] : null;
+                }
+                return true;
+            }).ToList();*/
+            WebApiConfig.AdslProccesses.Values.SelectMany(p => p.SLs.Where(sl => p.Last_Status == 1 && sl.Value.KStart.HasValue && sl.Value.KEnd.HasValue && sl.Value.KEnd.Value >= request.start && sl.Value.KEnd.Value < request.end).Select(ksl =>
+                {
+                    if (ksl.Key == 1 || ksl.Key == 4)
+                    { // Kurulum SL
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].k_SLOrt += (ksl.Value.KEnd.Value - ksl.Value.KStart.Value).TotalHours;
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].k_total++;
+                    }
+                    else if (ksl.Key == 5)
+                    { // Donanım SL
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].d_SLOrt += (ksl.Value.KEnd.Value - ksl.Value.KStart.Value).TotalHours;
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].d_total++;
+                    }
+                    else if (ksl.Key == 7)
+                    { // Evrak SL
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].e_SLOrt += (ksl.Value.KEnd.Value - ksl.Value.KStart.Value).TotalHours;
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].e_total++;
+                    }
+                    else if (ksl.Key == 9)
+                    { // Arıza SL
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].a_SLOrt += (ksl.Value.KEnd.Value - ksl.Value.KStart.Value).TotalHours;
+                        forsl[ksl.Value.KEnd.Value.Date.AddDays(1).AddMinutes(-1)].a_total++;
+                    }
+                    return true;
+                })
+            ).ToList();
             SKRate back = new SKRate();
             SKRate rate = new SKRate();
             return allDates.Select(r =>
             {
-                rate = new SKRate() { a_SLOrt = r.Value.a_SLOrt + rate.a_SLOrt, e_SLOrt = r.Value.e_SLOrt + rate.e_SLOrt, d_SLOrt = r.Value.d_SLOrt + rate.d_SLOrt, k_SLOrt = r.Value.k_SLOrt + rate.k_SLOrt };
+                var fsl = forsl[r.Key];
+                rate = new SKRate()
+                {
+                    a_SLOrt = fsl.a_SLOrt + rate.a_SLOrt,
+                    a_total = fsl.a_total + rate.a_total,
+                    e_SLOrt = fsl.e_SLOrt + rate.e_SLOrt,
+                    e_total = fsl.e_total + rate.e_total,
+                    d_SLOrt = fsl.d_SLOrt + rate.d_SLOrt,
+                    d_total = fsl.d_total + rate.d_total,
+                    k_SLOrt = fsl.k_SLOrt + rate.k_SLOrt,
+                    k_total = fsl.k_total + rate.k_total
+                };
                 r.Value.a_completed += back.a_completed;
                 r.Value.e_completed += back.e_completed;
                 r.Value.d_completed += back.d_completed;
@@ -1643,10 +1698,14 @@ namespace CRMWebApi.Controllers
                 r.Value.e_total += back.e_total;
                 r.Value.d_total += back.d_total;
                 r.Value.k_total += back.k_total;
-                r.Value.a_SLOrt = r.Value.a_completed > 0 ? (double)Math.Round((double)(rate.a_SLOrt / r.Value.a_completed), 2) : 0;
-                r.Value.e_SLOrt = r.Value.e_completed > 0 ? (double)Math.Round((double)(rate.e_SLOrt / r.Value.e_completed), 2) : 0;
-                r.Value.d_SLOrt = r.Value.d_completed > 0 ? (double)Math.Round((double)(rate.d_SLOrt / r.Value.d_completed), 2) : 0;
-                r.Value.k_SLOrt = r.Value.k_completed > 0 ? (double)Math.Round((double)(rate.k_SLOrt / r.Value.k_completed), 2) : 0;
+                r.Value.a_SLOrt = rate.a_total > 0 ? (double)Math.Round((double)(rate.a_SLOrt / rate.a_total), 2) : 0;
+                r.Value.e_SLOrt = rate.e_total > 0 ? (double)Math.Round((double)(rate.e_SLOrt / rate.e_total), 2) : 0;
+                r.Value.d_SLOrt = rate.d_total > 0 ? (double)Math.Round((double)(rate.d_SLOrt / rate.d_total), 2) : 0;
+                r.Value.k_SLOrt = rate.k_total > 0 ? (double)Math.Round((double)(rate.k_SLOrt / rate.k_total), 2) : 0;
+                //r.Value.a_SLOrt = r.Value.a_completed > 0 ? (double)Math.Round((double)(rate.a_SLOrt / r.Value.a_completed), 2) : 0;
+                //r.Value.e_SLOrt = r.Value.e_completed > 0 ? (double)Math.Round((double)(rate.e_SLOrt / r.Value.e_completed), 2) : 0;
+                //r.Value.d_SLOrt = r.Value.d_completed > 0 ? (double)Math.Round((double)(rate.d_SLOrt / r.Value.d_completed), 2) : 0;
+                //r.Value.k_SLOrt = r.Value.k_completed > 0 ? (double)Math.Round((double)(rate.k_SLOrt / r.Value.k_completed), 2) : 0;
                 back = r.Value;
                 return r.Value;
             }).ToList();
