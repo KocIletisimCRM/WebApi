@@ -229,7 +229,6 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, tqid, "application/json");
         }
 
-
         [Route("SaveStockMovement")]
         [HttpPost]
         public HttpResponseMessage SaveStockMovement(stockmovement r, int? tqid, string serinos)

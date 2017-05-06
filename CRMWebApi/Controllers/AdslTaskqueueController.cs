@@ -510,7 +510,7 @@ namespace CRMWebApi.Controllers
                                     }
                                 }
                                 db.taskqueue.Add(amtq);
-                                #region Hat Satışları için Otomatik Task Kapamalar
+                                #region Hat Satışları ve Akıllı Nokta için Otomatik Task Kapamalar
                                 /*
                                  * ADSL'Lİ HAT SATIŞLARINDA BAYİ SATIŞ TASKI OTOMATİK KAPATILACAK
                                  * ADSL'Lİ HAT SATIŞINDA İNTERNET HİYERARŞİSİ OLUŞURKEN İNTERNET SÜRECİNİ BAŞLATAN SATIŞ TASKI RELATED OLARAK KENDİNİ TUTMALI
@@ -545,6 +545,13 @@ namespace CRMWebApi.Controllers
                                     stq.fault = WebApiConfig.AdslTasks[item].tasktype == 1 ? "Bayi" : "Çağrı Merkezi";
                                     stq.description = "Satış Otomatik Olarak Kapatıldı.";
                                     listArray.Add(stq);
+                                }
+                                /* Akıllı Nokta ve bunun gibi işlem yapacak bayiler için sol kapama taskından sonra başlangıç taskı geliyorsa bu task related olarak kendini tutacak (Yeni Hiyerarşi Şartı) 06.05.2017 (Hüseyin KOZ) */
+                                else if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[item].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[item].tasktype].startsProccess && dtq.task.tasktype == 5)
+                                {
+                                    db.SaveChanges();
+                                    amtq.relatedtaskorderid = amtq.taskorderno;
+                                    amtq.fault = WebApiConfig.AdslTaskQueues.ContainsKey(saletask) ? WebApiConfig.AdslTaskQueues[saletask].fault : null;
                                 }
                                 #endregion
                             }
