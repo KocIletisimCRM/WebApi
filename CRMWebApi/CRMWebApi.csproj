@@ -415,6 +415,7 @@
     <Compile Include="DTOs\Fiber\DTOSavePenetrasyon.cs" />
     <Compile Include="DTOs\Fiber\DTOTest.cs" />
     <Compile Include="DTOs\Fiber\KocFiberProccess.cs" />
+    <Compile Include="DTOs\SMS\SendSMS.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizeAttribute.cs" />
     <Compile Include="KOCAuthorization\KOCAuthorizedUser.cs" />
     <Compile Include="KOCAuthorization\KOCUserTypes.cs" />
