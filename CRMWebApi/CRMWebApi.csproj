@@ -570,6 +570,9 @@
     <Compile Include="Models\Adsl\getPersonelStockAdsl_Result.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Adsl\GSMOperator.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Adsl\il.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
@@ -590,6 +593,12 @@
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\SL.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\SMSContent.cs">
+      <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Adsl\SMSInfo.cs">
       <DependentUpon>CRMAdslDataModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\Adsl\v_taskorderIsEditable.cs">

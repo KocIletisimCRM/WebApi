@@ -44,6 +44,7 @@ namespace CRMWebApi.Models.Adsl
         public string email { get; set; }
         public string superonlineCustNo { get; set; }
         public string xdslno { get; set; }
+        public Nullable<int> gsmoperator { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<adsl_taskqueue> taskqueue { get; set; }

@@ -18,6 +18,8 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Threading;
+using CRMWebApi.DTOs.SMS;
+using System.Text.RegularExpressions;
 
 namespace CRMWebApi.Controllers
 {
@@ -745,6 +747,22 @@ namespace CRMWebApi.Controllers
                                         db.SaveChanges();
                                         ntq.attachedpersonelid = WebApiConfig.AdslTaskQueues.ContainsKey(saletask) ? WebApiConfig.AdslTaskQueues[saletask].attachedpersonelid : null;
                                         ntq.relatedtaskorderid = ntq.taskorderno;
+                                    }
+                                    /*  */
+                                    if (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 3)
+                                    { // tamamlanan işlem kurulum ise müşteriye mesaj gönder operator bul
+                                        var cstmr = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
+                                        if (cstmr != null && !string.IsNullOrEmpty(cstmr.gsm))
+                                        {
+                                            var tel = clean(cstmr.gsm);
+                                            if (!string.IsNullOrEmpty(tel))
+                                            {
+                                                ComSMSApi sms = new ComSMSApi();
+                                                cstmr.gsm = tel;
+                                                // sendSMS(Mesaj, telefon numaraları)
+                                                sms.sendSMS("", new List<string>() { tel });
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -1596,6 +1614,19 @@ namespace CRMWebApi.Controllers
                     throw;
                 }
             }
+        }
+
+        string clean(string phone)
+        {
+            Regex digitsOnly = new Regex(@"[^\d]");
+            var ph = digitsOnly.Replace(phone, "");
+            if (ph.StartsWith("905") && ph.Length == 12)
+                return ph;
+            else if (ph.StartsWith("05") && ph.Length == 11)
+                return $"9{ph}";
+            else if (ph.StartsWith("5") && ph.Length == 10)
+                return $"90{ph}";
+            return "";
         }
 
         //public adsl_taskqueue saleTask(int taskorderno)

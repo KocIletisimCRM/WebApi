@@ -82,6 +82,7 @@
           <Property Name="xdslno" Type="nvarchar" MaxLength="10" />
           <Property Name="tc" Type="nvarchar" MaxLength="50" />
           <Property Name="gsm" Type="nvarchar" MaxLength="50" />
+          <Property Name="gsmoperator" Type="int" />
           <Property Name="phone" Type="nvarchar" MaxLength="50" />
           <Property Name="birthdate" Type="datetime" />
           <Property Name="ilKimlikNo" Type="int" />
@@ -168,6 +169,13 @@
           <Property Name="id" Type="int" Nullable="false" />
           <Property Name="gsmText" Type="nvarchar" MaxLength="50" />
           <Property Name="deleted" Type="int" />
+        </EntityType>
+        <EntityType Name="GSMOperator">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="50" Nullable="false" />
         </EntityType>
         <EntityType Name="il">
           <Key>
@@ -295,6 +303,32 @@
           <Property Name="lastupdated" Type="datetime" Nullable="false" />
           <Property Name="updatedby" Type="int" Nullable="false" />
           <Property Name="deleted" Type="bit" />
+        </EntityType>
+        <EntityType Name="SMSContent">
+          <Key>
+            <PropertyRef Name="Cid" />
+          </Key>
+          <Property Name="Cid" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Id" Type="bigint" Nullable="false" />
+          <Property Name="MSISDN" Type="nvarchar" MaxLength="15" Nullable="false" />
+          <Property Name="Network" Type="int" Nullable="false" />
+          <Property Name="Cost" Type="float" Nullable="false" />
+          <Property Name="Submitted" Type="datetime" Nullable="false" />
+          <Property Name="LastUpdated" Type="datetime" Nullable="false" />
+          <Property Name="State" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Sequence" Type="int" Nullable="false" />
+          <Property Name="ErrorCode" Type="int" />
+          <Property Name="Payload" Type="nvarchar(max)" />
+          <Property Name="Xser" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="SMSInfo">
+          <Key>
+            <PropertyRef Name="Gsm" />
+            <PropertyRef Name="MessageId" />
+          </Key>
+          <Property Name="Gsm" Type="nvarchar" MaxLength="15" Nullable="false" />
+          <Property Name="MessageId" Type="bigint" Nullable="false" />
+          <Property Name="Cid" Type="int" />
         </EntityType>
         <EntityType Name="stockcard">
           <Key>
@@ -508,6 +542,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySet Name="daire" EntityType="Self.daire" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="document" EntityType="Self.document" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="gsmKullanımıStatus" EntityType="Self.gsmKullanımıStatus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GSMOperator" EntityType="Self.GSMOperator" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="il" EntityType="Self.il" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ilce" EntityType="Self.ilce" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="issStatus" EntityType="Self.issStatus" Schema="dbo" store:Type="Tables" />
@@ -520,6 +555,8 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySet Name="personel" EntityType="Self.personel" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="product_service" EntityType="Self.product_service" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SL" EntityType="Self.SL" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SMSContent" EntityType="Self.SMSContent" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SMSInfo" EntityType="Self.SMSInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockcard" EntityType="Self.stockcard" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockmovement" EntityType="Self.stockmovement" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="task" EntityType="Self.task" Schema="dbo" store:Type="Tables" />
@@ -1083,6 +1120,9 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             <End Role="customer" EntitySet="customer" />
             <End Role="mahalleKoy" EntitySet="mahalleKoy" />
           </AssociationSet>
+          <EntitySet Name="GSMOperator" EntityType="KOCSAMADLSModel.GSMOperator" />
+          <EntitySet Name="SMSContent" EntityType="KOCSAMADLSModel.SMSContent" />
+          <EntitySet Name="SMSInfo" EntityType="KOCSAMADLSModel.SMSInfo" />
           </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -1296,6 +1336,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="superonlineCustNo" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="mahalle" Relationship="KOCSAMADLSModel.mahalle" FromRole="customer" ToRole="mahalleKoy" />
           <Property Name="xdslno" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="gsmoperator" Type="Int32" />
         </EntityType>
         <Association Name="customeradsl_taskqueue">
           <End Type="KOCSAMADLSModel.customer" Role="customer" Multiplicity="0..1" />
@@ -1706,6 +1747,39 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="GSMOperator">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="SMSContent">
+          <Key>
+            <PropertyRef Name="Cid" />
+          </Key>
+          <Property Name="Cid" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Id" Type="Int64" Nullable="false" />
+          <Property Name="MSISDN" Type="String" Nullable="false" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="Network" Type="Int32" Nullable="false" />
+          <Property Name="Cost" Type="Double" Nullable="false" />
+          <Property Name="Submitted" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LastUpdated" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="State" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Sequence" Type="Int32" Nullable="false" />
+          <Property Name="ErrorCode" Type="Int32" />
+          <Property Name="Payload" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Xser" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="SMSInfo">
+          <Key>
+            <PropertyRef Name="Gsm" />
+            <PropertyRef Name="MessageId" />
+          </Key>
+          <Property Name="Gsm" Type="String" Nullable="false" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="MessageId" Type="Int64" Nullable="false" />
+          <Property Name="Cid" Type="Int32" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2019,6 +2093,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySetMapping Name="customer">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.customer">
               <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="gsmoperator" ColumnName="gsmoperator" />
                 <ScalarProperty Name="xdslno" ColumnName="xdslno" />
                 <ScalarProperty Name="superonlineCustNo" ColumnName="superonlineCustNo" />
                 <ScalarProperty Name="email" ColumnName="email" />
@@ -2199,6 +2274,41 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <EntitySetMapping Name="GSMOperator">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.GSMOperator">
+              <MappingFragment StoreEntitySet="GSMOperator">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SMSContent">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.SMSContent">
+              <MappingFragment StoreEntitySet="SMSContent">
+                <ScalarProperty Name="Xser" ColumnName="Xser" />
+                <ScalarProperty Name="Payload" ColumnName="Payload" />
+                <ScalarProperty Name="ErrorCode" ColumnName="ErrorCode" />
+                <ScalarProperty Name="Sequence" ColumnName="Sequence" />
+                <ScalarProperty Name="State" ColumnName="State" />
+                <ScalarProperty Name="LastUpdated" ColumnName="LastUpdated" />
+                <ScalarProperty Name="Submitted" ColumnName="Submitted" />
+                <ScalarProperty Name="Cost" ColumnName="Cost" />
+                <ScalarProperty Name="Network" ColumnName="Network" />
+                <ScalarProperty Name="MSISDN" ColumnName="MSISDN" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Cid" ColumnName="Cid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SMSInfo">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.SMSInfo">
+              <MappingFragment StoreEntitySet="SMSInfo">
+                <ScalarProperty Name="Cid" ColumnName="Cid" />
+                <ScalarProperty Name="MessageId" ColumnName="MessageId" />
+                <ScalarProperty Name="Gsm" ColumnName="Gsm" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
