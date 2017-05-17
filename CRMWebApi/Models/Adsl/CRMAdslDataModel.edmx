@@ -170,7 +170,7 @@
           <Property Name="gsmText" Type="nvarchar" MaxLength="50" />
           <Property Name="deleted" Type="int" />
         </EntityType>
-        <EntityType Name="GSMOperator">
+        <EntityType Name="GSMO">
           <Key>
             <PropertyRef Name="id" />
           </Key>
@@ -542,7 +542,7 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <EntitySet Name="daire" EntityType="Self.daire" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="document" EntityType="Self.document" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="gsmKullanımıStatus" EntityType="Self.gsmKullanımıStatus" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="GSMOperator" EntityType="Self.GSMOperator" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GSMO" EntityType="Self.GSMO" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="il" EntityType="Self.il" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ilce" EntityType="Self.ilce" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="issStatus" EntityType="Self.issStatus" Schema="dbo" store:Type="Tables" />
@@ -1120,9 +1120,9 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             <End Role="customer" EntitySet="customer" />
             <End Role="mahalleKoy" EntitySet="mahalleKoy" />
           </AssociationSet>
-          <EntitySet Name="GSMOperator" EntityType="KOCSAMADLSModel.GSMOperator" />
           <EntitySet Name="SMSContent" EntityType="KOCSAMADLSModel.SMSContent" />
           <EntitySet Name="SMSInfo" EntityType="KOCSAMADLSModel.SMSInfo" />
+          <EntitySet Name="GSMO" EntityType="KOCSAMADLSModel.GSMO" />
           </EntityContainer>
         <Association Name="personeltaskqueue">
           <End Type="KOCSAMADLSModel.adsl_personel" Role="personel" Multiplicity="0..1" />
@@ -1747,13 +1747,6 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="GSMOperator">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-        </EntityType>
         <EntityType Name="SMSContent">
           <Key>
             <PropertyRef Name="Cid" />
@@ -1779,6 +1772,13 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
           <Property Name="Gsm" Type="String" Nullable="false" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="MessageId" Type="Int64" Nullable="false" />
           <Property Name="Cid" Type="Int32" />
+        </EntityType>
+        <EntityType Name="GSMO">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -2274,14 +2274,6 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <EntitySetMapping Name="GSMOperator">
-            <EntityTypeMapping TypeName="KOCSAMADLSModel.GSMOperator">
-              <MappingFragment StoreEntitySet="GSMOperator">
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="SMSContent">
             <EntityTypeMapping TypeName="KOCSAMADLSModel.SMSContent">
               <MappingFragment StoreEntitySet="SMSContent">
@@ -2306,6 +2298,14 @@ warning 6002: The table/view 'KOCSAMADLS.dbo.vcampaignproducts' does not have a 
                 <ScalarProperty Name="Cid" ColumnName="Cid" />
                 <ScalarProperty Name="MessageId" ColumnName="MessageId" />
                 <ScalarProperty Name="Gsm" ColumnName="Gsm" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GSMO">
+            <EntityTypeMapping TypeName="KOCSAMADLSModel.GSMO">
+              <MappingFragment StoreEntitySet="GSMO">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -12,7 +12,7 @@ namespace CRMWebApi.Models.Adsl
     using System;
     using System.Collections.Generic;
     
-    public partial class GSMOperator
+    public partial class GSMO
     {
         public int id { get; set; }
         public string name { get; set; }

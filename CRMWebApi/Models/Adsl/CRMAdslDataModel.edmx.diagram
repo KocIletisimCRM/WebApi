@@ -75,9 +75,9 @@
         <EntityTypeShape EntityType="KOCSAMADLSModel.paymentsystemtype" Width="1.5" PointX="17.5" PointY="19.125" />
         <AssociationConnector Association="KOCSAMADLSModel.paymentsystempaymentsystemtype" />
         <AssociationConnector Association="KOCSAMADLSModel.mahalle" />
-        <EntityTypeShape EntityType="KOCSAMADLSModel.GSMOperator" Width="1.5" PointX="11.375" PointY="19.25" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.SMSContent" Width="1.5" PointX="9.375" PointY="19.125" />
         <EntityTypeShape EntityType="KOCSAMADLSModel.SMSInfo" Width="1.5" PointX="7.5" PointY="19.125" />
+        <EntityTypeShape EntityType="KOCSAMADLSModel.GSMO" Width="1.5" PointX="11.5" PointY="19.25" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

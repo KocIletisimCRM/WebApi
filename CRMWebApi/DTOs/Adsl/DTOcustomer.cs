@@ -8,6 +8,7 @@ namespace CRMWebApi.DTOs.Adsl
         public string customername { get; set; }
         public string tc { get; set; }
         public string gsm { get; set; }
+        public int gsmoperator { get; set; }
         public string phone { get; set; }
         public string email { get; set; }
         public string superonlineCustNo { get; set; }

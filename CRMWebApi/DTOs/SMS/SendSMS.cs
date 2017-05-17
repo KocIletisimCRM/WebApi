@@ -36,7 +36,7 @@ namespace CRMWebApi.DTOs.SMS
         /// <summary>
         /// message: Message content; phones: Phone numbers to send messages (905xxxxxxxxx)
         /// </summary>
-        public void sendSMS(string message, List<string> phones)
+        public List<OperatorInfo> sendSMS(string message, List<string> phones)
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -63,9 +63,10 @@ namespace CRMWebApi.DTOs.SMS
                             });
                         db.SMSInfo.AddRange(infos);
                         db.SaveChanges();
-                        getQuery(res.Response.MessageId, null);
+                        return getQuery(res.Response.MessageId, null);
                     }
                 }
+                return new List<OperatorInfo>();
             }
         }
 
@@ -87,7 +88,7 @@ namespace CRMWebApi.DTOs.SMS
         /// <summary>
         /// mid: MessageId; list: Numbers to be queried || null (905xxxxxxxxx)
         /// </summary>
-        public void getQuery(int mid, List<string> list)
+        public List<OperatorInfo> getQuery(int mid, List<string> list)
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -106,21 +107,25 @@ namespace CRMWebApi.DTOs.SMS
                     if (res.Response.Status.Code == 200 && res.Response.ReportDetail.List.Count > 0)
                     {
                         List<SMSContent> cns = new List<SMSContent>();
+                        List<OperatorInfo> opList = new List<OperatorInfo>();
                         foreach (var item in res.Response.ReportDetail.List)
+                        {
                             cns.Add(new SMSContent()
                             {
                                 Cost = item.Cost,
                                 ErrorCode = item.ErrorCode,
                                 Id = item.Id,
-                                LastUpdated = item.LastUpdated,
+                                LastUpdated = item.LastUpdated < DateTime.Now.AddYears(-1) ? DateTime.Now : item.LastUpdated,
                                 MSISDN = item.MSISDN,
                                 Network = item.Network,
                                 Payload = item.Payload,
                                 Sequence = item.Sequence,
                                 State = item.State,
-                                Submitted = item.Submitted,
+                                Submitted = item.Submitted < DateTime.Now.AddYears(-1) ? DateTime.Now : item.Submitted,
                                 Xser = item.Xser
                             });
+                            opList.Add(new OperatorInfo { gsm = item.MSISDN, op = item.Network });
+                        }
                         db.SMSContent.AddRange(cns);
                         db.SaveChanges();
                         List<SMSInfo> ins = db.SMSInfo.Where(r => r.MessageId == mid).ToList();
@@ -130,10 +135,18 @@ namespace CRMWebApi.DTOs.SMS
                         });
                         //db.SMSInfo.AddRange(ins);
                         db.SaveChanges();
+                        return opList;
                     }
                 }
+                return new List<OperatorInfo>();
             }
         }
+    }
+
+    public class OperatorInfo
+    {
+        public string gsm { get; set; }
+        public int op { get; set; }
     }
 
     public class Status

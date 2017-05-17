@@ -105,6 +105,9 @@ namespace CRMWebApi.Controllers
                 var mahalleIds = customers.Select(m => m.mahalleKimlikNo).Distinct().ToList();
                 var mahalles = db.mahalleKoy.Where(m => mahalleIds.Contains(m.kimlikNo)).ToList();
 
+                var opIds = customers.Select(o => o.gsmoperator).Distinct().ToList();
+                var ops = db.GSMO.Where(o => opIds.Contains(o.id)).ToList();
+
                 var ilIds = res.Select(s => s.attachedcustomer.ilKimlikNo).Distinct().ToList();
                 var iller = db.il.Where(i => ilIds.Contains(i.kimlikNo)).ToList();
 
@@ -748,20 +751,25 @@ namespace CRMWebApi.Controllers
                                         ntq.attachedpersonelid = WebApiConfig.AdslTaskQueues.ContainsKey(saletask) ? WebApiConfig.AdslTaskQueues[saletask].attachedpersonelid : null;
                                         ntq.relatedtaskorderid = ntq.taskorderno;
                                     }
-                                    /*  */
-                                    if (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 3)
-                                    { // tamamlanan işlem kurulum ise müşteriye mesaj gönder operator bul
-                                        var cstmr = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
-                                        if (cstmr != null && !string.IsNullOrEmpty(cstmr.gsm))
+                                }
+                            }
+                            /*  */
+                            if (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 3)
+                            { // tamamlanan işlem kurulum ise müşteriye mesaj gönder operator bul
+                                var cstmr = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
+                                if (cstmr != null && !string.IsNullOrEmpty(cstmr.gsm))
+                                {
+                                    var tel = clean(cstmr.gsm);
+                                    if (!string.IsNullOrEmpty(tel))
+                                    {
+                                        ComSMSApi sms = new ComSMSApi();
+                                        cstmr.gsm = tel;
+                                        // sendSMS(Mesaj, telefon numaraları)
+                                        var snc = sms.sendSMS("Superonline'a Hoş Geldiniz...", new List<string>() { tel });
+                                        if (snc.Count > 0)
                                         {
-                                            var tel = clean(cstmr.gsm);
-                                            if (!string.IsNullOrEmpty(tel))
-                                            {
-                                                ComSMSApi sms = new ComSMSApi();
-                                                cstmr.gsm = tel;
-                                                // sendSMS(Mesaj, telefon numaraları)
-                                                sms.sendSMS("", new List<string>() { tel });
-                                            }
+                                            var op = snc.First().op;
+                                            cstmr.gsmoperator = op;
                                         }
                                     }
                                 }
@@ -1461,13 +1469,6 @@ namespace CRMWebApi.Controllers
             }
         }
 
-        //[Route("getSaleTask")]
-        //[HttpPost]
-        //public HttpResponseMessage getSaleTask(int taskorderno)
-        //{
-        //    return Request.CreateResponse(HttpStatusCode.OK, saleTask(taskorderno), "application/json");
-        //}
-
         [Route("getTaskqueuesForBayi")]
         [HttpPost]
         public HttpResponseMessage getTaskqueuesForBayi(DTOGetTaskqueuesForBayi request)
@@ -1628,32 +1629,6 @@ namespace CRMWebApi.Controllers
                 return $"90{ph}";
             return "";
         }
-
-        //public adsl_taskqueue saleTask(int taskorderno)
-        //{ // taskorderno gönderildiginde o taskın başlangıç taskını geri döndürür
-        //    using (var db = new KOCSAMADLSEntities())
-        //    {
-        //        var ptq = db.taskqueue.FirstOrDefault(r => r.taskorderno == taskorderno && r.deleted == false);
-        //        var startertasks = db.tasktypes.Where(r => r.startsProccess == true).Select(r => r.TaskTypeId).ToList();
-        //        int? saletask = null;
-        //        while (ptq != null)
-        //        {
-        //            ptq.task = db.task.Where(t => t.taskid == ptq.taskid).FirstOrDefault();
-        //            if (startertasks.Contains(ptq.task.tasktype))
-        //            {
-        //                saletask = ptq.taskorderno;
-        //                break;
-        //            }
-        //            else
-        //            {
-        //                ptq = db.taskqueue.Where(t => t.taskorderno == ptq.previoustaskorderid).FirstOrDefault();
-        //            }
-        //        }
-        //        if (saletask != null)
-        //            return db.taskqueue.First(r => r.taskorderno == saletask);
-        //        return null;
-        //    }
-        //}
 
         [Route("getTaskqueueInfo")]
         [HttpPost, HttpGet]
