@@ -22,6 +22,12 @@ namespace CRMWebApi.DTOs.SMS
         private static string DataCodingHeader = "DataCoding";
         private static string Default = "Default";
         private static string FromName = "KOCILETISIM";
+        private static string message = "Turkcell Süperonline'a Hoş Gelniniz.";
+
+        public string getMessage()
+        {
+            return message;
+        }
 
         private JProperty Credential()
         {

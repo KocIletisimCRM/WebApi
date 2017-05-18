@@ -798,7 +798,7 @@ namespace CRMWebApi.Controllers
                     dtq.description = tq.description != null ? tq.description : dtq.description;
                     dtq.appointmentdate = (tq.appointmentdate != null) ? tq.appointmentdate : dtq.appointmentdate;
                     dtq.creationdate = (tq.creationdate != null) ? tq.creationdate : dtq.creationdate;
-                    dtq.assistant_personel = (tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
+                    dtq.assistant_personel = (tq.asistanPersonel != null && tq.asistanPersonel.personelid != 0) ? tq.asistanPersonel.personelid : dtq.assistant_personel;
                     dtq.consummationdate = tq.consummationdate != null ? tq.consummationdate : (dtq.consummationdate != null) ? dtq.consummationdate : DateTime.Now;
                     dtq.lastupdated = DateTime.Now;
                     db.SaveChanges();
@@ -1290,6 +1290,32 @@ namespace CRMWebApi.Controllers
                 }
                 return Request.CreateResponse(HttpStatusCode.OK, docs.Select(d => d.toDTO()), "application/json");
             }
+        }
+
+        [Route("saveTaskCollective")]
+        [HttpPost, HttpGet]
+        public HttpResponseMessage saveTaskCollective(List<DTOtaskqueue> request)
+        { // toplu task kapatmak için oluşturuldu (Hüseyin) 03.11.2016
+            using (var db = new CRMEntities())
+                foreach (var item in request)
+                {
+                    // her task tek tek kontrol et, task için stok veya dokuman entegrasyonu varsa kaydetme
+                    var ttype = db.task.First(t => t.taskid == item.task.taskid).tasktype;
+                    var stype = db.taskstatepool.FirstOrDefault(t => t.taskstateid == item.taskstatepool.taskstateid);
+                    if (db.taskstatematches.Any(t => t.taskid == item.task.taskid && t.stateid == item.taskstatepool.taskstateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty))) { }
+                    else if (db.taskstatematches.Any(tsm => tsm.deleted == false && tsm.taskid == item.task.taskid && tsm.stateid == item.taskstatepool.taskstateid && !(tsm.documents == null || tsm.documents.Trim() == string.Empty))) { }
+                    else if ((ttype == 1 || ttype == 7 || ttype == 8 || ttype == 9) && item.customerproduct.Count > 0 && db.campaigns.Any(c => c.deleted == false && c.id == (Convert.ToInt32(item.customerproduct[0])) && !(c.documents == null || c.documents.Trim() == string.Empty))) { }
+                    else
+                    {
+                        item.task.tasktypes = new DTOTaskTypes();
+                        item.task.tasktypes.TaskTypeId = ttype;
+                        item.taskstatepool.statetype = stype != null ? stype.statetype : null;
+                        item.customerproduct = new List<object>(); // ürün kaydında yanlışlık olmaması için ürünü temizle
+                        item.customerdocument = new List<object>();
+                        saveTaskQueues(item);
+                    }
+                }
+            return Request.CreateResponse(HttpStatusCode.OK, "Ok", "application/json");
         }
 
         private List<stockmovement> getStockmovements(CRMEntities db, int taskorderno, int taskid, int stateid)

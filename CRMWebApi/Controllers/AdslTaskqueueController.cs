@@ -753,7 +753,7 @@ namespace CRMWebApi.Controllers
                                     }
                                 }
                             }
-                            /*  */
+                            /*  mesaj belirlenince işlem açılacak
                             if (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 3)
                             { // tamamlanan işlem kurulum ise müşteriye mesaj gönder operator bul
                                 var cstmr = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
@@ -765,7 +765,7 @@ namespace CRMWebApi.Controllers
                                         ComSMSApi sms = new ComSMSApi();
                                         cstmr.gsm = tel;
                                         // sendSMS(Mesaj, telefon numaraları)
-                                        var snc = sms.sendSMS("Superonline'a Hoş Geldiniz...", new List<string>() { tel });
+                                        var snc = sms.sendSMS(sms.getMessage(), new List<string>() { tel });
                                         if (snc.Count > 0)
                                         {
                                             var op = snc.First().op;
@@ -773,7 +773,7 @@ namespace CRMWebApi.Controllers
                                         }
                                     }
                                 }
-                            }
+                            }*/
                         }
                         #endregion
                     }
