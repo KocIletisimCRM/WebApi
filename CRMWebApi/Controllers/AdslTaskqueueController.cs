@@ -753,7 +753,7 @@ namespace CRMWebApi.Controllers
                                     }
                                 }
                             }
-                            /*  mesaj belirlenince işlem açılacak
+                            /*  mesaj belirlenince işlem açılacak 
                             if (WebApiConfig.AdslTasks.ContainsKey(tq.task.taskid) && WebApiConfig.AdslTasks[tq.task.taskid].tasktype == 3)
                             { // tamamlanan işlem kurulum ise müşteriye mesaj gönder operator bul
                                 var cstmr = db.customer.FirstOrDefault(r => r.customerid == dtq.attachedobjectid);
@@ -764,12 +764,38 @@ namespace CRMWebApi.Controllers
                                     {
                                         ComSMSApi sms = new ComSMSApi();
                                         cstmr.gsm = tel;
-                                        // sendSMS(Mesaj, telefon numaraları)
                                         var snc = sms.sendSMS(sms.getMessage(), new List<string>() { tel });
-                                        if (snc.Count > 0)
+                                        if (snc.Response.Status.Code == 200)
                                         {
-                                            var op = snc.First().op;
-                                            cstmr.gsmoperator = op;
+                                            var info = new SMSInfo
+                                            {
+                                                Gsm = tel,
+                                                MessageId = snc.Response.MessageId
+                                            };
+                                            var query = sms.getQuery(snc.Response.MessageId, null);
+                                            if (query.Response.Status.Code == 200 && query.Response.ReportDetail.List.Count > 0)
+                                            {
+                                                var item = query.Response.ReportDetail.List[0];
+                                                var cntt = new SMSContent
+                                                {
+                                                    Cost = item.Cost,
+                                                    ErrorCode = item.ErrorCode,
+                                                    Id = item.Id,
+                                                    LastUpdated = DateTime.Now,
+                                                    MSISDN = item.MSISDN,
+                                                    Network = item.Network,
+                                                    Payload = item.Payload,
+                                                    Sequence = item.Sequence,
+                                                    State = item.State,
+                                                    Submitted = DateTime.Now,
+                                                    Xser = item.Xser
+                                                };
+                                                db.SMSContent.Add(cntt);
+                                                db.SaveChanges();
+                                                info.Cid = cntt.Cid;
+                                                cstmr.gsmoperator = item.Network;
+                                            }
+                                            db.SMSInfo.Add(info);
                                         }
                                     }
                                 }
