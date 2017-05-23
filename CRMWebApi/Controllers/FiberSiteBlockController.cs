@@ -58,7 +58,6 @@ namespace CRMWebApi.Controllers
             var user = KOCAuthorizeAttribute.getCurrentUser();
             using (var db = new CRMEntities())
             {
-
                 var dblock = db.block.Where(r => r.blockid == request.blockid).FirstOrDefault();
                 var errormessage = new DTOResponseError();
 
@@ -88,7 +87,35 @@ namespace CRMWebApi.Controllers
 
                 return Request.CreateResponse(HttpStatusCode.OK, errormessage, "application/json");
             }
+        }
 
+        [Route("multiEditBlock"), HttpPost]
+        public HttpResponseMessage multiEditBlock(DTOMultiEditBlockDate request)
+        {
+            var user = KOCAuthorizeAttribute.getCurrentUser();
+            using (var db = new CRMEntities())
+            {
+                try
+                {
+                    var dblocks = db.block.Where(r => request.BIDS.Contains(r.blockid)).ToList();
+
+                    foreach (var b in dblocks)
+                    {
+                        b.updatedby = user.userId;
+                        b.lastupdated = DateTime.Now;
+                        b.sosaledate = request.FSD;
+                        if (request.SSC) b.readytosaledate = request.SOSR;
+                        if (request.KSC) b.kocsaledate = request.KSR;
+                    }
+                    db.SaveChanges();
+
+                    return Request.CreateResponse(HttpStatusCode.OK, "Tamamlandı", "application/json");
+                }
+                catch (Exception)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK, "Tamamlanmadı", "application/json");
+                }
+            }
         }
 
         [Route("insertBlock")]
