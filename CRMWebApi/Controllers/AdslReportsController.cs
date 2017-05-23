@@ -703,17 +703,19 @@ namespace CRMWebApi.Controllers
         }
 
         // SKR Bimser vb. bayiler için (07.02.2017) Hüseyin KOZ
-        public static async Task<List<SKReport>> getAgentBayiSKReport(DateTimeRange request)
+        public static async Task<List<SKReport>> getAgentBayiSKReport(DateTimeRange request, int perid, string pass)
         {
             await WebApiConfig.updateAdslData().ConfigureAwait(false);
             var StateTypeText = new string[] { "", "Tamamlanan", "İptal Edilen", "Ertelenen" };
+            var s_per = WebApiConfig.AdslPersonels.ContainsKey(perid) ? WebApiConfig.AdslPersonels[perid] : null;
+            if (s_per == null || (s_per.password != pass))
+                return new List<SKReport>() { new SKReport() { IlkTaskPersonel = "Personel Bilgileri Yanlış", MusteriId = 0 } };
             return WebApiConfig.AdslProccesses.Values.Where(r =>
             {
                 var last_tq = WebApiConfig.AdslTaskQueues[r.Last_TON];
-                var s_per = WebApiConfig.AdslPersonels.ContainsKey(3602) ? WebApiConfig.AdslPersonels[3602] : null;
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];
                 var ktk_tq = r.Ktk_TON.HasValue ? WebApiConfig.AdslTaskQueues[r.Ktk_TON.Value] : last_tq;
-                return s_per != null && (s_per.roles & (int)KOCUserTypes.AgentStuff) == (int)KOCUserTypes.AgentStuff && s_tq.attachedpersonelid == s_per.personelid && (ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end);
+                return s_per != null && s_tq.attachedpersonelid == s_per.personelid && (ktk_tq.status == null || ktk_tq.consummationdate >= request.start && ktk_tq.consummationdate <= request.end);
             }).Select(r =>
             {
                 var s_tq = WebApiConfig.AdslTaskQueues[r.S_TON];

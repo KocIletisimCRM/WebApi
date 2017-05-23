@@ -552,11 +552,13 @@ namespace CRMWebApi.Controllers
                                     listArray.Add(stq);
                                 }
                                 /* Akıllı Nokta ve bunun gibi işlem yapacak bayiler için sol kapama taskından sonra başlangıç taskı geliyorsa bu task related olarak kendini tutacak (Yeni Hiyerarşi Şartı) 06.05.2017 (Hüseyin KOZ) */
-                                else if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[item].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[item].tasktype].startsProccess && dtq.task.tasktype == 5)
+                                else if (WebApiConfig.AdslTasks.ContainsKey(item) && WebApiConfig.AdslTaskTypes.ContainsKey(WebApiConfig.AdslTasks[item].tasktype) && WebApiConfig.AdslTaskTypes[WebApiConfig.AdslTasks[item].tasktype].startsProccess && dtq.task.tasktype == 5 && WebApiConfig.AdslTaskQueues.ContainsKey(saletask) && WebApiConfig.AdslTasks.ContainsKey(WebApiConfig.AdslTaskQueues[saletask].taskid) && WebApiConfig.AdslTasks[WebApiConfig.AdslTaskQueues[saletask].taskid].tasktype == 15)
                                 {
                                     db.SaveChanges();
+                                    var st = WebApiConfig.AdslTaskQueues[saletask];
                                     amtq.relatedtaskorderid = amtq.taskorderno;
-                                    amtq.fault = WebApiConfig.AdslTaskQueues.ContainsKey(saletask) ? WebApiConfig.AdslTaskQueues[saletask].fault : null;
+                                    amtq.fault = st.fault;
+                                    amtq.attachedpersonelid = st.attachedpersonelid;
                                 }
                                 #endregion
                             }
