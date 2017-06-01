@@ -34,7 +34,7 @@ namespace CRMWebApi.KOCAuthorization
                 Select(u => u.Key).ToList().AsParallel().ForAll(t =>
                 {
                     ActiveUsers.TryRemove(t, out user);
-                }); 
+                });
             ActiveUsers.TryGetValue(Token, out user);
             if (user != null) user.lastActivityTime = DateTime.Now;
             return user;
@@ -79,40 +79,40 @@ namespace CRMWebApi.KOCAuthorization
                 {
                     using (var db = new KOCSAMADLSEntities())
                     {
-                       
-                        var emails = db.personel.Where(p=>p.deleted==false && p.email!=null).ToList();
 
-                            var user = emails.Where(p => p.email.ToString().Split(';')[0] == UserName && p.password == Password).FirstOrDefault();
+                        var emails = db.personel.Where(p => p.deleted == false && p.email != null).ToList();
 
-                            #region girişi kontrol et
-                            if (user != null)
+                        var user = emails.Where(p => p.email.ToString().Split(';')[0] == UserName && p.password == Password).FirstOrDefault();
+
+                        #region girişi kontrol et
+                        if (user != null)
+                        {
+                            token = createToken();
+                            ActiveUsers[token] = new KOCAuthorizedUser
                             {
-                                token = createToken();
-                                ActiveUsers[token] = new KOCAuthorizedUser
-                                {
-                                    userId = user.personelid,
-                                    userName = user.email,
-                                    userFullName = user.personelname,
-                                    userRole = user.roles,
-                                    lastActivityTime = DateTime.Now,
-                                    creationTime = DateTime.Now
-                                };
-                                HttpContext.Current.Response.Headers.Add(authorizedTokenHeader, token);
+                                userId = user.personelid,
+                                userName = user.email,
+                                userFullName = user.personelname,
+                                userRole = user.roles,
+                                lastActivityTime = DateTime.Now,
+                                creationTime = DateTime.Now
+                            };
+                            HttpContext.Current.Response.Headers.Add(authorizedTokenHeader, token);
 
-                            }
-                            else
-                            {
-                                ErrorMessage = "Kullanıcı bilgileri hatalı...";
-                                HandleUnauthorizedRequest(actionContext);
-                            }
-                            #endregion
                         }
+                        else
+                        {
+                            ErrorMessage = "Kullanıcı bilgileri hatalı...";
+                            HandleUnauthorizedRequest(actionContext);
+                        }
+                        #endregion
+                    }
                 }
-                else if(userType.Trim().ToUpper() == "FIBER")
+                else if (userType.Trim().ToUpper() == "FIBER")
                 {
                     using (var db = new CRMEntities())
                     {
-                        var user = db.personel.Where(p => p.deleted==false &&p.email == UserName && p.password == Password).FirstOrDefault();
+                        var user = db.personel.Where(p => p.deleted == false && p.email == UserName && p.password == Password).FirstOrDefault();
                         if (user != null)
                         {
                             token = createToken();

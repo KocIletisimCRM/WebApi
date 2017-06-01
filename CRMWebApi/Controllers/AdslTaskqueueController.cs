@@ -1103,12 +1103,10 @@ namespace CRMWebApi.Controllers
                     db.customer.Add(customer);
                     db.SaveChanges();
 
-                    var cust = db.customer.Where(c => c.tc == request.tc && c.customername == request.customername && c.deleted == false).FirstOrDefault();
-
                     var taskqueue = new adsl_taskqueue
                     {
                         appointmentdate = request.appointmentdate != null ? request.appointmentdate < DateTime.Now ? request.appointmentdate : DateTime.Now : DateTime.Now, // netflow tarihi ileri tarih olamaz
-                        attachedobjectid = cust.customerid,
+                        attachedobjectid = customer.customerid,
                         attachedpersonelid = request.salespersonel ?? user.userId,
                         attachmentdate = DateTime.Now,
                         creationdate = DateTime.Now,
@@ -1123,13 +1121,12 @@ namespace CRMWebApi.Controllers
                     db.taskqueue.Add(taskqueue);
                     db.SaveChanges();
                     taskqueue.relatedtaskorderid = taskqueue.taskorderno; // başlangıç tasklarının relatedtaskorderid kendi taskorderno tutacak (Hüseyin KOZ) 13.10.2016
-                    db.SaveChanges();
 
                     if (request.productids != null)
                     {
+                        List<adsl_customerproduct> cps = new List<adsl_customerproduct>();
                         foreach (var item in request.productids)
-                        {
-                            var customerproducst = new adsl_customerproduct
+                            cps.Add(new adsl_customerproduct
                             {
                                 taskid = taskqueue.taskorderno,
                                 customerid = customer.customerid,
@@ -1139,11 +1136,10 @@ namespace CRMWebApi.Controllers
                                 lastupdated = DateTime.Now,
                                 updatedby = user.userId,
                                 deleted = false
-                            };
-                            db.customerproduct.Add(customerproducst);
-                        }
-                        db.SaveChanges();
+                            });
+                        db.customerproduct.AddRange(cps);
                     }
+                    db.SaveChanges();
                     WebApiConfig.updateAdslData();
                     return Request.CreateResponse(HttpStatusCode.OK, taskqueue.taskorderno, "application/json");
                 }

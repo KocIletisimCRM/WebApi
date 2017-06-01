@@ -18,7 +18,7 @@ namespace CRMWebApi.Controllers
     {
         [Route("getAdress")]
         [HttpPost]
-        public async Task<HttpResponseMessage>  getAdress(DTOGetAdressFilter request)
+        public async Task<HttpResponseMessage> getAdress(DTOGetAdressFilter request)
         {
             using (var db = new KOCSAMADLSEntities())
             {
@@ -50,9 +50,11 @@ namespace CRMWebApi.Controllers
                         }
 
                         res = db.ilce.SqlQuery(querySql).ToList();
-                    }                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(s=>s.toDTO()).ToList(), "application/json");
+                    }
+                    var t = res.Select(s => s.toDTO()).ToList();
+                    return Request.CreateResponse(HttpStatusCode.OK, t, "application/json");
                 }
-                else if (filter.tableName=="bucak")
+                else if (filter.tableName == "bucak")
                 {
                     var res = db.bucak.SqlQuery(querySql).ToList();
                     if (res.Count < 1)
@@ -60,7 +62,7 @@ namespace CRMWebApi.Controllers
                         var bucakData = $"lnaj1hV9YSL2LjqEADiS9aLNc2015111912awiAQeCo723cW7/IyM3kk045ditq+ESdsbTdVfgMbN5Anwk3lx6H/cc9QTTadbSJA==&t=vl&u={request.adres.value}";
                         var url = "http://adreskodu.dask.gov.tr/site-element/control/load.ashx";
                         int error = 1;
-                        while (error==1)
+                        while (error == 1)
                         {
                             try
                             {
@@ -80,7 +82,7 @@ namespace CRMWebApi.Controllers
                                 return Request.CreateResponse(HttpStatusCode.OK, "-1", "application/json");
                             }
                         }
-                       
+
 
                         res = db.bucak.SqlQuery(querySql).ToList();
                     }
@@ -111,7 +113,7 @@ namespace CRMWebApi.Controllers
                             catch (Exception)
                             {
 
-                                return Request.CreateResponse(HttpStatusCode.OK,"-1", "application/json");
+                                return Request.CreateResponse(HttpStatusCode.OK, "-1", "application/json");
 
                             }
                         }
@@ -137,11 +139,11 @@ namespace CRMWebApi.Controllers
                 else
                 {
                     var res = db.il.SqlQuery(querySql).ToList();
-                    if (res.Count==0)
+                    if (res.Count == 0)
                     {
                         var ilData = "xMf1xgor4FG+LM9PJdCPruS0m2015111822y3yj7YxRo232eFmoz/WNhy11S9YjcSvl8NMI1rT2WwjdmPRLtK6lxgOEhjoQr+ezQ==&t=il&u=0";
                         var url = "http://adreskodu.dask.gov.tr/site-element/control/load.ashx";
-                        db.il.AddRange((await TeknarProxyService.DeserializeJSON<daskResponseJSON>(url, ilData)).Result.yt.Skip(1).Where(s=>!(new int[] { 34, 61}).Contains(s.value.Value)).Select(s => new il
+                        db.il.AddRange((await TeknarProxyService.DeserializeJSON<daskResponseJSON>(url, ilData)).Result.yt.Skip(1).Where(s => !(new int[] { 34, 61 }).Contains(s.value.Value)).Select(s => new il
                         {
                             ad = s.text,
                             kimlikNo = s.value.Value
@@ -155,10 +157,10 @@ namespace CRMWebApi.Controllers
 
                             throw;
                         }
-                       
+
                         res = db.il.SqlQuery(querySql).ToList();
                     }
-                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(s=>s.toDTO()).ToList(), "application/json");
+                    return Request.CreateResponse(HttpStatusCode.OK, res.Select(s => s.toDTO()).ToList(), "application/json");
                 }
 
             }

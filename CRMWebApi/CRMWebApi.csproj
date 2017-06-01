@@ -255,6 +255,7 @@
     <Compile Include="Controllers\AdslCustomerController.cs" />
     <Compile Include="Controllers\AdslDocumentController.cs" />
     <Compile Include="Controllers\AdslFilterController.cs" />
+    <Compile Include="Controllers\AdslInfoTaskController.cs" />
     <Compile Include="Controllers\AdslPersonelController.cs" />
     <Compile Include="Controllers\AdslProductController.cs" />
     <Compile Include="Controllers\AdslReportsController.cs" />

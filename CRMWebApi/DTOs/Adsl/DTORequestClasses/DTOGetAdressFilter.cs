@@ -7,11 +7,11 @@
 
         public DTOFilter getFilter()
         {
-            var filter = new DTOFilter("il","kimlikNo");
+            var filter = new DTOFilter("il", "kimlikNo");
 
             if (adres.fieldName.ToString() == "ilKimlikNo")
             {
-                filter = new DTOFilter("ilce","kimlikNo");      
+                filter = new DTOFilter("ilce", "kimlikNo");
                 filter.fieldFilters.Add(adres);
                 return filter;
             }
@@ -36,7 +36,7 @@
                     filter.fieldFilters.Add(subAdres);
                     return filter;
                 }
-                else if (subAdres.fieldName.ToString()== "binaKimlikNo")//mahalle ve binakimlik numarası seçince daireler listelenmeli(bağımsız bölümler)
+                else if (subAdres.fieldName.ToString() == "binaKimlikNo")//mahalle ve binakimlik numarası seçince daireler listelenmeli(bağımsız bölümler)
                 {
 
                     filter = new DTOFilter("daire", "kimlikNo");
@@ -53,11 +53,9 @@
             }
             else
             {
-                filter.fieldFilters.Add(new DTOFieldFilter { fieldName="ad",op=6,value=""});
+                filter.fieldFilters.Add(new DTOFieldFilter { fieldName = "ad", op = 6, value = "" });
                 return filter;
             }
-
-         
         }
     }
 }
