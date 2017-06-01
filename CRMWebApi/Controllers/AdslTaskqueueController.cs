@@ -465,7 +465,7 @@ namespace CRMWebApi.Controllers
                                     }
                                     var qqq = time.Elapsed;
                                 }
-                                if ((item == 45 || item == 118 || item == 148) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
+                                if ((item == 45 || item == 118 || item == 148 || item == 1226 || item == 1227) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
                                     var kt = WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value;
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == kt).attachedpersonelid;
