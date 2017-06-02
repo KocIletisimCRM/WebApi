@@ -465,11 +465,16 @@ namespace CRMWebApi.Controllers
                                     }
                                     var qqq = time.Elapsed;
                                 }
-                                if ((item == 45 || item == 118 || item == 148 || item == 1226 || item == 1227) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
+                                if ((item == 45 || item == 118 || item == 148) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslProccesses.ContainsKey(dtq.relatedtaskorderid.Value) && WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.HasValue))  // Evrak Onayı Saha Taskı oluşuyorsa kurulum yapan bayinin kanal yöneticisine ata
                                 {
                                     var kt = WebApiConfig.AdslProccesses[dtq.relatedtaskorderid.Value].K_TON.Value;
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == kt).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
+                                }
+                                if ((item == 1226 || item == 1227) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid.Value))) 
+                                { // Mobil evrak teslimatı kanal Yöneticisi oluşuyorsa satış yapan bayinin kanal yöneticisine ata
+                                    var kt = WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid.Value].attachedpersonelid;
+                                    personel_id = db.personel.First(p => p.personelid == kt).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
                                 //Diğer otomatik personel atamaları ()
                                 var oott = db.atama.Where(r => r.formedtasktype == oot.tasktype).ToList(); // atama satırı (oluşan task type tanımlamalarda varsa)
