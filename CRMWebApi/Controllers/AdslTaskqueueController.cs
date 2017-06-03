@@ -471,7 +471,7 @@ namespace CRMWebApi.Controllers
                                     var kbayi = db.taskqueue.First(r => r.taskorderno == kt).attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kbayi).relatedpersonelid;  //Bayi Kanal Yöneticisi
                                 }
-                                if ((item == 1226 || item == 1227) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid.Value))) 
+                                if ((item == 1226 || item == 1227) && (dtq.relatedtaskorderid.HasValue && WebApiConfig.AdslTaskQueues.ContainsKey(dtq.relatedtaskorderid.Value)))
                                 { // Mobil evrak teslimatı kanal Yöneticisi oluşuyorsa satış yapan bayinin kanal yöneticisine ata
                                     var kt = WebApiConfig.AdslTaskQueues[dtq.relatedtaskorderid.Value].attachedpersonelid;
                                     personel_id = db.personel.First(p => p.personelid == kt).relatedpersonelid;  //Bayi Kanal Yöneticisi
