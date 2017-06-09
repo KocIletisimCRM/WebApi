@@ -1219,8 +1219,8 @@ namespace CRMWebApi
                 var taskIds = AdslTasks.Where(r => typeIds.Contains(r.Value.tasktype)).Select(r => r.Key).ToList(); // proces başlatan task id'leri
 
                 // Bu kod 60 dakikada bir çalışacak
-                authHeader.Username = "EXT02308383_66010.00002";
-                authHeader.Password = "6qRF0687";
+                authHeader.Username = "EXT03322921_66010.00002";
+                authHeader.Password = "j67321bc";
 
                 BasicHttpBinding httpBinding = new BasicHttpBinding();
                 httpBinding.MaxReceivedMessageSize = int.MaxValue;
@@ -1332,7 +1332,7 @@ namespace CRMWebApi
                         try
                         {
                             var data = wsc.GetWorkflowDetailByUser(authHeader, workList[i].WorkflowId).FirstOrDefault();
-                            if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA"))
+                            if (data != null && (data.WorkflowStatusCode == "BIRINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "IKINCISEVIYEKUYRUKTA" || data.WorkflowStatusCode == "BIRINCISEVIYEATANDI"))
                             {
                                 string smno = data.CustomerId.ToString();
                                 bool register = false;

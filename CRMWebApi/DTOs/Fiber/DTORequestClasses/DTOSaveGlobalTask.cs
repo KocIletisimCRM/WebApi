@@ -8,7 +8,7 @@ namespace CRMWebApi.DTOs.Fiber.DTORequestClasses
 {
     public class DTOSaveGlobalTask
     {
-        public bool newcustomer { get; set; }
+        public bool newcustomer { get; set; } // sadece hat satışlarında pasif müşteri kontrolü
         public int? customerid { get; set; }
         public string customername { get; set; }
         public string gsm { get; set; }
