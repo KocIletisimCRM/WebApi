@@ -1018,6 +1018,7 @@ namespace CRMWebApi.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK, "İşlem Başarılı", "application/json");
             }
         }
+
         [Route("saveCTStatusWithKatZiyaret")]
         [HttpPost]
         public HttpResponseMessage saveCTStatusWithKatZiyaret(DTORequestKatZiyareti request)
@@ -1188,6 +1189,7 @@ namespace CRMWebApi.Controllers
                         foreach (var tq in ziyaretTQ)
                         {
                             tq.status = Convert.ToInt32(ct.customer_status.ID);
+                            tq.consummationdate = DateTime.Now;
                             tq.updatedby = user.userId;
                             tq.lastupdated = DateTime.Now;
                         }
