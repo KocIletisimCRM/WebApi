@@ -1320,6 +1320,19 @@ namespace CRMWebApi.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, "Ok", "application/json");
         }
 
+        [Route("getTaskqueueInfo")]
+        [HttpPost, HttpGet]
+        public HttpResponseMessage getTaskqueueInfo(taskqueue request)
+        { // Tasklarda satış ve önceki task bilgilerini çekmek için oluşturuldu (Hüseyin)
+            using (var db = new CRMEntities())
+            {
+                var task = db.taskqueue.Where(r => r.deleted == false && r.taskorderno == request.taskorderno).FirstOrDefault();
+                task.task = db.task.FirstOrDefault(r => r.taskid == task.taskid);
+                task.attachedpersonel = db.personel.FirstOrDefault(r => r.personelid == task.attachedpersonelid);
+                return Request.CreateResponse(HttpStatusCode.OK, task.toDTO(), "application/json");
+            }
+        }
+
         private List<stockmovement> getStockmovements(CRMEntities db, int taskorderno, int taskid, int stateid)
         {
             var tsm = db.taskstatematches.FirstOrDefault(t => t.taskid == taskid && t.stateid == stateid && t.deleted == false && !(t.stockcards == null || t.stockcards.Trim() == string.Empty));
