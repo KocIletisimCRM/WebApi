@@ -338,6 +338,12 @@ namespace CRMWebApi.Controllers
         { // Bağlantı problemi veya (fromobject,fromobjecttype,toobject,toobjecttype,serial,amount) bilgileri gönderidiğinde çalışacak yeni stock hareketi 
             if (r.deleted == true)
             {
+                using (var db = new KOCSAMADLSEntities())
+                {
+                    var s = db.stockmovement.Where(p => p.serialno == r.serialno).ToList();
+                    if (s.Count > 0)
+                        return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
+                }
                 // *** yeni stok hareketi olacağına deleted ile karar vereceğiz (true'ysa seriyi satınalma -> depoya -> müşteriye -> personele aktar)
                 var sm = new DTOstockmovement();
                 sm.serialno = r.serialno;
@@ -372,6 +378,12 @@ namespace CRMWebApi.Controllers
             else if (r.movementid == -1)
             {
                 // *** yeni stok hareketi olacağına movementid ile karar vereceğiz (-1'se seriyi satınalma -> depoya -> müşteriye aktar)
+                using (var db = new KOCSAMADLSEntities())
+                {
+                    var s = db.stockmovement.Where(p => p.serialno == r.serialno).ToList();
+                    if (s.Count > 0)
+                        return Request.CreateResponse(HttpStatusCode.OK, false, "application/json");
+                }
                 var sm = new DTOstockmovement();
                 sm.serialno = r.serialno;
                 sm.amount = 1;
