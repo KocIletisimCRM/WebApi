@@ -1189,7 +1189,7 @@ namespace CRMWebApi.Controllers
                         foreach (var tq in ziyaretTQ)
                         {
                             tq.status = Convert.ToInt32(ct.customer_status.ID);
-                            tq.consummationdate = DateTime.Now;
+                            //tq.consummationdate = DateTime.Now;
                             tq.updatedby = user.userId;
                             tq.lastupdated = DateTime.Now;
                         }
